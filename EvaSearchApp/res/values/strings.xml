@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, EvatureSplash!</string>
+    <string name="app_name">EvaSearch</string>
+    <string name="title_currency_preference">Currency</string>
+    <string name="summary_currency_preference">Currency to be used for prices</string>
+    <string name="dialog_title_currency_preference">Choose currency</string>
+    <string name="dialog_based_preferences">Currency settings</string>
+    <string name="key_currency_preference">preference_currency</string>
+    <string-array name="demo_queries">
+        <item >3 days in rome, 4*</item>
+        <item >5 nights in boston</item>
+        <item >Romantic hotel in Madrid for less than $200 per night</item>
+        <item >2 adults to highest rated hotel in Benidorm for 2 weeks</item>
+        <item >Family room in Nice for Easter</item>
+        <item >Child free all inclusive hotel in Paris</item>
+    </string-array>
+    <string name = "creating_objects">Creating Objects</string>
+    <string name = "contacting_expedia_server">Contacting XPEDIA server</string>
+    <string name = "determining_location">Determining_location</string>
+    <string name = "looking_for_hotel_for_tonight">Looking for hotel for tonight</string>
+    <string name = "obtained_hotel_list">Obtained hotel list</string>
+    <string name = "network_error">Network error</string>
+    <string name = "asking_eva">Asking EVA</string>
+</resources>
