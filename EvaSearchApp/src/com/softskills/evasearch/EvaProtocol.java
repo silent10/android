@@ -33,7 +33,7 @@ public class EvaProtocol {
 	}
 	
 	public static String getEvatureResponse(String text) {
-		String evatureUrl = "http://api2.evaws.com/ean/v1.0?input_text=";
+		String evatureUrl = "http://api2.evaws.com/api/v1.0?input_text=";
 		evatureUrl+=URLEncoder.encode(text);
 		
 		byte[] sBuffer = new byte[512];
