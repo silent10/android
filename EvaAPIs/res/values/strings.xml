@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="app_name">EvaAPIs</string>
+    <string name="hello">Hello World, Test1Activity!</string>
+    <string name="button">Travel Search</string>
+    <string name="eva_logo">EVA Logo</string>
+    <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>
+    <string name="ok_button">OK, got it.</string>
+    <string name="speech_recognition_preferences">Speech Recognition Preferences</string>
+    <string name="fatal_error">Fatal Error</string>
+    <string name="missing_recognizer">No Speech Recognition Engine could be found on your device.\nSorry.\s</string>
+    <string name="microphone_button">Microphone Button</string>
+    <string name="chat_icon_description">chat icon</string>
+    <string name="summary_of_empty_languages_list">Not initialized yet</string>
+    <string name="network_error">Network Error - Sorry!</string>
+    <string name="error_tts_init">Could not initialize text-to-speech</string>
+    <string name="DEBUG">DEBUG</string>
+    <string name="CHAT">CHAT</string>
+    <string name="TRAINS">TRAINS</string>
+    <string name="FLIGHTS">FLIGHTS</string>
+    <string name="HOTELS">HOTELS</string>
+    <string name="HOTEL">HOTEL</string>
+    <string name="button_stop">Stop</string>
+</resources>
