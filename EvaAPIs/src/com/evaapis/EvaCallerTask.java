@@ -46,9 +46,9 @@ import com.evature.search.utils.DownloadUrl;
 			if (externalIpAddress != null && (externalIpAddress.length()>0) && (externalIpAddress.trim().length()>0)) {
 				evatureUrl += ("&ip_addr=" + externalIpAddress);
 			}
-			S3LocationUpdater location;
+			EvatureLocationUpdater location;
 			try {
-				location = S3LocationUpdater.getInstance();
+				location = EvatureLocationUpdater.getInstance();
 				double longitude = location.getLongitude();
 				double latitude = location.getLatitude();
 				if (latitude != 0 && longitude != 0) {

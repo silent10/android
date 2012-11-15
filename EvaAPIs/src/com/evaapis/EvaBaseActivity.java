@@ -78,9 +78,9 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	protected void onResume() {
 		super.onResume();
 
-		S3LocationUpdater.initContext(this.getApplicationContext());
+		EvatureLocationUpdater.initContext(this.getApplicationContext());
 		try {
-			S3LocationUpdater location = S3LocationUpdater.getInstance();
+			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
 			location.startGPS();
 		} catch (Exception e2) {
 			e2.printStackTrace();

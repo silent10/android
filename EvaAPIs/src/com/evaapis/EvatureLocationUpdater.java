@@ -8,32 +8,32 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-public class S3LocationUpdater implements LocationListener {
+public class EvatureLocationUpdater implements LocationListener {
 
 	private static final int UPDATE_DELAY = 5 * 60 * 1000; // Five minutes
 	private static final int UPDATE_DISTANCE = 5 * 1000; // Five kilometers
 	private static final String TAG = "S3LocationUpdater";
 	private LocationManager locationManager;
 	private Location currentLocation = null;
-	private static S3LocationUpdater thisInstance = null;
+	private static EvatureLocationUpdater thisInstance = null;
 	private static Context appContext = null;
 
-	private S3LocationUpdater(Context context) {
+	private EvatureLocationUpdater(Context context) {
 		locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	public static void initContext(Context context) {
 		appContext = context;
-		thisInstance = new S3LocationUpdater(appContext);
+		thisInstance = new EvatureLocationUpdater(appContext);
 	}
 
-	public static S3LocationUpdater getInstance() throws Exception {
+	public static EvatureLocationUpdater getInstance() throws Exception {
 		assert (appContext != null);
 		if (appContext == null)
 			throw new Exception("Context not initialized in LocationUpdater");
 
 		if (thisInstance == null) {
-			thisInstance = new S3LocationUpdater(appContext);
+			thisInstance = new EvatureLocationUpdater(appContext);
 		}
 
 		return thisInstance;
