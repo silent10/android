@@ -1,6 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="hello">Hello World, EvatureSplash!</string>
+    <string name="hello">Hello World, Test1Activity!</string>
+    <string name="app_name">Eva Travel Search</string>
+    <string name="button">Travel Search</string>
+    <string name="textview"/>
+    <string name="button2">Now press me!</string>
+    <string name="button3">voice?</string>
+    <string name="inline_preferences">inline preferences</string>
+    <string name="title_checkbox_preference">title checkbox preference</string>
+    <string name="summary_checkbox_preference">summary checkbox preference</string>
+    <string name="title_edittext_preference">title edittext preference</string>
+    <string name="summary_edittext_preference">summary_edittext_preference</string>
+    <string name="dialog_based_preferences">dialog_based_preferences</string>
+    <string name="title_language_preference">Input language</string>
+    <string name="title_engine_preference">Engine</string>
+    <string name="dialog_title_edittext_preference">dialog_title_edittext_preference</string>
+    <string name="advanced_menu">Advanced Menu</string>
+    <string name="summary_parent_preference">Enable various debug features</string>
+    <string name="title_debug_parent_preference">Debug</string>
+    <string name="title_next_screen_toggle_preference">title_next_screen_toggle_preference</string>
+    <string name="launch_preferences">launch_preferences</string>
+    <string name="dialog_title_list_preference">dialog_title_list_preference</string>
+    <string name="summary_list_preference">summary_list_preference</string>
+    <string name="summary_engine_preference">summary_engine_preference</string>
+    <string name="looking_for_hotel_for_tonight">Looking for hotel for tonight</string>
+    <string-array name="entries_list_preference"/>
+    <string-array name="entryvalues_list_preference"/>
+    <string-array name="engine_list_preference">
+        <item>Google</item>
+        <item>Nuance</item>
+    </string-array>
+    <string-array name="enginevalues_list_preference">
+        <item>Google</item>
+        <item>Nuance</item>
+    </string-array>
+    <string name="eva_logo">EVA Logo</string>
+    <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>
+    <string name="ok_button">OK, got it.</string>
+    <string name="speech_recognition_preferences">Speech Recognition Preferences</string>
+    <string name="fatal_error">Fatal Error</string>
+    <string name="missing_recognizer">No Speech Recognition Engine could be found on your device.\nSorry.\s</string>
+    <string name="microphone_button">Microphone Button</string>
+    <string name="chat_icon_description">chat icon</string>
+    <string name="summary_of_empty_languages_list">Not initialized yet</string>
+    <string name="network_error">Network Error - Sorry!</string>
+    <string name="error_tts_init">Could not initialize text-to-speech</string>
+    <string name="DEBUG">DEBUG</string>
+    <string name="CHAT">CHAT</string>
+    <string name="TRAINS">TRAINS</string>
+    <string name="FLIGHTS">FLIGHTS</string>
+    <string name="HOTELS">HOTELS</string>
+    <string name="HOTEL">HOTEL</string>
+    <string name="button_stop">Stop</string>
+     <string name="hello">Hello World, EvatureSplash!</string>
     <string name="app_name">EvaSearch</string>
     <string name="title_currency_preference">Currency</string>
     <string name="summary_currency_preference">Currency to be used for prices</string>
