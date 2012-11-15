@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="actionbar_height">45.0dip</dimen>
+    <dimen name="btn_default_text_size">19.0sp</dimen>
+    <dimen name="label_default_text_size">16.0dip</dimen>
+    <dimen name="search_hidden_results_flight_trail_width">16.0dip</dimen>
+    <dimen name="search_hidden_results_initial_flight_trail_length">10.0dip</dimen>
+    <dimen name="timeline_item_spike_height">6.0dip</dimen>
+    <dimen name="timeline_item_padding">3.0dip</dimen>
+
+</resources>
