@@ -28,7 +28,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.evaapis.EvaApiReply;
-import com.evaapis.S3LocationUpdater;
+import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.MyApplication;
 
 public class XpediaProtocol {
@@ -182,7 +182,7 @@ public class XpediaProtocol {
 
 		double longitude, latitude;
 		try {
-			S3LocationUpdater location = S3LocationUpdater.getInstance();
+			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
 			longitude = location.getLongitude();
 			latitude = location.getLatitude();
 		} catch (Exception e2) {
