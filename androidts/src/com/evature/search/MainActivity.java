@@ -50,7 +50,7 @@ import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
-import com.evaapis.S3LocationUpdater;
+import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.utils.ExternalIpAddressGetter;
 
 public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInitListener, EvaDownloaderTaskInterface {
@@ -76,7 +76,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_main);
-		S3LocationUpdater.initContext(this.getApplicationContext());
+		EvatureLocationUpdater.initContext(this.getApplicationContext());
 		mViewPager = (ViewPager) findViewById(R.id.viewpager);
 		mTabs = (SwipeyTabs) findViewById(R.id.swipeytabs);
 		if (savedInstanceState != null) { // Restore state
@@ -527,9 +527,9 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	@Override
 	protected void onPause() {
-		S3LocationUpdater location;
+		EvatureLocationUpdater location;
 		try {
-			location = S3LocationUpdater.getInstance();
+			location = EvatureLocationUpdater.getInstance();
 			location.stopGPS();
 		} catch (Exception e) {
 			e.printStackTrace();

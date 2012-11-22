@@ -12,7 +12,7 @@ public class EvatureLocationUpdater implements LocationListener {
 
 	private static final int UPDATE_DELAY = 5 * 60 * 1000; // Five minutes
 	private static final int UPDATE_DISTANCE = 5 * 1000; // Five kilometers
-	private static final String TAG = "S3LocationUpdater";
+	private static final String TAG = "EvatureLocationUpdater";
 	private LocationManager locationManager;
 	private Location currentLocation = null;
 	private static EvatureLocationUpdater thisInstance = null;
