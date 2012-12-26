@@ -146,6 +146,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS))) { // Hotel list window
 				return HotelsFragment.newInstance();
 			}
+			
+			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS_MAP))) { // Hotel list window
+				Fragment fragment=HotelsMapFragment.newInstance();
+				return fragment;
+			}
+			
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
 				return FlightsFragment.newInstance();
 			}
@@ -460,6 +466,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (index == -1) {
 			mSwipeyAdapter.addTab(tabName);
 			index = mTabTitles.size() - 1;
+			mSwipeyAdapter.addTab("MAP");			
 		} else if (id == R.string.HOTEL) {
 			mSwipeyAdapter.removeTab();
 			mSwipeyAdapter.addTab(tabName);
@@ -472,6 +479,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (id == R.string.HOTELS) {
 			HotelsFragment fragment = (HotelsFragment) adapter.instantiateItem(mViewPager, index);
 			fragment.mAdapter.notifyDataSetChanged();
+			HotelsMapFragment mapFragment = (HotelsMapFragment) adapter.instantiateItem(mViewPager, index+1);
 		}
 
 		mViewPager.setCurrentItem(index);

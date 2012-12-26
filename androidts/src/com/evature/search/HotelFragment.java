@@ -1,6 +1,7 @@
 package com.evature.search;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -65,6 +66,8 @@ public class HotelFragment extends Fragment {
 	private HotelGalleryAdapter mHotelGalleryAdapter;
 	private Bitmap mEvaBmp;
 	private Thread mImageDownloadThread;
+
+	private Button mMapButton;
 
 	static boolean mViewingHotelData = false;
 
@@ -241,6 +244,24 @@ public class HotelFragment extends Fragment {
 				// getActivity().startActivityForResult(intent, 0);
 			}
 		});
+		
+		mMapButton = (Button) mView.findViewById(R.id.mapButton);
+
+		mMapButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(getActivity(),HotelMapActivity.class);
+				
+				intent.putExtra(HotelMapActivity.HOTEL_NAME,mHotelData.mSummary.mName);	
+				intent.putExtra(HotelMapActivity.HOTEL_LATITUDE,""+(int)(mHotelData.mSummary.mLatitude*1000000));
+				intent.putExtra(HotelMapActivity.HOTEL_LONGITUDE,""+(int)(mHotelData.mSummary.mLongitude*1000000));
+				intent.putExtra(HotelMapActivity.HOTEL_CITY,mHotelData.mSummary.mCity);
+				getActivity().startActivity(intent);
+			}
+		});
+		
+		
 
 	}
 
