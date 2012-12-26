@@ -29,6 +29,17 @@
             android:text="Select"
             android:textColor="#FFFFFFFF"
             android:textSize="14dp" />
+         <Button
+            android:id="@+id/mapButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/selectButton"
+            android:background="@drawable/button"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="Map"
+            android:textColor="#FFFFFFFF"
+            android:textSize="14dp" />
     </RelativeLayout>
 
     <TextView

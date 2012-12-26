@@ -49,6 +49,7 @@
     <string name="TRAINS">TRAINS</string>
     <string name="FLIGHTS">FLIGHTS</string>
     <string name="HOTELS">HOTELS</string>
+    <string name="HOTELS_MAP">MAP</string>
     <string name="HOTEL">HOTEL</string>
     <string name="button_stop">Stop</string>
 </resources>
