@@ -50,7 +50,10 @@ import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
+import com.evaapis.EvaSpeechRecognitionActivity;
 import com.evaapis.EvatureLocationUpdater;
+import com.evaapis.SpeechRecognition;
+import com.evaapis.SpeechRecognitionEva;
 import com.evature.search.utils.ExternalIpAddressGetter;
 
 public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInitListener, EvaDownloaderTaskInterface {
@@ -69,6 +72,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		
 	private ExternalIpAddressGetter mExternalIpAddressGetter;
 	private boolean mIsNetworkingOk = false;
+
+	private int mCurrentSpeechMethod=SpeechRecognition.SPEECH_RECOGNITION_EVA;
 	static EvaHotelDownloaderTask mHotelDownloader = null;
 
 	@Override
@@ -528,10 +533,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
 		case R.id.search_button:
-		    MainActivity.this.searchWithVoice();
+		    MainActivity.this.searchWithVoice(mCurrentSpeechMethod);
 			break;
 		}
 	}
+
+
 
 	@Override
 	protected void onPause() {
@@ -586,6 +593,15 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				mSearchTravelportTask.execute();
 			}
 		}
+	}
+
+	public int getCurrentSpeechMethod() {
+		return mCurrentSpeechMethod;
+	}
+
+	public void setCurrentSpeechMethod(int speechRecognitionMethod) {
+		mCurrentSpeechMethod=speechRecognitionMethod;
+		
 	}
 
 }

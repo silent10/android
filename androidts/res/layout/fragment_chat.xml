@@ -39,4 +39,22 @@
         android:src="@drawable/microphone_icon"
         android:text="@string/button" />
 
+    <RadioButton
+        android:id="@+id/radioButtonEva"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/radioButtonGoogle"
+        android:layout_alignParentLeft="true"
+        android:checked="true"
+        android:text="Eva" />
+
+    <RadioButton
+        android:id="@+id/radioButtonGoogle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/search_button"
+        android:layout_alignParentLeft="true"
+        android:checked="false"
+        android:text="Google" />
+  
 </RelativeLayout>

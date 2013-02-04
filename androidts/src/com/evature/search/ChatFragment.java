@@ -3,15 +3,26 @@ package com.evature.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.evaapis.SpeechRecognition;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.RadioButton;
 
 public class ChatFragment extends Fragment {
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.mainmenu, menu);
+	}
 
 	protected List<ChatItem> mChatListEva = new ArrayList<ChatItem>();
 	protected ListView mChatListView;
@@ -24,6 +35,9 @@ public class ChatFragment extends Fragment {
 
 	// private ImageButton travel_search_button;
 
+	RadioButton mRadioButtonEva;
+	RadioButton mRadioButtonGoogle;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
@@ -39,6 +53,40 @@ public class ChatFragment extends Fragment {
 		mChatListView.setAdapter(new ChatAdapter(this, R.layout.row, R.id.label, mChatListEva));
 		// travel_search_button = (ImageButton) root.findViewById(R.id.search_button);
 
+		mRadioButtonGoogle =(RadioButton)root.findViewById(R.id.radioButtonGoogle);
+		
+		mRadioButtonGoogle.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				MainActivity activity= (MainActivity)getActivity();
+				if(activity.getCurrentSpeechMethod()==SpeechRecognition.SPEECH_RECOGNITION_EVA)
+				{
+					activity.setCurrentSpeechMethod(SpeechRecognition.SPEECH_RECOGNITION_GOOGLE);
+					mRadioButtonGoogle.setChecked(true);
+					mRadioButtonEva.setChecked(false);
+				}
+				
+			}
+		});
+		
+		mRadioButtonEva =(RadioButton)root.findViewById(R.id.radioButtonEva);
+		
+		mRadioButtonEva.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				MainActivity activity= (MainActivity)getActivity();
+				if(activity.getCurrentSpeechMethod()==SpeechRecognition.SPEECH_RECOGNITION_GOOGLE)
+				{
+					activity.setCurrentSpeechMethod(SpeechRecognition.SPEECH_RECOGNITION_EVA);
+					mRadioButtonGoogle.setChecked(false);
+					mRadioButtonEva.setChecked(true);
+				}
+				
+			}
+		});
+		
 		return root;
 	}
 
