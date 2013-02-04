@@ -382,8 +382,9 @@ public class DictationHTTPClient {
 			InputStreamEntity reqEntity = mDictationHttpClient.setAudioContent(mSpeechAudioStreamer);
 			uri = mDictationHttpClient.getURI();
 
-			HttpPost httppost = mDictationHttpClient.getHeader(uri, 0);	//fileSize);
+			httppost = mDictationHttpClient.getHeader(uri, 0);	//fileSize);
 			httppost.setEntity(reqEntity);		
+			
 			HttpResponse response = httpclient.execute(httppost);
 
 			Log.i("EVA","After Sending post request");
@@ -410,6 +411,17 @@ public class DictationHTTPClient {
 			mInTransaction = false;
 		}
 
+	}
+	
+	static HttpPost httppost;
+	
+	public static void stopTransfer()
+	{
+		if(getInTransaction())
+		{
+			httppost.abort();
+			mInTransaction=false;
+		}
 	}
 
 	static boolean getInTransaction()

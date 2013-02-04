@@ -45,7 +45,7 @@ public class SpeechAudioStreamer
 
 	public static final int TEMP_BUFFER_SIZE = 5;
 	private static final long SILENCE_PERIOD = 2000;
-	private static final float SILENCE_THRESHOLD = 150;
+	private static final float SILENCE_THRESHOLD = 250;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 	public static final int SPEEX_MODE = 1;
@@ -210,6 +210,8 @@ public class SpeechAudioStreamer
 		byte [] mSecondaryBuffer;
 
 		private final static int SINGLE_FRAME_SIZE = 32000;
+
+		private static final int MAX_WAIT_FOR_TRANSFER = 10;
 		
 		
 		Consumer(BlockingQueue q) {
@@ -261,6 +263,24 @@ public class SpeechAudioStreamer
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			
+			int count=0;
+			
+			while(DictationHTTPClient.getInTransaction() && (count<MAX_WAIT_FOR_TRANSFER))
+			{
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				count++;
+			}
+			
+			if(DictationHTTPClient.getInTransaction())
+			{
+				DictationHTTPClient.stopTransfer();
 			}
 
 			Log.i("EVA","Finished consumer thread");

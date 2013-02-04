@@ -22,15 +22,6 @@ import android.widget.Toast;
 
 public class EvaSpeechRecognitionActivity extends Activity {
 
-	@Override
-	protected void onStop() {
-		Log.i("EVA","Stopping speech recognition activity");
-		mSpeechAudioStreamer.stop();
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-		mUpdateLevel.removeMessages(0);
-		dictationTask.mParent=null;
-		super.onDestroy();
-	}
 
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
@@ -157,6 +148,20 @@ public class EvaSpeechRecognitionActivity extends Activity {
 			e.printStackTrace();
 		}
 
+	}
+	
+	@Override
+	protected void onStop() {
+		Log.i("EVA","Stopping speech recognition activity");
+		mSpeechAudioStreamer.stop();
+		if(DictationHTTPClient.getInTransaction())
+		{
+			DictationHTTPClient.stopTransfer();
+		}
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+		mUpdateLevel.removeMessages(0);
+		dictationTask.mParent=null;
+		super.onDestroy();
 	}
 
 
