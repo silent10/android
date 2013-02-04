@@ -102,24 +102,30 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	// Handle the results from the speech recognition activity
 		@Override
 		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-			if (requestCode == SpeechRecognition.VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
+			if (requestCode == SpeechRecognitionGoogle.VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
 				Bundle bundle = data.getExtras();
 				
-				onSpeechRecognitionResults(bundle);
+				onSpeechRecognitionResults(bundle);			
+			}
+			
+			if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
+				Bundle bundle = data.getExtras();
 				
+				String result = bundle.getString("EVA_REPLY");
 				
+				EvaApiReply apiReply = new EvaApiReply(result);		
+				
+				onEvaReply(apiReply);		
 			}
 
 			super.onActivityResult(requestCode, resultCode, data);
 		}
 
 	
+
 	@Override
 	protected void onCreate(Bundle arg0) {
-		if (mSpeechRecognition == null) {
-			mSpeechRecognition = new SpeechRecognition(this);
-		}
-		
+	
 		if (mTts == null)
 			mTtsConfigured = false;
 
@@ -132,7 +138,7 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
-		case SpeechRecognition.LISTENING_DIALOG:
+		case SpeechRecognitionNuance.LISTENING_DIALOG:
 			return mSpeechRecognition.getListeningDialog();
 		}
 		return null;
@@ -142,7 +148,7 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	@Override
 	protected void onPrepareDialog(int id, final Dialog dialog) {
 		switch (id) {
-		case SpeechRecognition.LISTENING_DIALOG:
+		case SpeechRecognitionNuance.LISTENING_DIALOG:
 			mSpeechRecognition.prepareDialog();
 			break;
 		}
@@ -155,8 +161,12 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 		mPreferedLanguage = preffredLanguage;
 	}
 	
-	protected void searchWithVoice( )
+	protected void searchWithVoice(int recognitionMethod)
 	{		
+
+		mSpeechRecognition = SpeechRecognition.instance(recognitionMethod,this);
+	
+		
 		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage);
 		mLastLanguageUsed = mPreferedLanguage;
 	}
@@ -166,7 +176,7 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 		new EvaCallerTask(this,this).execute(searchString, mLastLanguageUsed); // first item in "matches" is highest
 		// priority speech parse
 	}
-
+	
 	
 	@Override
 	public void onSpeechRecognitionResults(Bundle bundle) {
@@ -177,5 +187,8 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 																				// priority speech parse
 		}
 	}
+	
+
+
 
 }

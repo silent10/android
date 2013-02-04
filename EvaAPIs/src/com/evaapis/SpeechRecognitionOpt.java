@@ -1,7 +1,6 @@
 package com.evaapis;
 
 import android.app.Activity;
-import android.content.Context;
 
 abstract public class SpeechRecognitionOpt implements SpeechRecognitionInterface {
 	
