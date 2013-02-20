@@ -33,11 +33,7 @@ public class ChatFragment extends Fragment {
 		return f;
 	}
 
-	// private ImageButton travel_search_button;
-
-	RadioButton mRadioButtonEva;
-	RadioButton mRadioButtonGoogle;
-	
+	// private ImageButton travel_search_button;	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
@@ -53,40 +49,6 @@ public class ChatFragment extends Fragment {
 		mChatListView.setAdapter(new ChatAdapter(this, R.layout.row, R.id.label, mChatListEva));
 		// travel_search_button = (ImageButton) root.findViewById(R.id.search_button);
 
-		mRadioButtonGoogle =(RadioButton)root.findViewById(R.id.radioButtonGoogle);
-		
-		mRadioButtonGoogle.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				MainActivity activity= (MainActivity)getActivity();
-				if(activity.getCurrentSpeechMethod()==SpeechRecognition.SPEECH_RECOGNITION_EVA)
-				{
-					activity.setCurrentSpeechMethod(SpeechRecognition.SPEECH_RECOGNITION_GOOGLE);
-					mRadioButtonGoogle.setChecked(true);
-					mRadioButtonEva.setChecked(false);
-				}
-				
-			}
-		});
-		
-		mRadioButtonEva =(RadioButton)root.findViewById(R.id.radioButtonEva);
-		
-		mRadioButtonEva.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View arg0) {
-				MainActivity activity= (MainActivity)getActivity();
-				if(activity.getCurrentSpeechMethod()==SpeechRecognition.SPEECH_RECOGNITION_GOOGLE)
-				{
-					activity.setCurrentSpeechMethod(SpeechRecognition.SPEECH_RECOGNITION_EVA);
-					mRadioButtonGoogle.setChecked(false);
-					mRadioButtonEva.setChecked(true);
-				}
-				
-			}
-		});
-		
 		return root;
 	}
 
@@ -97,17 +59,4 @@ public class ChatFragment extends Fragment {
 		savedInstanceState.putParcelableArrayList("mChatListEva", (ArrayList<ChatItem>) mChatListEva);
 	}
 
-	// @Override
-	// public void onActivityCreated(Bundle savedInstanceState) {
-	// Log.d(TAG, "onActivityCreated");
-	// super.onActivityCreated(savedInstanceState);
-	// if (savedInstanceState != null) {
-	// Log.d(TAG, "onActivityCreated savedInstanceState != null");
-	// // Restore last state for checked position.
-	// mChatListEva = savedInstanceState.getParcelableArrayList("mChatListEva");
-	// ListView chatListView = (ListView) getView().findViewById(R.id.chat_list);
-	// ((ChatAdapter) chatListView.getAdapter()).notifyDataSetChanged();
-	// // mChatListView.setAdapter(new ChatAdapter(mainActivity, R.layout.row, R.id.label, mChatListEva));
-	// }
-	// }
 }

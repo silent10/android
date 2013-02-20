@@ -156,7 +156,14 @@ public class EvaSpeechRecognitionActivity extends Activity {
 		mSpeechAudioStreamer.stop();
 		if(DictationHTTPClient.getInTransaction())
 		{
-			DictationHTTPClient.stopTransfer();
+			Thread tr = new Thread()
+			{
+				public void run()
+				{
+					DictationHTTPClient.stopTransfer();
+				}
+			};
+			tr.start();
 		}
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 		mUpdateLevel.removeMessages(0);

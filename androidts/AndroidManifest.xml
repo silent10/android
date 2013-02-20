@@ -20,7 +20,7 @@
         android:label="@string/app_name" android:name="com.evature.search.MyApplication">
         <activity
             android:name="com.evature.search.MainActivity"
-            android:label="@string/app_name" android:theme="@android:style/Theme.Black">
+            android:label="@string/app_name" > <!-- android:theme="@android:style/Theme.Black"-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

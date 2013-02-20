@@ -26,12 +26,12 @@
     <string-array name="entries_list_preference"/>
     <string-array name="entryvalues_list_preference"/>
     <string-array name="engine_list_preference">
+    	<item>Eva</item>
         <item>Google</item>
-        <item>Nuance</item>
     </string-array>
     <string-array name="enginevalues_list_preference">
+    	<item>Eva</item>
         <item>Google</item>
-        <item>Nuance</item>
     </string-array>
     <string name="eva_logo">EVA Logo</string>
     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>
