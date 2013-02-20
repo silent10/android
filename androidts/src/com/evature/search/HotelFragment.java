@@ -1,5 +1,6 @@
 package com.evature.search;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -29,6 +30,7 @@ import android.widget.TextView;
 import com.evature.search.expedia.HotelData;
 import com.evature.search.expedia.XpediaProtocol;
 
+@SuppressLint("ValidFragment")
 public class HotelFragment extends Fragment {
 
 	protected static final String TAG = HotelFragment.class.getSimpleName();
@@ -136,6 +138,7 @@ public class HotelFragment extends Fragment {
 		super.onDestroy();
 	}
 
+	@SuppressLint("ValidFragment")
 	void fillData() {
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
 
@@ -172,12 +175,17 @@ public class HotelFragment extends Fragment {
 		Log.i(TAG, "fillData hotel name = " + name);
 
 		Log.i(TAG, "1)mHotelData.mSummary.mName:" + mHotelData.mSummary.mName);
-		Log.i(TAG, "2)mHotelData.mDetails.propertyDescription:" + mHotelData.mDetails.propertyDescription);
+		
+		if(mHotelData.mDetails!=null)
+		{
+			Log.i(TAG, "2)mHotelData.mDetails.propertyDescription:" + mHotelData.mDetails.propertyDescription);
 
-		Spanned marked_up = Html.fromHtml("<html><body>" + mHotelData.mDetails.propertyDescription + "</body></html>");
+			Spanned marked_up = Html.fromHtml("<html><body>" + mHotelData.mDetails.propertyDescription + "</body></html>");
 
-		mPropertyDescription
+			mPropertyDescription
 				.loadData("<font color=\"black\">" + marked_up.toString() + "</font>", "text/html", "utf-8");
+		}
+		
 		mPropertyDescription.setBackgroundColor(Color.rgb(0xe3, 0xe3, 0xe3));
 
 		mTripAdvisorRatingBar.setRating((float) mHotelData.mSummary.mTripAdvisorRating);
@@ -294,6 +302,13 @@ public class HotelFragment extends Fragment {
 			@Override
 			public void run() {
 				Bitmap bmp;
+				
+				
+				if(mHotelData.mDetails==null)
+				{
+					return;
+				}
+				
 				if ((mHotelData.mDetails.hotelImages != null) && (mRunThreads)) {
 					for (int i = 0; i < mHotelData.mDetails.hotelImages.length; i++) {
 						bmp = null;

@@ -26,9 +26,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.Fragment;
@@ -73,7 +75,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	private ExternalIpAddressGetter mExternalIpAddressGetter;
 	private boolean mIsNetworkingOk = false;
 
-	private int mCurrentSpeechMethod=SpeechRecognition.SPEECH_RECOGNITION_EVA;
 	static EvaHotelDownloaderTask mHotelDownloader = null;
 
 	@Override
@@ -237,6 +238,20 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				stuffChanged(position);
 			}
 		}
+		
+		public void removeTab(int tabIndex)
+		{
+				mTabTitles.remove(tabIndex);
+				
+				if(tabIndex!=0)
+				{
+					stuffChanged(tabIndex-1);
+				}
+				else
+				{
+					stuffChanged(tabIndex);
+				}
+			}
 
 	}
 
@@ -455,7 +470,9 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		builder.create().show();
 	}
 
-
+	int mMapTabIndex=-1;
+	int mHotelTabIndex=-1;
+	
 	@Override
 	public void endProgressDialog(int id) { // we got the hotel search reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
@@ -467,11 +484,17 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		}
 
 		String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
+		
 		int index = mTabTitles.indexOf(tabName);
 		if (index == -1) {
 			mSwipeyAdapter.addTab(tabName);
 			index = mTabTitles.size() - 1;
-			mSwipeyAdapter.addTab("MAP");			
+			
+			if(tabName.equals("HOTELS"))
+			{
+				mSwipeyAdapter.addTab("MAP");
+				mMapTabIndex = mTabTitles.size() - 1;
+			}
 		} else if (id == R.string.HOTEL) {
 			mSwipeyAdapter.removeTab();
 			mSwipeyAdapter.addTab(tabName);
@@ -479,12 +502,19 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			// fragment.mAdapter.notifyDataSetChanged();
 			// I need to invalidate the entire view somehow!!!
 			mSwipeyAdapter.stuffChanged(index);
+			mHotelTabIndex = mTabTitles.size() - 1;
 		}
 		SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) mViewPager.getAdapter();
 		if (id == R.string.HOTELS) {
 			HotelsFragment fragment = (HotelsFragment) adapter.instantiateItem(mViewPager, index);
 			fragment.mAdapter.notifyDataSetChanged();
 			HotelsMapFragment mapFragment = (HotelsMapFragment) adapter.instantiateItem(mViewPager, index+1);
+			
+			if(mHotelTabIndex!=-1)
+			{
+				mSwipeyAdapter.removeTab(mHotelTabIndex);
+				mHotelTabIndex=-1;
+			}
 		}
 
 		mViewPager.setCurrentItem(index);
@@ -533,7 +563,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
 		case R.id.search_button:
-		    MainActivity.this.searchWithVoice(mCurrentSpeechMethod);
+		    MainActivity.this.searchWithVoice(getCurrentSpeechMethod());
 			break;
 		}
 	}
@@ -596,14 +626,29 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	}
 
 	public int getCurrentSpeechMethod() {
-		return mCurrentSpeechMethod;
-	}
-
-	public void setCurrentSpeechMethod(int speechRecognitionMethod) {
-		mCurrentSpeechMethod=speechRecognitionMethod;
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		String currentMethod = sp.getString("engine", "Eva");
+		int returnValue = SpeechRecognition.SPEECH_RECOGNITION_EVA;
 		
+		if(currentMethod.toLowerCase().equals("eva"))
+		{
+			returnValue = SpeechRecognition.SPEECH_RECOGNITION_EVA;
+		}
+		
+		if(currentMethod.toLowerCase().equals("nuance"))
+		{
+			returnValue = SpeechRecognition.SPEECH_RECOGNITION_NUANCE;
+		}
+		
+		if(currentMethod.toLowerCase().equals("google"))
+		{
+			returnValue = SpeechRecognition.SPEECH_RECOGNITION_GOOGLE;
+		}
+		
+		return returnValue;
 	}
 
+	
 }
 // TODO: I took the microphone icon from: http://www.iconarchive.com/show/atrous-icons-by-iconleak/microphone-icon.html
 // Need to add attribution in the about text.
