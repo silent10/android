@@ -247,9 +247,9 @@ public class HotelFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Log.e(TAG, "PLEASE IMPLEMENT CHECKOUT");
-				// Intent intent = new Intent(getActivity(), EvaCheckoutActivity.class);
-				// intent.putExtra(EvaCheckoutActivity.HOTEL_INDEX, mHotelIndex);
-				// getActivity().startActivityForResult(intent, 0);
+				Intent intent = new Intent(getActivity(), EvaCheckoutActivity.class);
+				intent.putExtra(EvaCheckoutActivity.HOTEL_INDEX, mHotelIndex);
+				getActivity().startActivityForResult(intent, 0);
 			}
 		});
 		
