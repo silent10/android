@@ -10,6 +10,7 @@ import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.http.HttpEntity;
@@ -22,6 +23,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -370,6 +373,23 @@ public class XpediaProtocol {
 			Log.e(TAG, e.getStackTrace().toString());
 			return null;
 		}
+	}
+
+	public static void printJsonObject(JSONObject jobj) {
+		try {
+			Iterator jsonIterator = jobj.keys();
+
+			while(jsonIterator.hasNext())
+			{
+				String key = String.valueOf(jsonIterator.next());
+				String value = jobj.getString(key);
+				Log.i("TAG",key+"="+value);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }

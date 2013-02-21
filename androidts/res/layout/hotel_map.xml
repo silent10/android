@@ -9,7 +9,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:clickable="true"
-    android:apiKey="0Q5WyeldvY7hGbyQQFIZmdVmMjtOdi0zIMyWzBw"
+    android:apiKey="0Q5WyeldvY7jrbxow5od7iY6XC-qveSWrFVLAVg"
 />
-
+<!-- vonage mac android:apiKey="0Q5WyeldvY7hGbyQQFIZmdVmMjtOdi0zIMyWzBw" -->
 </RelativeLayout>

@@ -1,9 +1,11 @@
-package com.evature.search.expedia;
+package com.evature.search;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.evature.search.expedia.EvaXpediaDatabase;
+import com.evature.search.expedia.RoomDetails;
 
 public class HotelSummary {
 	
