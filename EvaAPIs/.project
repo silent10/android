@@ -34,7 +34,7 @@
 		<link>
 			<name>java_api</name>
 			<type>2</type>
-			<location>/Users/iftah/workspaces/eva/android/java_api/src</location>
+			<locationURI>$%7BWORKSPACE_LOC%7D/java_api/src</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

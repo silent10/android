@@ -59,7 +59,7 @@ import android.content.Context;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.evature.search.utils.EvatureSSLSocketFactory;
+import com.evature.util.EvatureSSLSocketFactory;
 
 public class DictationHTTPClient {
 
