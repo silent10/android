@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.evature.search.utils.DownloadUrl;
+import com.evature.util.DownloadUrl;
 
 
     //Uses AsyncTask to create a task away from the main UI thread. This task takes a

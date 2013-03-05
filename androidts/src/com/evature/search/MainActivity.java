@@ -52,11 +52,9 @@ import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
-import com.evaapis.EvaSpeechRecognitionActivity;
 import com.evaapis.EvatureLocationUpdater;
 import com.evaapis.SpeechRecognition;
-import com.evaapis.SpeechRecognitionEva;
-import com.evature.search.utils.ExternalIpAddressGetter;
+import com.evature.util.ExternalIpAddressGetter;
 
 public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInitListener, EvaDownloaderTaskInterface {
 
