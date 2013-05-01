@@ -50,6 +50,7 @@ import android.view.View.OnClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvatureLocationUpdater;
@@ -108,8 +109,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (!mIsNetworkingOk) {
 			fatal_error(R.string.network_error);
 		}
-		mExternalIpAddressGetter = new ExternalIpAddressGetter();
-
+		//mExternalIpAddressGetter = new ExternalIpAddressGetter();
+		EvaAPIs.start();
 
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();

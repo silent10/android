@@ -31,8 +31,8 @@ import com.evature.util.DownloadUrl;
 		@Override
 		protected String doInBackground(String... urls) {
 			// params comes from the execute() call: params[0] is the url.
-			String API_KEY = mContext.getResources().getString(R.string.EVA_API_KEY);
-			String SITE_CODE = mContext.getResources().getString(R.string.EVA_SITE_CODE);
+			String API_KEY = EvaAPIs.API_KEY;
+			String SITE_CODE = EvaAPIs.SITE_CODE;
 			String evatureUrl = "http://freeapi.evature.com/api/v1.0?from_speech";
 			evatureUrl += ("&site_code=" + SITE_CODE);
 			evatureUrl += ("&api_key=" + API_KEY);

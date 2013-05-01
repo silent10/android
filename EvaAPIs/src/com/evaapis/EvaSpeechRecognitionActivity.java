@@ -71,8 +71,8 @@ public class EvaSpeechRecognitionActivity extends Activity {
 
 		@Override
 		protected Object doInBackground(Object... arg0) {
-			String API_KEY = getResources().getString(R.string.EVA_API_KEY);
-			String SITE_CODE =getResources().getString(R.string.EVA_SITE_CODE);
+			String API_KEY = EvaAPIs.API_KEY;
+			String SITE_CODE = EvaAPIs.SITE_CODE;
 			
 			TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 			String DEVICE_ID=telephonyManager.getDeviceId();
