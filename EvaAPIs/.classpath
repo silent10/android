@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="libs/httpmime-4.2.3.jar"/>
 	<classpathentry kind="lib" path="libs/commons-httpclient-3.0.jar"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="org/json/|src/com/evature/util/Log.java" including="com/evaapis/" kind="src" path="java_api"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
