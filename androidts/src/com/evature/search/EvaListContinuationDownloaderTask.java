@@ -15,11 +15,9 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	public EvaListContinuationDownloaderTask(EvaDownloaderTaskInterface listener, String nextQuery, String currencyCode) {
 		Log.i(TAG, "CTOR");
 		mNextQuery = nextQuery;
-		// this.apiReply = apiReply;
 		attach(listener);
 		mCurrencyCode = currencyCode;
-		//
-		// super(listener, apiReply, currencyCode);
+		
 	}
 
 	@Override

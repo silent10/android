@@ -49,13 +49,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
-import com.evaapis.EvatureLocationUpdater;
-import com.evaapis.SpeechRecognition;
-import com.evature.util.ExternalIpAddressGetter;
 
 public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInitListener, EvaDownloaderTaskInterface {
 
@@ -71,7 +67,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	SwipeyTabsPagerAdapter mSwipeyAdapter;
 	HotelListDownloaderTask mSearchExpediaTask;
 		
-	private ExternalIpAddressGetter mExternalIpAddressGetter;
 	private boolean mIsNetworkingOk = false;
 
 	static EvaHotelDownloaderTask mHotelDownloader = null;
@@ -81,7 +76,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_main);
-		EvatureLocationUpdater.initContext(this.getApplicationContext());
 		mViewPager = (ViewPager) findViewById(R.id.viewpager);
 		mTabs = (SwipeyTabs) findViewById(R.id.swipeytabs);
 		if (savedInstanceState != null) { // Restore state
@@ -109,8 +103,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (!mIsNetworkingOk) {
 			fatal_error(R.string.network_error);
 		}
-		//mExternalIpAddressGetter = new ExternalIpAddressGetter();
-		EvaAPIs.start();
+		
+		EvaAPIs.start(getApplicationContext());
 
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
@@ -569,17 +563,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 
 
-	@Override
-	protected void onPause() {
-		EvatureLocationUpdater location;
-		try {
-			location = EvatureLocationUpdater.getInstance();
-			location.stopGPS();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		super.onPause();
-	}
 
 	public void showHotelDetails(int hotelIndex) {
 		Log.d(TAG, "showHotelDetails()");
@@ -611,11 +594,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			mSearchExpediaTask = new HotelListDownloaderTask(this, reply, "$");
 			mSearchExpediaTask.execute();
 		} else {
-			// if (apiReply.isFlightSearch()) {
-			// Log.d(TAG, "Running Flight Search!");
-			// mSearchVayantTask = new SearchVayantTask(mContext, apiReply);
-			// mSearchVayantTask.execute();
-			// }
+			
 			if (reply.isTrainSearch() || reply.isFlightSearch()) {
 				Log.d(TAG, "Running Travelport Search!");
 				mSearchTravelportTask = new SearchTravelportTask(this, reply);
@@ -627,21 +606,21 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	public int getCurrentSpeechMethod() {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		String currentMethod = sp.getString("engine", "Eva");
-		int returnValue = SpeechRecognition.SPEECH_RECOGNITION_EVA;
+		int returnValue = SPEECH_RECOGNITION_EVA;
 		
 		if(currentMethod.toLowerCase().equals("eva"))
 		{
-			returnValue = SpeechRecognition.SPEECH_RECOGNITION_EVA;
+			returnValue = SPEECH_RECOGNITION_EVA;
 		}
 		
 		if(currentMethod.toLowerCase().equals("nuance"))
 		{
-			returnValue = SpeechRecognition.SPEECH_RECOGNITION_NUANCE;
+			returnValue = SPEECH_RECOGNITION_NUANCE;
 		}
 		
 		if(currentMethod.toLowerCase().equals("google"))
 		{
-			returnValue = SpeechRecognition.SPEECH_RECOGNITION_GOOGLE;
+			returnValue = SPEECH_RECOGNITION_GOOGLE;
 		}
 		
 		return returnValue;
