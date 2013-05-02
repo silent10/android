@@ -40,7 +40,7 @@ public class MyApplication extends Application {
 		mEvaSiteCode = resources.getString(R.string.EVA_SITE_CODE);
 		mEvaApiKey = resources.getString(R.string.EVA_API_KEY);
 		
-		EvaAPIs.setKeys(mEvaApiKey,mEvaSiteCode); 
+		EvaAPIs.start(this,mEvaApiKey,mEvaSiteCode); 
 		
 		super.onCreate();
 		MyApplication.context = getApplicationContext();

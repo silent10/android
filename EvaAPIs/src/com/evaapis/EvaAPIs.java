@@ -37,16 +37,11 @@ public class EvaAPIs {
 		return location.getLatitude();
 	}
 	
-	
-	public static void setKeys(String api_key, String site_code)
-	{
-		API_KEY = api_key;
-		SITE_CODE = site_code;
-	}
-	
-	public static void start(Context appContext)
+	public static void start(Context appContext,String api_key, String site_code)
 	{
 		mExternalIpAddressGetter = new ExternalIpAddressGetter();
 		EvatureLocationUpdater.initContext(appContext);
+		API_KEY = api_key;
+		SITE_CODE = site_code;
 	}
 }

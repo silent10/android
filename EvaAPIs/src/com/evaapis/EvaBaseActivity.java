@@ -123,7 +123,9 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 			if (requestCode == SpeechRecognitionGoogle.VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
 				Bundle bundle = data.getExtras();
 				
-				onSpeechRecognitionResults(bundle);			
+				ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
+				
+				onSpeechRecognitionResults(matches);			
 			}
 			
 			if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
@@ -197,8 +199,7 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	
 	
 	@Override
-	public void onSpeechRecognitionResults(Bundle bundle) {
-		ArrayList<String> matches =bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
+	public void onSpeechRecognitionResults(ArrayList<String> matches) {
 		
 		if (matches.size() > 0) {
 			searchWithText(matches.get(0));

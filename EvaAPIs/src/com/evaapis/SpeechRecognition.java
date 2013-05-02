@@ -27,7 +27,7 @@ abstract public class SpeechRecognition {
 	
 	public interface OnSpeechRecognitionResultsListerner
 	{
-		void onSpeechRecognitionResults(Bundle bundle);
+		void onSpeechRecognitionResults(ArrayList<String> matches);
 	}
 
 	public SpeechRecognition(Activity parentActivity) {
@@ -58,8 +58,7 @@ abstract public class SpeechRecognition {
 		for (int i = 0; i < results.length; i++) { // This is ugly and I look down on Java!
 			sentences.add(results[i].getText());
 		}
-		a_bundle.putStringArrayList(RecognizerIntent.EXTRA_RESULTS, sentences);		
-		((EvaBaseActivity) mParentActivity).onSpeechRecognitionResults(a_bundle);
+		((EvaBaseActivity) mParentActivity).onSpeechRecognitionResults(sentences);
 
 	}
 

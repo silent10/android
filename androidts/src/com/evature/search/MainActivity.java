@@ -104,8 +104,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			fatal_error(R.string.network_error);
 		}
 		
-		EvaAPIs.start(getApplicationContext());
-
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
 		// Bundle a_bundle = new Bundle();
@@ -308,10 +306,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	}
 
 	@Override
-	public void onSpeechRecognitionResults(Bundle bundle) {		
-		super.onSpeechRecognitionResults(bundle);
-		
-		ArrayList<String> matches =bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
+	public void onSpeechRecognitionResults(ArrayList<String> matches) {		
+		super.onSpeechRecognitionResults(matches);
 				
 		String chatTabName = getString(R.string.CHAT);
 		int index = mTabTitles.indexOf(chatTabName);
