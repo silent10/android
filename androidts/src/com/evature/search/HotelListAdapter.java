@@ -17,7 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.evaapis.EvatureLocationUpdater;
+import com.evaapis.EvaAPIs;
 import com.evature.components.S3DrawableBackgroundLoader;
 import com.evature.search.expedia.EvaDatabase;
 import com.evature.search.expedia.HotelData;
@@ -107,9 +107,8 @@ public class HotelListAdapter extends BaseAdapter {
 		double myLongitude, myLatitude;
 		try {
 			float[] results = new float[3];
-			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
-			myLongitude = location.getLongitude();
-			myLatitude = location.getLatitude();
+			myLongitude = EvaAPIs.getLongitude();
+			myLatitude = EvaAPIs.getLatitude();
 			Location.distanceBetween(myLatitude, myLongitude, hotelLatitude, hotelLongitude, results);
 			if (results != null && results.length > 0)
 				distance = results[0] / 1000;

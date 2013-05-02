@@ -18,6 +18,11 @@ import com.evaapis.SpeechRecognition.OnSpeechRecognitionResultsListerner;
 
 abstract public class EvaBaseActivity extends FragmentActivity implements OnSpeechRecognitionResultsListerner,EvaSearchReplyListener, OnInitListener{ 
 	
+	public static final int SPEECH_RECOGNITION_EVA = SpeechRecognition.SPEECH_RECOGNITION_EVA;
+	public static final int SPEECH_RECOGNITION_NUANCE = SpeechRecognition.SPEECH_RECOGNITION_NUANCE;
+	public static final int SPEECH_RECOGNITION_GOOGLE = SpeechRecognition.SPEECH_RECOGNITION_GOOGLE;
+	
+	
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
 	private final String TAB = "EvaBaseActivity";
@@ -34,13 +39,13 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	}
 
 	
-	protected void speak(String say_it) {
+	protected void speak(String sayIt) {
 		if (mTts != null) {
-			mTts.speak(say_it, TextToSpeech.QUEUE_FLUSH, null);
+			mTts.speak(sayIt, TextToSpeech.QUEUE_FLUSH, null);
 		}
 	}
 	
-	public void setTtsLanguage(String destLanguage) {
+	private void setTtsLanguage(String destLanguage) {
 		// Set preferred language to whatever the user used to speak to phone.
 		// Note that a language may not be available, and the result will indicate this.
 		Locale aLocale = Locale.US; // new Locale(destLanguage.substring(0, 2), destLanguage.substring(3, 5));
@@ -73,12 +78,23 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 		super.onDestroy();
 	}
 	
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		try {
+			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
+			location.stopGPS();
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+	}
+	
+	
 	// Request updates at startupResults
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		EvatureLocationUpdater.initContext(this.getApplicationContext());
 		try {
 			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
 			location.startGPS();
@@ -97,6 +113,8 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 		mLastLanguageUsed = new String(mPreferedLanguage);
 
 	}
+
+	
 	
 	
 	// Handle the results from the speech recognition activity
