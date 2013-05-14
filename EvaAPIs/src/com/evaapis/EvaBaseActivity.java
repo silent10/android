@@ -176,7 +176,7 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 
 	protected SpeechRecognition mSpeechRecognition;
 	
-	void setPreferedLanguage(String preffredLanguage)
+	void setPrefredLanguage(String preffredLanguage)
 	{
 		mPreferedLanguage = preffredLanguage;
 	}

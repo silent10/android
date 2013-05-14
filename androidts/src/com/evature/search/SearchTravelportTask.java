@@ -125,10 +125,30 @@ public class SearchTravelportTask extends AsyncTask<String, Integer, String> {
 		return writer.toString();
 	}
 
+	
+	boolean checkApiReply(EvaApiReply reply)
+	{
+		if(reply==null) return false;
+		
+		if(reply.locations==null) return false;
+		
+		if(reply.locations.length==0) return false;
+		
+		if(reply.locations[0]==null) return false;
+		
+		return true;
+	}
+	
 	@Override
 	protected String doInBackground(String... unusedParams) {
 		String airport_code0 = "";
 		String airport_code1 = "";
+		
+		if(!checkApiReply(mApiReply))
+		{
+			return null;
+		}
+		
 		if (mApiReply.locations.length >= 2) {
 			Log.i(TAG, "Eva returned 2 locations!");
 			if (mApiReply.locations[0].allAirportCode != null)

@@ -11,5 +11,5 @@
     android:clickable="true"
     android:apiKey="0Q5WyeldvY7jrbxow5od7iY6XC-qveSWrFVLAVg"
 />
-<!-- vonage mac android:apiKey="0Q5WyeldvY7hGbyQQFIZmdVmMjtOdi0zIMyWzBw" -->
+<!-- computer android:apiKey="0Q5WyeldvY7hGbyQQFIZmdVmMjtOdi0zIMyWzBw" -->
 </RelativeLayout>
