@@ -3,7 +3,7 @@ package com.evature.search.test;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.TextView;
 
-import com.evature.search.MainActivity;
+import com.evature.search.controllers.activities.MainActivity;
 
 public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActivity> {
 
