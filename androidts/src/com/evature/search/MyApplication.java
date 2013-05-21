@@ -11,7 +11,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import com.evaapis.EvaAPIs;
-import com.evature.search.expedia.EvaDatabase;
+import com.evature.search.models.expedia.EvaDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {

@@ -7,7 +7,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <com.evature.search.SwipeyTabs
+    <com.evature.search.views.SwipeyTabs
         android:id="@+id/swipeytabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
