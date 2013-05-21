@@ -21,7 +21,7 @@
         android:gravity="center"
         android:textSize="16sp"
         android:textStyle="bold" 
-        android:text="Nothing to see here - move along"/>
+        android:text="@string/nothing_to_see_here_move_along"/>
      
 
 </LinearLayout>

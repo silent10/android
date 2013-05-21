@@ -52,4 +52,7 @@
     <string name="HOTELS_MAP">MAP</string>
     <string name="HOTEL">HOTEL</string>
     <string name="button_stop">Stop</string>
+    <string name="people_per_room">People per room:</string>
+    <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
+    <string name="EXAMPLES">EXAMPLES</string>
 </resources>
