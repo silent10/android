@@ -21,20 +21,21 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	public static final int SPEECH_RECOGNITION_EVA = SpeechRecognition.SPEECH_RECOGNITION_EVA;
 	public static final int SPEECH_RECOGNITION_NUANCE = SpeechRecognition.SPEECH_RECOGNITION_NUANCE;
 	public static final int SPEECH_RECOGNITION_GOOGLE = SpeechRecognition.SPEECH_RECOGNITION_GOOGLE;
-	
-	
+		
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
 	private final String TAB = "EvaBaseActivity";
+	
+
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
 	static private String mExternalIpAddress = null;
 	
-	static public void setmExternalIpAddress(String mExternalIpAddress) {
+	static public void setExternalIpAddress(String mExternalIpAddress) {
 		mExternalIpAddress = mExternalIpAddress;
 	}
 
-	static public String getmExternalIpAddress() {
+	static public String getExternalIpAddress() {
 		return mExternalIpAddress;
 	}
 

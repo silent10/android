@@ -33,7 +33,7 @@ import com.evature.util.DownloadUrl;
 			// params comes from the execute() call: params[0] is the url.
 			String API_KEY = EvaAPIs.API_KEY;
 			String SITE_CODE = EvaAPIs.SITE_CODE;
-			String evatureUrl = "http://freeapi.evature.com/api/v1.0?from_speech";
+			String evatureUrl = EvaAPIs.API_ROOT + "/api/v1.0?from_speech";
 			evatureUrl += ("&site_code=" + SITE_CODE);
 			evatureUrl += ("&api_key=" + API_KEY);
 			evatureUrl += ("&language=" + urls[1].substring(0, 2)); // Add the language code!
@@ -42,7 +42,7 @@ import com.evature.util.DownloadUrl;
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace(); // TODO Auto-generated catch block
 			}
-			String externalIpAddress = EvaBaseActivity.getmExternalIpAddress();
+			String externalIpAddress = EvaBaseActivity.getExternalIpAddress();
 			if (externalIpAddress != null && (externalIpAddress.length()>0) && (externalIpAddress.trim().length()>0)) {
 				evatureUrl += ("&ip_addr=" + externalIpAddress);
 			}
