@@ -6,6 +6,7 @@ import com.evature.util.ExternalIpAddressGetter;
 
 public class EvaAPIs {
 	
+	public static String API_ROOT = "http://freeapi.evature.com";
 	public static String API_KEY="UNKNOWN";
 	public static String SITE_CODE="UNKNOWN";
 	private static ExternalIpAddressGetter mExternalIpAddressGetter;
