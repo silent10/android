@@ -65,7 +65,12 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
 		String hotelListResponse = XpediaProtocol.getExpediaAnswer(apiReply, mCurrencyCode);
-		Log.d(TAG, hotelListResponse);
+		if (hotelListResponse == null) {
+			Log.d(TAG, "null hotelist response!");
+		}
+		else {
+			Log.d(TAG, hotelListResponse);
+		}
 		mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
 		if ((hotelListResponse == null) || (false == createHotelData(hotelListResponse))) {
 			Log.i(TAG, "doInBackground: Error in Expedia response");

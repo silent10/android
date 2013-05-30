@@ -31,8 +31,8 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	private TextToSpeech mTts = null;
 	static private String mExternalIpAddress = null;
 	
-	static public void setExternalIpAddress(String mExternalIpAddress) {
-		mExternalIpAddress = mExternalIpAddress;
+	static public void setExternalIpAddress(String externalIpAddress) {
+		mExternalIpAddress = externalIpAddress;
 	}
 
 	static public String getExternalIpAddress() {

@@ -59,6 +59,7 @@ import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.ChatItem;
+import com.evature.search.models.ChatItemList;
 import com.evature.search.views.SwipeyTabs;
 import com.evature.search.views.adapters.ChatAdapter;
 import com.evature.search.views.adapters.FlightListAdapterTP;
@@ -139,7 +140,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	// Using FragmentStatePagerAdapter to overcome bug: http://code.google.com/p/android/issues/detail?id=19001
 	// This is an uglier approach I did not use: http://stackoverflow.com/a/7287121/78234
-	private class SwipeyTabsPagerAdapter extends FragmentStatePagerAdapter implements SwipeyTabsAdapter,
+	public class SwipeyTabsPagerAdapter extends FragmentStatePagerAdapter implements SwipeyTabsAdapter,
 			ViewPager.OnPageChangeListener {
 		// Nicer example: http://developer.android.com/reference/android/support/v4/view/ViewPager.html
 		private final Context mContext;
@@ -163,37 +164,49 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				final String[] examples = {
 					"Fly to NY next Tuesday morning",
 					"3 Star hotels in NYC",
-					"Fly to NY next Sunday, return 5 days later"
+					"Fly to NY next Sunday, return 5 days later",
+					"Train ride from NYC to Washington DC next Wednesday"
 				};
+				Log.d(TAG, "Example Fragment");
 				return ExamplesFragment.newInstance(examples, new ExampleClickedHandler() {
 					@Override
 					public void onClick(String example) {
+						Log.d(TAG, ">>>> Running example: "+example);
 						addChatItem(example, false);
 						MainActivity.this.searchWithText(example);
 					}
 				});
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.CHAT))) { // Main Chat window
-				return ChatFragment.newInstance();
+				Log.i(TAG, "Chat Fragment");
+				return ChatFragment.newInstance(new ChatItemList());
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS))) { // Hotel list window
+				Log.i(TAG, "Hotels Fragment");
 				return HotelsFragment.newInstance();
 			}
 			
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS_MAP))) { // Hotel list window
+				Log.i(TAG, "HotelsMap Fragment");
 				Fragment fragment=HotelsMapFragment.newInstance();
 				return fragment;
 			}
 			
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
+				Log.i(TAG, "Flights Fragment");
 				return FlightsFragment.newInstance();
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTEL))) { // Single hotel
 				int hotelIndex = MyApplication.getDb().getHotelId();
-				Log.i(TAG, "starting hotel fragment for hotel # " + hotelIndex);
+				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
 				return HotelFragment.newInstance(hotelIndex);
-			} else { // (position == TRAINS_POSITION) trains list window
+			} else if (position < size && mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
+				Log.i(TAG, "Trains Fragment");
 				return TrainsFragment.newInstance();
+			}
+			else {
+				Log.e(TAG, "No fragment made for Position "+position+(position< size ? " titled "+mTabTitles.get(position) : ""));
+				return null;
 			}
 		}
 
@@ -348,6 +361,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	}
 		
 	private void addChatItem(String text, boolean fromEva) {
+		Log.d(TAG, "Adding chat item: '"+text+"'  fromEva: "+fromEva);
 		String chatTabName = getString(R.string.CHAT);
 		int index = mTabTitles.indexOf(chatTabName);
 		if (index == -1) {
@@ -360,9 +374,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (fragment != null) // could be null if not instantiated yet
 		{
 			if (fragment.getView() != null) {
-				ListView chatListView = fragment.getChatListView();
-				ChatAdapter chatAdapter = (ChatAdapter) chatListView.getAdapter();
-				chatAdapter.add(new ChatItem(text, fromEva));
+				fragment.addChatItem(new ChatItem(text, fromEva));
 			} else {
 				Log.e(TAG, "chat fragment.getView() == null!?! [from addChatItem]");
 			}
@@ -392,16 +404,15 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				if (fragment != null) // could be null if not instantiated yet
 				{
 					if (fragment.getView() != null) {
-						ListView chatListView = fragment.getChatListView();
-						ChatAdapter chatAdapter = (ChatAdapter) chatListView.getAdapter();
-						chatAdapter.add(chatItem);
+						fragment.addChatItem(chatItem);
 					} else {
 						Log.e(TAG, "chat fragment.getView() == null!?! [for sayit]");
 					}
 				} else {
 					Log.e(TAG, "chat fragment == null!?! [for sayit]");
 				}
-				speak(say_it);
+				// Iftah: commented - debug without annoying sounds
+				//speak(say_it);
 			}
 		}
 	}

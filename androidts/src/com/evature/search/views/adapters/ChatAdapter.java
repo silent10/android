@@ -1,15 +1,6 @@
 // Relevant example: http://windrealm.org/tutorials/android/listview-with-checkboxes-without-listactivity.php
 package com.evature.search.views.adapters;
 
-import java.util.List;
-
-import com.evature.search.R;
-import com.evature.search.R.drawable;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.models.ChatItem;
-import com.evature.search.views.fragments.ChatFragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +8,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evature.search.R;
+import com.evature.search.models.ChatItem;
+import com.evature.search.models.ChatItemList;
+import com.evature.search.views.fragments.ChatFragment;
+
 public class ChatAdapter extends ArrayAdapter<ChatItem> {
 
-	private List<ChatItem> mChatList;
+	private ChatItemList mChatList;
 	LayoutInflater mInflater;
 
-	public ChatAdapter(ChatFragment chatFragment, int resource, int textViewResourceId, List<ChatItem> objects) {
-		super(chatFragment.getActivity(), resource, textViewResourceId, objects);
-		mChatList = objects;
+	public ChatAdapter(ChatFragment chatFragment, int resource, int textViewResourceId, ChatItemList chatList) {
+		super(chatFragment.getActivity(), resource, textViewResourceId, chatList.getItemList());
+		mChatList = chatList;
 		mInflater = LayoutInflater.from(chatFragment.getActivity());
 	}
 
