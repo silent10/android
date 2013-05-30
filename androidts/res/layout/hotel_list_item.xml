@@ -12,7 +12,7 @@
         android:layout_height="72dip"
         android:src="@drawable/eva_hotel_icon"
         android:padding="2dp"
-         >
+         android:contentDescription="@string/hotel_image">
     </ImageView>
 
     <LinearLayout
@@ -29,7 +29,7 @@
             android:freezesText="true"
             android:text="hotel namehotel namehotel namehotel namehotel namehotel namehotel namehotel namehotel namehotel name"
             android:textColor="#FF000000"
-            android:textSize="18dip"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:ellipsize="marquee"            
             android:singleLine="true"        	
@@ -48,11 +48,10 @@
                 android:id="@+id/textFromTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:text="From"
+                android:text="@string/from"
                 android:textStyle="bold"
                 android:textColor="#FFafafaf"
-                android:textSize="12dip" >
+                android:textSize="12sp" >
             </TextView>            
 
             <TextView
@@ -61,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:text="180"
                 android:textColor="#ff2f74a7"
-                android:textSize="18dip"                
+                android:textSize="18sp"                
                 android:textStyle="bold" >
             </TextView>
 
@@ -69,10 +68,10 @@
                 android:id="@+id/perNightTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="/night"
+                android:text="@string/per_night"
                 android:textColor="#ffafafaf"
                 android:textStyle="bold"
-                android:textSize="12dip" >
+                android:textSize="12sp" >
             </TextView>            
         </LinearLayout>
         <ImageView
@@ -80,7 +79,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="16dip"
                 android:layout_alignParentRight="true"
-                android:src="@drawable/trip_advisor_strip" />
+                android:src="@drawable/trip_advisor_strip" 
+                android:contentDescription="@string/trip_advisor_icon"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -104,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:text="Distance"
+                android:text="@string/distance"
                 android:textColor="#ff2f74a7"
                 android:textStyle="bold" />
 

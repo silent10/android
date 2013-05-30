@@ -117,9 +117,6 @@ public class HotelsFragment extends Fragment implements OnClickListener, OnItemC
 		mView = inflater.inflate(R.layout.hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 
-		setAdapter(new HotelListAdapter(this, MyApplication.getDb()));
-		mHotelListView.setAdapter(getAdapter());
-		mHotelListView.setOnItemClickListener(this);
 		setAdapter();
 		// mCheckQueryLength.sendEmptyMessageDelayed(0, 500);
 
@@ -127,6 +124,13 @@ public class HotelsFragment extends Fragment implements OnClickListener, OnItemC
 	}
 
 	void setAdapter() {
+		
+		if (mEnabledPaging && mFooterView != null)
+			mHotelListView.removeFooterView(mFooterView);
+
+		mEnabledPaging = false;
+		mPaging = false;
+
 		if (MyApplication.getDb() != null) {
 
 			if (MyApplication.getDb().mMoreResultsAvailable) {
@@ -136,11 +140,11 @@ public class HotelsFragment extends Fragment implements OnClickListener, OnItemC
 				mHotelListView.setOnScrollListener(mListScroll);
 				mEnabledPaging = true;
 			}
-
-			mAdapter = new HotelListAdapter(this, MyApplication.getDb());
-			mHotelListView.setAdapter(mAdapter);
-			mHotelListView.setOnItemClickListener(this);
 		}
+
+		mAdapter = new HotelListAdapter(this, MyApplication.getDb());
+		mHotelListView.setAdapter(mAdapter);
+		mHotelListView.setOnItemClickListener(this);
 	}
 
 	public static HotelsFragment newInstance() {
@@ -206,23 +210,7 @@ public class HotelsFragment extends Fragment implements OnClickListener, OnItemC
 			mProgressDialog.dismiss();
 		}
 
-		setAdapter(new HotelListAdapter(this, MyApplication.getDb()));
-
-		if (mEnabledPaging && mFooterView != null)
-			mHotelListView.removeFooterView(mFooterView);
-
-		mEnabledPaging = false;
-		mPaging = false;
-
-		if (MyApplication.getDb().mMoreResultsAvailable) {
-			LayoutInflater li = getActivity().getLayoutInflater();
-			mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
-			mHotelListView.addFooterView(mFooterView);
-			mHotelListView.setOnScrollListener(mListScroll);
-			mEnabledPaging = true;
-		}
-
-		mHotelListView.setAdapter(getAdapter());
+		setAdapter();
 
 	}
 
@@ -279,10 +267,6 @@ public class HotelsFragment extends Fragment implements OnClickListener, OnItemC
 
 	public HotelListAdapter getAdapter() {
 		return mAdapter;
-	}
-
-	public void setAdapter(HotelListAdapter mAdapter) {
-		this.mAdapter = mAdapter;
 	}
 
 }

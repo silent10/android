@@ -55,4 +55,9 @@
     <string name="people_per_room">People per room:</string>
     <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
     <string name="EXAMPLES">EXAMPLES</string>
+    <string name="hotel_image">Hotel Image</string>
+    <string name="from">From</string>
+    <string name="per_night">/night</string>
+    <string name="trip_advisor_icon">Trip Advisor Icon</string>
+    <string name="distance">Distance</string>
 </resources>
