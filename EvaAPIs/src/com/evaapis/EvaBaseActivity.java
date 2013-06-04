@@ -4,6 +4,7 @@ package com.evaapis;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import roboguice.activity.RoboFragmentActivity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,11 +13,13 @@ import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
-import android.support.v4.app.FragmentActivity;
 
 import com.evaapis.SpeechRecognition.OnSpeechRecognitionResultsListerner;
+import com.evature.util.ExternalIpAddressGetter;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-abstract public class EvaBaseActivity extends FragmentActivity implements OnSpeechRecognitionResultsListerner,EvaSearchReplyListener, OnInitListener{ 
+abstract public class EvaBaseActivity extends RoboFragmentActivity implements OnSpeechRecognitionResultsListerner,EvaSearchReplyListener, OnInitListener{ 
 	
 	public static final int SPEECH_RECOGNITION_EVA = SpeechRecognition.SPEECH_RECOGNITION_EVA;
 	public static final int SPEECH_RECOGNITION_NUANCE = SpeechRecognition.SPEECH_RECOGNITION_NUANCE;
@@ -25,21 +28,16 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
 	private final String TAB = "EvaBaseActivity";
-	
+
+	@Inject Injector injector;
 
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
-	static private String mExternalIpAddress = null;
-	
-	static public void setExternalIpAddress(String externalIpAddress) {
-		mExternalIpAddress = externalIpAddress;
-	}
 
-	static public String getExternalIpAddress() {
-		return mExternalIpAddress;
-	}
+	@Inject private ExternalIpAddressGetter mExternalIpAddressGetter;
+	@Inject private EvatureLocationUpdater mLocationUpdater;
 
-	
+
 	protected void speak(String sayIt) {
 		if (mTts != null) {
 			mTts.speak(sayIt, TextToSpeech.QUEUE_FLUSH, null);
@@ -83,12 +81,8 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	protected void onPause()
 	{
 		super.onPause();
-		try {
-			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
-			location.stopGPS();
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
+		mExternalIpAddressGetter.pause();
+		mLocationUpdater.stopGPS();
 	}
 	
 	
@@ -96,13 +90,9 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 	@Override
 	protected void onResume() {
 		super.onResume();
-		try {
-			EvatureLocationUpdater location = EvatureLocationUpdater.getInstance();
-			location.startGPS();
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-
+		mExternalIpAddressGetter.start();
+		mLocationUpdater.startGPS();
+		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		String oldLanguage = new String(mPreferedLanguage);
@@ -192,10 +182,11 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 		mLastLanguageUsed = mPreferedLanguage;
 	}
 
-	protected void searchWithText(String searchString)
+	public void searchWithText(String searchString)
 	{
-		new EvaCallerTask(this,this).execute(searchString, mLastLanguageUsed); // first item in "matches" is highest
-		// priority speech parse
+		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
+		callerTask.setListener(this);
+		callerTask.execute(searchString, mLastLanguageUsed);
 	}
 	
 	
@@ -207,7 +198,6 @@ abstract public class EvaBaseActivity extends FragmentActivity implements OnSpee
 																				// priority speech parse
 		}
 	}
-	
 
 
 

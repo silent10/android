@@ -1,5 +1,6 @@
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -40,7 +41,7 @@ import com.evature.search.views.adapters.HotelGalleryAdapter;
 import com.evature.search.views.adapters.ImageAdapter;
 
 @SuppressLint("ValidFragment")
-public class HotelFragment extends Fragment {
+public class HotelFragment extends RoboFragment {
 
 	protected static final String TAG = HotelFragment.class.getSimpleName();
 

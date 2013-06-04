@@ -1,5 +1,7 @@
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
+
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
@@ -32,7 +34,7 @@ import android.widget.Toast;
 
 // From Arik's app
 
-public class HotelsFragment extends Fragment implements OnClickListener, OnItemClickListener, OnKeyListener,
+public class HotelsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener,
 		EvaDownloaderTaskInterface {
 
 	static HotelListDownloaderTask mDownLoader = null;

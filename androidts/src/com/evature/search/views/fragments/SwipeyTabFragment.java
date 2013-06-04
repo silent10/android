@@ -16,6 +16,8 @@
 
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
+
 import com.evature.search.R;
 import com.evature.search.R.id;
 import com.evature.search.R.layout;
@@ -27,7 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class SwipeyTabFragment extends Fragment {
+public class SwipeyTabFragment extends RoboFragment {
 
 	public static Fragment newInstance(String title) {
 		SwipeyTabFragment f = new SwipeyTabFragment();

@@ -1,5 +1,6 @@
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -13,7 +14,7 @@ import android.widget.ListView;
 
 import com.evature.search.R;
 
-public class ExamplesFragment extends Fragment { // TODO: change to ListFragment ?
+public class ExamplesFragment extends RoboFragment { // TODO: change to ListFragment ?
 	static final String TAG = "ExamplesFragment";
 	
 	public interface ExampleClickedHandler {
@@ -24,12 +25,6 @@ public class ExamplesFragment extends Fragment { // TODO: change to ListFragment
 	private String[] mExamples;
 	private ListView mExamplesListView;
 	
-
-//	@Override
-//	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//		inflater.inflate(R.menu.mainmenu, menu);
-//	}
-//
 
 	public static Fragment newInstance(String[] examples, ExampleClickedHandler clickHandler) {
 		ExamplesFragment f = new ExamplesFragment();
