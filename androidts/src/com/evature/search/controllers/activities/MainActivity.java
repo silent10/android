@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import roboguice.inject.InjectView;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -46,7 +47,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
@@ -61,7 +61,6 @@ import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.ChatItem;
 import com.evature.search.models.ChatItemList;
 import com.evature.search.views.SwipeyTabs;
-import com.evature.search.views.adapters.ChatAdapter;
 import com.evature.search.views.adapters.FlightListAdapterTP;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
 import com.evature.search.views.adapters.TrainListAdapter;
@@ -81,8 +80,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	
 	private static boolean mSpeechToTextWasConfigured = false;
 	private List<String> mTabTitles;
-	private SwipeyTabs mTabs; // The main swipey tabs element and the main view pager element:
-	private ViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
+	@InjectView(R.id.viewpager) private ViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
+	@InjectView(R.id.swipeytabs) private SwipeyTabs mTabs; // The main swipey tabs element and the main view pager element:
 	SearchVayantTask mSearchVayantTask;
 	SearchTravelportTask mSearchTravelportTask;
 	SwipeyTabsPagerAdapter mSwipeyAdapter;
@@ -92,13 +91,23 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	static EvaHotelDownloaderTask mHotelDownloader = null;
 
+	@Override 
+	public void onResume() {
+		Log.d(TAG, "onResume()");
+		super.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		Log.d(TAG, "onPause()");
+		super.onPause();
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
 		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_main);
-		mViewPager = (ViewPager) findViewById(R.id.viewpager);
-		mTabs = (SwipeyTabs) findViewById(R.id.swipeytabs);
 		if (savedInstanceState != null) { // Restore state
 			// Same code as onRestoreInstanceState() ?
 			Log.d(TAG, "restoring saved instance state");
@@ -229,6 +238,13 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			});
 			return view;
 		}
+		
+//		@Override
+//		public Object instantiateItem(ViewGroup container, int position) {
+//			Object item = super.instantiateItem(container, position);
+//			this.finishUpdate(container);
+//			return item;
+//		}
 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
@@ -368,9 +384,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			mSwipeyAdapter.addTab(chatTabName);
 			index = mTabTitles.size() - 1;
 		}
-		SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) mViewPager.getAdapter();
 		// http://stackoverflow.com/a/8886019/78234
-		ChatFragment fragment = (ChatFragment) adapter.instantiateItem(mViewPager, index);
+		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
 		if (fragment != null) // could be null if not instantiated yet
 		{
 			if (fragment.getView() != null) {
@@ -399,8 +414,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 					index = mTabTitles.size() - 1;
 				}
 				// http://stackoverflow.com/a/8886019/78234
-				SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) mViewPager.getAdapter();
-				ChatFragment fragment = (ChatFragment) adapter.instantiateItem(mViewPager, index);
+				ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
 				if (fragment != null) // could be null if not instantiated yet
 				{
 					if (fragment.getView() != null) {
@@ -543,11 +557,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			mSwipeyAdapter.stuffChanged(index);
 			mHotelTabIndex = mTabTitles.size() - 1;
 		}
-		SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) mViewPager.getAdapter();
 		if (id == R.string.HOTELS) {
-			HotelsFragment fragment = (HotelsFragment) adapter.instantiateItem(mViewPager, index);
-			fragment.getAdapter().notifyDataSetChanged();
-			HotelsMapFragment mapFragment = (HotelsMapFragment) adapter.instantiateItem(mViewPager, index+1);
+			HotelsFragment fragment = (HotelsFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
+			if (fragment != null) {
+				fragment.getAdapter().notifyDataSetChanged();
+			}
+			HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
 			
 			if(mHotelTabIndex!=-1)
 			{

@@ -1,14 +1,8 @@
 package com.evature.search.views.fragments;
 
-import com.evature.search.MyApplication;
-import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.views.adapters.FlightListAdapterTP;
-
+import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -21,7 +15,11 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class FlightsFragment extends Fragment implements OnClickListener, OnItemClickListener, OnKeyListener {
+import com.evature.search.MyApplication;
+import com.evature.search.R;
+import com.evature.search.views.adapters.FlightListAdapterTP;
+
+public class FlightsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener {
 
 	// private LinearLayout mFooterView;
 	View mView;

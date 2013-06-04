@@ -30,8 +30,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
+import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.MyApplication;
 
 public class XpediaProtocol {
@@ -185,8 +185,8 @@ public class XpediaProtocol {
 
 		double longitude, latitude;
 				
-		longitude = EvaAPIs.getLongitude();
-		latitude = EvaAPIs.getLatitude();
+		longitude = EvatureLocationUpdater.getLongitude();
+		latitude = EvatureLocationUpdater.getLatitude();
 		
 		if (longitude == -1) {
 			longitude = 10000;

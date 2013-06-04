@@ -1,5 +1,7 @@
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
+
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.R.id;
@@ -20,7 +22,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class TrainsFragment extends Fragment implements OnClickListener, OnItemClickListener, OnKeyListener {
+public class TrainsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener {
 
 	// private LinearLayout mFooterView;
 	View mView;

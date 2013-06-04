@@ -1,5 +1,6 @@
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +35,7 @@ import com.evature.search.models.expedia.XpediaProtocol;
 import com.evature.search.views.adapters.RoomListAdapter;
 
 @SuppressLint("ValidFragment")
-public class RoomsSelectFragement extends Fragment implements OnItemClickListener {
+public class RoomsSelectFragement extends RoboFragment implements OnItemClickListener {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {

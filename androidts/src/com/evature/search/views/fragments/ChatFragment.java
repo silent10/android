@@ -1,5 +1,6 @@
 package com.evature.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,7 +16,7 @@ import com.evature.search.models.ChatItem;
 import com.evature.search.models.ChatItemList;
 import com.evature.search.views.adapters.ChatAdapter;
 
-public class ChatFragment extends Fragment {
+public class ChatFragment extends RoboFragment {
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

@@ -3,6 +3,8 @@ package com.evature.search.views.fragments;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import roboguice.fragment.RoboFragment;
+
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -23,7 +25,7 @@ import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaRoomsUpdaterTask;
 
-public class CalendarFragment extends Fragment implements EvaDownloaderTaskInterface{
+public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskInterface{
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {		

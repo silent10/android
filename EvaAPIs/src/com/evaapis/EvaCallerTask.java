@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.evature.util.DownloadUrl;
+import com.evature.util.ExternalIpAddressGetter;
+import com.google.inject.Inject;
 
 
     //Uses AsyncTask to create a task away from the main UI thread. This task takes a
@@ -19,13 +21,13 @@ import com.evature.util.DownloadUrl;
 	public class EvaCallerTask extends AsyncTask<String, Integer, String> {
 
 		private static final String TAG = "EvaCallerTask";
-		private final Context mContext;
+		
+		@Inject DownloadUrl urlDownloader;
 
 		EvaSearchReplyListener mSearchReplyListener;
 		
-		EvaCallerTask(Context context,EvaSearchReplyListener esrl) {
-			mContext = context;
-			mSearchReplyListener = esrl;
+		public void setListener(EvaSearchReplyListener searchReplyListener) {
+			mSearchReplyListener = searchReplyListener;
 		}
 
 		@Override
@@ -42,15 +44,13 @@ import com.evature.util.DownloadUrl;
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace(); // TODO Auto-generated catch block
 			}
-			String externalIpAddress = EvaBaseActivity.getExternalIpAddress();
+			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
 			if (externalIpAddress != null && (externalIpAddress.length()>0) && (externalIpAddress.trim().length()>0)) {
 				evatureUrl += ("&ip_addr=" + externalIpAddress);
 			}
-			EvatureLocationUpdater location;
 			try {
-				location = EvatureLocationUpdater.getInstance();
-				double longitude = location.getLongitude();
-				double latitude = location.getLatitude();
+				double longitude = EvatureLocationUpdater.getLongitude();
+				double latitude = EvatureLocationUpdater.getLatitude();
 				if (latitude != 0 && longitude != 0) {
 					evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
 				}
@@ -61,7 +61,7 @@ import com.evature.util.DownloadUrl;
 
 			Log.d(TAG, "Eva URL = " + evatureUrl);
 			try {
-				return DownloadUrl.get(evatureUrl);
+				return urlDownloader.get(evatureUrl);
 			} catch (IOException e) {
 				return "Unable to retrieve web page. URL may be invalid.";
 			}
@@ -76,5 +76,7 @@ import com.evature.util.DownloadUrl;
 			mSearchReplyListener.onEvaReply(apiReply);
 			
 		}
+
+		
 	}
 

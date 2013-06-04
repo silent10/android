@@ -11,6 +11,7 @@ import android.content.res.Resources;
 import android.util.Log;
 
 import com.evaapis.EvaAPIs;
+import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.models.expedia.EvaDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
@@ -40,7 +41,9 @@ public class MyApplication extends Application {
 		mEvaSiteCode = resources.getString(R.string.EVA_SITE_CODE);
 		mEvaApiKey = resources.getString(R.string.EVA_API_KEY);
 		
-		EvaAPIs.start(this,mEvaApiKey,mEvaSiteCode); 
+		EvaAPIs.API_KEY = mEvaApiKey;
+		EvaAPIs.SITE_CODE = mEvaSiteCode; 
+		EvatureLocationUpdater.initContext(this);
 		
 		super.onCreate();
 		MyApplication.context = getApplicationContext();

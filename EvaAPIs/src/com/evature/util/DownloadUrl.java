@@ -6,11 +6,17 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class DownloadUrl {
+import com.google.inject.Singleton;
 
+@Singleton
+public class DownloadUrl {
+	
+	// Iftah: I changed this to be non-static method so that a unit test can inject a mock class and verify URL without
+	//        but added @Singleton - which should make Guice reuse a single instance of this class for each instantiation
+	
 	// Given a URL, establishes an HttpUrlConnection and retrieves
 	// the web page content as a InputStream, which it returns as a string.
-	public static String get(String myurl) throws IOException {
+	public String get(String myurl) throws IOException {
 		URL url = new URL(myurl);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setReadTimeout(20000 /* milliseconds */);

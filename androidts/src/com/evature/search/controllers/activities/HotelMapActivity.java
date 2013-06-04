@@ -2,39 +2,40 @@ package com.evature.search.controllers.activities;
 
 import java.util.List;
 
+import roboguice.activity.RoboMapActivity;
+import roboguice.inject.InjectResource;
+import roboguice.inject.InjectView;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.evature.search.R;
-import com.evature.search.R.drawable;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
 import com.evature.search.views.HotelItemizedOverlay;
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class HotelMapActivity extends MapActivity {
+public class HotelMapActivity extends RoboMapActivity {
 	
     public static String HOTEL_NAME="SUMMARY";
     public static String HOTEL_CITY="CITY";
     public static String HOTEL_LATITUDE="LATITUDE";
     public static String HOTEL_LONGITUDE="LONGITUDE";
 	private MapController myMapController;
+	
+	@InjectView(R.id.mapview) MapView mapView;
+	@InjectResource(R.drawable.hotel_ico)  Drawable hotelIcon;
 
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.hotel_map);
-        MapView mapView = (MapView) findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
         List<Overlay> mapOverlays = mapView.getOverlays();
-        Drawable drawable = this.getResources().getDrawable(R.drawable.hotel_ico);
-        HotelItemizedOverlay itemizedoverlay = new HotelItemizedOverlay(drawable, this);
+        
+        HotelItemizedOverlay itemizedoverlay = new HotelItemizedOverlay(hotelIcon, this);
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         

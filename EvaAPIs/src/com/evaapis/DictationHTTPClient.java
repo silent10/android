@@ -220,11 +220,9 @@ public class DictationHTTPClient {
 		qparams.add(new BasicNameValuePair("api_key", mAppKey));
 		qparams.add(new BasicNameValuePair("id",  deviceID));
 
-		EvatureLocationUpdater location;
 		try {
-			location = EvatureLocationUpdater.getInstance();
-			double longitude = location.getLongitude();
-			double latitude = location.getLatitude();
+			double longitude = EvatureLocationUpdater.getLongitude();
+			double latitude = EvatureLocationUpdater.getLatitude();
 			if (latitude != 0 && longitude != 0) {
 				qparams.add(new BasicNameValuePair("longitude",""+longitude));
 				qparams.add(new BasicNameValuePair("latitude",""+latitude));

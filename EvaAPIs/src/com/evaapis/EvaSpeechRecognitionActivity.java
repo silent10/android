@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.xiph.speex.SpeexEncoder;
 
-import android.app.Activity;
+import roboguice.activity.RoboActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -20,7 +20,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class EvaSpeechRecognitionActivity extends Activity {
+public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 
 	public static final int SAMPLE_RATE = 16000;

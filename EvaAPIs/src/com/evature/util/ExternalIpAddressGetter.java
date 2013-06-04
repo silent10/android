@@ -10,37 +10,67 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.evaapis.EvaAPIs;
-import com.evaapis.EvaBaseActivity;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
+@Singleton
 public class ExternalIpAddressGetter {
 
 	private static final String TAG = ExternalIpAddressGetter.class.getSimpleName();
 	private Handler mHandler = new Handler();
-
+	
+	private Runnable mRunnable;
+	
+	private static String IpAddress;
+	
+	@Inject protected Injector injector;
+	
 	public ExternalIpAddressGetter() {
+		mRunnable = new Runnable() {
+			public void run() {
+				executeGetIpAddr();
+				mHandler.postDelayed(mRunnable, 5 * 60 * 1000); // and repeat every X minutes!
+			}
+		};
+	}
+	
+	public void start() {
+		
 		mHandler.removeCallbacks(mRunnable); // We remove any existing callbacks to the handler before adding the
-												// new handler, to make absolutely sure we don't get more callback
-												// events than we want.
+											// new handler, to make absolutely sure we don't get more callback
+											// events than we want.
 		mHandler.postDelayed(mRunnable, 1000); // 1 second delay
 	}
+	
+	public void pause() {
+		mHandler.removeCallbacks(mRunnable); // We remove any existing callbacks
+	}
 
-	private Runnable mRunnable = new Runnable() {
-		public void run() {
-			new GetExternalIpAddress().execute(); // Get the external IP address (in the background)
-			mHandler.postDelayed(mRunnable, 3 * 60 * 1000); // and repeat every 3 minutes!
-		}
-	};
+
+	public void executeGetIpAddr() {
+		GetExternalIpAddress ipGetter = injector.getInstance(GetExternalIpAddress.class);
+		ipGetter.execute(); // Get the external IP address (in the background)
+	}
+
+	public static String getExternalIpAddr() {
+		return IpAddress;
+	}
+
+
 
 	// Uses AsyncTask to create a task away from the main UI thread. This task takes a URL string and uses it to create
 	// an HttpUrlConnection. Once the connection has been established, the AsyncTask downloads the contents of the
 	// webpage as an InputStream. Finally, the InputStream is converted into a string, which is saved to the Model.
-	private class GetExternalIpAddress extends AsyncTask<String, Integer, String> {
+	private static class GetExternalIpAddress extends AsyncTask<String, Integer, String> {
 
+		@Inject DownloadUrl urlDownloader;
+		
 		@Override
 		protected String doInBackground(String... ignore) {
 			try {
 				Log.d(TAG, "Requesting external IP address");
-				String result = DownloadUrl.get(EvaAPIs.API_ROOT + "/whatismyip");
+				String result = urlDownloader.get(EvaAPIs.API_ROOT + "/whatismyip");
 				if (result == null) {
 					return null;
 				}
@@ -63,7 +93,7 @@ public class ExternalIpAddressGetter {
 		protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
 			if (result != null) {
 				Log.d(TAG, "External IP address = " + result);
-				EvaBaseActivity.setExternalIpAddress(result);
+				IpAddress = result;
 			} else {
 				Log.d(TAG, "My external IP resolver returned null!");
 			}
