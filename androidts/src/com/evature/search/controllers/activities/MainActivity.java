@@ -59,7 +59,6 @@ import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.ChatItem;
-import com.evature.search.models.ChatItemList;
 import com.evature.search.views.SwipeyTabs;
 import com.evature.search.views.adapters.FlightListAdapterTP;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
@@ -72,6 +71,8 @@ import com.evature.search.views.fragments.HotelFragment;
 import com.evature.search.views.fragments.HotelsFragment;
 import com.evature.search.views.fragments.HotelsMapFragment;
 import com.evature.search.views.fragments.TrainsFragment;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInitListener, EvaDownloaderTaskInterface {
 
@@ -80,6 +81,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	
 	private static boolean mSpeechToTextWasConfigured = false;
 	private List<String> mTabTitles;
+	@Inject Injector injector;
+	
 	@InjectView(R.id.viewpager) private ViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
 	@InjectView(R.id.swipeytabs) private SwipeyTabs mTabs; // The main swipey tabs element and the main view pager element:
 	SearchVayantTask mSearchVayantTask;
@@ -177,33 +180,35 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 					"Train ride from NYC to Washington DC next Wednesday"
 				};
 				Log.d(TAG, "Example Fragment");
-				return ExamplesFragment.newInstance(examples, new ExampleClickedHandler() {
+				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
+				fragment.setExamples(examples);
+				fragment.setHandler(new ExampleClickedHandler() {
 					@Override
 					public void onClick(String example) {
 						Log.d(TAG, ">>>> Running example: "+example);
 						addChatItem(example, false);
 						MainActivity.this.searchWithText(example);
-					}
-				});
+					}});
+				return fragment; 
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.CHAT))) { // Main Chat window
 				Log.i(TAG, "Chat Fragment");
-				return ChatFragment.newInstance(new ChatItemList());
+				return injector.getInstance(ChatFragment.class);
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS))) { // Hotel list window
 				Log.i(TAG, "Hotels Fragment");
-				return HotelsFragment.newInstance();
+				return injector.getInstance(HotelsFragment.class);
 			}
 			
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS_MAP))) { // Hotel list window
 				Log.i(TAG, "HotelsMap Fragment");
-				Fragment fragment=HotelsMapFragment.newInstance();
+				Fragment fragment= injector.getInstance(HotelsMapFragment.class);
 				return fragment;
 			}
 			
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
 				Log.i(TAG, "Flights Fragment");
-				return FlightsFragment.newInstance();
+				return injector.getInstance(FlightsFragment.class);
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTEL))) { // Single hotel
 				int hotelIndex = MyApplication.getDb().getHotelId();
@@ -211,7 +216,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				return HotelFragment.newInstance(hotelIndex);
 			} else if (position < size && mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 				Log.i(TAG, "Trains Fragment");
-				return TrainsFragment.newInstance();
+				return injector.getInstance(TrainsFragment.class);
 			}
 			else {
 				Log.e(TAG, "No fragment made for Position "+position+(position< size ? " titled "+mTabTitles.get(position) : ""));
@@ -267,6 +272,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 		// Internal helper function
 		public void stuffChanged(int position) {
+			Log.d(TAG, "stuffChanged "+position);
 			mTabs.setAdapter(mSwipeyAdapter);
 			mViewPager.setAdapter(mSwipeyAdapter); // I crashed here once ?! java.lang.IllegalStateException: Fragment
 													// ChatFragment{41ac6dd0} is not currently in the FragmentManager
@@ -276,6 +282,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		}
 
 		public void addTab(String name) { // Dynamic tabs add to end
+			Log.d(TAG, "addTab "+name);
 			int position = mViewPager.getCurrentItem();
 			mTabs.setAdapter(null);
 			mTabTitles.add(name);
@@ -283,6 +290,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		}
 
 		public void removeTab() { // Dynamic tabs remove from end
+			Log.d(TAG, "removeTab");
 			int position = mViewPager.getCurrentItem();
 			int size = mTabTitles.size();
 			if (size > 0) { // fast clicking on remove gets us here...
@@ -297,17 +305,18 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		
 		public void removeTab(int tabIndex)
 		{
-				mTabTitles.remove(tabIndex);
-				
-				if(tabIndex!=0)
-				{
-					stuffChanged(tabIndex-1);
-				}
-				else
-				{
-					stuffChanged(tabIndex);
-				}
+			Log.d(TAG, "removeTab "+tabIndex);
+			mTabTitles.remove(tabIndex);
+			
+			if(tabIndex!=0)
+			{
+				stuffChanged(tabIndex-1);
 			}
+			else
+			{
+				stuffChanged(tabIndex);
+			}
+		}
 
 	}
 
@@ -559,8 +568,11 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		}
 		if (id == R.string.HOTELS) {
 			HotelsFragment fragment = (HotelsFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
-			if (fragment != null) {
+			if (fragment != null && fragment.getAdapter() != null) {
 				fragment.getAdapter().notifyDataSetChanged();
+			}
+			else {
+				Log.w(TAG, "Unexpected hotel fragment or fragment adaptor are null");
 			}
 			HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
 			

@@ -6,6 +6,9 @@ import java.util.List;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class ChatItemList {
 	static final String TAG = "ChatItemList";
 	

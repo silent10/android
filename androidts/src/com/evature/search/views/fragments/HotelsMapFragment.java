@@ -12,9 +12,4 @@ public class HotelsMapFragment extends ActivityHostFragment {
 		return HotelsMapActivity.class;
 	}
 
-
-	public static Fragment newInstance() {
-		HotelsMapFragment f = new HotelsMapFragment();
-		return f;
-	}
 }

@@ -53,7 +53,6 @@ abstract public class SpeechRecognition {
 
 	void setResults(Recognition.Result[] results) {
 		Log.d(TAG, "Got x results = " + results.length);
-		Bundle a_bundle = new Bundle();
 		ArrayList<String> sentences = new ArrayList<String>();
 		for (int i = 0; i < results.length; i++) { // This is ugly and I look down on Java!
 			sentences.add(results[i].getText());
@@ -87,7 +86,7 @@ abstract public class SpeechRecognition {
 			}
 			return mInstanceGoogle;
 		case SPEECH_RECOGNITION_NUANCE:
-			if(mInstanceGoogle==null)
+			if(mInstanceNuance==null)
 			{
 				mInstanceNuance = new SpeechRecognitionNuance(parentActivity);
 			}
