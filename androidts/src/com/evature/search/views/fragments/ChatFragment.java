@@ -2,7 +2,6 @@ package com.evature.search.views.fragments;
 
 import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,6 +14,7 @@ import com.evature.search.R;
 import com.evature.search.models.ChatItem;
 import com.evature.search.models.ChatItemList;
 import com.evature.search.views.adapters.ChatAdapter;
+import com.google.inject.Inject;
 
 public class ChatFragment extends RoboFragment {
 
@@ -23,15 +23,15 @@ public class ChatFragment extends RoboFragment {
 		inflater.inflate(R.menu.mainmenu, menu);
 	}
 
-	private ChatItemList mChatListModel;
+	@Inject private ChatItemList mChatListModel;
 	private ChatAdapter mChatAdapter;
 	static final String TAG = "ChatFragment";
 
-	public static Fragment newInstance(ChatItemList chatListModel) {
-		ChatFragment f = new ChatFragment();
-		f.mChatListModel = chatListModel;
-		return f;
-	}
+//	public static Fragment newInstance(ChatItemList chatListModel) {
+//		ChatFragment f = new ChatFragment();
+//		f.mChatListModel = chatListModel;
+//		return f;
+//	}
 
 	// private ImageButton travel_search_button;	
 	@Override

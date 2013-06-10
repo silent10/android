@@ -104,10 +104,6 @@ public class TrainsFragment extends RoboFragment implements OnClickListener, OnI
 		}
 	}
 
-	public static TrainsFragment newInstance() {
-		TrainsFragment result = new TrainsFragment();
-		return result;
-	}
 
 	@Override
 	public void onClick(View v) {

@@ -149,11 +149,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		mHotelListView.setOnItemClickListener(this);
 	}
 
-	public static HotelsFragment newInstance() {
-		HotelsFragment result = new HotelsFragment();
-		return result;
-	}
-
 	@Override
 	public void onClick(View v) {
 

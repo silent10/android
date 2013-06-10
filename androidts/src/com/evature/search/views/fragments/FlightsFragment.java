@@ -108,10 +108,6 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 		}
 	}
 
-	public static FlightsFragment newInstance() {
-		FlightsFragment result = new FlightsFragment();
-		return result;
-	}
 
 	@Override
 	public void onClick(View v) {

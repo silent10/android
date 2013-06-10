@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.evature.search.R;
+import com.evature.search.models.ChatItemList;
 
 public class ExamplesFragment extends RoboFragment { // TODO: change to ListFragment ?
 	static final String TAG = "ExamplesFragment";
@@ -23,14 +24,16 @@ public class ExamplesFragment extends RoboFragment { // TODO: change to ListFrag
 
 	ExampleClickedHandler  clickHandler;
 	private String[] mExamples;
+	
 	private ListView mExamplesListView;
 	
 
-	public static Fragment newInstance(String[] examples, ExampleClickedHandler clickHandler) {
-		ExamplesFragment f = new ExamplesFragment();
-		f.mExamples = examples;
-		f.clickHandler = clickHandler;
-		return f;
+	public void setExamples(String[] examples) {
+		mExamples = examples;
+	}
+	
+	public void setHandler(ExampleClickedHandler clickHandler) {
+		this.clickHandler = clickHandler;		
 	}
 
 	// private ImageButton travel_search_button;	

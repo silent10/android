@@ -167,12 +167,12 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 
 	protected SpeechRecognition mSpeechRecognition;
 	
-	void setPrefredLanguage(String preffredLanguage)
+	public void setPrefredLanguage(String preffredLanguage)
 	{
 		mPreferedLanguage = preffredLanguage;
 	}
 	
-	protected void searchWithVoice(int recognitionMethod)
+	public void searchWithVoice(int recognitionMethod)
 	{		
 
 		mSpeechRecognition = SpeechRecognition.instance(recognitionMethod,this);
@@ -194,8 +194,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 	public void onSpeechRecognitionResults(ArrayList<String> matches) {
 		
 		if (matches.size() > 0) {
-			searchWithText(matches.get(0));
-																				// priority speech parse
+			searchWithText(matches.get(0));	// priority speech parse
 		}
 	}
 

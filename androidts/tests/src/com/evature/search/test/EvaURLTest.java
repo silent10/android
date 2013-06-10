@@ -84,7 +84,7 @@ public class EvaURLTest {
 		mLocationUpdater.startGPS();
 		
 		try {
-			when(mockDownloader.get(anyString())).thenReturn("{}");
+			when(mockDownloader.get(anyString())).thenReturn("{\"status\":true, \"api_reply\":{} }");
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
 		}
