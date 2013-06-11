@@ -5,7 +5,7 @@ import android.support.v4.app.Fragment;
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.models.expedia.HotelData;
-import com.evature.search.models.expedia.XpediaProtocol;
+import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.fragments.CalendarFragment;
 
 public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
@@ -23,7 +23,7 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	
 		@Override
 	protected Void doInBackground(Void... params) {
-		String str= XpediaProtocol.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
+		String str= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
 				MyApplication.getDb().mArrivalDateParam,
 				MyApplication.getDb().mDepartureDateParam,
 				EvaSettingsAPI.getCurrencyCode(((Fragment)mListener).getActivity()),

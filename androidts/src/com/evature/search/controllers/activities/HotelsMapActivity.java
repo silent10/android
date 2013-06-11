@@ -2,18 +2,15 @@ package com.evature.search.controllers.activities;
 
 import java.util.List;
 
+import roboguice.activity.RoboMapActivity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.drawable;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.models.expedia.EvaDatabase;
+import com.evature.search.models.EvaDatabase;
 import com.evature.search.views.HotelItemizedOverlay;
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
@@ -21,7 +18,7 @@ import com.google.android.maps.OverlayItem;
 
 // From Arik's app
 
-public class HotelsMapActivity extends MapActivity  {
+public class HotelsMapActivity extends RoboMapActivity  {
 	private final String TAG = "HotelMapActivity";
 
 
@@ -121,10 +118,10 @@ public class HotelsMapActivity extends MapActivity  {
 	}
 
 	
-	public static HotelsMapActivity newInstance() {
-		HotelsMapActivity result = new HotelsMapActivity();
-		return result;
-	}
+//	public static HotelsMapActivity newInstance() {
+//		HotelsMapActivity result = new HotelsMapActivity();
+//		return result;
+//	}
 
 
 	@Override

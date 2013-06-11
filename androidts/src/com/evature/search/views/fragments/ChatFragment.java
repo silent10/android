@@ -24,6 +24,7 @@ public class ChatFragment extends RoboFragment {
 	}
 
 	@Inject private ChatItemList mChatListModel;
+	
 	private ChatAdapter mChatAdapter;
 	static final String TAG = "ChatFragment";
 
@@ -43,7 +44,7 @@ public class ChatFragment extends RoboFragment {
 		
 		// Connect the data of the chat history to the view:
 		mChatListModel.loadInstanceState(savedInstanceState);
-		mChatAdapter = new ChatAdapter(this, R.layout.row, R.id.label, mChatListModel);
+		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row, R.id.label, mChatListModel);
 		chatListView.setAdapter(mChatAdapter);
 
 		return root;
@@ -59,10 +60,6 @@ public class ChatFragment extends RoboFragment {
 
 	public void addChatItem(ChatItem chatItem) {
 		mChatAdapter.add(chatItem);
-	}
-
-	public ChatItemList getChatListModel() {
-		return mChatListModel;
 	}
 
 }

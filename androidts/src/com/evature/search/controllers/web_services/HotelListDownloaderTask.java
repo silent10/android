@@ -8,8 +8,8 @@ import android.util.Log;
 import com.evaapis.EvaApiReply;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.string;
 import com.evature.search.models.expedia.XpediaProtocol;
+import com.google.inject.Inject;
 
 public class HotelListDownloaderTask extends EvaDownloaderTask {
 
@@ -17,13 +17,15 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 	// String mSearchQuery;
 	String mCurrencyCode;
 	EvaApiReply apiReply;
+	
+	@Inject XpediaProtocol xpediaProtocol;
 
 	@Override
 	protected int getId() {
 		return R.string.HOTELS;
 	}
 
-	public HotelListDownloaderTask(EvaDownloaderTaskInterface listener, EvaApiReply apiReply, String currencyCode) {
+	public void initialize(EvaDownloaderTaskInterface listener, EvaApiReply apiReply, String currencyCode) {
 		Log.i(TAG, "CTOR");
 		// mSearchQuery = searchQuery;
 		this.apiReply = apiReply;
@@ -64,7 +66,7 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
-		String hotelListResponse = XpediaProtocol.getExpediaAnswer(apiReply, mCurrencyCode);
+		String hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, mCurrencyCode);
 		if (hotelListResponse == null) {
 			Log.d(TAG, "null hotelist response!");
 		}
@@ -79,9 +81,9 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 			Log.i(TAG, "doInBackground: All OK");
 			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
 			MyApplication.getDb().setArrivalDate(apiReply.ean.get("arrivalDate"));
-			// XpediaProtocol.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
+			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
 			MyApplication.getDb().setDepartueDate(apiReply.ean.get("departureDate"));
-			// XpediaProtocol.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
+			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
 			MyApplication.getDb().setNumberOfAdults(1);
 		}
 		Log.i(TAG, "doInBackground: end");

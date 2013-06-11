@@ -1,4 +1,4 @@
-package com.evature.search.models.expedia;
+package com.evature.search.models;
 
 import java.util.HashMap;
 
@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 
+import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.travelport.AirLowFareSearchRsp;
 import com.evature.search.models.vayant.VayantJourneys;
 
@@ -157,22 +158,22 @@ public class EvaDatabase {
 		return "&" + "cacheKey=" + mCacheKey + "&" + "cacheLocation=" + mCacheLocation;
 	}
 
-	public void addData(EvaDatabase db) {
-		if (db.mHotelData != null && db.mHotelData.length > 0) {
-			mCacheKey = db.mCacheKey;
-			mCacheLocation = db.mCacheLocation;
-			setMoreResultsAvailable(db.isMoreResultsAvailable());
-
-			HotelData[] newHotelData = new HotelData[mHotelData.length + db.mHotelData.length];
-			int i = 0;
-			for (; i < mHotelData.length; i++)
-				newHotelData[i] = mHotelData[i];
-			for (; i < newHotelData.length; i++)
-				newHotelData[i] = db.mHotelData[i - mHotelData.length];
-			mHotelData = newHotelData;
-		}
-	}
-
+//	public void addData(EvaDatabase db) {
+//		if (db.mHotelData != null && db.mHotelData.length > 0) {
+//			mCacheKey = db.mCacheKey;
+//			mCacheLocation = db.mCacheLocation;
+//			setMoreResultsAvailable(db.isMoreResultsAvailable());
+//
+//			HotelData[] newHotelData = new HotelData[mHotelData.length + db.mHotelData.length];
+//			int i = 0;
+//			for (; i < mHotelData.length; i++)
+//				newHotelData[i] = mHotelData[i];
+//			for (; i < newHotelData.length; i++)
+//				newHotelData[i] = db.mHotelData[i - mHotelData.length];
+//			mHotelData = newHotelData;
+//		}
+//	}
+//
 	public boolean isMoreResultsAvailable() {
 		return mMoreResultsAvailable;
 	}

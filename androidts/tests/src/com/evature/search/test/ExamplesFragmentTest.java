@@ -73,7 +73,6 @@ public class ExamplesFragmentTest {
         
 		MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().start().get();
 		ViewPager viewPager = (ViewPager) activity.findViewById(R.id.viewpager);
-		viewPager.setCurrentItem(1);
 		
     	SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) viewPager.getAdapter();
 		
@@ -109,8 +108,8 @@ public class ExamplesFragmentTest {
 
 		// should have one item in chat
 		assertEquals(1, mChatListModel.getItemList().size());
-		assertEquals(mChatListModel.getItemList().get(0).getChat(), expectedChat);
-		assertEquals(mChatListModel.getItemList().get(0).isEva(), false);
+		assertEquals(expectedChat,  mChatListModel.getItemList().get(0).getChat());
+		assertEquals(false, mChatListModel.getItemList().get(0).isEva());
 	}
     
 

@@ -133,12 +133,13 @@ public class EvaURLTest {
 			
 			when(mockDownloader.get(anyString())).thenReturn("{}");
 			mActivity.searchWithText("!!Testing Eva search");
-		
 			
 			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
 					"from_speech&site_code=thack&api_key=thack-london-june-2012" +
 					"&language=en&input_text=%21%21Testing+Eva+search" +
 					"&ip_addr=12.34.56.78&longitude=-1.0&latitude=-1.0");
+			
+			ExternalIpAddressGetter.setExternalIpAddr(null); // reset back to make other tests consistent
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
 		}

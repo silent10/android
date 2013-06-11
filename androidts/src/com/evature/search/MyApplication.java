@@ -12,7 +12,7 @@ import android.util.Log;
 
 import com.evaapis.EvaAPIs;
 import com.evaapis.EvatureLocationUpdater;
-import com.evature.search.models.expedia.EvaDatabase;
+import com.evature.search.models.EvaDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {
