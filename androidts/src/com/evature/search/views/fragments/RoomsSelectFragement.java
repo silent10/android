@@ -31,7 +31,7 @@ import com.evature.search.R.id;
 import com.evature.search.R.layout;
 import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.models.expedia.HotelData;
-import com.evature.search.models.expedia.XpediaProtocol;
+import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.RoomListAdapter;
 
 @SuppressLint("ValidFragment")
@@ -75,7 +75,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 					{
 						if(mHotelData.mDetails.hotelImages[0].url!=null)
 						{
-							bmp = XpediaProtocol.download_Image(mHotelData.mDetails.hotelImages[0].url);
+							bmp = XpediaProtocolStatic.download_Image(mHotelData.mDetails.hotelImages[0].url);
 						}							
 					}
 

@@ -48,7 +48,7 @@ public class RoomsUpdaterTask extends AsyncTask<Void, Integer, Void>
 	protected Void doInBackground(Void... params) {
 
 
-		String str= XpediaProtocol.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
+		String str= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
 				EvaSearchApplication.getDb().mArrivalDateParam,
 				EvaSearchApplication.getDb().mDepartureDateParam,
 				EvaSettingsAPI.getCurrencyCode(mShowHotel),

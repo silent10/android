@@ -56,6 +56,9 @@ public class ExternalIpAddressGetter {
 	public static String getExternalIpAddr() {
 		return IpAddress;
 	}
+	public static void setExternalIpAddr(String ipaddr) {
+		IpAddress = ipaddr;
+	}
 
 
 

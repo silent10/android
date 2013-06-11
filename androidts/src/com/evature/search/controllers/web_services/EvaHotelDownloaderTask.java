@@ -10,10 +10,10 @@ import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.R.string;
-import com.evature.search.models.expedia.EvaDatabase;
+import com.evature.search.models.EvaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.HotelDetails;
-import com.evature.search.models.expedia.XpediaProtocol;
+import com.evature.search.models.expedia.XpediaProtocolStatic;
 
 public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	private static final String TAG = EvaHotelDownloaderTask.class.getSimpleName();
@@ -46,7 +46,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 
 		publishProgress();
 
-		String hotelInfo = XpediaProtocol.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
+		String hotelInfo = XpediaProtocolStatic.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
 				EvaSettingsAPI.getCurrencyCode((Context) mListener));
 
 		JSONObject jHotel;
@@ -59,7 +59,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 				hotelData.mDetails = new HotelDetails(jHotelInfo);
 
 				if (db.mArrivalDateParam != null && db.mDepartureDateParam != null) {
-					String str = XpediaProtocol.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
+					String str = XpediaProtocolStatic.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
 							db.mArrivalDateParam, db.mDepartureDateParam,
 							EvaSettingsAPI.getCurrencyCode((Context) mListener), db.mNumberOfAdultsParam);
 					Log.d(TAG, str);

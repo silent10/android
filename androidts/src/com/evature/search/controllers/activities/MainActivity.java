@@ -88,7 +88,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	SearchVayantTask mSearchVayantTask;
 	SearchTravelportTask mSearchTravelportTask;
 	SwipeyTabsPagerAdapter mSwipeyAdapter;
-	HotelListDownloaderTask mSearchExpediaTask;
+	@Inject HotelListDownloaderTask mSearchExpediaTask;
 		
 	private boolean mIsNetworkingOk = false;
 
@@ -665,7 +665,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		handleSayIt(reply); // Say (using TTS) the eva reply
 		if (reply.isHotelSearch()) {
 			Log.d(TAG, "Running Hotel Search!");
-			mSearchExpediaTask = new HotelListDownloaderTask(this, reply, "$");
+			mSearchExpediaTask.initialize(this, reply, "$");
 			mSearchExpediaTask.execute();
 		}
 //		if (reply.isFlightSearch()) {

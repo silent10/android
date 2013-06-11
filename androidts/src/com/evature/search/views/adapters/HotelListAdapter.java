@@ -21,7 +21,7 @@ import com.evaapis.EvatureLocationUpdater;
 import com.evature.components.S3DrawableBackgroundLoader;
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.R;
-import com.evature.search.models.expedia.EvaDatabase;
+import com.evature.search.models.EvaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.views.fragments.HotelsFragment;
 
@@ -156,7 +156,7 @@ public class HotelListAdapter extends BaseAdapter {
 		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder) ((View)v.getParent()).getTag();
 		 * 
 		 * String hotelInfo =
-		 * XpediaProtocol.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
+		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
 		 * 
 		 * Intent intent = new Intent(mParent,ShowHotel.class);
 		 * 
@@ -174,7 +174,7 @@ public class HotelListAdapter extends BaseAdapter {
 		 * ((View)v.getParent().getParent()).getTag();
 		 * 
 		 * String hotelInfo =
-		 * XpediaProtocol.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
+		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
 		 * 
 		 * Intent intent = new Intent(mParent,ShowHotel.class);
 		 * 
@@ -189,7 +189,7 @@ public class HotelListAdapter extends BaseAdapter {
 		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder) ((View)v.getParent()).getTag();
 		 * 
 		 * String hotelInfo =
-		 * XpediaProtocol.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
+		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
 		 * 
 		 * Intent intent = new Intent(mParent,ShowHotel.class);
 		 * 

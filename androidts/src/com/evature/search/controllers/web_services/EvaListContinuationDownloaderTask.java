@@ -8,7 +8,7 @@ import android.util.Log;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.R.string;
-import com.evature.search.models.expedia.XpediaProtocol;
+import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.fragments.HotelsFragment;
 
 public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
@@ -43,7 +43,7 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	protected Void doInBackground(Void... params) {
 		Log.i(TAG, "Do in background");
 
-		String hotelListResponse = XpediaProtocol.getExpediaNext(mNextQuery, mCurrencyCode);
+		String hotelListResponse = XpediaProtocolStatic.getExpediaNext(mNextQuery, mCurrencyCode);
 		if (hotelListResponse == null)
 			Log.e(TAG, "Response for next null");
 		else

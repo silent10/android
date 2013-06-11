@@ -36,7 +36,7 @@ import com.evature.search.R.layout;
 import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.controllers.activities.HotelMapActivity;
 import com.evature.search.models.expedia.HotelData;
-import com.evature.search.models.expedia.XpediaProtocol;
+import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.HotelGalleryAdapter;
 import com.evature.search.views.adapters.ImageAdapter;
 
@@ -325,7 +325,7 @@ public class HotelFragment extends RoboFragment {
 
 						if (mHotelData.mDetails.hotelImages[i] != null) {
 							if (mHotelData.mDetails.hotelImages[i].url != null) {
-								bmp = XpediaProtocol.download_Image(mHotelData.mDetails.hotelImages[i].url);
+								bmp = XpediaProtocolStatic.download_Image(mHotelData.mDetails.hotelImages[i].url);
 							}
 						}
 

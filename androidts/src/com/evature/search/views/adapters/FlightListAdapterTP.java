@@ -16,7 +16,7 @@ import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.R.id;
 import com.evature.search.R.layout;
-import com.evature.search.models.expedia.EvaDatabase;
+import com.evature.search.models.EvaDatabase;
 import com.evature.search.models.travelport.AirPricingSolution;
 import com.evature.search.models.travelport.AirSegment;
 import com.evature.search.views.fragments.FlightsFragment;
