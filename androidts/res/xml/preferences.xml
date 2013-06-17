@@ -3,22 +3,6 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/speech_recognition_preferences" >
-        <ListPreference
-            android:dialogTitle="@string/dialog_title_list_preference"
-            android:entries="@array/entries_list_preference"
-            android:entryValues="@array/entryvalues_list_preference"
-            android:key="languages"
-            android:summary="@string/summary_list_preference"
-            android:title="@string/title_language_preference" />
-        <ListPreference
-            android:dialogTitle="@string/dialog_title_list_preference"
-            android:entries="@array/engine_list_preference"
-            android:entryValues="@array/enginevalues_list_preference"
-            android:key="engine"
-            android:summary="@string/summary_engine_preference"
-            android:title="@string/title_engine_preference" />
-    </PreferenceCategory>
     <PreferenceCategory android:title="@string/advanced_menu" >
         <CheckBoxPreference
             android:key="debug"

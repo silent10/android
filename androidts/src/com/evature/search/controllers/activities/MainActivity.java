@@ -27,11 +27,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -630,7 +628,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		switch (view.getId()) {
 		case R.id.search_button:
 //		    MainActivity.this.searchWithText("3 star Hotels in NYC on July 5th to July 16th");
-			MainActivity.this.searchWithVoice(getCurrentSpeechMethod());
+			MainActivity.this.searchWithVoice();
 			break;
 		}
 	}
@@ -678,29 +676,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 //			mSearchTravelportTask = new SearchTravelportTask(this, reply);
 //			mSearchTravelportTask.execute();
 //		}
-	}
-
-	public int getCurrentSpeechMethod() {
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-		String currentMethod = sp.getString("engine", "Eva");
-		int returnValue = SPEECH_RECOGNITION_EVA;
-		
-		if(currentMethod.toLowerCase().equals("eva"))
-		{
-			returnValue = SPEECH_RECOGNITION_EVA;
-		}
-		
-		if(currentMethod.toLowerCase().equals("nuance"))
-		{
-			returnValue = SPEECH_RECOGNITION_NUANCE;
-		}
-		
-		if(currentMethod.toLowerCase().equals("google"))
-		{
-			returnValue = SPEECH_RECOGNITION_GOOGLE;
-		}
-		
-		return returnValue;
 	}
 
 	
