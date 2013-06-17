@@ -27,25 +27,25 @@ import org.xiph.speex.SpeexEncoder;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.util.Log;
 
 public class SpeechAudioStreamer
 {
+	public static final String TAG = "SpeechAudioStreamer";
 	private PipedInputStream pipedIn;
 	private PipedOutputStream pipedOut;
-	private int sampleRate;
+	
 	boolean mDebugRecording = false;
 
 	private AudioRecord mRecorder;
 	private JSpeexEnc mEncoder;
 	private byte[] mBuffer;
 	private boolean mIsRecording = false;
-	private File mRawFile;
-	private File mEncodedFile;
 
 	public static final int TEMP_BUFFER_SIZE = 5;
 	private static final long SILENCE_PERIOD = 2000;
-	private static final float SILENCE_THRESHOLD = 250;
+	private static final float SILENCE_THRESHOLD = 350;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 	public static final int SPEEX_MODE = 1;
@@ -55,6 +55,15 @@ public class SpeechAudioStreamer
 	float mSilenceAccumulationBuffer[] = new float[TEMP_BUFFER_SIZE];
 
 	long mLastStart = -1;
+	private int mSoundLevel;
+
+	
+	public SpeechAudioStreamer(int sampleRate) throws Exception {
+		this.mEncoder = new JSpeexEnc(sampleRate); //PCM 8K only for now
+
+		Log.i("EVA","Encoder="+mEncoder.toString());
+	}
+
 
 	void initRecorder() {
 		Log.e("EVA","Starting to record");
@@ -68,13 +77,6 @@ public class SpeechAudioStreamer
 		mRecorder.startRecording();
 	}
 
-
-	public SpeechAudioStreamer(int sampleRate) throws Exception {
-		this.sampleRate = sampleRate;
-		this.mEncoder = new JSpeexEnc(sampleRate); //PCM 8K only for now
-
-		Log.i("EVA","Encoder="+mEncoder.toString());
-	}
 
 
 	private boolean checkForSilence(int numberOfReadBytes) {
@@ -97,7 +99,7 @@ public class SpeechAudioStreamer
 
 		mSilenceAccumulationBufferIndex++;
 
-		DictationHTTPClient.mSoundLevel = (int)temp;
+		this.mSoundLevel = (int)temp;
 		
 		if((temp>=0) && (temp <= SILENCE_THRESHOLD))
 		{
@@ -107,7 +109,7 @@ public class SpeechAudioStreamer
 			}
 			else
 			{
-				if((System.currentTimeMillis()-mLastStart)>SILENCE_PERIOD)
+				if((System.currentTimeMillis()-mLastStart) > SILENCE_PERIOD)
 				{
 					return true;
 				}
@@ -121,6 +123,10 @@ public class SpeechAudioStreamer
 		return false;
 	}
 
+	
+	public int getSoundLevel() {
+		return mSoundLevel;
+	}
 
 
 	class Producer implements Runnable 
@@ -184,14 +190,17 @@ public class SpeechAudioStreamer
 				
 				queue.put(new byte[0]);
 
-				mRecorder.stop();
-				mRecorder.release();
 
 				Log.i("EVA","Finished producer thread");
 
 
 			} catch (InterruptedException ex)
 			{
+				Log.i(TAG, "Interrupted recorder thread");
+			}
+			finally {
+				mRecorder.stop();
+				mRecorder.release();				
 			}
 		}
 
@@ -211,8 +220,6 @@ public class SpeechAudioStreamer
 
 		private final static int SINGLE_FRAME_SIZE = 32000;
 
-		private static final int MAX_WAIT_FOR_TRANSFER = 10;
-		
 		
 		Consumer(BlockingQueue q) {
 			mAccumulationBufferPosition = 0;
@@ -222,16 +229,16 @@ public class SpeechAudioStreamer
 			queue = q; 
 		}
 		public void run() {
+			String fileBase = Environment.getExternalStorageDirectory().getPath() + "/sampling";
 
 			if(mDebugRecording)
 			{
-				File f = new File("/sdcard/sampling.smp");
+				File f = new File(fileBase+".smp");
 
 				try {
 					fos = new FileOutputStream(f);
 					dos = new DataOutputStream(new BufferedOutputStream(fos));
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}    
@@ -241,7 +248,9 @@ public class SpeechAudioStreamer
 					consume(queue.take()); 
 				}
 
-			} catch (InterruptedException ex) { }
+			} catch (InterruptedException ex) {
+				
+			}
 
 			try {
 				Log.i("TAG","Closing pipe");
@@ -253,35 +262,33 @@ public class SpeechAudioStreamer
 					dos.flush();
 					dos.close();
 
-					encodeFile(new File("/sdcard/sampling.smp"),new File("/sdcard/sampling.spx"));
+					encodeFile(new File(fileBase+".smp"),new File(fileBase+".smx"));
 
-					byte bytes[] = FileUtils.readFileToByteArray(new File("/sdcard/sampling.smp"));
+					byte bytes[] = FileUtils.readFileToByteArray(new File(fileBase+".smp"));
 
-					WriteWavFile(new File("/sdcard/sampling.wav"), 16000, bytes);
+					WriteWavFile(new File(fileBase+".wav"), 16000, bytes);
 				}
 
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
-			int count=0;
-			
-			while(DictationHTTPClient.getInTransaction() && (count<MAX_WAIT_FOR_TRANSFER))
-			{
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				count++;
-			}
-			
-			if(DictationHTTPClient.getInTransaction())
-			{
-				DictationHTTPClient.stopTransfer();
-			}
+//			int count=0;
+//			while(DictationHTTPClient.getInTransaction() && (count<MAX_WAIT_FOR_TRANSFER))
+//			{
+//				try {
+//					Thread.sleep(1000);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				count++;
+//			}
+//			
+//			if(DictationHTTPClient.getInTransaction())
+//			{
+//				DictationHTTPClient.stopTransfer();
+//			}
 
 			Log.i("EVA","Finished consumer thread");
 
