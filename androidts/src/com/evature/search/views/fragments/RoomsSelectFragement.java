@@ -156,7 +156,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 
 			if(mAdapter.getCount()==0)
 			{
-				Toast.makeText(getActivity(),"No rooms available for the selected dates",3000).show();			
+				Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
 			}
 
 			startImageDownload();

@@ -16,15 +16,7 @@ abstract public class SpeechRecognition {
 	Handler mHandler;
 	
 	protected Activity mParentActivity;
-	
-	public static final int SPEECH_RECOGNITION_EVA = 1;
-	public static final int SPEECH_RECOGNITION_NUANCE = 2;
-	public static final int SPEECH_RECOGNITION_GOOGLE = 3;
-	
-	static SpeechRecognition mInstanceNuance=null;
-	static SpeechRecognition mInstanceEva=null;
-	static SpeechRecognition mInstanceGoogle=null;
-	
+		
 	public interface OnSpeechRecognitionResultsListerner
 	{
 		void onSpeechRecognitionResults(ArrayList<String> matches);
@@ -64,36 +56,6 @@ abstract public class SpeechRecognition {
 	public void prepareDialog() {
 		
 		
-	}
-
-	public static SpeechRecognition instance(int speechRecognitionType,
-			Activity parentActivity) {
-		
-		
-		switch(speechRecognitionType)
-		{
-		case SPEECH_RECOGNITION_EVA:
-			
-			if(mInstanceEva==null)
-			{
-				mInstanceEva =  new SpeechRecognitionEva(parentActivity);
-			}
-			return mInstanceEva;
-		case SPEECH_RECOGNITION_GOOGLE:
-			if(mInstanceGoogle==null)
-			{
-				mInstanceGoogle = new SpeechRecognitionGoogle(parentActivity);
-			}
-			return mInstanceGoogle;
-		case SPEECH_RECOGNITION_NUANCE:
-			if(mInstanceNuance==null)
-			{
-				mInstanceNuance = new SpeechRecognitionNuance(parentActivity);
-			}
-			return mInstanceNuance;
-			
-		}
-		return null;
 	}
 	
 	/**

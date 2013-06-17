@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import roboguice.activity.RoboFragmentActivity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,19 +19,16 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 abstract public class EvaBaseActivity extends RoboFragmentActivity implements OnSpeechRecognitionResultsListerner,EvaSearchReplyListener, OnInitListener{ 
-	
-	public static final int SPEECH_RECOGNITION_EVA = SpeechRecognition.SPEECH_RECOGNITION_EVA;
-	public static final int SPEECH_RECOGNITION_NUANCE = SpeechRecognition.SPEECH_RECOGNITION_NUANCE;
-	public static final int SPEECH_RECOGNITION_GOOGLE = SpeechRecognition.SPEECH_RECOGNITION_GOOGLE;
-		
+
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
-	private final String TAB = "EvaBaseActivity";
+	private final String TAG = "EvaBaseActivity";
 
 	@Inject Injector injector;
 
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
+	protected SpeechRecognition mSpeechRecognition;
 
 	@Inject private ExternalIpAddressGetter mExternalIpAddressGetter;
 	@Inject private EvatureLocationUpdater mLocationUpdater;
@@ -102,36 +98,27 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 			if (mTtsConfigured)
 				setTtsLanguage(mPreferedLanguage);
 		mLastLanguageUsed = new String(mPreferedLanguage);
-
 	}
 
 	
 	
 	
 	// Handle the results from the speech recognition activity
-		@Override
-		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-			if (requestCode == SpeechRecognitionGoogle.VOICE_RECOGNITION_REQUEST_CODE && resultCode == RESULT_OK) {
-				Bundle bundle = data.getExtras();
-				
-				ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
-				
-				onSpeechRecognitionResults(matches);			
-			}
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+		if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
+			Bundle bundle = data.getExtras();
 			
-			if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
-				Bundle bundle = data.getExtras();
-				
-				String result = bundle.getString("EVA_REPLY");
-				
-				EvaApiReply apiReply = new EvaApiReply(result);		
-				
-				onEvaReply(apiReply);		
-			}
-
-			super.onActivityResult(requestCode, resultCode, data);
+			String result = bundle.getString("EVA_REPLY");
+			
+			EvaApiReply apiReply = new EvaApiReply(result);		
+			
+			onEvaReply(apiReply);		
 		}
 
+		super.onActivityResult(requestCode, resultCode, data);
+	}
 	
 
 	@Override
@@ -141,43 +128,18 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 			mTtsConfigured = false;
 
 		mTts = new TextToSpeech(this, this);
-
+		mSpeechRecognition = new SpeechRecognitionEva(this);
 		
 		super.onCreate(arg0);
 	}
-	
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case SpeechRecognitionNuance.LISTENING_DIALOG:
-			return mSpeechRecognition.getListeningDialog();
-		}
-		return null;
-	}
-
-	
-	@Override
-	protected void onPrepareDialog(int id, final Dialog dialog) {
-		switch (id) {
-		case SpeechRecognitionNuance.LISTENING_DIALOG:
-			mSpeechRecognition.prepareDialog();
-			break;
-		}
-	}
-
-	protected SpeechRecognition mSpeechRecognition;
 	
 	public void setPrefredLanguage(String preffredLanguage)
 	{
 		mPreferedLanguage = preffredLanguage;
 	}
 	
-	public void searchWithVoice(int recognitionMethod)
+	public void searchWithVoice()
 	{		
-
-		mSpeechRecognition = SpeechRecognition.instance(recognitionMethod,this);
-	
-		
 		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage);
 		mLastLanguageUsed = mPreferedLanguage;
 	}
