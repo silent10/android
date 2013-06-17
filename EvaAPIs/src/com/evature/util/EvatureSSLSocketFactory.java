@@ -40,10 +40,6 @@ public class EvatureSSLSocketFactory extends SSLSocketFactory {
         sslContext.init(null, new TrustManager[] { tm }, null);
     }
 
-    public EvatureSSLSocketFactory(SSLContext context) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException {
-       super(null);
-       sslContext = context;
-    }
 
     @Override
     public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {

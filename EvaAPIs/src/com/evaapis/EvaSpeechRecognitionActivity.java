@@ -1,9 +1,5 @@
 package com.evaapis;
 
-import java.io.File;
-
-import org.xiph.speex.SpeexEncoder;
-
 import roboguice.activity.RoboActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -27,25 +23,34 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	public static final int CHANNELS = 1;
 	public static final int SPEEX_MODE = 1;
 	public static final int SPEEX_QUALITY = 8;
-	private AndroidRecording mRecorder;
-	private SpeexEncoder mEncoder;
 
-	private final String startRecordingLabel = "Start recording";
-	private final String stopRecordingLabel = "Stop recording";
-	private boolean mIsRecording = false;
-	private File mRawFile;
-	private File mEncodedFile;
-	SpeechAudioStreamer mSpeechAudioStreamer;
+	
+	private SpeechAudioStreamer mSpeechAudioStreamer;
 	private EvaHttpDictationTask dictationTask;
 
+	Button mStopButton;
+	TextView mLevel;
+	
+	Handler mUpdateLevel;
+
+	
+	EvaVoiceClient mVoiceClient = null;
 
 	private class EvaHttpDictationTask extends AsyncTask
 	{
+		
 		public EvaSpeechRecognitionActivity mParent;
+		private EvaVoiceClient  mVoiceClient;
+		
+		EvaHttpDictationTask(EvaVoiceClient voiceClient, EvaSpeechRecognitionActivity parent) {
+			mVoiceClient = voiceClient;
+			mParent = parent;
+		}
+		
 
 		@Override
 		protected void onPostExecute(Object result) {
-			String evaJson = DictationHTTPClient.getEvaJson();		
+			String evaJson = mVoiceClient.getEvaJson();		
 
 			if(mParent==null) return;
 			
@@ -59,7 +64,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			}
 			else
 			{
-				Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", 1000).show();
+				Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", Toast.LENGTH_SHORT).show();
 				setResult(RESULT_CANCELED);
 			}
 			Log.i("EVA","Finish speech recognition activity");
@@ -71,26 +76,25 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 		@Override
 		protected Object doInBackground(Object... arg0) {
-			String API_KEY = EvaAPIs.API_KEY;
-			String SITE_CODE = EvaAPIs.SITE_CODE;
 			
-			TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-			String DEVICE_ID=telephonyManager.getDeviceId();
-
-			while(DictationHTTPClient.getInTransaction())
-			{
+			int count = 0;
+			int MAX_WAIT_FOR_TRANSFER = 12 * 10; // 12 seconds
+			while(mVoiceClient.getInTransaction()  && (count<MAX_WAIT_FOR_TRANSFER)) {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				count++;
+			}
+			
+			if(mVoiceClient.getInTransaction()) {
+				mVoiceClient.stopTransfer();
 			}
 
 			try {
-				DictationHTTPClient.startDictation(mSpeechAudioStreamer,API_KEY,SITE_CODE,DEVICE_ID);
+				mVoiceClient.startDictation();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;
@@ -98,21 +102,6 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 	}
 
-	Button mStopButton;
-	TextView mLevel;
-
-	Handler mUpdateLevel = new Handler()
-	{
-
-		@Override
-		public void handleMessage(Message msg) {
-			int level = DictationHTTPClient.getSoundLevel();
-			mLevel.setText(""+level);
-			sendEmptyMessageDelayed(0, 1000);
-			super.handleMessage(msg);
-		}
-
-	};
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -124,7 +113,6 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
 		mLevel=(TextView)findViewById(R.id.text_recordLevel);
-
 		mStopButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -132,13 +120,30 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 				mSpeechAudioStreamer.stop();
 			}
 		});
+		
+		mUpdateLevel = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				int level = mSpeechAudioStreamer.getSoundLevel();
+				mLevel.setText(""+level);
+				sendEmptyMessageDelayed(0, 1000);
+				super.handleMessage(msg);
+			}
+		};
+		
+		String appKey = EvaAPIs.API_KEY;
+		String siteCode = EvaAPIs.SITE_CODE;
+		
+		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+		String deviceId=telephonyManager.getDeviceId();
+
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
 			mSpeechAudioStreamer = new SpeechAudioStreamer(16000);
+			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
-			dictationTask = new EvaHttpDictationTask();
-			dictationTask.mParent=this;
+			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);
 			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
 
@@ -154,13 +159,13 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	protected void onStop() {
 		Log.i("EVA","Stopping speech recognition activity");
 		mSpeechAudioStreamer.stop();
-		if(DictationHTTPClient.getInTransaction())
+		if (mVoiceClient.getInTransaction())
 		{
 			Thread tr = new Thread()
 			{
 				public void run()
 				{
-					DictationHTTPClient.stopTransfer();
+					mVoiceClient.stopTransfer();
 				}
 			};
 			tr.start();
