@@ -1,0 +1,3 @@
+[submodule "EvaAPIs-CrossPlatform"]
+	path = EvaAPIs-CrossPlatform
+	url = git@github.com:evature/java_api.git

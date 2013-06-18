@@ -11,7 +11,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class DownloadUrl {
 	
-	// Iftah: I changed this to be non-static method so that a unit test can inject a mock class and verify URL without
+	// Iftah: I changed this to be non-static method so that a unit test can inject a mock class and verify URL without trouble
 	//        but added @Singleton - which should make Guice reuse a single instance of this class for each instantiation
 	
 	// Given a URL, establishes an HttpUrlConnection and retrieves
