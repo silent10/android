@@ -63,8 +63,8 @@ public class EvaVoiceClient {
 
 	private SpeechAudioStreamer mSpeechAudioStreamer;
 
-
 	private boolean mInTransaction = false;
+	HttpPost mHttpPost = null;
 
 	public EvaVoiceClient(String siteCode, String appKey, String deviceId, SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
@@ -139,8 +139,6 @@ public class EvaVoiceClient {
 		httppost.addHeader("Content-Language", LANGUAGE);
 		httppost.addHeader("Accept-Language", LANGUAGE);
 		httppost.addHeader("Accept", RESULTS_FORMAT);
-//		String LM = "Dictation";	// or WebSearch
-//		httppost.addHeader("Accept-Topic", LM);	
 
 		return httppost;
 	}
@@ -212,29 +210,23 @@ public class EvaVoiceClient {
 		return mEvaJson;
 	}
 
-	/**
-	 * @param speechAudioStreamer 
-	 * @param args
-	 * @throws Exception 
-	 */
-	public void startDictation() throws Exception{
-
+	public void startVoiceRequest() throws Exception{
 		mInTransaction = true;
 		HttpClient httpclient = null;
 		try {
 			httpclient = getHttpClient();
 
-			Log.i("EVA","Sending post request");
+			Log.i(TAG,"Sending post request");
 
 			InputStreamEntity reqEntity = setAudioContent(mSpeechAudioStreamer);
 			URI uri = getURI();
 
-			httppost = getHeader(uri, 0);	//fileSize);
-			httppost.setEntity(reqEntity);		
+			mHttpPost = getHeader(uri, 0);	//fileSize);
+			mHttpPost.setEntity(reqEntity);		
 			
-			HttpResponse response = httpclient.execute(httppost);
+			HttpResponse response = httpclient.execute(mHttpPost);
 
-			Log.i("EVA","After Sending post request");
+			Log.i(TAG,"After Sending post request");
 			processResponse(response);
 
 			if( httpclient != null ) {
@@ -257,13 +249,11 @@ public class EvaVoiceClient {
 
 	}
 	
-	static HttpPost httppost;
-	
 	public void stopTransfer()
 	{
 		if(getInTransaction())
 		{
-			httppost.abort();
+			mHttpPost.abort();
 			mInTransaction=false;
 		}
 	}
