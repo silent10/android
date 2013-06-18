@@ -78,7 +78,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		protected Object doInBackground(Object... arg0) {
 			
 			int count = 0;
-			int MAX_WAIT_FOR_TRANSFER = 12 * 10; // 12 seconds
+			int MAX_WAIT_FOR_TRANSFER = 12 * 10; // 12 seconds max wait for finish of previous request
 			while(mVoiceClient.getInTransaction()  && (count<MAX_WAIT_FOR_TRANSFER)) {
 				try {
 					Thread.sleep(100);
@@ -93,7 +93,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			}
 
 			try {
-				mVoiceClient.startDictation();
+				mVoiceClient.startVoiceRequest();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

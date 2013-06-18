@@ -1,7 +1,6 @@
 package com.evaapis;
 
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 import roboguice.activity.RoboFragmentActivity;
@@ -9,20 +8,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
+import android.util.Log;
 
-import com.evaapis.SpeechRecognition.OnSpeechRecognitionResultsListerner;
 import com.evature.util.ExternalIpAddressGetter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-abstract public class EvaBaseActivity extends RoboFragmentActivity implements OnSpeechRecognitionResultsListerner,EvaSearchReplyListener, OnInitListener{ 
+abstract public class EvaBaseActivity extends RoboFragmentActivity implements EvaSearchReplyListener, OnInitListener{ 
 
+	private final String TAG = "EvaBaseActivity";
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
-	private final String TAG = "EvaBaseActivity";
 
 	@Inject Injector injector;
 
@@ -106,7 +104,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 	// Handle the results from the speech recognition activity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		
+		Log.i(TAG, "speech recognition activity result "+resultCode);
 		if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
 			Bundle bundle = data.getExtras();
 			
@@ -114,7 +112,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 			
 			EvaApiReply apiReply = new EvaApiReply(result);		
 			
-			onEvaReply(apiReply);		
+			onEvaReply(apiReply, null);		
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
@@ -140,26 +138,17 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements On
 	
 	public void searchWithVoice()
 	{		
+		Log.i(TAG, "search with voice starting, lang="+mPreferedLanguage);
 		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage);
 		mLastLanguageUsed = mPreferedLanguage;
 	}
 
 	public void searchWithText(String searchString)
 	{
+		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
-		callerTask.setListener(this);
-		callerTask.execute(searchString, mLastLanguageUsed);
+		callerTask.initialize(this, "1", mLastLanguageUsed, null);
+		callerTask.execute(searchString);
 	}
-	
-	
-	@Override
-	public void onSpeechRecognitionResults(ArrayList<String> matches) {
-		
-		if (matches.size() > 0) {
-			searchWithText(matches.get(0));	// priority speech parse
-		}
-	}
-
-
 
 }

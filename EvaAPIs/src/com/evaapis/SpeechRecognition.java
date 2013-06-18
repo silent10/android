@@ -43,15 +43,14 @@ abstract public class SpeechRecognition {
 		// t.setText(result);
 	}
 
-	void setResults(Recognition.Result[] results) {
-		Log.d(TAG, "Got x results = " + results.length);
-		ArrayList<String> sentences = new ArrayList<String>();
-		for (int i = 0; i < results.length; i++) { // This is ugly and I look down on Java!
-			sentences.add(results[i].getText());
-		}
-		((EvaBaseActivity) mParentActivity).onSpeechRecognitionResults(sentences);
-
-	}
+//	void setResults(Recognition.Result[] results) {
+//		Log.d(TAG, "Got x results = " + results.length);
+//		ArrayList<String> sentences = new ArrayList<String>();
+//		for (int i = 0; i < results.length; i++) { // This is ugly and I look down on Java!
+//			sentences.add(results[i].getText());
+//		}
+//		((EvaBaseActivity) mParentActivity).onSpeechRecognitionResults(sentences);
+//	}
 
 	public void prepareDialog() {
 		
