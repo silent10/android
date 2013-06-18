@@ -13,11 +13,13 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 
 import com.evature.util.ExternalIpAddressGetter;
+import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 abstract public class EvaBaseActivity extends RoboFragmentActivity implements EvaSearchReplyListener, OnInitListener{ 
 
+	protected String mSessionId = "1";
 	private final String TAG = "EvaBaseActivity";
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
@@ -99,6 +101,15 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	}
 
 	
+	@Override
+	public void onEvaReply(EvaApiReply reply, Object cookie) {
+		if (reply.sessionId != null) {
+			mSessionId = reply.sessionId;
+		}
+		else {
+			resetSession();
+		}
+	}
 	
 	
 	// Handle the results from the speech recognition activity
@@ -112,7 +123,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 			
 			EvaApiReply apiReply = new EvaApiReply(result);		
 			
-			onEvaReply(apiReply, null);		
+			onEvaReply(apiReply, "voice");		
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
@@ -139,7 +150,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	public void searchWithVoice()
 	{		
 		Log.i(TAG, "search with voice starting, lang="+mPreferedLanguage);
-		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage);
+		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage, mSessionId);
 		mLastLanguageUsed = mPreferedLanguage;
 	}
 
@@ -147,8 +158,12 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	{
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
-		callerTask.initialize(this, "1", mLastLanguageUsed, null);
+		callerTask.initialize(this, mSessionId, mLastLanguageUsed, null);
 		callerTask.execute(searchString);
+	}
+	
+	public void resetSession() {
+		mSessionId = "1";
 	}
 
 }

@@ -405,31 +405,36 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	
 
 	protected void handleSayIt(EvaApiReply apiReply) {
-		handleChat(apiReply);
-		if (apiReply.sayIt != null) {
-			String say_it = apiReply.sayIt;
-			if (say_it != null && !say_it.isEmpty() && !say_it.trim().isEmpty()) {
-				// say_it = "Searching for a " + say_it; Need to create an international version of this...
-				addChatItem(say_it, true);
-				
-				// Iftah: commented - debug without annoying sounds
-				//speak(say_it);
-			}
+		
+		String sayIt = handleChat(apiReply);
+		if (sayIt == null  && apiReply.dialog != null) {
+			sayIt = apiReply.dialog.sayIt;
+		}
+		if (sayIt == null) {
+			sayIt = apiReply.sayIt;
+		}
+		if (sayIt != null && !sayIt.isEmpty() && !sayIt.trim().isEmpty()) {
+			// say_it = "Searching for a " + say_it; Need to create an international version of this...
+			addChatItem(sayIt, true);
+			
+			// Iftah: commented - debug without annoying sounds
+			speak(sayIt);
 		}
 	}
 
-	private void handleChat(EvaApiReply apiReply) {
+	private String handleChat(EvaApiReply apiReply) {
 		if (!apiReply.isFlightSearch() && !apiReply.isHotelSearch() && (apiReply.chat != null)) {
 			if (apiReply.chat.hello != null && apiReply.chat.hello) {
-				apiReply.sayIt = "Why, Hello there!";
+				return "Why, Hello there!";
 			}
 			if (apiReply.chat.who != null && apiReply.chat.who) {
-				apiReply.sayIt = "I'm Eva, your travel search assistant";
+				return "I'm Eva, your travel search assistant";
 			}
 			if (apiReply.chat.meaningOfLife != null && apiReply.chat.meaningOfLife) {
-				apiReply.sayIt = "Disrupting travel search, of course!";
+				return "Disrupting travel search, of course!";
 			}
 		}
+		return null;
 	}
 
 
@@ -640,8 +645,15 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
+		super.onEvaReply(reply, cookie);
+		if (cookie != null && cookie.toString().equals("voice") && reply.inputText != null) {
+			addChatItem(reply.inputText, false);
+		}
 		handleSayIt(reply); // Say (using TTS) the eva reply
-		if (reply.isHotelSearch()) {
+		if (reply.dialog != null) {
+			
+		}
+		else if (reply.isHotelSearch()) {
 			Log.d(TAG, "Running Hotel Search!");
 			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 			mSearchExpediaTask.initialize(this, reply, "$");
