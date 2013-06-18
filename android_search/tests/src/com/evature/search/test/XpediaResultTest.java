@@ -1,10 +1,11 @@
 package com.evature.search.test;
 
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -14,7 +15,6 @@ import org.robolectric.util.Transcript;
 
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
-
 import android.os.AsyncTask;
 
 import com.evature.search.controllers.web_services.HotelListDownloaderTask;
@@ -84,6 +84,7 @@ public class XpediaResultTest {
         asyncTask = new TestXpediaAsyncTask();
 	}
 	
+	@Ignore
 	@Test
 	public void testXpediaHotelList() {
 		assertThat(asyncTask.getStatus(), is(AsyncTask.Status.PENDING));

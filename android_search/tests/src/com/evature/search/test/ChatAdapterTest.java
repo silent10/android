@@ -41,10 +41,10 @@ public class ChatAdapterTest {
 	public void testView() {
         assertEquals(0, mChatListModel.getItemList().size());
 		
-		mAdapter.add(new ChatItem("TEST 111", true));
+		mAdapter.add(new ChatItem("TEST 111", ChatItem.CHAT_EVA));
 		assertEquals(1, mChatListModel.getItemList().size());
 		
-		mAdapter.add(new ChatItem("222 TEST", false));
+		mAdapter.add(new ChatItem("222 TEST"));
 		assertEquals(2, mChatListModel.getItemList().size());
 		
         View child0 = mAdapter.getView(0, null, new LinearLayout(new Activity()));
