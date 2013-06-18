@@ -55,7 +55,7 @@ public class ChatFragmentTest {
 		
     	SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) viewPager.getAdapter();
 		
-    	mChatFragment = (ChatFragment) adapter.instantiateItem(viewPager, 0);
+    	mChatFragment = (ChatFragment) adapter.instantiateItem(viewPager, 1);
 		FragmentManager.enableDebugLogging(true);
 		
 		startFragment(mChatFragment);
@@ -73,17 +73,14 @@ public class ChatFragmentTest {
         fragmentTransaction.commit();
     }
 	
-	
 	@Test
 	public void testChatList() {
 		assertEquals(0, mChatListModel.getItemList().size());
-		
-		ListView chatList = (ListView) mChatFragment.getView().findViewById(R.id.chat_list);
 
-		mChatFragment.addChatItem(new ChatItem("Test 1", true));
+		mChatFragment.addChatItem(new ChatItem("Test 1", ChatItem.CHAT_EVA));
 		
 		assertEquals(1, mChatListModel.getItemList().size());
 		assertEquals("Test 1", mChatListModel.getItemList().get(0).getChat());
-		assertEquals(true, mChatListModel.getItemList().get(0).isEva());
+		assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatItem.CHAT_EVA);
 	}
 }
