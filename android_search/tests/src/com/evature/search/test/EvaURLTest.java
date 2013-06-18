@@ -112,8 +112,11 @@ public class EvaURLTest {
 		try {
 			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
 					"from_speech&site_code=thack&api_key=thack-london-june-2012" +
-					"&language=en&input_text=%21%21Testing+Eva+search" +
+					"&language=en&session_id=1&input_text=%21%21Testing+Eva+search" +
 					"&longitude=12.34&latitude=56.78");
+				
+
+
 			// TODO: this fails if testEvaIPAddr runs first!  (because IP-addr is stored in global state) - need to isolate tests!
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
@@ -136,8 +139,9 @@ public class EvaURLTest {
 			
 			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
 					"from_speech&site_code=thack&api_key=thack-london-june-2012" +
-					"&language=en&input_text=%21%21Testing+Eva+search" +
-					"&ip_addr=12.34.56.78&longitude=-1.0&latitude=-1.0");
+					"&language=en&session_id=1&input_text=%21%21Testing+Eva+search" +
+					"&ip_addr=12.34.56.78");
+
 			
 			ExternalIpAddressGetter.setExternalIpAddr(null); // reset back to make other tests consistent
 		} catch (IOException e) {

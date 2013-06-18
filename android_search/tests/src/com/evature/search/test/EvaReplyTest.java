@@ -23,6 +23,7 @@ import roboguice.inject.RoboInjector;
 
 import com.evaapis.EvaApiReply;
 import com.evature.search.controllers.activities.MainActivity;
+import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.expedia.XpediaProtocol;
 import com.evature.util.DownloadUrl;
@@ -132,7 +133,7 @@ public class EvaReplyTest {
 			// verify chat model holds the eva reply say-it
 			assertEquals(1, mChatListModel.getItemList().size());
 			assertEquals("3 stars hotel in New York City, New York",  mChatListModel.getItemList().get(0).getChat());
-			assertEquals(true, mChatListModel.getItemList().get(0).isEva());
+			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatItem.CHAT_EVA);
 
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
