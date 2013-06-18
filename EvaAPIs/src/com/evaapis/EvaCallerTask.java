@@ -70,7 +70,6 @@ import com.google.inject.Inject;
 
 		@Override
 		protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
-			Log.d(TAG, "Got EVA Response! "+result);
 			EvaApiReply apiReply = new EvaApiReply(result);		
 			
 			mSearchReplyListener.onEvaReply(apiReply, mCookie);

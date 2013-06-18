@@ -60,16 +60,19 @@ public class EvaVoiceClient {
 	private static String HOSTNAME = "vproxy.evaws.com";
 
 	private String mEvaJson;
+	private String mSessionId;
 
 	private SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 	HttpPost mHttpPost = null;
 
-	public EvaVoiceClient(String siteCode, String appKey, String deviceId, SpeechAudioStreamer speechAudioStreamer) {
+
+	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
 		mDeviceId = deviceId;
+		mSessionId = sessionId;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
@@ -107,6 +110,7 @@ public class EvaVoiceClient {
 		qparams.add(new BasicNameValuePair("site_code", mSiteCode));
 		qparams.add(new BasicNameValuePair("api_key", mAppKey));
 		qparams.add(new BasicNameValuePair("id",  mDeviceId));
+		qparams.add(new BasicNameValuePair("session_id", mSessionId));
 
 		try {
 			double longitude = EvatureLocationUpdater.getLongitude();
@@ -216,10 +220,11 @@ public class EvaVoiceClient {
 		try {
 			httpclient = getHttpClient();
 
-			Log.i(TAG,"Sending post request");
+			URI uri = getURI();
+			Log.i(TAG,"Sending post request to URI: "+uri);
 
 			InputStreamEntity reqEntity = setAudioContent(mSpeechAudioStreamer);
-			URI uri = getURI();
+			
 
 			mHttpPost = getHeader(uri, 0);	//fileSize);
 			mHttpPost.setEntity(reqEntity);		

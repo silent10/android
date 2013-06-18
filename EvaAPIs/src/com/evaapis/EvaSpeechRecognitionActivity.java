@@ -33,7 +33,6 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	
 	Handler mUpdateLevel;
 
-	
 	EvaVoiceClient mVoiceClient = null;
 
 	private class EvaHttpDictationTask extends AsyncTask
@@ -108,6 +107,8 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		String sessionId = getIntent().getStringExtra("SessionId");
+		
 		Log.i("EVA","Creating speech recognition activity");
 		setContentView(R.layout.listening);
 
@@ -141,7 +142,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
 			mSpeechAudioStreamer = new SpeechAudioStreamer(16000);
-			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, mSpeechAudioStreamer);
+			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);

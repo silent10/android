@@ -29,7 +29,7 @@ abstract public class SpeechRecognition {
 	}
 
 	
-	abstract protected void startVoiceRecognitionActivity(String mPreferedLanguage);
+	abstract protected void startVoiceRecognitionActivity(String mPreferedLanguage, String sessionId);
 	
 	public Dialog getListeningDialog() {
 		return null;
