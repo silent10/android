@@ -49,6 +49,7 @@ import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
+import com.evature.components.MyViewPager;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
@@ -81,7 +82,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	private List<String> mTabTitles;
 	@Inject Injector injector;
 	
-	@InjectView(R.id.viewpager) private ViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
+	@InjectView(R.id.viewpager) private MyViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
 	@InjectView(R.id.swipeytabs) private SwipeyTabs mTabs; // The main swipey tabs element and the main view pager element:
 	SearchVayantTask mSearchVayantTask;
 	SearchTravelportTask mSearchTravelportTask;
