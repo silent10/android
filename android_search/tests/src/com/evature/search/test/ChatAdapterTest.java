@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.evature.search.R;
 import com.evature.search.models.chat.ChatItem;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.views.adapters.ChatAdapter;
 
@@ -41,7 +42,7 @@ public class ChatAdapterTest {
 	public void testView() {
         assertEquals(0, mChatListModel.getItemList().size());
 		
-		mAdapter.add(new ChatItem("TEST 111", ChatItem.CHAT_EVA));
+		mAdapter.add(new ChatItem("TEST 111", ChatType.Eva));
 		assertEquals(1, mChatListModel.getItemList().size());
 		
 		mAdapter.add(new ChatItem("222 TEST"));
