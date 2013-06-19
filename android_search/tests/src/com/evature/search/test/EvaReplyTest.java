@@ -25,6 +25,7 @@ import com.evaapis.EvaApiReply;
 import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItemList;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.expedia.XpediaProtocol;
 import com.evature.util.DownloadUrl;
 import com.google.inject.AbstractModule;
@@ -83,7 +84,7 @@ public class EvaReplyTest {
 			"			     \"latitude\": \"40.71427\"," +
 			"			     \"minStarRating\": \"3\"" +
 			"			   }," +
-			"			   \"Say It\": \"3 stars hotel in New York City, New York\"," +
+			"			   \"SayIt\": \"3 stars hotel in New York City, New York\"," +
 			"			   \"ProcessedText\": \"3 Star hotels in NYC\"," +
 			"			   \"Locations\": [" +
 			"			     {" +
@@ -133,7 +134,7 @@ public class EvaReplyTest {
 			// verify chat model holds the eva reply say-it
 			assertEquals(1, mChatListModel.getItemList().size());
 			assertEquals("3 stars hotel in New York City, New York",  mChatListModel.getItemList().get(0).getChat());
-			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatItem.CHAT_EVA);
+			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
 
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy

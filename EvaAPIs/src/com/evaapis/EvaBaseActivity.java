@@ -154,12 +154,18 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		mLastLanguageUsed = mPreferedLanguage;
 	}
 
-	public void searchWithText(String searchString)
-	{
+	public void searchWithText(String searchString) {
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
-		callerTask.initialize(this, mSessionId, mLastLanguageUsed, null);
-		callerTask.execute(searchString);
+		callerTask.initialize(this, mSessionId, mLastLanguageUsed, searchString, -1, null);
+		callerTask.execute();
+	}
+	
+	public void replyToDialog(int replyIndex) {
+		Log.i(TAG, "replying to dialog: "+replyIndex);
+		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
+		callerTask.initialize(this, mSessionId, mLastLanguageUsed, null, replyIndex, null);
+		callerTask.execute();
 	}
 	
 	public void resetSession() {

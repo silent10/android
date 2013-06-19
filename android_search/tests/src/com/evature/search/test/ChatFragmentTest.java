@@ -31,6 +31,7 @@ import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.controllers.activities.MainActivity.SwipeyTabsPagerAdapter;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItemList;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.views.fragments.ChatFragment;
 import com.google.inject.Inject;
 
@@ -77,10 +78,10 @@ public class ChatFragmentTest {
 	public void testChatList() {
 		assertEquals(0, mChatListModel.getItemList().size());
 
-		mChatFragment.addChatItem(new ChatItem("Test 1", ChatItem.CHAT_EVA));
+		mChatFragment.addChatItem(new ChatItem("Test 1", ChatType.Eva));
 		
 		assertEquals(1, mChatListModel.getItemList().size());
 		assertEquals("Test 1", mChatListModel.getItemList().get(0).getChat());
-		assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatItem.CHAT_EVA);
+		assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
 	}
 }

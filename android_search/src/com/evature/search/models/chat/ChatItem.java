@@ -3,23 +3,25 @@ package com.evature.search.models.chat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+
 public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141166/78234
 	
-	public static final int CHAT_ME = 0;
-	public static final int CHAT_EVA = 1;
-	public static final int CHAT_DIALOG = 2;
-	public static final int CHAT_CHOICE = 3;
-	public static final int CHAT_TYPES = 4;
+	public enum ChatType {
+		Me,
+		Eva,
+		DialogQuestion,
+		DialogAnswer
+	}	
 	
 	protected String chat = "";
-	protected int chatType;
+	protected ChatType chatType;
 
 	public ChatItem(String chat) {
 		this.chat = chat;
-		chatType = CHAT_ME;
+		chatType = ChatType.Me;
 	}
 	
-	public ChatItem(String chat, int chatType) {
+	public ChatItem(String chat, ChatType chatType) {
 		this.chat = chat;
 		this.chatType = chatType;
 	}
@@ -33,7 +35,7 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 	}
 
 	
-	public int getType() {
+	public ChatType getType() {
 		return chatType;
 	}
 
@@ -44,7 +46,7 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeByte((byte) getType());
+		dest.writeByte((byte) getType().ordinal());
 		dest.writeString(chat);
 	}
 
@@ -58,11 +60,13 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 			return new ChatItem[size];
 		}
 	};
+	
+	final static ChatType[] chatTypeValues = ChatType.values();
 
 	// example constructor that takes a Parcel and gives you an object populated with it's values
 	private ChatItem(Parcel in) {
 		super();
-		chatType = in.readByte();
+		chatType = chatTypeValues[in.readByte()];
 		chat = in.readString();
 	}
 }
