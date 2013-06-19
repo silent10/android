@@ -17,7 +17,7 @@ import com.google.inject.Inject;
 	// has been established, the AsyncTask downloads the contents of the webpage as
 	// an InputStream. Finally, the InputStream is converted into a string,
 	// which is displayed in the UI by the AsyncTask's onPostExecute method.
-	public class EvaCallerTask extends AsyncTask<String, Integer, String> {
+	public class EvaCallerTask extends AsyncTask<Void, Integer, String> {
 
 		private static final String TAG = "EvaCallerTask";
 		
@@ -26,28 +26,51 @@ import com.google.inject.Inject;
 		EvaSearchReplyListener mSearchReplyListener;
 		String mSessionId = "1";
 		String mLanguage = "US";
-		Object mCookie; // to be returned to the listener on callback
+		Object mCookie; // 
+		String mInputText;
+		int mResponseId;
 		
-		public void initialize(EvaSearchReplyListener searchReplyListener, String sessionId, String languageCode, Object cookie) {
+		/****
+		 * 
+		 * @param searchReplyListener
+		 * @param languageCode
+		 * @param inputText - text to send to Eva,   ignored if null
+		 * @param responseId - response to send to Eva, ignored if -1
+		 * @param sessionId
+		 * @param cookie   - will be returned to the listener on callback
+		 */
+		public void initialize(EvaSearchReplyListener searchReplyListener, 
+								String sessionId,  
+								String languageCode,
+								String inputText, 
+								int responseId, 
+								Object cookie) {
 			mSearchReplyListener = searchReplyListener;
 			mSessionId = sessionId;
 			mLanguage = languageCode.substring(0, 2);
+			mResponseId = responseId;
+			mInputText = inputText;
 			mCookie = cookie;
 		}
 
 		@Override
-		protected String doInBackground(String... inputText) {
+		protected String doInBackground(Void... non) {
 			String API_KEY = EvaAPIs.API_KEY;
 			String SITE_CODE = EvaAPIs.SITE_CODE;
-			String evatureUrl = EvaAPIs.API_ROOT + "/api/v1.0?from_speech"; // TODO: from_speech not always true
-			evatureUrl += ("&site_code=" + SITE_CODE);
+			String evatureUrl = EvaAPIs.API_ROOT + "/api/v1.0?";
+			evatureUrl += ("site_code=" + SITE_CODE);
 			evatureUrl += ("&api_key=" + API_KEY);
 			evatureUrl += ("&language=" + mLanguage);
 			evatureUrl += ("&session_id=" + mSessionId);
-			try {
-				evatureUrl += ("&input_text=" + URLEncoder.encode(inputText[0], "UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace(); 
+			if (mResponseId != -1) {
+				evatureUrl += ("&dialog_response="+mResponseId);
+			}
+			if (mInputText != null) {
+				try {
+					evatureUrl += ("&input_text=" + URLEncoder.encode(mInputText, "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace(); 
+				}
 			}
 			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
 			if (externalIpAddress != null && (externalIpAddress.length()>0) && (externalIpAddress.trim().length()>0)) {

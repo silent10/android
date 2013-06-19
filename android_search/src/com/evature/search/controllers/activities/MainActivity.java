@@ -49,6 +49,7 @@ import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
+import com.evaapis.EvaDialog.DialogElement;
 import com.evature.components.MyViewPager;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
@@ -58,11 +59,15 @@ import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.chat.ChatItem;
+import com.evature.search.models.chat.DialogAnswerChatItem;
+import com.evature.search.models.chat.DialogQuestionChatItem;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.views.SwipeyTabs;
 import com.evature.search.views.adapters.FlightListAdapterTP;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
 import com.evature.search.views.adapters.TrainListAdapter;
 import com.evature.search.views.fragments.ChatFragment;
+import com.evature.search.views.fragments.ChatFragment.DialogClickHandler;
 import com.evature.search.views.fragments.ExamplesFragment;
 import com.evature.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.evature.search.views.fragments.FlightsFragment;
@@ -176,7 +181,9 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 					"Fly to NY next Tuesday morning",
 					"Hotels in Arlington",
 					"3 Star hotels in NYC",
+					"Fly from Minto to Heatherwood",
 					"Fly to NY next Sunday, return 5 days later",
+					"Hotels in Heatherwood",
 					"Train ride from NYC to Washington DC next Wednesday"
 				};
 				Log.d(TAG, "Example Fragment");
@@ -186,7 +193,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 					@Override
 					public void onClick(String example) {
 						Log.d(TAG, "Running example: "+example);
-						addChatItem(example, false);
+						MainActivity.this.addChatItem(new ChatItem(example));
 						mViewPager.setCurrentItem(1, true);
 						MainActivity.this.searchWithText(example);
 					}});
@@ -194,7 +201,17 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.CHAT))) { // Main Chat window
 				Log.i(TAG, "Chat Fragment");
-				return injector.getInstance(ChatFragment.class);
+				ChatFragment chatFragment = injector.getInstance(ChatFragment.class);
+				chatFragment.setDialogHandler(new DialogClickHandler() {
+					
+					@Override
+					public void onClick(String dialogResponse, int responseIndex) {
+						MainActivity.this.addChatItem(new ChatItem(dialogResponse));
+						MainActivity.this.replyToDialog(responseIndex);
+						//MainActivity.this.searchWithText(dialogResponse);
+					}
+				});
+				return chatFragment;
 			}
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS))) { // Hotel list window
 				Log.i(TAG, "Hotels Fragment");
@@ -380,8 +397,8 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		mSpeechToTextWasConfigured = savedInstanceState.getBoolean("mTtsWasConfigured");
 	}
 	
-	private void addChatItem(String text, boolean fromEva) {
-		Log.d(TAG, "Adding chat item: '"+text+"'  fromEva: "+fromEva);
+	private void addChatItem(ChatItem item) {
+		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		String chatTabName = getString(R.string.CHAT);
 		int index = mTabTitles.indexOf(chatTabName);
 		if (index == -1) {
@@ -393,7 +410,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (fragment != null) // could be null if not instantiated yet
 		{
 			if (fragment.getView() != null) {
-				fragment.addChatItem(new ChatItem(text, fromEva ? ChatItem.CHAT_EVA : ChatItem.CHAT_ME));
+				fragment.addChatItem(item);
 			} else {
 				Log.e(TAG, "chat fragment.getView() == null!?!");
 			}
@@ -403,24 +420,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	}
 	
-
-	protected void handleSayIt(EvaApiReply apiReply) {
-		
-		String sayIt = handleChat(apiReply);
-		if (sayIt == null  && apiReply.dialog != null) {
-			sayIt = apiReply.dialog.sayIt;
-		}
-		if (sayIt == null) {
-			sayIt = apiReply.sayIt;
-		}
-		if (sayIt != null && !sayIt.isEmpty() && !sayIt.trim().isEmpty()) {
-			// say_it = "Searching for a " + say_it; Need to create an international version of this...
-			addChatItem(sayIt, true);
-			
-			// Iftah: commented - debug without annoying sounds
-			speak(sayIt);
-		}
-	}
 
 	private String handleChat(EvaApiReply apiReply) {
 		if (!apiReply.isFlightSearch() && !apiReply.isHotelSearch() && (apiReply.chat != null)) {
@@ -646,29 +645,57 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 		super.onEvaReply(reply, cookie);
-		if (cookie != null && cookie.toString().equals("voice") && reply.inputText != null) {
-			addChatItem(reply.inputText, false);
+		
+		if ("voice".equals(cookie) && reply.inputText != null) {
+			// reply of voice -  add a "Me" chat item for the input text
+			addChatItem(new ChatItem(reply.inputText, ChatType.Eva));
 		}
-		handleSayIt(reply); // Say (using TTS) the eva reply
-		if (reply.dialog != null) {
+		
+		String sayIt = handleChat(reply);
+		if (sayIt != null) {
+			addChatItem(new ChatItem(sayIt, ChatType.Eva));
+		}
+		else if (reply.dialog != null) {
+			sayIt = reply.dialog.sayIt;
+			speak(sayIt);
+			DialogQuestionChatItem chatItem = new DialogQuestionChatItem(sayIt);
+			addChatItem(chatItem);
 			
+			if (reply.dialog.elements != null && reply.dialog.elements.length > 0) {
+				DialogElement dialogElement = reply.dialog.elements[0];
+				if ("Question".equals(dialogElement.Type) && "Multiple Choice".equals(dialogElement.SubType)) {
+					for (int index=0; index < dialogElement.Choices.length; index++) {
+						addChatItem(new DialogAnswerChatItem(chatItem, index, dialogElement.Choices[index]));
+					}
+				}
+			}
+
 		}
-		else if (reply.isHotelSearch()) {
-			Log.d(TAG, "Running Hotel Search!");
-			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-			mSearchExpediaTask.initialize(this, reply, "$");
-			mSearchExpediaTask.execute();
+		else {
+			sayIt = reply.sayIt;
+			if (sayIt != null && !sayIt.isEmpty() && !sayIt.trim().isEmpty()) {
+				// say_it = "Searching for a " + say_it; Need to create an international version of this...
+				addChatItem(new ChatItem(sayIt, ChatType.Eva));
+				speak(sayIt);
+			}
+			
+			if (reply.isHotelSearch()) {
+				Log.d(TAG, "Running Hotel Search!");
+				mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
+				mSearchExpediaTask.initialize(this, reply, "$");
+				mSearchExpediaTask.execute();
+			}
+//			if (reply.isFlightSearch()) {
+//				Log.d(TAG, "Running Vayant Search!");
+//				mSearchVayantTask = new SearchVayantTask(this, reply);
+//				mSearchVayantTask.execute();
+//			}
+//			if (reply.isTrainSearch()) {
+//				Log.d(TAG, "Running Travelport Search!");
+//				mSearchTravelportTask = new SearchTravelportTask(this, reply);
+//				mSearchTravelportTask.execute();
+//			}
 		}
-//		if (reply.isFlightSearch()) {
-//			Log.d(TAG, "Running Vayant Search!");
-//			mSearchVayantTask = new SearchVayantTask(this, reply);
-//			mSearchVayantTask.execute();
-//		}
-//		if (reply.isTrainSearch()) {
-//			Log.d(TAG, "Running Travelport Search!");
-//			mSearchTravelportTask = new SearchTravelportTask(this, reply);
-//			mSearchTravelportTask.execute();
-//		}
 		
 	}
 
