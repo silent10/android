@@ -4,12 +4,8 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.os.Bundle;
 import android.os.Handler;
-import android.speech.RecognizerIntent;
 import android.util.Log;
-
-import com.nuance.nmdp.speechkit.Recognition;
 
 abstract public class SpeechRecognition {
 	private final String TAG = SpeechRecognition.class.getSimpleName();
