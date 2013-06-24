@@ -83,7 +83,10 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			respInd.setText( Integer.toString(dialogItem.getIndex() + 1) );
 			if (dialogItem.isChosen()) {
 				label.setTypeface(null, Typeface.BOLD);
-			} 
+			}
+			else {
+				label.setTypeface(null, Typeface.NORMAL);
+			}
 			break;
 		}
 		row.setTag(chatItem);

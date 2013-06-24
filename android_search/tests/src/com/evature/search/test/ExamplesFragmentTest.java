@@ -100,7 +100,7 @@ public class ExamplesFragmentTest {
 		
 		try {
 			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
-					"from_speech&site_code=thack&api_key=thack-london-june-2012" +
+					"site_code=thack&api_key=thack-london-june-2012" +
 					"&language=en&session_id=1&input_text=3+Star+hotels+in+NYC");
 			// TODO: this fails if testEvaIPAddr runs first!  (because IP-addr is stored in global state) - need to isolate tests!
 		} catch (IOException e) {

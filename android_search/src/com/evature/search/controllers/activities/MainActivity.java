@@ -679,7 +679,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				speak(sayIt);
 			}
 			
-			if (reply.isHotelSearch()) {
+			if (reply.ean != null && !reply.ean.isEmpty()) {  //isHotelSearch()) {
 				Log.d(TAG, "Running Hotel Search!");
 				mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 				mSearchExpediaTask.initialize(this, reply, "$");
@@ -702,6 +702,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	
 }
 // TODO: I took the microphone icon from: http://www.iconarchive.com/show/atrous-icons-by-iconleak/microphone-icon.html
+// TODO:  restart icon by Christian Burprich  http://chrfb.deviantart.com/ 
 // Need to add attribution in the about text.
 // TODO: refactor classes out of this mess.
 // TODO: progress bar or spinning wheel when contacting Eva?

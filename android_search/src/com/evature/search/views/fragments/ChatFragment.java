@@ -9,14 +9,15 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.evature.search.R;
 import com.evature.search.models.chat.ChatItem;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
-import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.DialogQuestionChatItem;
 import com.evature.search.views.adapters.ChatAdapter;
 import com.google.inject.Inject;
