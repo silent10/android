@@ -111,7 +111,7 @@ public class EvaURLTest {
 		
 		try {
 			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
-					"from_speech&site_code=thack&api_key=thack-london-june-2012" +
+					"site_code=thack&api_key=thack-london-june-2012" +
 					"&language=en&session_id=1&input_text=%21%21Testing+Eva+search" +
 					"&longitude=12.34&latitude=56.78");
 				
@@ -138,7 +138,7 @@ public class EvaURLTest {
 			mActivity.searchWithText("!!Testing Eva search");
 			
 			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
-					"from_speech&site_code=thack&api_key=thack-london-june-2012" +
+					"site_code=thack&api_key=thack-london-june-2012" +
 					"&language=en&session_id=1&input_text=%21%21Testing+Eva+search" +
 					"&ip_addr=12.34.56.78");
 
