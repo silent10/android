@@ -4,14 +4,11 @@ import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.evature.search.R;
 import com.evature.search.models.chat.ChatItem;
@@ -28,10 +25,10 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 		public void onClick(String dialog, int responseId);
 	}
 	
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		inflater.inflate(R.menu.mainmenu, menu);
-	}
+//	@Override
+//	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//		inflater.inflate(R.menu.mainmenu, menu);
+//	}
 
 	@Inject private ChatItemList mChatListModel;
 	

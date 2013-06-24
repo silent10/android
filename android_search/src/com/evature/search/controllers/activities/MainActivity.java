@@ -59,9 +59,9 @@ import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.chat.ChatItem;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
-import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.views.SwipeyTabs;
 import com.evature.search.views.adapters.FlightListAdapterTP;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
@@ -123,6 +123,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			Log.d(TAG, "no saved instance state");
 			mTabTitles = new ArrayList<String>(Arrays.asList("EXAMPLES", "CHAT"));
 		}
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 		mSwipeyAdapter = new SwipeyTabsPagerAdapter(this, getSupportFragmentManager(), mViewPager, mTabs);
 		mViewPager.setAdapter(mSwipeyAdapter);
 		mTabs.setAdapter(mSwipeyAdapter);
@@ -348,6 +349,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
 		switch (item.getItemId()) {
+		case android.R.id.home:
+			mViewPager.setCurrentItem(1);
+			return true;
+		case R.id.new_session:
+			startNewSession();
+			return true;
 		case R.id.settings: // Did the user select "settings"?
 			Intent intent = new Intent();
 			// Then set the activity class that needs to be launched/started.
@@ -700,9 +707,17 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	}
 
 	
+
+	private void startNewSession() {
+		if (isNewSession() == false) {
+			addChatItem(new ChatItem("start new session", ChatType.Me));
+			resetSession();
+		}
+	}
+
+	
 }
 // TODO: I took the microphone icon from: http://www.iconarchive.com/show/atrous-icons-by-iconleak/microphone-icon.html
-// TODO:  restart icon by Christian Burprich  http://chrfb.deviantart.com/ 
 // Need to add attribution in the about text.
 // TODO: refactor classes out of this mess.
 // TODO: progress bar or spinning wheel when contacting Eva?
