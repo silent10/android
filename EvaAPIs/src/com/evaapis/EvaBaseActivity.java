@@ -168,6 +168,10 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		callerTask.execute();
 	}
 	
+	public boolean isNewSession() {
+		return "1".equals(mSessionId);
+	}
+	
 	public void resetSession() {
 		mSessionId = "1";
 	}
