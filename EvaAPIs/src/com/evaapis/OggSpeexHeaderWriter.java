@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.OggCrc;
 
 /**

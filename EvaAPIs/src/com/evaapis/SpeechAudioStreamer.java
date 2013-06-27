@@ -36,7 +36,7 @@ public class SpeechAudioStreamer
 	private PipedInputStream pipedIn;
 	private PipedOutputStream pipedOut;
 	
-	boolean mDebugRecording = false;
+	boolean mDebugRecording = true;
 
 	private AudioRecord mRecorder;
 	private JSpeexEnc mEncoder;
@@ -56,10 +56,11 @@ public class SpeechAudioStreamer
 
 	long mLastStart = -1;
 	private int mSoundLevel;
+	public File wavFile;
 
 	
 	public SpeechAudioStreamer(int sampleRate) throws Exception {
-		this.mEncoder = new JSpeexEnc(sampleRate); //PCM 8K only for now
+		this.mEncoder =  new JSpeexEnc(sampleRate); //PCM 8K only for now
 
 		Log.i("EVA","Encoder="+mEncoder.toString());
 	}
@@ -88,8 +89,9 @@ public class SpeechAudioStreamer
 		for( int i=0; i<mBuffer.length; i+=2 ) 
 		{
 			sample = (short)( (mBuffer[i]) | mBuffer[i + 1] << 8 );
-			totalAbsValue += Math.abs( sample ) / (numberOfReadBytes/2);
+			totalAbsValue += Math.abs( sample );
 		}
+		totalAbsValue /= (numberOfReadBytes/2);
 
 		// Analyze temp buffer.
 		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex%TEMP_BUFFER_SIZE] = totalAbsValue;
@@ -218,6 +220,7 @@ public class SpeechAudioStreamer
 		byte [] mAccumulationBuffer;
 		byte [] mSecondaryBuffer;
 
+
 		private final static int SINGLE_FRAME_SIZE = 32000;
 
 		
@@ -266,7 +269,8 @@ public class SpeechAudioStreamer
 
 					byte bytes[] = FileUtils.readFileToByteArray(new File(fileBase+".smp"));
 
-					WriteWavFile(new File(fileBase+".wav"), 16000, bytes);
+					wavFile = new File(fileBase+".wav");
+					WriteWavFile(wavFile, 16000, bytes);
 				}
 
 			} catch (IOException e) {
@@ -304,7 +308,7 @@ public class SpeechAudioStreamer
 				Log.i("Eva","Buffer length is 0");
 				System.arraycopy(mAccumulationBuffer, 0, chunk, 0, mAccumulationBufferPosition);
 				try {
-					encoded = mEncoder.encode(chunk);
+					encoded = chunk;//mEncoder.encode(chunk);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -337,7 +341,7 @@ public class SpeechAudioStreamer
 				mAccumulationBufferPosition=mAccumulationBufferPosition-mFrameSize;
 				
 				try {
-					encoded = mEncoder.encode(chunk);
+					encoded = chunk; //mEncoder.encode(chunk);
 					Log.i("EVA","Writing:"+encoded.length);
 					pipedOut.write(encoded);
 					if(mDebugRecording)
@@ -521,4 +525,5 @@ public class SpeechAudioStreamer
 	public void stop() {
 		mIsRecording = false;
 	}
+
 }
