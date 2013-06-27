@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 public class EvaSpeechRecognitionActivity extends RoboActivity {
 
+	protected static final String TAG = "EvaSpeechRecognitionActivity";
 
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
@@ -25,7 +26,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	public static final int SPEEX_QUALITY = 8;
 
 	
-	private SpeechAudioStreamer mSpeechAudioStreamer;
+	private MP4SpeechAudioStreamer mSpeechAudioStreamer;
 	private EvaHttpDictationTask dictationTask;
 
 	Button mStopButton;
@@ -93,6 +94,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 			try {
 				mVoiceClient.startVoiceRequest();
+//				mVoiceClient.startVoiceRequestFile();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -109,7 +111,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		
 		String sessionId = getIntent().getStringExtra("SessionId");
 		
-		Log.i("EVA","Creating speech recognition activity");
+		Log.i(TAG,"Creating speech recognition activity");
 		setContentView(R.layout.listening);
 
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
@@ -118,6 +120,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 			@Override
 			public void onClick(View arg0) {
+				Log.i(TAG, "Stopping streamer");
 				mSpeechAudioStreamer.stop();
 			}
 		});
@@ -141,7 +144,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
-			mSpeechAudioStreamer = new SpeechAudioStreamer(16000);
+			mSpeechAudioStreamer = new MP4SpeechAudioStreamer(16000); // new SpeechAudioStreamer(16000);  
 			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
@@ -159,13 +162,14 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	@Override
 	protected void onStop() {
 		Log.i("EVA","Stopping speech recognition activity");
-		mSpeechAudioStreamer.stop();
+//		mSpeechAudioStreamer.stop();
 		if (mVoiceClient.getInTransaction())
 		{
 			Thread tr = new Thread()
 			{
 				public void run()
 				{
+//					mVoiceClient.endVoiceRequestFile();
 					mVoiceClient.stopTransfer();
 				}
 			};
