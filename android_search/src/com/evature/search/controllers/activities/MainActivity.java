@@ -50,6 +50,9 @@ import android.widget.TextView;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaDialog.DialogElement;
+import com.evaapis.flow.FlowElement;
+import com.evaapis.flow.FlowElement.TypeEnum;
+import com.evaapis.flow.QuestionElement;
 import com.evature.components.MyViewPager;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
@@ -82,6 +85,19 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 	// private static String mExternalIpAddress = null;
+	
+	final static String[] examplesArray = {
+			"Fly to NY next Tuesday morning",
+			"Hotels in Arlington",
+			"3 Star hotels in NYC",
+			"Fly from Minto to Heatherwood",
+			"Fly to NY next Sunday, stay 5 nights in Arlignton, return",
+			"Hotels in Heatherwood",
+			"3 Star hotels in NYC sorted by price",
+			"3 Star hotels in NYC sorted by name",
+			"Fly to Madrid"
+//			"Train ride from NYC to Washington DC next Wednesday"
+		};
 	
 	private static boolean mSpeechToTextWasConfigured = false;
 	private List<String> mTabTitles;
@@ -178,20 +194,9 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			Log.i(TAG, "getItem " + String.valueOf(position));
 			int size = mTabTitles.size();
 			if (position < size && mTabTitles.get(position).equals(getString(R.string.EXAMPLES))) { // Examples window
-				final String[] examples = {
-					"Fly to NY next Tuesday morning",
-					"Hotels in Arlington",
-					"3 Star hotels in NYC",
-					"Fly from Minto to Heatherwood",
-					"Fly to NY next Sunday, return 5 days later",
-					"Hotels in Heatherwood",
-					"3 Star hotels in NYC sorted by price",
-					"3 Star hotels in NYC sorted by name"
-//					"Train ride from NYC to Washington DC next Wednesday"
-				};
 				Log.d(TAG, "Example Fragment");
 				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
-				fragment.setExamples(examples);
+				fragment.setExamples(examplesArray);
 				fragment.setHandler(new ExampleClickedHandler() {
 					@Override
 					public void onClick(String example) {
@@ -660,6 +665,11 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			addChatItem(new ChatItem(reply.inputText, ChatType.Me));
 		}
 		
+		if (reply.flow != null ) {
+			handleFlow(reply);
+			return;
+		}
+		
 		String sayIt = handleChat(reply);
 		if (sayIt != null) {
 			addChatItem(new ChatItem(sayIt, ChatType.Eva));
@@ -709,6 +719,61 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	}
 
 	
+
+	private void handleFlow(EvaApiReply reply) {
+		boolean first = true;
+		for (FlowElement flow : reply.flow.Elements) {
+			
+			ChatItem chatItem = null;
+			if (flow.Type == TypeEnum.Question) {
+				QuestionElement question = (QuestionElement) flow;
+				DialogQuestionChatItem  questionChatItem = new DialogQuestionChatItem(flow.SayIt);
+				chatItem = questionChatItem;
+				addChatItem(questionChatItem);
+				
+				if (question.choices != null && question.choices.length > 0) {
+					for (int index=0; index < question.choices.length; index++) {
+						addChatItem(new DialogAnswerChatItem(questionChatItem, index, question.choices[index]));
+					}
+				}
+			}
+			else {
+				chatItem = new ChatItem(flow.SayIt, ChatType.Eva);
+				addChatItem(chatItem);
+			}
+			
+			if (first) {
+				// automatically execute first element
+				executeFlowElement(reply, flow, chatItem);
+				
+				first = false;
+			}
+			
+		}
+	}
+
+	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem) {
+//		chatItem.setActivated(true);
+		if (flow.SayIt != null && flow.SayIt.isEmpty() == false) {
+			speak(flow.SayIt);
+		}
+		
+		switch (flow.Type) {
+		case Hotel:
+			Log.d(TAG, "Running Hotel Search!");
+			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
+			mSearchExpediaTask.initialize(this, reply, "$"); // TODO: change to be based on flow element
+			mSearchExpediaTask.execute();
+			break;
+		case Flight:
+			setVayantReply(); // pretend a flight search response arrived
+			break;
+		case Question:
+			break;
+		
+		}
+		
+	}
 
 	private void startNewSession() {
 		if (isNewSession() == false) {
