@@ -50,8 +50,7 @@ public class EvaVoiceClient {
 	private String mAppKey = "UNKNOWN";
 	private String mDeviceId = "0000";
 	private String LANGUAGE = "ENUS";
-	private String CODEC = "audio/wav"; // "audio/m4a";
-										// //"audio/x-speex;rate=16000"; //MP3
+	private String CODEC = "audio/x-wav"; 
 	private String RESULTS_FORMAT = "text/plain";
 
 	private static short PORT = (short) 443;
@@ -60,19 +59,16 @@ public class EvaVoiceClient {
 	private String mEvaJson;
 	private String mSessionId;
 
-//	private SpeechAudioStreamer mSpeechAudioStreamer;
-	 private MP4SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 	HttpPost mHttpPost = null;
 
 	public EvaVoiceClient(String siteCode, String appKey, String deviceId,
-			String sessionId, MP4SpeechAudioStreamer speechAudioStreamer) {
+			String sessionId) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
 		mDeviceId = deviceId;
 		mSessionId = sessionId;
-		mSpeechAudioStreamer = speechAudioStreamer;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -144,27 +140,7 @@ public class EvaVoiceClient {
 		return httppost;
 	}
 
-	/***
-	 * Start the recording and return it as
-	 * 
-	 * @param speechAudioStreamer
-	 * @return
-	 * @throws NumberFormatException
-	 * @throws Exception
-	 */
-	private InputStreamEntity setAudioContent(
-			MP4SpeechAudioStreamer speechAudioStreamer)
-			throws NumberFormatException, Exception {
-		InputStreamEntity reqEntity = new InputStreamEntity(
-				speechAudioStreamer.getInputStream(), -1);
-		speechAudioStreamer.start();
-
-		reqEntity.setContentType(CODEC);
-
-		reqEntity.setChunked(true);
-
-		return reqEntity;
-	}
+	
 
 	private StringBuilder inputStreamToString(InputStream is) {
 		String line = "";
@@ -194,7 +170,7 @@ public class EvaVoiceClient {
 		Header[] h = response.getAllHeaders();
 
 		for (int i = 0; i < h.length; i++) {
-			Log.i("EVA", "Header:" + h[i].getName() + "=" + h[i].getValue());
+			Log.i(TAG, "Header:" + h[i].getName() + "=" + h[i].getValue());
 		}
 
 		InputStream is = resEntity.getContent();
@@ -210,36 +186,7 @@ public class EvaVoiceClient {
 		return mEvaJson;
 	}
 
-	MediaRecorder mRecorder = null;
-	String fileName = null;
-
-	public void startVoiceRequestFile() {
-		mInTransaction = true;
-		mRecorder = new MediaRecorder();
-		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-		if (fileName == null)
-			fileName = Environment.getExternalStorageDirectory().getPath()
-					+ "/eva_sampling.3gp";
-		mRecorder.setOutputFile(fileName);
-		try {
-			mRecorder.prepare();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		mRecorder.start();
-	}
 	
-	public void endVoiceRequestFile() {
-		mRecorder.stop();
-		
-		sendFile(new File(fileName));
-	}
 	
 	public void sendFile(File outfile) {
 		HttpClient httpclient = null;
@@ -276,56 +223,14 @@ public class EvaVoiceClient {
 		}
 	}
 
-	public void startVoiceRequest() throws Exception {
-		mInTransaction = true;
-		HttpClient httpclient = null;
-		try {
-			httpclient = getHttpClient();
-
-			URI uri = getURI();
-			Log.i(TAG, "Sending post request to URI: " + uri);
-
-			InputStreamEntity reqEntity = setAudioContent(mSpeechAudioStreamer);
-
-			mHttpPost = getHeader(uri, 0); // fileSize);
-			mHttpPost.setEntity(reqEntity);
-
-			HttpResponse response = httpclient.execute(mHttpPost);
-
-			Log.i(TAG, "After Sending post request");
-			processResponse(response);
-
-			if (httpclient != null) {
-				httpclient.getConnectionManager().shutdown();
-				httpclient = null;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.e(TAG, "Exception sending voice request", e);
-		} finally {
-			// When HttpClient instance is no longer needed,
-			// shut down the connection manager to ensure
-			// immediate deallocation of all system resources
-			if (httpclient != null)
-				httpclient.getConnectionManager().shutdown();
-			mInTransaction = false;
-		}
-	}
-
 	public void stopTransfer() {
 		if (getInTransaction()) {
 			mHttpPost.abort();
 			mInTransaction = false;
 
-			if (mRecorder != null) {
-				mRecorder.reset();
-				mRecorder.release();
-				mRecorder = null;
-			}
 		}
-		// mSpeechAudioStreamer.stop();
 	}
-
+	
 	public boolean getInTransaction() {
 		return mInTransaction;
 	}
