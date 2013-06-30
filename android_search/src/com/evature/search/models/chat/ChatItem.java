@@ -15,6 +15,7 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 	
 	protected String chat = "";
 	protected ChatType chatType;
+	protected boolean activated = false;
 
 	public ChatItem(String chat) {
 		this.chat = chat;
@@ -68,5 +69,13 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 		super();
 		chatType = chatTypeValues[in.readByte()];
 		chat = in.readString();
+	}
+
+	public void setActivated(boolean isActivated) {
+		activated = isActivated;
+	}
+
+	public boolean isActivated() {
+		return activated;
 	}
 }
