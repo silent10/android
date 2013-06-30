@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvatureLocationUpdater;
+import com.evaapis.RequestAttributes.SortEnum;
 import com.evature.search.MyApplication;
 
 public class XpediaProtocolStatic {
@@ -210,6 +211,27 @@ public class XpediaProtocolStatic {
 		}
 
 		params += "&maxRatePlanCount=2";
+		
+		if (apiReply.requestAttributes != null && apiReply.requestAttributes.sortBy != null) {
+			switch (apiReply.requestAttributes.sortBy) {
+			case price:
+				params += "&sort=PRICE";
+				break;
+			case stars:
+				params += "&sort=QUALITY";
+				break;
+			case name:
+				params += "&sort=ALPHA";
+				break;
+			case distance:
+				if (apiReply.ean.containsKey("latitude")) {
+					params += "&sort=PROXIMITY";
+				}
+				break;
+			}
+			
+			
+		}
 
 		DefaultHttpClient client = new DefaultHttpClient();
 
@@ -219,7 +241,7 @@ public class XpediaProtocolStatic {
 		urlString += "&cid=" + getClientId() + "&";
 		urlString += CONSTANT_HTTP_PARAMS + "&currencyCode=" + currencyCode;
 		urlString += params;
-
+		
 		HttpGet request = new HttpGet(urlString);
 
 		Log.i(TAG, "EXPEDIA URL = " + urlString);

@@ -185,7 +185,9 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 					"Fly from Minto to Heatherwood",
 					"Fly to NY next Sunday, return 5 days later",
 					"Hotels in Heatherwood",
-					"Train ride from NYC to Washington DC next Wednesday"
+					"3 Star hotels in NYC sorted by price",
+					"3 Star hotels in NYC sorted by name"
+//					"Train ride from NYC to Washington DC next Wednesday"
 				};
 				Log.d(TAG, "Example Fragment");
 				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
@@ -655,7 +657,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		
 		if ("voice".equals(cookie) && reply.inputText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
-			addChatItem(new ChatItem(reply.inputText, ChatType.Eva));
+			addChatItem(new ChatItem(reply.inputText, ChatType.Me));
 		}
 		
 		String sayIt = handleChat(reply);
