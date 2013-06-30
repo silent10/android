@@ -4,7 +4,12 @@
     android:versionCode="16"
     android:versionName="Pre-alpha" >
 
-    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="16"/>
+    <uses-sdk android:minSdkVersion="12" android:targetSdkVersion="17"/>
+    <permission
+        android:name="com.evature.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature"/>
+    <uses-permission android:name="com.evature.permission.MAPS_RECEIVE"/>
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -14,6 +19,10 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true"/>
     
     <application
         android:icon="@drawable/eva_icon"
@@ -38,6 +47,10 @@
         <activity android:name="com.evature.search.controllers.activities.HotelsMapActivity" android:screenOrientation="portrait"></activity>
         <activity android:name="com.evaapis.EvaSpeechRecognitionActivity" android:screenOrientation="portrait"></activity>
         <activity android:name="com.evature.search.controllers.activities.EvaCheckoutActivity" android:screenOrientation="portrait"></activity>
+        
+        <meta-data
+		   android:name="com.google.android.maps.v2.API_KEY"
+		   android:value="AIzaSyC-iQUsbK6o0M3NaApFisKhi4JOHcdJqEw"/>
     </application>
 
 </manifest>
