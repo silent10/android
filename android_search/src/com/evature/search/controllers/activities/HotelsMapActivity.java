@@ -1,50 +1,50 @@
 package com.evature.search.controllers.activities;
 
-import java.util.List;
-
 import roboguice.activity.RoboMapActivity;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.models.EvaDatabase;
-import com.evature.search.views.HotelItemizedOverlay;
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
+import com.google.android.gms.maps.model.LatLng;
 
 // From Arik's app
 
 public class HotelsMapActivity extends RoboMapActivity  {
 	private final String TAG = "HotelMapActivity";
 
+	GoogleMap mMap;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hotel_map);
-		mapView = (MapView) findViewById(R.id.mapview);
-        mapView.setBuiltInZoomControls(true);
+		
+		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+		mMap = mapFragment.getMap();
+//        mapView.setBuiltInZoomControls(true);
         addHotelsToMap();			
 	}
-
-	MapView mapView;
-	
 
 	
 	
 	public void addHotelsToMap()
 	{	    
-        List<Overlay> mapOverlays = mapView.getOverlays();
-        Drawable drawable = this.getResources().getDrawable(R.drawable.hotel_ico);
-        HotelItemizedOverlay itemizedoverlay = new HotelItemizedOverlay(drawable, this);
-    
-        MapController mapController = mapView.getController();
-    
-        mapOverlays.removeAll(mapOverlays);
+//        List<Overlay> mapOverlays = mapView.getOverlays();
+//        Drawable drawable = this.getResources().getDrawable(R.drawable.hotel_ico);
+        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
+//        HotelItemizedOverlay itemizedoverlay = new HotelItemizedOverlay(drawable, this);
+//    
+//        MapController mapController = mapView.getController();
+//    
+//        mapOverlays.removeAll(mapOverlays);
        
         EvaDatabase evaDb = MyApplication.getDb();
         
@@ -62,10 +62,13 @@ public class HotelsMapActivity extends RoboMapActivity  {
 	      	        
 	        String city = evaDb.mHotelData[i].mSummary.mCity;
 	        String name = evaDb.mHotelData[i].mSummary.mName;
-	        GeoPoint point = new GeoPoint(x[i],y[i]);
-	        OverlayItem overlayitem = new OverlayItem(point, city,name);
-	        itemizedoverlay.addOverlay(overlayitem);
-	        mapOverlays.add(itemizedoverlay);
+	        LatLng point = new LatLng(x[i],y[i]);
+//	        OverlayItem overlayitem = new OverlayItem(point, city,name);
+//	        itemizedoverlay.addOverlay(overlayitem);
+//	        mapOverlays.add(itemizedoverlay);
+	        GroundOverlay groundOverlay = mMap.addGroundOverlay(new GroundOverlayOptions()
+            	.image(hotelIcon).anchor(0, 1)
+            	.position(point, 100f));
         }
         
         int sumX=0;
@@ -106,14 +109,14 @@ public class HotelsMapActivity extends RoboMapActivity  {
         int midY=sumY/y.length;
         
         
-        GeoPoint point = new GeoPoint(midX*1000,midY*1000);
-        mapController.animateTo(point);
-        int spanLong = maxX-minX;
-        int spanLat = maxY-minY;
-        
-        if(spanLong<10000) spanLong =10000;
-        if(spanLat<10000) spanLat = 10000;
-        mapController.zoomToSpan(spanLong, spanLat) ;
+//        LatLng point = new LatLng(midX*1000,midY*1000);
+//        mapController.animateTo(point);
+//        int spanLong = maxX-minX;
+//        int spanLat = maxY-minY;
+//        
+//        if(spanLong<10000) spanLong =10000;
+//        if(spanLat<10000) spanLat = 10000;
+//        mapController.zoomToSpan(spanLong, spanLat) ;
 
 	}
 
