@@ -10,9 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
@@ -33,13 +30,12 @@ import android.util.Log;
 public class SpeechAudioStreamer
 {
 	public static final String TAG = "SpeechAudioStreamer";
-	private PipedInputStream pipedIn;
-	private PipedOutputStream pipedOut;
+//	private PipedInputStream pipedIn;
+//	private PipedOutputStream pipedOut;
 	
 	boolean mDebugRecording = true;
 
 	private AudioRecord mRecorder;
-	private JSpeexEnc mEncoder;
 	private byte[] mBuffer;
 	private boolean mIsRecording = false;
 
@@ -56,13 +52,14 @@ public class SpeechAudioStreamer
 
 	long mLastStart = -1;
 	private int mSoundLevel;
-	public File wavFile;
 
+	public boolean done = false;
+	
+	String fileBase;
+	private Thread consumerThread;
 	
 	public SpeechAudioStreamer(int sampleRate) throws Exception {
-		this.mEncoder =  new JSpeexEnc(sampleRate); //PCM 8K only for now
-
-		Log.i("EVA","Encoder="+mEncoder.toString());
+		fileBase = Environment.getExternalStorageDirectory().getPath() + "/sampling";
 	}
 
 
@@ -74,10 +71,12 @@ public class SpeechAudioStreamer
 		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
 				AudioFormat.ENCODING_PCM_16BIT, bufferSize);
 
+		done = false;
 		mIsRecording = true;
 		mRecorder.startRecording();
 	}
 
+	
 
 
 	private boolean checkForSilence(int numberOfReadBytes) {
@@ -175,7 +174,8 @@ public class SpeechAudioStreamer
 					{
 						if(true==checkForSilence(readSize))
 						{
-							mIsRecording = false;
+							Log.i(TAG, "Found silence"); 
+							mIsRecording = false;  // Note this isn't the only way to stop recording - also possible from outside change of IsRecording to false
 						}
 						else
 						{
@@ -208,6 +208,16 @@ public class SpeechAudioStreamer
 
 	}
 
+	public File getWavFile() {
+		return new File(fileBase+".wav");
+	}
+	public File getSpeexFile() {
+		return new File(fileBase+".smx");
+	}
+	public File getSmpFile() {
+		return  new File(fileBase+".smp");
+	}
+	
 	class Consumer implements Runnable {
 		private final BlockingQueue queue;
 
@@ -232,11 +242,9 @@ public class SpeechAudioStreamer
 			queue = q; 
 		}
 		public void run() {
-			String fileBase = Environment.getExternalStorageDirectory().getPath() + "/sampling";
-
 			if(mDebugRecording)
 			{
-				File f = new File(fileBase+".smp");
+				File f = getSmpFile();
 
 				try {
 					fos = new FileOutputStream(f);
@@ -252,25 +260,28 @@ public class SpeechAudioStreamer
 				}
 
 			} catch (InterruptedException ex) {
-				
+				Log.i(TAG, "Interrupted encoding thread");
 			}
 
 			try {
-				Log.i("TAG","Closing pipe");
-				pipedOut.flush();
-				pipedOut.close();
+				Log.i(TAG,"Closing pipe");
+//				pipedOut.flush();
+//				pipedOut.close();
 
 				if(mDebugRecording)
 				{
 					dos.flush();
+					Log.i(TAG,"Flushed");
 					dos.close();
+					Log.i(TAG,"Closed");
+//					encodeFile(getSmpFile(), getSpeexFile());
+//					Log.i(TAG,"Encoded");
 
-					encodeFile(new File(fileBase+".smp"),new File(fileBase+".smx"));
+					byte bytes[] = FileUtils.readFileToByteArray(getSmpFile());
+					Log.i(TAG,"Read "+bytes.length+" bytes");
 
-					byte bytes[] = FileUtils.readFileToByteArray(new File(fileBase+".smp"));
-
-					wavFile = new File(fileBase+".wav");
-					WriteWavFile(wavFile, 16000, bytes);
+					WriteWavFile(getWavFile(), 16000, bytes);
+					Log.i(TAG,"Saved as Wav file");
 				}
 
 			} catch (IOException e) {
@@ -295,17 +306,18 @@ public class SpeechAudioStreamer
 //			}
 
 			Log.i("EVA","Finished consumer thread");
-
+			done = true;
 		}
+		
 		void consume(Object x)
 		{
 			byte [] buffer = (byte[])x;
 			byte[] encoded=null;
 			byte[] chunk = new byte[mFrameSize];
-						
+			
 			if(buffer.length==0)
 			{
-				Log.i("Eva","Buffer length is 0");
+				Log.i(TAG,"Buffer length is 0 -- finishing!");
 				System.arraycopy(mAccumulationBuffer, 0, chunk, 0, mAccumulationBufferPosition);
 				try {
 					encoded = chunk;//mEncoder.encode(chunk);
@@ -313,9 +325,13 @@ public class SpeechAudioStreamer
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				Log.i("EVA","Writing:"+encoded.length);
 				try {
-					pipedOut.write(encoded);
+//					pipedOut.write(encoded);
+					if(mDebugRecording)
+					{
+						Log.i(TAG,"debug saving "+encoded.length);
+						dos.write(encoded);
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -342,10 +358,10 @@ public class SpeechAudioStreamer
 				
 				try {
 					encoded = chunk; //mEncoder.encode(chunk);
-					Log.i("EVA","Writing:"+encoded.length);
-					pipedOut.write(encoded);
+//					pipedOut.write(encoded);
 					if(mDebugRecording)
 					{
+						Log.i(TAG,"debug saving "+encoded.length);
 						dos.write(chunk);
 					}
 					Thread.sleep(20);
@@ -360,15 +376,27 @@ public class SpeechAudioStreamer
 
 	void start()
 	{
+//		pipedOut = new PipedOutputStream();
+//		try {
+//			pipedIn = new PipedInputStream(pipedOut);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} 
+
 		BlockingQueue q = new ArrayBlockingQueue<byte []>(1000);
 		Producer p = new Producer(q);
 		Consumer c = new Consumer(q);
 		mIsRecording = true;
 		new Thread(p).start();
-		new Thread(c).start();
+		consumerThread = new Thread(c);
+		consumerThread.start();
 	}
 
+	void waitForIt() throws InterruptedException {
+		consumerThread.join();
+	}
 
+	
 
 	private void encodeFile(final File inputFile, final File outputFile) throws IOException {
 
@@ -443,12 +471,10 @@ public class SpeechAudioStreamer
 		return new byte[0];
 	}
 
-	public InputStream getInputStream() throws IOException {
-		pipedOut = new PipedOutputStream();
-		pipedIn = new PipedInputStream(pipedOut); 
-		return pipedIn;
-
-	}
+//	public InputStream getInputStream() throws IOException {
+//		return pipedIn;
+//
+//	}
 
 	void WriteWavFile(File outputFile,int sampleRate,byte data[])
 	{
