@@ -2,6 +2,8 @@
 package com.evature.search.views.adapters;
 
 import android.app.Activity;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 
 	private static final String TAG = "ChatAdapter";
 	private static final int VIEW_TYPE_COUNT = ChatType.values().length;
+	private static final int SelectedBackgroundColor = Color.parseColor("#F4F4F4");
+	private static final int SelectedTextColor = Color.parseColor("#404040");
 	private ChatItemList mChatList;
 	LayoutInflater mInflater;
 
@@ -88,6 +92,10 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				label.setTypeface(null, Typeface.NORMAL);
 			}
 			break;
+		}
+		if (viewType != ChatType.Me) {
+			row.setBackgroundColor(SelectedBackgroundColor);
+			label.setTextColor(SelectedTextColor);
 		}
 		row.setTag(chatItem);
 		return row;

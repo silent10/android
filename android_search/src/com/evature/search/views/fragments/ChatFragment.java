@@ -94,6 +94,12 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 			mChatAdapter.notifyDataSetChanged();
 			mDialogClickHandler.onClick(dialogItem.getChat(), dialogItem.getIndex());
 		}
+		else {
+			if (item.getType() == ChatType.Eva) {
+				item.setActivated(true);
+				mChatAdapter.notifyDataSetChanged();
+			}
+		}
 	}
 
 	public void setDialogHandler(DialogClickHandler handler) {
