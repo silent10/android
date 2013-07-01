@@ -92,11 +92,13 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			"Fly to NY next Tuesday morning",
 			"Hotels in Arlington",
 			"3 Star hotels in NYC",
-			"Fly from Minto to Heatherwood",
+//			"Fly from Minto to Heatherwood",
 			"Fly to NY next Sunday, stay 5 nights in Arlignton, return",
 			"Hotels in Heatherwood",
 			"3 Star hotels in NYC sorted by price",
 			"3 Star hotels in NYC sorted by name",
+			"3 Star hotels in NYC, on Wednesday for two nights, sorted by price descending",
+			"3 Star hotels in NYC, on Wednesday for two nights, sorted by price ascending",
 			"Fly to Madrid"
 //			"Train ride from NYC to Washington DC next Wednesday"
 		};
@@ -141,7 +143,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			Log.d(TAG, "no saved instance state");
 			mTabTitles = new ArrayList<String>(Arrays.asList("EXAMPLES", "CHAT"));
 		}
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+//		getActionBar().setDisplayHomeAsUpEnabled(true);
 		mSwipeyAdapter = new SwipeyTabsPagerAdapter(this, getSupportFragmentManager(), mViewPager, mTabs);
 		mViewPager.setAdapter(mSwipeyAdapter);
 		mTabs.setAdapter(mSwipeyAdapter);
@@ -780,7 +782,10 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	private void startNewSession() {
 		if (isNewSession() == false) {
 			resetSession();
-			addChatItem(new ChatItem("start new session"));
+			addChatItem(new ChatItem("Start new search"));
+			String sessionText = "Starting a new search. How may I help you?";
+			addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
+			speak(sessionText);
 		}
 	}
 	
