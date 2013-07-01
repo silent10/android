@@ -5,8 +5,8 @@
         android:id="@+id/new_session"
         android:title="New"
         android:icon="@drawable/session_restart"
-        android:showAsAction="ifRoom|withText"
         >
+        <!-- android:showAsAction="ifRoom|withText" -->
         <!-- android:showAsAction="always" -->
     </item>
      
