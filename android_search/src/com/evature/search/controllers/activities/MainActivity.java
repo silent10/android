@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import roboguice.event.Observes;
 import roboguice.inject.InjectView;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -56,6 +57,7 @@ import com.evaapis.flow.QuestionElement;
 import com.evature.components.MyViewPager;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.controllers.events.ChatItemClicked;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaHotelDownloaderTask;
 import com.evature.search.controllers.web_services.HotelListDownloaderTask;
@@ -662,7 +664,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		
 		if ("voice".equals(cookie) && reply.inputText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
-			addChatItem(new ChatItem(reply.inputText, ChatType.Me));
+			addChatItem(new ChatItem(reply.inputText));
 		}
 		
 		if (reply.flow != null ) {
@@ -672,12 +674,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		
 		String sayIt = handleChat(reply);
 		if (sayIt != null) {
-			addChatItem(new ChatItem(sayIt, ChatType.Eva));
+			addChatItem(new ChatItem(sayIt, reply, null, ChatType.Eva));
 		}
 		else if (reply.dialog != null) {
 			sayIt = reply.dialog.sayIt;
 			speak(sayIt);
-			DialogQuestionChatItem chatItem = new DialogQuestionChatItem(sayIt);
+			DialogQuestionChatItem chatItem = new DialogQuestionChatItem(sayIt, reply, null);
 			addChatItem(chatItem);
 			
 			if (reply.dialog.elements != null && reply.dialog.elements.length > 0) {
@@ -694,7 +696,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			sayIt = reply.sayIt;
 			if (sayIt != null && !sayIt.isEmpty() && !sayIt.trim().isEmpty()) {
 				// say_it = "Searching for a " + say_it; Need to create an international version of this...
-				addChatItem(new ChatItem(sayIt, ChatType.Eva));
+				addChatItem(new ChatItem(sayIt, reply,  null, ChatType.Eva));
 				speak(sayIt);
 			}
 			
@@ -727,7 +729,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			ChatItem chatItem = null;
 			if (flow.Type == TypeEnum.Question) {
 				QuestionElement question = (QuestionElement) flow;
-				DialogQuestionChatItem  questionChatItem = new DialogQuestionChatItem(flow.SayIt);
+				DialogQuestionChatItem  questionChatItem = new DialogQuestionChatItem(flow.SayIt, reply, flow);
 				chatItem = questionChatItem;
 				addChatItem(questionChatItem);
 				
@@ -738,7 +740,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				}
 			}
 			else {
-				chatItem = new ChatItem(flow.SayIt, ChatType.Eva);
+				chatItem = new ChatItem(flow.SayIt, reply, flow, ChatType.Eva);
 				addChatItem(chatItem);
 			}
 			
@@ -766,7 +768,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			mSearchExpediaTask.execute();
 			break;
 		case Flight:
-			setVayantReply(); // pretend a flight search response arrived
+			//setVayantReply(); // pretend a flight search response arrived
 			break;
 		case Question:
 			break;
@@ -777,8 +779,18 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	private void startNewSession() {
 		if (isNewSession() == false) {
-			addChatItem(new ChatItem("start new session", ChatType.Me));
+			addChatItem(new ChatItem("start new session"));
 			resetSession();
+		}
+	}
+	
+	
+		
+	public void onChatItemClicked( @Observes ChatItemClicked  event) {
+		ChatItem chatItem = event.chatItem;
+		Log.i(TAG, "Chat Item clicked "+chatItem.getChat());
+		if (chatItem.getFlowElement() != null) {
+			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem);
 		}
 	}
 

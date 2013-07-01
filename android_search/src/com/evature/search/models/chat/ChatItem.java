@@ -1,5 +1,8 @@
 package com.evature.search.models.chat;
 
+import com.evaapis.EvaApiReply;
+import com.evaapis.flow.FlowElement;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -11,19 +14,26 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 		Eva,
 		DialogQuestion,
 		DialogAnswer
-	}	
+	}
+	
+	static ChatItem lastActivated = null;
 	
 	protected String chat = "";
 	protected ChatType chatType;
 	protected boolean activated = false;
+	
+	protected FlowElement flow = null;
+	protected EvaApiReply evaReply = null;
 
 	public ChatItem(String chat) {
 		this.chat = chat;
 		chatType = ChatType.Me;
 	}
 	
-	public ChatItem(String chat, ChatType chatType) {
+	public ChatItem(String chat, EvaApiReply evaReply, FlowElement flow, ChatType chatType) {
 		this.chat = chat;
+		this.flow = flow;
+		this.evaReply = evaReply;
 		this.chatType = chatType;
 	}
 
@@ -71,11 +81,23 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 		chat = in.readString();
 	}
 
-	public void setActivated(boolean isActivated) {
-		activated = isActivated;
+	public void setActivated() {
+		if (lastActivated != null) {
+			lastActivated.activated = false;
+		}
+		lastActivated = this;
+		activated = true;
 	}
 
 	public boolean isActivated() {
 		return activated;
+	}
+
+	public FlowElement getFlowElement() {
+		return flow;
+	}
+
+	public EvaApiReply getEvaReply() {
+		return evaReply;
 	}
 }
