@@ -20,7 +20,7 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 	
 	protected String chat = "";
 	protected ChatType chatType;
-	protected boolean activated = false;
+	protected boolean inSession = true;
 	
 	protected FlowElement flow = null;
 	protected EvaApiReply evaReply = null;
@@ -81,16 +81,12 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 		chat = in.readString();
 	}
 
-	public void setActivated() {
-		if (lastActivated != null) {
-			lastActivated.activated = false;
-		}
-		lastActivated = this;
-		activated = true;
+	public void setInSession(boolean inSession) {
+		this.inSession = inSession;
 	}
 
-	public boolean isActivated() {
-		return activated;
+	public boolean isInSession() {
+		return inSession;
 	}
 
 	public FlowElement getFlowElement() {

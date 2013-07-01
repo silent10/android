@@ -759,6 +759,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (flow.SayIt != null && flow.SayIt.isEmpty() == false) {
 			speak(flow.SayIt);
 		}
+		//chatItem.setActivated();
 		
 		switch (flow.Type) {
 		case Hotel:
@@ -774,13 +775,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			break;
 		
 		}
-		
 	}
 
 	private void startNewSession() {
 		if (isNewSession() == false) {
-			addChatItem(new ChatItem("start new session"));
 			resetSession();
+			addChatItem(new ChatItem("start new session"));
 		}
 	}
 	

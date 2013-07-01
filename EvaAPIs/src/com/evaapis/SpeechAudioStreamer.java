@@ -40,8 +40,8 @@ public class SpeechAudioStreamer
 	private boolean mIsRecording = false;
 
 	public static final int TEMP_BUFFER_SIZE = 5;
-	private static final long SILENCE_PERIOD = 1500;
-	private static final float SILENCE_THRESHOLD = 1400;
+	private static final long SILENCE_PERIOD = 500;
+	private static final float SILENCE_THRESHOLD = 2400;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 	public static final int SPEEX_MODE = 1;
