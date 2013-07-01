@@ -33,6 +33,7 @@ import android.util.Log;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvatureLocationUpdater;
 import com.evaapis.RequestAttributes.SortEnum;
+import com.evaapis.RequestAttributes.SortOrderEnum;
 import com.evature.search.MyApplication;
 
 public class XpediaProtocolStatic {
@@ -215,10 +216,27 @@ public class XpediaProtocolStatic {
 		if (apiReply.requestAttributes != null && apiReply.requestAttributes.sortBy != null) {
 			switch (apiReply.requestAttributes.sortBy) {
 			case price:
-				params += "&sort=PRICE";
+			case price_per_person:
+				if (apiReply.requestAttributes.sortOrder == SortOrderEnum.descending ||
+					apiReply.requestAttributes.sortOrder == SortOrderEnum.reverse) {
+					params += "&sort=PRICE_REVERSE";
+				}
+				else {
+					params += "&sort=PRICE";
+				}
 				break;
 			case stars:
-				params += "&sort=QUALITY";
+			case rating:
+			case popularity:
+			case guest_rating:
+			case recommendations:
+				if (apiReply.requestAttributes.sortOrder == SortOrderEnum.descending ||
+				apiReply.requestAttributes.sortOrder == SortOrderEnum.reverse) {
+					params += "&sort=QUALITY_REVERSE";
+				}
+				else {
+					params += "&sort=QUALITY";
+				}
 				break;
 			case name:
 				params += "&sort=ALPHA";
@@ -229,8 +247,7 @@ public class XpediaProtocolStatic {
 				}
 				break;
 			}
-			
-			
+
 		}
 
 		DefaultHttpClient client = new DefaultHttpClient();

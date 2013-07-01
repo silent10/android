@@ -15,6 +15,7 @@ import android.widget.ListView;
 import com.evature.search.R;
 import com.evature.search.controllers.events.ChatItemClicked;
 import com.evature.search.models.chat.ChatItem;
+import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;

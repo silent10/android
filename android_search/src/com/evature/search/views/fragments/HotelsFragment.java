@@ -136,11 +136,13 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		if (MyApplication.getDb() != null) {
 
 			if (MyApplication.getDb().mMoreResultsAvailable) {
-				LayoutInflater li = getActivity().getLayoutInflater();
-				mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
-				mHotelListView.addFooterView(mFooterView);
-				mHotelListView.setOnScrollListener(mListScroll);
-				mEnabledPaging = true;
+				if (getActivity() != null) {
+					LayoutInflater li = getActivity().getLayoutInflater();
+					mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
+					mHotelListView.addFooterView(mFooterView);
+					mHotelListView.setOnScrollListener(mListScroll);
+					mEnabledPaging = true;
+				}
 			}
 		}
 
