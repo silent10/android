@@ -2,13 +2,16 @@
 package com.evature.search.views.adapters;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.evature.search.R;
@@ -21,15 +24,28 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 
 	private static final String TAG = "ChatAdapter";
 	private static final int VIEW_TYPE_COUNT = ChatType.values().length;
-	private static final int SelectedBackgroundColor = Color.parseColor("#F4F4F4");
-	private static final int SelectedTextColor = Color.parseColor("#404040");
+	
+	// TODO: move to resource file
 	private ChatItemList mChatList;
 	LayoutInflater mInflater;
 
+	int myChatInSessionBg, myChatInSessionText, myChatNoSessionBg, myChatNoSessionText;
+	int evaChatInSessionBg, evaChatInSessionText, evaChatNoSessionBg, evaChatNoSessionText;
+	
 	public ChatAdapter(Activity activity, int resource, int textViewResourceId, ChatItemList chatList) {
 		super(activity, resource, textViewResourceId, chatList.getItemList());
 		mChatList = chatList;
 		mInflater = LayoutInflater.from(activity);
+		
+		Resources resources = activity.getResources();
+		myChatInSessionBg = resources.getColor(R.color.my_chat_in_session_bg);
+		myChatInSessionText = resources.getColor(R.color.my_chat_in_session_text);
+		myChatNoSessionBg = resources.getColor(R.color.my_chat_no_session_bg);
+		myChatNoSessionText = resources.getColor(R.color.my_chat_no_session_text);
+		evaChatInSessionBg = resources.getColor(R.color.eva_chat_in_session_bg);
+		evaChatInSessionText = resources.getColor(R.color.eva_chat_in_session_text);
+		evaChatNoSessionBg = resources.getColor(R.color.eva_chat_no_session_bg);
+		evaChatNoSessionText = resources.getColor(R.color.eva_chat_no_session_text);
 	}
 	
 	@Override
@@ -79,7 +95,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		TextView label = (TextView) row.findViewById(R.id.label);
 		label.setText(chatItem.getChat());
 		
-		// some row types require more than label
+		
+		// some row types require more than label setting...
 		switch (viewType) {
 		case DialogAnswer:
 			DialogAnswerChatItem dialogItem = (DialogAnswerChatItem)chatItem;
@@ -93,10 +110,44 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			}
 			break;
 		}
-		if (viewType != ChatType.Me) {
-			row.setBackgroundColor(SelectedBackgroundColor);
-			label.setTextColor(SelectedTextColor);
+		
+		if (viewType == ChatType.Me) {
+			TextView icon = (TextView)row.findViewById(R.id.icon);
+			if (chatItem.isInSession()) {
+				row.setBackgroundColor(myChatInSessionBg);
+				label.setTextColor(myChatInSessionText);
+				icon.setTextColor(myChatInSessionText);
+			}
+			else {
+				row.setBackgroundColor(myChatNoSessionBg);
+				label.setTextColor(myChatNoSessionText);
+				icon.setTextColor(myChatNoSessionText);
+			}
 		}
+		else {
+			if (chatItem.isInSession()) {
+				row.setBackgroundColor(evaChatInSessionBg);
+				label.setTextColor(evaChatInSessionText);
+			}
+			else {
+				row.setBackgroundColor(evaChatNoSessionBg);
+				label.setTextColor(evaChatNoSessionText);
+			}
+		}
+//		if (chatItem.isActivated()) {
+//			if (viewType == ChatType.Me) {
+//				if (label.getVisibility() != View.GONE) {
+//					label.setVisibility(View.GONE);
+//					EditText editBox = (EditText)row.findViewById(R.id.editText);
+//					editBox.setText(chatItem.getChat(), TextView.BufferType.EDITABLE);
+//					editBox.setVisibility(View.VISIBLE);
+//				}
+//			}
+//			else {
+//				row.setBackgroundColor(SelectedBackgroundColor);
+//				label.setTextColor(SelectedTextColor);
+//			}
+//		}
 		row.setTag(chatItem);
 		return row;
 	}

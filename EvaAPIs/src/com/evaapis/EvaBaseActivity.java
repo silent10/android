@@ -4,6 +4,7 @@ package com.evaapis;
 import java.util.Locale;
 
 import roboguice.activity.RoboFragmentActivity;
+import roboguice.event.EventManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,8 +13,8 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.util.Log;
 
+import com.evaapis.events.NewSessionStarted;
 import com.evature.util.ExternalIpAddressGetter;
-import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -24,7 +25,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	private String mPreferedLanguage = "en-US";	
 	private String mLastLanguageUsed = "en-US";
 
-	@Inject Injector injector;
+	@Inject protected Injector injector;
 
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
@@ -33,6 +34,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	@Inject private ExternalIpAddressGetter mExternalIpAddressGetter;
 	@Inject private EvatureLocationUpdater mLocationUpdater;
 
+	@Inject protected EventManager eventManager;
 
 	protected void speak(String sayIt) {
 		if (mTts != null) {
@@ -100,13 +102,19 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		mLastLanguageUsed = new String(mPreferedLanguage);
 	}
 
-	
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 		if (reply.sessionId != null) {
-			mSessionId = reply.sessionId;
+			if (reply.sessionId.equals(mSessionId) == false) {
+				// not same as previous session = new session
+				if ("1".equals(mSessionId) == false) {
+					eventManager.fire(new NewSessionStarted() );
+				}
+				mSessionId = reply.sessionId;
+			}
 		}
 		else {
+			// no session support - every reply starts a new session
 			resetSession();
 		}
 	}
@@ -148,7 +156,12 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	}
 	
 	public void searchWithVoice()
-	{		
+	{
+		// stop the TTS speech - so that we don't record the generated speech
+		if (mTts != null) {
+			mTts.stop();
+		}
+		
 		Log.i(TAG, "search with voice starting, lang="+mPreferedLanguage);
 		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage, mSessionId);
 		mLastLanguageUsed = mPreferedLanguage;
@@ -174,6 +187,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	
 	public void resetSession() {
 		mSessionId = "1";
+		eventManager.fire(new NewSessionStarted() );
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.evature.search.views.fragments;
 
 import roboguice.event.EventManager;
+import roboguice.event.Observes;
 import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,11 +15,11 @@ import android.widget.ListView;
 import com.evature.search.R;
 import com.evature.search.controllers.events.ChatItemClicked;
 import com.evature.search.models.chat.ChatItem;
-import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
 import com.evature.search.views.adapters.ChatAdapter;
+import com.evaapis.events.NewSessionStarted;
 import com.google.inject.Inject;
 
 public class ChatFragment extends RoboFragment  implements OnItemClickListener {
@@ -100,14 +101,13 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 			mDialogClickHandler.onClick(dialogItem.getChat(), dialogItem.getIndex());
 			break;
 //		case Me:
-//			item.setActivated();
+//			item.setEditMode();
 //			mChatAdapter.notifyDataSetChanged();
 //			break;
 		case Eva:
 			Log.i(TAG, "Eva item clicked: "+item.getChat());
 			eventManager.fire(new ChatItemClicked(item) );
-			item.setActivated();
-			mChatAdapter.notifyDataSetChanged();
+//			mChatAdapter.notifyDataSetChanged();
 			break;
 		}
 		
@@ -115,6 +115,13 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 
 	public void setDialogHandler(DialogClickHandler handler) {
 		mDialogClickHandler = handler;
+	}
+	
+	protected void newSessionStart(@Observes NewSessionStarted event) {
+		for (ChatItem chatItem : mChatListModel.getItemList()) {
+			chatItem.setInSession(false);
+		}
+		mChatAdapter.notifyDataSetChanged();
 	}
 }
 

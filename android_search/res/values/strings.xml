@@ -60,4 +60,5 @@
     <string name="per_night">/night</string>
     <string name="trip_advisor_icon">Trip Advisor Icon</string>
     <string name="distance">Distance</string>
+    <string name="eva_icon">></string>
 </resources>
