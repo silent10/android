@@ -31,6 +31,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 	Button mStopButton;
 	TextView mLevel;
+	TextView mStatus;
 	
 	Handler mUpdateLevel;
 
@@ -41,13 +42,54 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		
 		public EvaSpeechRecognitionActivity mParent;
 		private EvaVoiceClient  mVoiceClient;
+		private boolean isDone = false;
 		
 		EvaHttpDictationTask(EvaVoiceClient voiceClient, EvaSpeechRecognitionActivity parent) {
 			mVoiceClient = voiceClient;
 			mParent = parent;
 		}
 		
+		@Override
+		protected void onPostExecute(Object result) {
+			isDone = true;
+			Thread tr = new Thread()
+			{
+				public void run()
+				{
+					Log.i(TAG, "sending wav file");
+					mVoiceClient.sendFile( mSpeechAudioStreamer.getWavFile() );
+					Log.i(TAG, "Sent");
+				}
+			};
+			tr.start();
+			try {
+				tr.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
+			String evaJson = mVoiceClient.getEvaJson();		
 
+			if((evaJson!=null) && (evaJson.length()!=0))
+			{
+				Intent intent = new Intent();
+
+				intent.putExtra("EVA_REPLY", evaJson);
+
+				setResult(RESULT_OK, intent);
+			}
+			else
+			{
+				Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", Toast.LENGTH_SHORT).show();
+				setResult(RESULT_CANCELED);
+			}
+			
+			
+			Log.i("EVA","Finish speech recognition activity");
+			
+			EvaSpeechRecognitionActivity.this.finish();
+		}
+		
 		@Override
 		protected Object doInBackground(Object... arg0) {
 			
@@ -73,7 +115,15 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			
 			return null;
+		}
+
+		public int getSoundLevel() {
+			if (isDone) {
+				return -999;
+			}
+			return mSpeechAudioStreamer.getSoundLevel();
 		}
 
 	}
@@ -91,64 +141,28 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
 		mLevel=(TextView)findViewById(R.id.text_recordLevel);
+		mStatus=(TextView)findViewById(R.id.text_listeningStatus);
 		mStopButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View arg0) {
 				Log.i(TAG, "Stopping streamer");
 				mSpeechAudioStreamer.stop();
-				
-				while (!mSpeechAudioStreamer.done) {
-					try {
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				
-
-				Thread tr = new Thread()
-				{
-					public void run()
-					{
-						mVoiceClient.sendFile( mSpeechAudioStreamer.getWavFile() );
-					}
-				};
-				tr.start();
-				try {
-					tr.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-//				
-				String evaJson = mVoiceClient.getEvaJson();		
-
-				if((evaJson!=null) && (evaJson.length()!=0))
-				{
-					Intent intent = new Intent();
-
-					intent.putExtra("EVA_REPLY", evaJson);
-
-					setResult(RESULT_OK, intent);
-				}
-				else
-				{
-					Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", Toast.LENGTH_SHORT).show();
-					setResult(RESULT_CANCELED);
-				}
-				Log.i("EVA","Finish speech recognition activity");
-				
-				EvaSpeechRecognitionActivity.this.finish();
-
 			}
 		});
 		
 		mUpdateLevel = new Handler() {
 			@Override
 			public void handleMessage(Message msg) {
-				int level = mSpeechAudioStreamer.getSoundLevel();
-				mLevel.setText(""+level);
-				sendEmptyMessageDelayed(0, 1000);
+				int level = dictationTask.getSoundLevel();
+				if (level == -999) {
+					mStatus.setText("Processing...");
+					mLevel.setText("");
+				}
+				else {
+					mLevel.setText(""+level);
+					sendEmptyMessageDelayed(0, 100);
+				}
 				super.handleMessage(msg);
 			}
 		};

@@ -40,8 +40,8 @@ public class SpeechAudioStreamer
 	private boolean mIsRecording = false;
 
 	public static final int TEMP_BUFFER_SIZE = 5;
-	private static final long SILENCE_PERIOD = 2000;
-	private static final float SILENCE_THRESHOLD = 350;
+	private static final long SILENCE_PERIOD = 1500;
+	private static final float SILENCE_THRESHOLD = 1400;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 	public static final int SPEEX_MODE = 1;
@@ -53,6 +53,8 @@ public class SpeechAudioStreamer
 	long mLastStart = -1;
 	private int mSoundLevel;
 
+	private boolean mWasNotSilent;
+	
 	public boolean done = false;
 	
 	String fileBase;
@@ -73,17 +75,24 @@ public class SpeechAudioStreamer
 
 		done = false;
 		mIsRecording = true;
+		mWasNotSilent = false;
 		mRecorder.startRecording();
 	}
 
 	
 
-
-	private boolean checkForSilence(int numberOfReadBytes) {
+/***
+ * 
+ * @param numberOfReadBytes
+ * @return True - identified silence
+ *         False - identified noise
+ *         null - not enough info to make sure
+ */
+	private Boolean checkForSilence(int numberOfReadBytes) {
 		float totalAbsValue = 0.0f;
 		short sample        = 0; 
 
-		if(numberOfReadBytes==0) return false;
+		if(numberOfReadBytes==0) return null;
 		// Analyze Sound.
 		for( int i=0; i<mBuffer.length; i+=2 ) 
 		{
@@ -107,20 +116,17 @@ public class SpeechAudioStreamer
 			if(mLastStart==-1)
 			{
 				mLastStart = System.currentTimeMillis();
+				return null;
 			}
-			else
+
+			if((System.currentTimeMillis()-mLastStart) > SILENCE_PERIOD)
 			{
-				if((System.currentTimeMillis()-mLastStart) > SILENCE_PERIOD)
-				{
-					return true;
-				}
+				return true;
 			}
-		}
-		else
-		{
-			mLastStart = -1;
+			return null;
 		}
 
+		mLastStart = -1;
 		return false;
 	}
 
@@ -172,13 +178,18 @@ public class SpeechAudioStreamer
 					}
 					else
 					{
-						if(true==checkForSilence(readSize))
+						Boolean isSilence = checkForSilence(readSize);
+						if(Boolean.TRUE== isSilence && mWasNotSilent)
 						{
 							Log.i(TAG, "Found silence"); 
 							mIsRecording = false;  // Note this isn't the only way to stop recording - also possible from outside change of IsRecording to false
 						}
 						else
 						{
+							if (Boolean.FALSE == isSilence && !mWasNotSilent) {
+								Log.i(TAG, "Identified first non-silence");
+								mWasNotSilent = true;
+							}
 							byte[] chunk = new byte[readSize];
 							System.arraycopy(mBuffer, 0, chunk, 0, readSize);
 
@@ -187,7 +198,6 @@ public class SpeechAudioStreamer
 							Thread.sleep(10);
 						}
 					}
-
 				}
 				
 				queue.put(new byte[0]);

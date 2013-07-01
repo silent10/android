@@ -3,6 +3,7 @@ package com.evature.search;
 // This class is needed so that application crashes are automatically reported back home.
 // The formKey is a Google Docs key that enables the application to fill in an online Google "Excel" form.
 
+import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
@@ -31,7 +32,7 @@ public class MyApplication extends Application {
 
 		// if (!BuildConfig.DEBUG) // Not when in debug mode!
 		// The following line triggers the initialization of ACRA
-		//ACRA.init(this);
+		ACRA.init(this);
 		Log.d(TAG, "onCreate");
 
 		Resources resources = getResources();
@@ -47,7 +48,6 @@ public class MyApplication extends Application {
 		
 		super.onCreate();
 		MyApplication.context = getApplicationContext();
-
 	}
 
 	public static EvaDatabase getDb() {
