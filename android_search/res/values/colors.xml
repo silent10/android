@@ -148,5 +148,12 @@
     <color name="journey_result_detail_boarder">@color/palette_dark_grey_disabled</color>
     <color name="destination_header_background_gradient_start">#ff9a9a9a</color>
     <color name="destination_header_background_gradient_end">#ff7b7d7b</color>
-   
+    <color name="my_chat_in_session_bg">#ff3d4049</color>
+    <color name="my_chat_in_session_text">#10ff10</color>
+    <color name="my_chat_no_session_bg">#ff4d5059</color>
+    <color name="my_chat_no_session_text">#40cf40</color>
+    <color name="eva_chat_no_session_bg">#dddddd</color>
+    <color name="eva_chat_no_session_text">#606060</color>
+    <color name="eva_chat_in_session_bg">#f4f4f4</color>
+    <color name="eva_chat_in_session_text">#404040</color>
 </resources>
