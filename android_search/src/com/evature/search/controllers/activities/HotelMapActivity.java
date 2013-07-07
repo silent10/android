@@ -1,7 +1,6 @@
 package com.evature.search.controllers.activities;
 
-import roboguice.activity.RoboMapActivity;
-import roboguice.inject.InjectFragment;
+import roboguice.activity.RoboFragmentActivity;
 import roboguice.inject.InjectResource;
 import android.app.Dialog;
 import android.content.Intent;
@@ -12,18 +11,27 @@ import com.evature.search.R;
 import com.evature.search.views.HotelItemizedOverlay;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapController;
-import com.google.android.maps.OverlayItem;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.CameraPositionCreator;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.LatLngBounds.Builder;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class HotelMapActivity extends RoboMapActivity {
+public class HotelMapActivity extends RoboFragmentActivity {
 	
     public static String HOTEL_NAME="SUMMARY";
     public static String HOTEL_CITY="CITY";
     public static String HOTEL_LATITUDE="LATITUDE";
     public static String HOTEL_LONGITUDE="LONGITUDE";
-	private MapController myMapController;
+    private GoogleMap mMap = null;
 	
 	@InjectResource(R.drawable.hotel_ico)  Drawable hotelIcon;
 
@@ -32,46 +40,74 @@ public class HotelMapActivity extends RoboMapActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.hotel_map);
 
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-//        mapView.setBuiltInZoomControls(true);
-//        List<Overlay> mapOverlays = mapView.getOverlays();
         
-        HotelItemizedOverlay itemizedoverlay = new HotelItemizedOverlay(hotelIcon, this);
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
-        
-        String name = extras.getString(HOTEL_NAME);
-        String longitudeString = extras.getString(HOTEL_LONGITUDE);
-        String latitudeString = extras.getString(HOTEL_LATITUDE);
-        String city = extras.getString(HOTEL_CITY);
-        
-        int longitude= Integer.valueOf(longitudeString);
-        int latitude= Integer.valueOf(latitudeString);
-        
-        GeoPoint point = new GeoPoint(latitude,longitude);
-        OverlayItem overlayitem = new OverlayItem(point, city,name);
-        itemizedoverlay.addOverlay(overlayitem);
-//        mapOverlays.add(itemizedoverlay);
-//        myMapController = mapView.getController();
-//        myMapController.animateTo(point);
-//        int spanLong = 10000;
-//        int spanLat = 10000;
-//        myMapController.zoomToSpan(spanLong, spanLat) ;
     }
-	
+
+	private void setUpMapIfNeeded() {
+		if (mMap == null) {
+			SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+			mMap = mapFragment.getMap();
+            // Check if we were successful in obtaining the map.
+            if (mMap != null) {
+            	mapFragment.getView().post(new Runnable(){
+					@Override
+					public void run() {
+						addHotelToMap();
+					}
+            	});
+            }
+        }
+	}
+
+
+	private void addHotelToMap() {
+		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+      
+      Intent intent = getIntent();
+      Bundle extras = intent.getExtras();
+      
+      String name = extras.getString(HOTEL_NAME);
+      String longitudeString = extras.getString(HOTEL_LONGITUDE);
+      String latitudeString = extras.getString(HOTEL_LATITUDE);
+      //String city = extras.getString(HOTEL_CITY);
+      
+      Double longitude= Double.valueOf(longitudeString);
+      Double latitude= Double.valueOf(latitudeString);
+      
+      LatLng point = new LatLng(latitude,longitude);
+      
+      BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
+      
+      mMap.addMarker(new MarkerOptions()
+		            .position(point)
+		            .title(name)
+		            .icon(hotelIcon));
+      
+      CameraPosition position = new CameraPosition.Builder().target(point)
+	      .zoom(14.5f)
+	      .bearing(0)
+	      .tilt(15)
+	      .build();
+
+      mMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+	}
+
 	@Override
-	public void onResume() {
-		int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+    protected void onResume() {
+        super.onResume();
+        int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 		if (errCode != ConnectionResult.SUCCESS) {
 			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errCode, this, 0);
 			errorDialog.show();
 		}
-	}
-
-    @Override
-    protected boolean isRouteDisplayed() {
-        return false;
+		else {
+			setUpMapIfNeeded();
+		}
     }
+	
+	
+	
+
 }
 
 
