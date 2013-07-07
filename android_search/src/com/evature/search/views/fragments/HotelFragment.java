@@ -272,8 +272,8 @@ public class HotelFragment extends RoboFragment {
 				Intent intent = new Intent(getActivity(),HotelMapActivity.class);
 				
 				intent.putExtra(HotelMapActivity.HOTEL_NAME,mHotelData.mSummary.mName);	
-				intent.putExtra(HotelMapActivity.HOTEL_LATITUDE,""+(int)(mHotelData.mSummary.mLatitude*1000000));
-				intent.putExtra(HotelMapActivity.HOTEL_LONGITUDE,""+(int)(mHotelData.mSummary.mLongitude*1000000));
+				intent.putExtra(HotelMapActivity.HOTEL_LATITUDE,""+(mHotelData.mSummary.mLatitude));
+				intent.putExtra(HotelMapActivity.HOTEL_LONGITUDE,""+(mHotelData.mSummary.mLongitude));
 				intent.putExtra(HotelMapActivity.HOTEL_CITY,mHotelData.mSummary.mCity);
 				getActivity().startActivity(intent);
 			}
