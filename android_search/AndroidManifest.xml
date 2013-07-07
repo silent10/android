@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.evature.search"
-    android:versionCode="17"
+    android:versionCode="18"
     android:versionName="Pre-alpha" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
@@ -29,8 +29,8 @@
             </intent-filter>
         </activity>
         
-                <activity
-   android:name="com.evature.search.controllers.activities.HotelMapActivity"
+        <activity
+   			android:name="com.evature.search.controllers.activities.HotelMapActivity"
             android:label="Hotel Area" 
             />
         <activity android:name="com.evature.search.controllers.activities.MyPreferences"></activity>

@@ -118,12 +118,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 		mDialogClickHandler = handler;
 	}
 	
-	protected void newSessionStart(@Observes NewSessionStarted event) {
-		for (ChatItem chatItem : mChatListModel.getItemList()) {
-			chatItem.setInSession(false);
-		}
-		mChatAdapter.notifyDataSetChanged();
-	}
+	
 }
 
 
