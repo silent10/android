@@ -51,6 +51,7 @@ import android.widget.TextView;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaDialog.DialogElement;
+import com.evaapis.events.NewSessionStarted;
 import com.evaapis.flow.FlowElement;
 import com.evaapis.flow.FlowElement.TypeEnum;
 import com.evaapis.flow.QuestionElement;
@@ -65,6 +66,7 @@ import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItem.ChatType;
+import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
 import com.evature.search.views.SwipeyTabs;
@@ -662,12 +664,13 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
-		super.onEvaReply(reply, cookie);
 		
 		if ("voice".equals(cookie) && reply.inputText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
 			addChatItem(new ChatItem(reply.inputText));
 		}
+		
+		super.onEvaReply(reply, cookie);
 		
 		if (reply.flow != null ) {
 			handleFlow(reply);
@@ -781,15 +784,21 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	private void startNewSession() {
 		if (isNewSession() == false) {
-			resetSession();
 			addChatItem(new ChatItem("Start new search"));
-			String sessionText = "Starting a new search. How may I help you?";
-			addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
-			speak(sessionText);
+			resetSession();
 		}
 	}
 	
+	@Inject private ChatItemList mChatListModel;
 	
+	protected void newSessionStart(@Observes NewSessionStarted event) {
+		for (ChatItem chatItem : mChatListModel.getItemList()) {
+			chatItem.setInSession(false);
+		}
+		String sessionText = "Starting a new search. How may I help you?";
+		addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
+		speak(sessionText);
+	}
 		
 	public void onChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
