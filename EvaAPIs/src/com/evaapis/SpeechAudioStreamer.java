@@ -2,9 +2,7 @@ package com.evaapis;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,9 +15,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.io.FileUtils;
-import org.xiph.speex.AudioFileWriter;
-import org.xiph.speex.OggSpeexWriter;
-import org.xiph.speex.SpeexEncoder;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -408,46 +403,7 @@ public class SpeechAudioStreamer
 
 	
 
-	private void encodeFile(final File inputFile, final File outputFile) throws IOException {
-
-		SpeexEncoder encoder = new SpeexEncoder();
-		encoder.init(SPEEX_MODE, SPEEX_QUALITY, SAMPLE_RATE, CHANNELS);
-
-		DataInputStream input = null;
-		AudioFileWriter output = null;
-		try {
-			input = new DataInputStream(new FileInputStream(inputFile));
-			output = new OggSpeexWriter(SPEEX_MODE, SAMPLE_RATE, CHANNELS, 1, false);
-			output.open(outputFile);
-			output.writeHeader("Encoded with: " + SpeexEncoder.VERSION);
-
-			byte[] buffer = new byte[2560]; // 2560 is the maximum needed value (stereo UWB)
-			int packetSize = 2 * CHANNELS * encoder.getFrameSize();
-
-			while (true) {
-				input.readFully(buffer, 0, packetSize);
-				encoder.processData(buffer, 0, packetSize);
-				int encodedBytes = encoder.getProcessedData(buffer, 0);
-				if (encodedBytes > 0) {
-					output.writePacket(buffer, 0, encodedBytes);
-				}
-			}
-		} catch (EOFException e) {
-			// This exception just provides exit from the loop
-		} finally {
-			try {
-				if (input != null) {
-					input.close();
-				}
-			} finally {
-				if (output != null) {
-					output.close();
-				}
-			}
-		}
-	}
-
-
+	
 
 	public byte[] loadBytesFromFile(File file) {
 		WritableByteChannel outputChannel = null;
