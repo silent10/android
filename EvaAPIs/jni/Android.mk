@@ -1,55 +1,57 @@
 LOCAL_PATH := $(call my-dir)
- 
+
+# First build libogg statically
+#
 include $(CLEAR_VARS)
- 
-LOCAL_MODULE    := libspeex
-LOCAL_CFLAGS = -DFIXED_POINT -DUSE_KISS_FFT -DEXPORT="" -UHAVE_CONFIG_H
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
- 
-LOCAL_SRC_FILES :=  \
-./libspeex/bits.c \
-./libspeex/buffer.c \
-./libspeex/cb_search.c \
-./libspeex/exc_10_16_table.c \
-./libspeex/exc_10_32_table.c \
-./libspeex/exc_20_32_table.c \
-./libspeex/exc_5_256_table.c \
-./libspeex/exc_5_64_table.c \
-./libspeex/exc_8_128_table.c \
-./libspeex/fftwrap.c \
-./libspeex/filterbank.c \
-./libspeex/filters.c \
-./libspeex/gain_table.c \
-./libspeex/gain_table_lbr.c \
-./libspeex/hexc_10_32_table.c \
-./libspeex/hexc_table.c \
-./libspeex/high_lsp_tables.c \
-./libspeex/jitter.c \
-./libspeex/kiss_fft.c \
-./libspeex/kiss_fftr.c \
-./libspeex/lpc.c \
-./libspeex/lsp.c \
-./libspeex/lsp_tables_nb.c \
-./libspeex/ltp.c \
-./libspeex/mdf.c \
-./libspeex/modes.c \
-./libspeex/modes_wb.c \
-./libspeex/nb_celp.c \
-./libspeex/preprocess.c \
-./libspeex/quant_lsp.c \
-./libspeex/resample.c \
-./libspeex/sb_celp.c \
-./libspeex/scal.c \
-./libspeex/smallft.c \
-./libspeex/speex.c \
-./libspeex/speex_callbacks.c \
-./libspeex/speex_header.c \
-./libspeex/stereo.c \
-./libspeex/vbr.c \
-./libspeex/vq.c \
-./libspeex/window.c \
-./libogg/bitwise.c \
-./libogg/framing.c \
-./wrapper.cpp
-  
+
+LOCAL_MODULE    := audioboo-ogg
+LOCAL_SRC_FILES := \
+	ogg/src/bitwise.c \
+	ogg/src/framing.c
+
+include $(BUILD_STATIC_LIBRARY)
+
+# Then build flac statically
+#
+include $(CLEAR_VARS)
+
+LOCAL_MODULE    := audioboo-flac
+LOCAL_SRC_FILES := \
+	flac/src/libFLAC/bitmath.c \
+	flac/src/libFLAC/bitreader.c \
+	flac/src/libFLAC/cpu.c \
+	flac/src/libFLAC/crc.c \
+	flac/src/libFLAC/fixed.c \
+	flac/src/libFLAC/float.c \
+	flac/src/libFLAC/format.c \
+	flac/src/libFLAC/lpc.c \
+	flac/src/libFLAC/md5.c \
+	flac/src/libFLAC/memory.c \
+	flac/src/libFLAC/metadata_iterators.c \
+	flac/src/libFLAC/metadata_object.c \
+	flac/src/libFLAC/ogg_decoder_aspect.c \
+	flac/src/libFLAC/ogg_encoder_aspect.c \
+	flac/src/libFLAC/ogg_helper.c \
+	flac/src/libFLAC/ogg_mapping.c \
+	flac/src/libFLAC/stream_decoder.c \
+	flac/src/libFLAC/stream_encoder.c \
+	flac/src/libFLAC/stream_encoder_framing.c \
+	flac/src/libFLAC/window.c \
+	flac/src/libFLAC/bitwriter.c
+
+include $(BUILD_STATIC_LIBRARY)
+
+# Lastly build the JNI wrapper and link both other libs against it
+#
+include $(CLEAR_VARS)
+
+LOCAL_MODULE    := audioboo-native
+LOCAL_SRC_FILES := \
+	jni/FLACStreamEncoder.cpp \
+	jni/FLACStreamDecoder.cpp \
+	jni/util.cpp
+LOCAL_LDLIBS := -llog
+
+LOCAL_STATIC_LIBRARIES := audioboo-ogg audioboo-flac
+
 include $(BUILD_SHARED_LIBRARY)
