@@ -22,17 +22,10 @@ public class FLACStreamEncoder
    * Interface
    **/
 
-  /**
-   * channels must be either 1 (mono) or 2 (stereo)
-   * bits_per_sample must be either 8 or 16
-   **/
-  public FLACStreamEncoder(String outfile, int sample_rate, int channels,
-      int bits_per_sample)
+  public FLACStreamEncoder()
   {
-    init(outfile, sample_rate, channels, bits_per_sample);
   }
-
-
+  
 
   public void release()
   {
@@ -68,10 +61,13 @@ public class FLACStreamEncoder
   // Pointer to opaque data in C
   private long  mObject;
 
+  native public void initFifo(String outfile);
+  
   /**
-   * Constructor equivalent
+   * channels must be either 1 (mono) or 2 (stereo)
+   * bits_per_sample must be either 8 or 16
    **/
-  native private void init(String outfile, int sample_rate, int channels,
+  native public void init(String outfile, int sample_rate, int channels,
       int bits_per_sample);
 
   /**
