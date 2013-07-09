@@ -16,6 +16,7 @@
 #include <limits.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/stat.h>  /* Iftah:  for mkfifo */
 
 #include "FLAC/metadata.h"
 #include "FLAC/stream_encoder.h"
@@ -31,7 +32,7 @@ namespace {
 /*****************************************************************************
  * Constants
  **/
-static char const * const FLACStreamEncoder_classname   = "fm.audioboo.jni.FLACStreamEncoder";
+static char const * const FLACStreamEncoder_classname   = "com.evaapis.FLACStreamEncoder";
 static char const * const FLACStreamEncoder_mObject     = "mObject";
 
 static char const * const IllegalArgumentException_classname  = "java.lang.IllegalArgumentException";
@@ -264,6 +265,9 @@ public:
   {
     //aj::log(ANDROID_LOG_DEBUG, LTAG, "Asked to write buffer of size %d", bufsize);
 
+	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write    buffer of size %d", bufsize);
+	aj::log(ANDROID_LOG_ERROR, LTAG, "--> testing logging");
+
     // We have 8 or 16 bit pcm in the buffer, but FLAC expects 32 bit samples,
     // where some of the 32 bits are unused.
     int bufsize32 = bufsize / (m_bits_per_sample / 8);
@@ -271,6 +275,7 @@ public:
 
     // Protect from overly large buffers on the JNI side.
     if (bufsize32 > m_write_buffer_size) {
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write   #2 ");
       // The only way we can handle this sanely without fragmenting buffers and
       // so forth is to use a separate code path here. In this, we'll flush the
       // current write buffer to the FIFO, and immediately append a new
@@ -285,7 +290,7 @@ public:
 
       // Signal writer to wake up.
       pthread_cond_signal(&m_writer_condition);
-
+      __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  ret= %d", ret);
       return ret;
     }
 
@@ -293,6 +298,7 @@ public:
     // If the current write buffer cannot hold the amount of data we've
     // got, push it onto the write FIFO and create a new buffer.
     if (m_write_buffer && m_write_buffer_offset + bufsize32 > m_write_buffer_size) {
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write   #3");
       aj::log(ANDROID_LOG_DEBUG, LTAG, "JNI buffer is full, pushing to FIFO");
       flush_to_fifo();
 
@@ -300,16 +306,22 @@ public:
       pthread_cond_signal(&m_writer_condition);
     }
 
+    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  #4");
+
     // If we need to create a new buffer, do so now.
     if (!m_write_buffer) {
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  #5");
       //aj::log(ANDROID_LOG_DEBUG, LTAG, "Need new buffer.");
       m_write_buffer = new FLAC__int32[m_write_buffer_size];
       m_write_buffer_offset = 0;
     }
 
+    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  #6  buffer=%d   bufsize=%d   bufsize32=%d", buffer, bufsize, bufsize32);
     // At this point we know that there's a write buffer, and we know that
     // there's enough space in it to write the data we've received.
-    return copyBuffer(buffer, bufsize, bufsize32);
+    int ret = copyBuffer(buffer, bufsize, bufsize32);
+    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  ret= %d", ret);
+    return ret;
   }
 
 
@@ -450,7 +462,12 @@ private:
       m_write_buffer_offset += bufsize32;
     }
     else if (16 == m_bits_per_sample) {
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  before copyBuffer");
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  buf= %d", buf);
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  buffer= %d", buffer);
+    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  bufsize= %d", bufsize);
       copyBuffer<int16_t>(buf, buffer, bufsize);
+      __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  after copyBuffer");
       m_write_buffer_offset += bufsize32;
     }
     else {
@@ -596,10 +613,37 @@ static void set_encoder(JNIEnv * env, jobject obj, FLACStreamEncoder * encoder)
  * JNI Wrappers
  **/
 
+char * fifo_filename = 0;
+
 extern "C" {
 
+JNIEXPORT
 void
-Java_fm_audioboo_jni_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
+Java_com_evaapis_FLACStreamEncoder_initFifo(JNIEnv * env, jobject obj,
+    jstring outfile) {
+	/*
+	Iftah:  I added the mkfifo part to allow streaming the data to Java...
+	*/
+	const char * APPNAME = "FLACStreamEncoder";
+	char * filename = aj::convert_jstring_path(env, outfile);
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "-------> unlink and mkfifo %s", filename);
+	int res = unlink(filename);
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "-------> unlinked %d", res);
+	res = mkfifo(filename, 0777);
+	fifo_filename = filename;
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "-------> created %d", res);
+}
+
+JNIEXPORT
+void
+Java_com_evaapis_FLACStreamEncoder_deinitFifo(JNIEnv * env, jobject obj,
+    jstring outfile) {
+	unlink(aj::convert_jstring_path(env, outfile));
+}
+
+JNIEXPORT
+void
+Java_com_evaapis_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
     jstring outfile, jint sample_rate, jint channels, jint bits_per_sample)
 {
   assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
@@ -620,19 +664,23 @@ Java_fm_audioboo_jni_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 }
 
 
-
+JNIEXPORT
 void
-Java_fm_audioboo_jni_FLACStreamEncoder_deinit(JNIEnv * env, jobject obj)
+Java_com_evaapis_FLACStreamEncoder_deinit(JNIEnv * env, jobject obj)
 {
   FLACStreamEncoder * encoder = get_encoder(env, obj);
   delete encoder;
   set_encoder(env, obj, NULL);
+  if (fifo_filename) {
+	  unlink(fifo_filename);
+	  fifo_filename = 0;
+  }
 }
 
 
-
+JNIEXPORT
 jint
-Java_fm_audioboo_jni_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
+Java_com_evaapis_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
     jobject buffer, jint bufsize)
 {
   FLACStreamEncoder * encoder = get_encoder(env, obj);
@@ -649,13 +697,14 @@ Java_fm_audioboo_jni_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
   }
 
   char * buf = static_cast<char *>(env->GetDirectBufferAddress(buffer));
+  __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "-->  FLACStreamEncoder_write  buf = %d", buf);
   return encoder->write(buf, bufsize);
 }
 
 
-
+JNIEXPORT
 void
-Java_fm_audioboo_jni_FLACStreamEncoder_flush(JNIEnv * env, jobject obj)
+Java_com_evaapis_FLACStreamEncoder_flush(JNIEnv * env, jobject obj)
 {
   FLACStreamEncoder * encoder = get_encoder(env, obj);
 
@@ -669,9 +718,9 @@ Java_fm_audioboo_jni_FLACStreamEncoder_flush(JNIEnv * env, jobject obj)
 }
 
 
-
+JNIEXPORT
 jfloat
-Java_fm_audioboo_jni_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
+Java_com_evaapis_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
 {
   FLACStreamEncoder * encoder = get_encoder(env, obj);
 
@@ -685,9 +734,9 @@ Java_fm_audioboo_jni_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj
 }
 
 
-
+JNIEXPORT
 jfloat
-Java_fm_audioboo_jni_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
+Java_com_evaapis_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
 {
   FLACStreamEncoder * encoder = get_encoder(env, obj);
 
