@@ -18,7 +18,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	private static final String TAG = EvaHotelDownloaderTask.class.getSimpleName();
 
 	@Override
-	protected int getId() {
+	public int getId() {
 		return R.string.HOTEL;
 	}
 

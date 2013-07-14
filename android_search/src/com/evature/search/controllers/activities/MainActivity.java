@@ -24,6 +24,7 @@ import java.util.List;
 
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -59,6 +60,7 @@ import com.evature.components.MyViewPager;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.controllers.events.ChatItemClicked;
+import com.evature.search.controllers.events.HotelsListUpdated;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaHotelDownloaderTask;
 import com.evature.search.controllers.web_services.HotelListDownloaderTask;
@@ -91,18 +93,18 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	// private static String mExternalIpAddress = null;
 	
 	final static String[] examplesArray = {
-			"Fly to NY next Tuesday morning",
-			"Hotels in Arlington",
+//			"Fly to NY next Tuesday morning",
+//			"Hotels in Arlington",
 			"Hotel in NYC on Wednesday for 5 nights",
 			"3 Star hotels in NYC",
 //			"Fly from Minto to Heatherwood",
 			"Fly to NY next Sunday, stay 5 nights in Arlignton, return",
-			"Hotels in Heatherwood",
+//			"Hotels in Heatherwood",
 			"3 Star hotels in NYC sorted by price",
 			"3 Star hotels in NYC sorted by name",
 			"3 Star hotels in NYC, on Wednesday for two nights, sorted by price descending",
-			"3 Star hotels in NYC, on Wednesday for two nights, sorted by price ascending",
-			"Fly to Madrid"
+			"3 Star hotels in Miami FL, on Wednesday for two nights, sorted by price ascending",
+//			"Fly to Madrid"
 //			"Train ride from NYC to Washington DC next Wednesday"
 		};
 	
@@ -130,6 +132,10 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	@Override
 	public void onPause() {
 		Log.d(TAG, "onPause()");
+		if (mHotelDownloader != null) {
+			mHotelDownloader.cancel(true);
+			mHotelDownloader = null;
+		}
 		super.onPause();
 	}
 	
@@ -607,7 +613,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		// }
 
 		// mHotelListView.setAdapter(mAdapter);
-
 	}
 
 	@Override
@@ -800,6 +805,19 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		String sessionText = "Starting a new search. How may I help you?";
 		addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
 		speak(sessionText);
+	}
+	
+	public void onHotelsListUpdated( @Observes HotelsListUpdated event) {
+		if (mMapTabIndex != -1) {
+			HotelsMapFragment frag = (HotelsMapFragment)  mSwipeyAdapter.instantiateItem(mViewPager, mMapTabIndex);
+			if (frag != null) {
+				Activity hostedActivity = frag.getHostedActivity();
+				if (hostedActivity != null) {
+					HotelsMapActivity hma = (HotelsMapActivity) hostedActivity;
+					hma.onHotelsListUpdated();
+				}
+			}
+		}
 	}
 		
 	public void onChatItemClicked( @Observes ChatItemClicked  event) {

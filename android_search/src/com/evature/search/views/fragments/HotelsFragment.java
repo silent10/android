@@ -1,22 +1,9 @@
 package com.evature.search.views.fragments;
 
+import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
-
-import com.evature.search.EvaSettingsAPI;
-import com.evature.search.MyApplication;
-import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.controllers.activities.MainActivity;
-import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
-import com.evature.search.controllers.web_services.EvaListContinuationDownloaderTask;
-import com.evature.search.controllers.web_services.HotelListDownloaderTask;
-import com.evature.search.views.adapters.HotelListAdapter;
-import com.evature.search.views.adapters.HotelListAdapter.ViewHolder;
-
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -32,12 +19,25 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.evature.search.EvaSettingsAPI;
+import com.evature.search.MyApplication;
+import com.evature.search.R;
+import com.evature.search.controllers.activities.MainActivity;
+import com.evature.search.controllers.events.HotelsListUpdated;
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
+import com.evature.search.controllers.web_services.EvaListContinuationDownloaderTask;
+import com.evature.search.controllers.web_services.HotelListDownloaderTask;
+import com.evature.search.views.adapters.HotelListAdapter;
+import com.google.inject.Inject;
+
 // From Arik's app
 
 public class HotelsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener,
 		EvaDownloaderTaskInterface {
 
-	static HotelListDownloaderTask mDownLoader = null;
+	@Inject protected EventManager eventManager;
+	
+	HotelListDownloaderTask mDownLoader = null;
 	EvaListContinuationDownloaderTask mContinuationLoader = null;
 	private LinearLayout mFooterView;
 	boolean mClickEnabled = true;
@@ -45,23 +45,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	ListView mHotelListView;
 	private HotelListAdapter mAdapter;
 	private final String TAG = "HotelListFragment";
-
-	@Override
-	public void onDestroy() {
-		Log.d(TAG, "onDestroy");
-
-		// mCheckQueryLength.removeMessages(0);
-		//
-		if (mDownLoader != null) {
-			mDownLoader.detach();
-		}
-		//
-		// if (mContinuationLoader != null) {
-		// mContinuationLoader.detach();
-		// }
-
-		super.onDestroy();
-	}
 
 	@Override
 	public void onDestroyView() {
@@ -73,6 +56,17 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	public void onPause() {
 		Log.d(TAG, "onPause");
 
+		if (mContinuationLoader != null) {
+			mContinuationLoader.detach();
+			mContinuationLoader.cancel(true);
+			mContinuationLoader = null;
+		}
+		
+		if (mDownLoader != null) {
+			mDownLoader.detach();
+			mDownLoader.cancel(true);
+			mDownLoader = null;
+		}
 		super.onPause();
 	}
 
@@ -207,10 +201,8 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 		if (mProgressDialog != null) {
 			mProgressDialog.dismiss();
+			mProgressDialog = null;
 		}
-
-		setAdapter();
-
 	}
 
 	ProgressDialog mProgressDialog = null;
@@ -230,8 +222,11 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void startProgressDialog(int id) {
-
-		if (mDownLoader != null) {
+		if (id == R.string.HOTEL) {
+			if (mDownLoader == null) {
+				Log.w(TAG, "expected hotel downloader to run");
+				return;
+			}
 			mProgressDialog = ProgressDialog.show(getActivity(), "Getting Hotel Information",
 					"Contacting search server", true, false);
 		}
@@ -240,17 +235,24 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	@Override
 	public void updateProgress(int id, int mProgress) {
 
-		Log.i(TAG, "update progress");
+		Log.i(TAG, "Update progress");
 
-		if (getAdapter() != null) {
-			getAdapter().notifyDataSetChanged();
-		} else {
-			return;
-		}
-
-		if (!MyApplication.getDb().mMoreResultsAvailable) {
-			mHotelListView.removeFooterView(mFooterView);
-			mEnabledPaging = false;
+		if (id == R.string.HOTELS) {
+			if (mContinuationLoader == null) {
+				Log.w(TAG, "expected continuous downloader to run");
+			}
+			if (getAdapter() != null) {
+				getAdapter().notifyDataSetChanged();
+			} else {
+				return;
+			}
+	
+			if (!MyApplication.getDb().mMoreResultsAvailable) {
+				mHotelListView.removeFooterView(mFooterView);
+				mEnabledPaging = false;
+			}
+			
+			eventManager.fire(new HotelsListUpdated());
 		}
 	}
 

@@ -22,7 +22,7 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 	@Inject XpediaProtocol xpediaProtocol;
 
 	@Override
-	protected int getId() {
+	public int getId() {
 		return R.string.HOTELS;
 	}
 
@@ -41,12 +41,8 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 			hotelListResponseJSON = new JSONObject(hotelListResponse);
 //			MyApplication.getDb().EvaDatabaseUpdateExpedia(hotelListResponseJSON);
 			EvaXpediaDatabase db = new EvaXpediaDatabase(hotelListResponseJSON);
-
-			if (MyApplication.getDb() == null) {
-				MyApplication.setDb(db);
-			} else {
-				MyApplication.getDb().addData(db);
-			}
+			MyApplication.setDb(db);
+			
 			
 //			if (MyApplication.getDb().mHotelData == null) {
 //				return false;
