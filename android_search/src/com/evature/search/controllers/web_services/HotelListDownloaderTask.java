@@ -8,6 +8,7 @@ import android.util.Log;
 import com.evaapis.EvaApiReply;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.XpediaProtocol;
 import com.google.inject.Inject;
 
@@ -38,15 +39,21 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		JSONObject hotelListResponseJSON;
 		try {
 			hotelListResponseJSON = new JSONObject(hotelListResponse);
-			MyApplication.getDb().EvaDatabaseUpdateExpedia(hotelListResponseJSON);
-			// EvaDatabase db = new com.evature.search.expedia.EvaDatabase(hotelListResponseJSON);
+//			MyApplication.getDb().EvaDatabaseUpdateExpedia(hotelListResponseJSON);
+			EvaXpediaDatabase db = new EvaXpediaDatabase(hotelListResponseJSON);
 
-			if (MyApplication.getDb().mHotelData == null) {
-				return false;
+			if (MyApplication.getDb() == null) {
+				MyApplication.setDb(db);
+			} else {
+				MyApplication.getDb().addData(db);
 			}
-			// else {
-			// MyApplication.setEvaDb(db);
-			// }
+			
+//			if (MyApplication.getDb().mHotelData == null) {
+//				return false;
+//			}
+//			else {
+//				 MyApplication.setDb(db);
+//			}
 			return true;
 		} catch (JSONException e) {
 			e.printStackTrace();

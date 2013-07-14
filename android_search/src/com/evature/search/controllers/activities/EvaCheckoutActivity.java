@@ -1,5 +1,7 @@
 package com.evature.search.controllers.activities;
 
+import roboguice.activity.RoboFragmentActivity;
+
 import com.evature.search.R;
 import com.evature.search.R.id;
 import com.evature.search.R.layout;
@@ -12,7 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
-public class EvaCheckoutActivity extends FragmentActivity{
+public class EvaCheckoutActivity extends RoboFragmentActivity{
 	
 	public final static String HOTEL_INDEX= "hotel_index";
 

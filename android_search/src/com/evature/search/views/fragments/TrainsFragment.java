@@ -98,7 +98,7 @@ public class TrainsFragment extends RoboFragment implements OnClickListener, OnI
 			// mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
 			// mTrainListView.addFooterView(mFooterView);
 			// }
-			mAdapter = new TrainListAdapter(this, MyApplication.getDb());
+			mAdapter = new TrainListAdapter(this);
 			mTrainListView.setAdapter(mAdapter);
 			mTrainListView.setOnItemClickListener(this);
 		}

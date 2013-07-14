@@ -86,7 +86,6 @@ public class EvaXpediaDatabase {
 	public EvaXpediaDatabase(JSONObject serverResponse)
 	{
 		mImagesMap = new HashMap<String, Bitmap>();
-		
 					
 		try {						
 			String response = getSafeString(serverResponse,"HotelListResponse");
@@ -144,6 +143,8 @@ public class EvaXpediaDatabase {
 	public String mDepartureDateParam;
 	public int mNumberOfAdultsParam;
 	
+	private int mExpediaHotelId; // last viewed hotel
+	
 	public void setNumberOfAdults(int paramFromUI) {
 		mNumberOfAdultsParam = paramFromUI;
 	}
@@ -196,6 +197,14 @@ public class EvaXpediaDatabase {
 		this.mMoreResultsAvailable = moreResultsAvailable;
 	}
 
+
+	public void setHotelId(int id) {
+		mExpediaHotelId = id;
+	}
+
+	public int getHotelId() {
+		return mExpediaHotelId;
+	}
 
 
 }

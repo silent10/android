@@ -93,6 +93,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	final static String[] examplesArray = {
 			"Fly to NY next Tuesday morning",
 			"Hotels in Arlington",
+			"Hotel in NYC on Wednesday for 5 nights",
 			"3 Star hotels in NYC",
 //			"Fly from Minto to Heatherwood",
 			"Fly to NY next Sunday, stay 5 nights in Arlignton, return",
@@ -402,6 +403,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		// Save UI state changes to the savedInstanceState.
 		// This bundle will be passed to onCreate if the process is killed and restarted.
 		super.onSaveInstanceState(savedInstanceState);
+
 		savedInstanceState.putBoolean("mTtsWasConfigured", mSpeechToTextWasConfigured);
 		// savedInstanceState.putString("mExternalIpAddress", mExternalIpAddress);
 		savedInstanceState.putStringArrayList("mTabTitles", (ArrayList<String>) mTabTitles);
