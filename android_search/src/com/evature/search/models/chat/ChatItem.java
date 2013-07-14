@@ -58,6 +58,7 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeByte((byte) getType().ordinal());
+		dest.writeByte((byte) (inSession ? 1 : 0));
 		dest.writeString(chat);
 	}
 
@@ -78,6 +79,7 @@ public class ChatItem implements Parcelable { // http://stackoverflow.com/a/2141
 	private ChatItem(Parcel in) {
 		super();
 		chatType = chatTypeValues[in.readByte()];
+		inSession = in.readByte() == 1;
 		chat = in.readString();
 	}
 

@@ -6,6 +6,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import roboguice.util.Ln;
+
 import android.graphics.Bitmap;
 
 
@@ -94,13 +96,14 @@ public class EvaXpediaDatabase {
 
 			mCustomerSessionId = getSafeString(responseObject,"customerSessionId");
 			mNumberOfRoomsRequested= getSafeInt(responseObject, "numberOfRoomsRequested");
-			setMoreResultsAvailable(getSafeBool(responseObject,"moreResultsAvailable"));
+			mMoreResultsAvailable = getSafeBool(responseObject,"moreResultsAvailable");
 			mCacheKey= getSafeString(responseObject, "cacheKey");
 			mCacheLocation= getSafeString( responseObject, "cacheLocation");
 
 			responseObject = responseObject.getJSONObject("HotelList");
 
 			int size = getSafeInt(responseObject, "@size");
+//			Ln.d("Hotel List Response:  size=%s  cahceKey=%s  moreAvail=%s  location=%s", size, mCacheKey, mMoreResultsAvailable, mCacheLocation);
 
 			if(size==-1)
 			{
@@ -175,7 +178,7 @@ public class EvaXpediaDatabase {
 		{
 			mCacheKey = db.mCacheKey;
 			mCacheLocation = db.mCacheLocation;
-			setMoreResultsAvailable(db.isMoreResultsAvailable());
+			mMoreResultsAvailable = db.isMoreResultsAvailable();
 			
 			HotelData[] newHotelData = new HotelData[mHotelData.length + db.mHotelData.length];
 			int i=0;
@@ -190,11 +193,6 @@ public class EvaXpediaDatabase {
 
 	public boolean isMoreResultsAvailable() {
 		return mMoreResultsAvailable;
-	}
-
-
-	public void setMoreResultsAvailable(boolean moreResultsAvailable) {
-		this.mMoreResultsAvailable = moreResultsAvailable;
 	}
 
 

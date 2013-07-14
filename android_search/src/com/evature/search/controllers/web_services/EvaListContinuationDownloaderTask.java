@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.string;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.fragments.HotelsFragment;
@@ -26,7 +25,7 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected int getId() {
+	public int getId() {
 		return R.string.HOTELS;
 	}
 

@@ -19,7 +19,7 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, Void> {
 
 	int mProgress = 0;
 
-	protected int getId() {
+	public int getId() {
 		return 0;
 	}
 
