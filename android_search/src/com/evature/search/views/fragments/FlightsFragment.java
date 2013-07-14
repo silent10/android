@@ -102,7 +102,7 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 			// mFlightListView.addFooterView(mFooterView);
 			// }
 
-			mAdapter = new FlightListAdapterTP(this, MyApplication.getDb());
+			mAdapter = new FlightListAdapterTP(this);
 			mFlightListView.setAdapter(mAdapter);
 			mFlightListView.setOnItemClickListener(this);
 		}

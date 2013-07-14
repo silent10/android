@@ -14,11 +14,9 @@ import android.widget.TextView;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.models.EvaDatabase;
 import com.evature.search.models.travelport.AirPricingSolution;
 import com.evature.search.models.travelport.AirSegment;
+import com.evature.search.models.travelport.EvaTravelportDatabase;
 import com.evature.search.views.fragments.FlightsFragment;
 
 public class FlightListAdapterTP extends BaseAdapter {
@@ -26,26 +24,21 @@ public class FlightListAdapterTP extends BaseAdapter {
 
 	private LayoutInflater mInflater;
 
-	private EvaDatabase evaDatabase;
+	private EvaTravelportDatabase evaDatabase;
 
 	// private FlightsFragment mParent;
 
-	public FlightListAdapterTP(FlightsFragment parent, EvaDatabase evaDatabase) {
+	public FlightListAdapterTP(FlightsFragment parent) {
 		Log.d(TAG, "CTOR");
 		mInflater = LayoutInflater.from(parent.getActivity());
 		// mParent = parent;
-		this.evaDatabase = evaDatabase;
 	}
 
-	public void setData(EvaDatabase evaDatabase) {
-		Log.d(TAG, "setData()");
-		this.evaDatabase = evaDatabase;
-	}
 
 	@Override
 	public int getCount() {
 		int count = 0;
-		evaDatabase = MyApplication.getDb();
+		evaDatabase = MyApplication.getFlightsDb();
 		if (evaDatabase != null) {
 			if (evaDatabase.airLowFareSearchRsp != null) {
 				if (evaDatabase.airLowFareSearchRsp.airPricingSolutions != null) {

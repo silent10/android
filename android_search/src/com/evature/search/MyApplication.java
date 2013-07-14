@@ -13,12 +13,14 @@ import android.util.Log;
 
 import com.evaapis.EvaAPIs;
 import com.evaapis.EvatureLocationUpdater;
-import com.evature.search.models.EvaDatabase;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
+import com.evature.search.models.travelport.EvaTravelportDatabase;
+import com.evature.search.models.vayant.EvaVayantDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {
 
-	static EvaDatabase mEvaDb = new EvaDatabase();
+	static EvaXpediaDatabase mEvaDb = null;
 	static String mExpediaSecret = null;
 	static String mExpediaApiKey = null;
 	static String mExpediaClientId = null;
@@ -50,8 +52,12 @@ public class MyApplication extends Application {
 		MyApplication.context = getApplicationContext();
 	}
 
-	public static EvaDatabase getDb() {
+	public static EvaXpediaDatabase getDb() {
 		return mEvaDb;
+	}
+	
+	public static void setDb(EvaXpediaDatabase db) {
+		mEvaDb = db;
 	}
 
 	public static String getExpediaApiKey() {
@@ -84,6 +90,15 @@ public class MyApplication extends Application {
 
 	public static Context getAppContext() {
 		return MyApplication.context;
+	}
+
+	public static EvaTravelportDatabase getFlightsDb() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public static EvaVayantDatabase getJourneyDb() {
+		return null;
 	}
 
 }

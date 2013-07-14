@@ -115,53 +115,55 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				mHotelIndex=savedInstanceState.getInt(HOTEL_INDEX);
 			}
 
-			mHotelData = MyApplication.getDb().mHotelData[mHotelIndex];
+			if (mHotelIndex < MyApplication.getDb().mHotelData.length) {
+				mHotelData = MyApplication.getDb().mHotelData[mHotelIndex];
+				
 
-			Bitmap hotelBitmap = MyApplication.getDb().mImagesMap.get(mHotelData.mSummary.mThumbNailUrl);
-			if(hotelBitmap!=null)
-			{
-				mHotelImage.setImageBitmap(hotelBitmap);
+				Bitmap hotelBitmap = MyApplication.getDb().mImagesMap.get(mHotelData.mSummary.mThumbNailUrl);
+				if(hotelBitmap!=null)
+				{
+					mHotelImage.setImageBitmap(hotelBitmap);
+				}
+	
+				Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
+	
+				String name = spannedName.toString();
+	
+				Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+	
+				/* Now we can retrieve all display-related infos */
+				//		int width = display.getWidth();
+				//		int height = display.getHeight();		 
+				//
+				//		int maxNameLength = (width-90)/18-3;
+				//
+				//		if(name.length()>maxNameLength)
+				//		{
+				//			name = (name.subSequence(0, maxNameLength)).toString();
+				//			name+="...";
+				//		}
+	
+				mHotelName.setText(name);
+	
+				mLocation.setText(mHotelData.mSummary.mCity+","+mHotelData.mSummary.mCountryCode);
+	
+				mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
+	
+				mRoomListView = (ListView)mView.findViewById(R.id.roomListView);
+	
+				mAdapter = new RoomListAdapter(getActivity(),mHotelData);
+				mRoomListView.setAdapter( mAdapter );
+	
+				mRoomListView.setOnItemClickListener(this);
+	
+				if(mAdapter.getCount()==0)
+				{
+					Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
+				}
+	
+				startImageDownload();
+
 			}
-
-			Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
-
-			String name = spannedName.toString();
-
-			Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-
-			/* Now we can retrieve all display-related infos */
-			//		int width = display.getWidth();
-			//		int height = display.getHeight();		 
-			//
-			//		int maxNameLength = (width-90)/18-3;
-			//
-			//		if(name.length()>maxNameLength)
-			//		{
-			//			name = (name.subSequence(0, maxNameLength)).toString();
-			//			name+="...";
-			//		}
-
-			mHotelName.setText(name);
-
-			mLocation.setText(mHotelData.mSummary.mCity+","+mHotelData.mSummary.mCountryCode);
-
-			mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
-
-			mRoomListView = (ListView)mView.findViewById(R.id.roomListView);
-
-			mAdapter = new RoomListAdapter(getActivity(),mHotelData);
-			mRoomListView.setAdapter( mAdapter );
-
-			mRoomListView.setOnItemClickListener(this);
-
-			if(mAdapter.getCount()==0)
-			{
-				Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
-			}
-
-			startImageDownload();
-
-
 
 
 			return mView;

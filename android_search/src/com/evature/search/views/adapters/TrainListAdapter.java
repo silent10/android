@@ -16,11 +16,10 @@ import android.widget.TextView;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.models.EvaDatabase;
+import com.evature.search.models.travelport.EvaTravelportDatabase;
 import com.evature.search.models.travelport.RailJourney;
 import com.evature.search.models.travelport.RailPricingSolution;
+import com.evature.search.models.vayant.EvaVayantDatabase;
 import com.evature.search.views.fragments.TrainsFragment;
 
 public class TrainListAdapter extends BaseAdapter {
@@ -28,23 +27,23 @@ public class TrainListAdapter extends BaseAdapter {
 
 	private LayoutInflater mInflater;
 	// private TrainsFragment mParent;
-	private EvaDatabase evaDatabase = null;
+	private EvaTravelportDatabase evaDatabase = null;
 
-	public TrainListAdapter(TrainsFragment parent, EvaDatabase evaDatabase) {
+	public TrainListAdapter(TrainsFragment parent) {
 		Log.d(TAG, "CTOR");
 		mInflater = LayoutInflater.from(parent.getActivity());
 		// mParent = parent;
-		this.evaDatabase = evaDatabase;
+		this.evaDatabase = MyApplication.getFlightsDb();
 	}
 
-	public void setData(EvaDatabase evaDatabase) {
+	public void setData(EvaTravelportDatabase evaDatabase) {
 		Log.d(TAG, "setData()");
 		this.evaDatabase = evaDatabase;
 	}
 
 	@Override
 	public int getCount() {
-		evaDatabase = MyApplication.getDb();
+		evaDatabase = MyApplication.getFlightsDb();
 		if (evaDatabase != null) {
 			if (evaDatabase.airLowFareSearchRsp != null && evaDatabase.airLowFareSearchRsp.railJourneys != null) {
 				return evaDatabase.airLowFareSearchRsp.railJourneys.size();
