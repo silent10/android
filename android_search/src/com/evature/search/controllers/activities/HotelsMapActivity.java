@@ -1,11 +1,16 @@
 package com.evature.search.controllers.activities;
 
 import roboguice.activity.RoboFragmentActivity;
+import roboguice.event.Observes;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.controllers.events.ChatItemClicked;
+import com.evature.search.controllers.events.HotelsListUpdated;
+import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -62,6 +67,12 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
 		}
     }
 	
+	
+	public void onHotelsListUpdated() {
+		Log.i(TAG, "Updating map because hotels list was updated");
+		mMap = null;
+		setUpMapIfNeeded();
+	}
 	
 	
 	private void addHotelsToMap()
