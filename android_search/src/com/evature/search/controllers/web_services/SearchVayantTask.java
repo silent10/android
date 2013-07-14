@@ -125,7 +125,7 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 		try {
 			vayantReply = new JSONObject(str);
 			journeys = new VayantJourneys(vayantReply.getJSONArray("Journeys"));
-			MyApplication.getDb().mJourneys = journeys;
+			MyApplication.getJourneyDb().mJourneys = journeys;
 		} catch (JSONException e) {
 			Log.e("VAYANT", "Bad reply");
 		}

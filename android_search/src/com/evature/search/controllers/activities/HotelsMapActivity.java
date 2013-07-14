@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.models.EvaDatabase;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -68,9 +68,12 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
 	{	    
         BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
        
-        EvaDatabase evaDb = MyApplication.getDb();
+        EvaXpediaDatabase evaDb = MyApplication.getDb();
         
         int length=evaDb.mHotelData.length;
+        if (length == 0) {
+        	HotelsMapActivity.this.finishActivity(0);
+        }
         if(length>30) length=30;
         
         Builder boundsBuilder = new LatLngBounds.Builder();

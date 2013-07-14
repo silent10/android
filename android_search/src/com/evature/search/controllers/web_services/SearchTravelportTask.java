@@ -228,8 +228,8 @@ public class SearchTravelportTask extends AsyncTask<String, Integer, String> {
 		String xml = buf.toString();
 		XMLParser parser = new XMLParser();
 		Document document = parser.getDomElement(xml);
-		MyApplication.getDb().airLowFareSearchRsp = new AirLowFareSearchRsp(document);
-		Log.d(TAG, "Travelport returned " + MyApplication.getDb().airLowFareSearchRsp.railJourneyList.size()
+		MyApplication.getFlightsDb().airLowFareSearchRsp = new AirLowFareSearchRsp(document);
+		Log.d(TAG, "Travelport returned " + MyApplication.getFlightsDb().airLowFareSearchRsp.railJourneyList.size()
 				+ " Rail Journeys");
 		return xml;
 	}

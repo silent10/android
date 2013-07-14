@@ -20,8 +20,9 @@ import android.widget.TextView;
 import com.evaapis.EvatureLocationUpdater;
 import com.evature.components.S3DrawableBackgroundLoader;
 import com.evature.search.EvaSettingsAPI;
+import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.models.EvaDatabase;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.views.fragments.HotelsFragment;
 
@@ -29,30 +30,37 @@ public class HotelListAdapter extends BaseAdapter {
 
 	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
 	private static final double DISTANCE_DELTA = 200;
-	EvaDatabase mEvaDb;
 	private LayoutInflater mInflater;
 	private HotelsFragment mParent;
 	static Drawable mEvaHotelIcon;
 
-	public HotelListAdapter(HotelsFragment parent, EvaDatabase evaDb) {
+	public HotelListAdapter(HotelsFragment parent) {
 
 		mInflater = LayoutInflater.from(parent.getActivity());
 		mParent = parent;
-		mEvaDb = evaDb;
 		mEvaHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.eva_hotel_icon);
+	}
+	
+	private EvaXpediaDatabase getDb() {
+		return MyApplication.getDb();
 	}
 
 	@Override
 	public int getCount() {
-		if (mEvaDb != null && mEvaDb.mHotelData != null) {
-			return mEvaDb.mHotelData.length;
+		EvaXpediaDatabase evaDb = getDb();
+		if (evaDb != null && evaDb.mHotelData != null) {
+			return evaDb.mHotelData.length;
 		}
 		return 0;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return mEvaDb.mHotelData[position];
+		EvaXpediaDatabase evaDb = getDb();
+		if (evaDb != null && evaDb.mHotelData != null) {
+			return evaDb.mHotelData[position];
+		}
+		return null;
 	}
 
 	@Override
@@ -79,7 +87,12 @@ public class HotelListAdapter extends BaseAdapter {
 			holder = (ViewHolder) convertView.getTag();
 		}
 
-		holder.hotel = mEvaDb.mHotelData[position];
+		
+		HotelData hotelData = (HotelData) getItem(position);
+		if (hotelData == null) {
+			return convertView;
+		}
+		holder.hotel = hotelData;
 
 		holder.setHotelIndex(position);
 

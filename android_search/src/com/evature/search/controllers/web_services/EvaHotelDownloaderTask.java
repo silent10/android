@@ -9,8 +9,7 @@ import android.util.Log;
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.string;
-import com.evature.search.models.EvaDatabase;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.HotelDetails;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
@@ -41,7 +40,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	protected Void doInBackground(Void... params) {
 		Log.d(TAG, "doInBackground()");
 
-		EvaDatabase db = MyApplication.getDb();
+		EvaXpediaDatabase db = MyApplication.getDb();
 		HotelData hotelData = db.mHotelData[mHotelIndex];
 
 		publishProgress();

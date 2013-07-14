@@ -146,7 +146,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			}
 		}
 
-		mAdapter = new HotelListAdapter(this, MyApplication.getDb());
+		mAdapter = new HotelListAdapter(this);
 		mHotelListView.setAdapter(mAdapter);
 		mHotelListView.setOnItemClickListener(this);
 	}
