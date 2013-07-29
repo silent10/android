@@ -52,7 +52,7 @@ public class EvaVoiceClient {
 	private String mAppKey = "UNKNOWN";
     private String mDeviceId = "0000";
 	private String LANGUAGE = "ENUS";
-	private String CODEC = "audio/x-flac; rate=16000";//"audio/x-speex;rate=16000";	//MP3
+	private String CODEC = "audio/x-flac;rate=16000";//"audio/x-speex;rate=16000";	//MP3
 	private String RESULTS_FORMAT = "text/plain";
 
 
