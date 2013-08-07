@@ -45,7 +45,6 @@ public class SpeechAudioStreamer {
 
 	public static final int TEMP_BUFFER_SIZE = 5;
 	private static final long SILENCE_PERIOD = 700;
-	private static final float SILENCE_THRESHOLD = 350;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 	private int mSampleRate;
@@ -55,6 +54,7 @@ public class SpeechAudioStreamer {
 
 	long mLastStart = -1;
 	private int mSoundLevel;
+	private int mPeakSoundLevel;
 	
 	boolean wasNoise;
 
@@ -79,6 +79,7 @@ public class SpeechAudioStreamer {
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		mBuffer = new byte[bufferSize];
 		wasNoise = false;
+		mPeakSoundLevel = 0;
 		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);
@@ -107,8 +108,11 @@ public class SpeechAudioStreamer {
 		mSilenceAccumulationBufferIndex++;
 
 		this.mSoundLevel = (int) temp;
+		if (mSoundLevel > mPeakSoundLevel) {
+			mPeakSoundLevel = mSoundLevel;
+		}
 
-		if ((temp >= 0) && (temp <= SILENCE_THRESHOLD)) {
+		if ((temp >= 0) && (temp <= mPeakSoundLevel/2)) {
 			if (mLastStart == -1) {
 				mLastStart = System.currentTimeMillis();
 				return null;
