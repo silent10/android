@@ -4,7 +4,6 @@
 package com.evaapis;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,6 +16,10 @@ import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -28,7 +31,6 @@ import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -36,8 +38,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
-import android.media.MediaRecorder;
-import android.os.Environment;
+import android.content.Context;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.evature.util.EvatureSSLSocketFactory;
@@ -45,13 +47,14 @@ import com.evature.util.EvatureSSLSocketFactory;
 public class EvaVoiceClient {
 
 	private static final String TAG = "EvaVoiceClient";
-
+	
 	private String mSiteCode = "UNKNOWN";
 	private String mAppKey = "UNKNOWN";
-	private String mDeviceId = "0000";
+    private String mDeviceId = "0000";
 	private String LANGUAGE = "ENUS";
-	private String CODEC = "audio/x-wav"; 
+	private String CODEC = "audio/x-flac;rate=16000";//"audio/x-speex;rate=16000";	//MP3
 	private String RESULTS_FORMAT = "text/plain";
+
 
 	private static short PORT = (short) 443;
 	private static String HOSTNAME = "vproxy.evaws.com";
@@ -59,21 +62,23 @@ public class EvaVoiceClient {
 	private String mEvaJson;
 	private String mSessionId;
 
+	private SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 	HttpPost mHttpPost = null;
 
-	public EvaVoiceClient(String siteCode, String appKey, String deviceId,
-			String sessionId) {
+
+	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
 		mDeviceId = deviceId;
 		mSessionId = sessionId;
+		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
 	@SuppressWarnings("deprecation")
-	private HttpClient getHttpClient() throws NoSuchAlgorithmException,
-			KeyManagementException {
+	private HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyManagementException
+	{
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setContentCharset(params, "UTF-8");
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -82,7 +87,7 @@ public class EvaVoiceClient {
 		// Initialize the HTTP client
 		HttpClient httpclient = new DefaultHttpClient(params);
 
-		SSLSocketFactory sf = null;
+		SSLSocketFactory sf=null;
 		try {
 			sf = new EvatureSSLSocketFactory(null);
 		} catch (UnrecoverableKeyException e) {
@@ -97,27 +102,28 @@ public class EvaVoiceClient {
 		return httpclient;
 	}
 
-	private URI getURI() throws Exception {
+
+	private URI getURI() throws Exception
+	{
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 
 		qparams.add(new BasicNameValuePair("site_code", mSiteCode));
 		qparams.add(new BasicNameValuePair("api_key", mAppKey));
-		qparams.add(new BasicNameValuePair("id", mDeviceId));
+		qparams.add(new BasicNameValuePair("id",  mDeviceId));
 		qparams.add(new BasicNameValuePair("session_id", mSessionId));
 
 		try {
 			double longitude = EvatureLocationUpdater.getLongitude();
 			double latitude = EvatureLocationUpdater.getLatitude();
 			if (latitude != -1 && longitude != -1) {
-				qparams.add(new BasicNameValuePair("longitude", "" + longitude));
-				qparams.add(new BasicNameValuePair("latitude", "" + latitude));
+				qparams.add(new BasicNameValuePair("longitude",""+longitude));
+				qparams.add(new BasicNameValuePair("latitude",""+latitude));
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 
-		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, "",
-				URLEncodedUtils.format(qparams, "UTF-8"), null);
+		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, "", URLEncodedUtils.format(qparams, "UTF-8"), null);
 
 		return uri;
 	}
@@ -125,22 +131,41 @@ public class EvaVoiceClient {
 	/*
 	 * This is a simpler helper function to setup the Header parameters
 	 */
-	private HttpPost getHeader(URI uri, long contentLength)
-			throws UnsupportedEncodingException {
+	private HttpPost getHeader(URI uri, long contentLength) throws UnsupportedEncodingException
+	{
 		HttpPost httppost = new HttpPost(uri);
 
-		// httppost.setHeader("Transfer-Encoding", "chunked");
-		// httppost.addHeader("Transfer-Encoding", "chunked");
 
-		httppost.addHeader("Content-Type", CODEC);
-		// httppost.addHeader("Content-Language", LANGUAGE);
-		// httppost.addHeader("Accept-Language", LANGUAGE);
+		//	httppost.setHeader("Transfer-Encoding", "chunked");	
+		//	httppost.addHeader("Transfer-Encoding", "chunked");
+
+		httppost.addHeader("Content-Type",  CODEC);
+		httppost.addHeader("Content-Language", LANGUAGE);
+		httppost.addHeader("Accept-Language", LANGUAGE);
 		httppost.addHeader("Accept", RESULTS_FORMAT);
 
 		return httppost;
 	}
 
-	
+	/***
+	 * Start the recording and return it as 
+	 * @param speechAudioStreamer
+	 * @return
+	 * @throws NumberFormatException
+	 * @throws Exception
+	 */
+	private InputStreamEntity setAudioContent(SpeechAudioStreamer speechAudioStreamer) throws NumberFormatException, Exception
+	{		
+		InputStreamEntity reqEntity  = new InputStreamEntity(speechAudioStreamer.getInputStream(), -1);
+		speechAudioStreamer.start();
+
+		reqEntity.setContentType(CODEC);
+
+		reqEntity.setChunked(true);
+
+		return reqEntity;
+	}
+
 
 	private StringBuilder inputStreamToString(InputStream is) {
 		String line = "";
@@ -151,8 +176,8 @@ public class EvaVoiceClient {
 
 		// Read response until the end
 		try {
-			while ((line = rd.readLine()) != null) {
-				total.append(line);
+			while ((line = rd.readLine()) != null) { 
+				total.append(line); 
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -162,76 +187,84 @@ public class EvaVoiceClient {
 		return total;
 	}
 
-	private void processResponse(HttpResponse response)
-			throws IllegalStateException, IOException {
+	private void processResponse(HttpResponse response) throws IllegalStateException, IOException
+	{
 		HttpEntity resEntity = response.getEntity();
 
-		Log.i(TAG, "Response status: " + response.getStatusLine());
-		Header[] h = response.getAllHeaders();
 
-		for (int i = 0; i < h.length; i++) {
-			Log.i(TAG, "Header:" + h[i].getName() + "=" + h[i].getValue());
+		System.out.println(response.getStatusLine());
+		Header [] h = response.getAllHeaders();
+
+		for(int i=0;i<h.length;i++)
+		{
+			Log.i("EVA","Header:"+h[i].getName()+"="+h[i].getValue());
 		}
 
 		InputStream is = resEntity.getContent();
 
 		mEvaJson = inputStreamToString(is).toString();
 
-		Log.i(TAG, "Response: \n" + mEvaJson);
-
+		Log.i(TAG, "Response: \n"+mEvaJson);
+		
 		resEntity.consumeContent();
 	}
-
-	public String getEvaJson() {
+	
+	public String getEvaJson()
+	{
 		return mEvaJson;
 	}
 
-	
-	
-	public void sendFile(File outfile) {
+	public void startVoiceRequest() throws Exception{
+		mInTransaction = true;
 		HttpClient httpclient = null;
 		try {
 			httpclient = getHttpClient();
 
 			URI uri = getURI();
-			Log.i(TAG, "Sending post request to URI: " + uri);
+			Log.i(TAG,"Sending post request to URI: "+uri);
 
-			FileEntity reqEntity = new FileEntity(outfile, "audio/wav");
+			InputStreamEntity reqEntity = setAudioContent(mSpeechAudioStreamer);
+			
 
-			mHttpPost = getHeader(uri, outfile.length());//0); // fileSize);
-			mHttpPost.setEntity(reqEntity);
-
+			mHttpPost = getHeader(uri, 0);	//fileSize);
+			mHttpPost.setEntity(reqEntity);		
+			
 			HttpResponse response = httpclient.execute(mHttpPost);
 
-			Log.i(TAG, "After Sending post request");
+			Log.i(TAG,"After Sending post request");
 			processResponse(response);
 
-			if (httpclient != null) {
+			if( httpclient != null ) {
 				httpclient.getConnectionManager().shutdown();
 				httpclient = null;
 			}
-		} catch (Exception e) {
+		}
+		catch(Exception e)	{
 			e.printStackTrace();
 			Log.e(TAG, "Exception sending voice request", e);
-		} finally {
-			// When HttpClient instance is no longer needed,
+		}
+		finally {
+			// When HttpClient instance is no longer needed, 
 			// shut down the connection manager to ensure
 			// immediate deallocation of all system resources
-			if (httpclient != null)
+			if( httpclient != null ) 
 				httpclient.getConnectionManager().shutdown();
 			mInTransaction = false;
 		}
-	}
 
-	public void stopTransfer() {
-		if (getInTransaction()) {
-			mHttpPost.abort();
-			mInTransaction = false;
-
-		}
 	}
 	
-	public boolean getInTransaction() {
+	public void stopTransfer()
+	{
+		if(getInTransaction())
+		{
+			mHttpPost.abort();
+			mInTransaction=false;
+		}
+	}
+
+	public boolean getInTransaction()
+	{
 		return mInTransaction;
 	}
 
