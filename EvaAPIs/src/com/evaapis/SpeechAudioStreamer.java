@@ -6,10 +6,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
@@ -17,244 +23,234 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.io.FileUtils;
-import org.xiph.speex.AudioFileWriter;
-import org.xiph.speex.OggSpeexWriter;
-import org.xiph.speex.SpeexEncoder;
 
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
 import android.util.Log;
 
-public class SpeechAudioStreamer
-{
+public class SpeechAudioStreamer {
 	public static final String TAG = "SpeechAudioStreamer";
-//	private PipedInputStream pipedIn;
-//	private PipedOutputStream pipedOut;
-	
+	private PipedInputStream pipedIn;
+	private PipedOutputStream pipedOut;
+
 	boolean mDebugRecording = true;
 
 	private AudioRecord mRecorder;
+	private FLACStreamEncoder mEncoder;
 	private byte[] mBuffer;
 	private boolean mIsRecording = false;
 
 	public static final int TEMP_BUFFER_SIZE = 5;
-	private static final long SILENCE_PERIOD = 500;
-	private static final float SILENCE_THRESHOLD = 2400;
+	private static final long SILENCE_PERIOD = 700;
+	private static final float SILENCE_THRESHOLD = 350;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
-	public static final int SPEEX_MODE = 1;
-	public static final int SPEEX_QUALITY = 8;
+	private int mSampleRate;
 
-	int mSilenceAccumulationBufferIndex           = 0;
+	int mSilenceAccumulationBufferIndex = 0;
 	float mSilenceAccumulationBuffer[] = new float[TEMP_BUFFER_SIZE];
 
 	long mLastStart = -1;
 	private int mSoundLevel;
+	
+	boolean wasNoise;
 
-	private boolean mWasNotSilent;
-	
-	public boolean done = false;
-	
-	String fileBase;
-	private Thread consumerThread;
-	
-	public SpeechAudioStreamer(int sampleRate) throws Exception {
-		fileBase = Environment.getExternalStorageDirectory().getPath() + "/sampling";
+	private String fifoPath;
+	private RandomAccessFile encodedFifo = null;
+
+	public SpeechAudioStreamer(Context context, int sampleRate)
+			throws Exception {
+		fifoPath = context.getApplicationInfo().dataDir + "/flac_stream_fifo";
+
+		Log.i(TAG, "initing fifo");
+		this.mEncoder = new FLACStreamEncoder();
+		mEncoder.initFifo(fifoPath);
+		mSampleRate = sampleRate;
+
+		Log.i(TAG, "Encoder=" + mEncoder.toString());
 	}
-
 
 	void initRecorder() {
-		Log.e("EVA","Starting to record");
-		int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
-				AudioFormat.ENCODING_PCM_16BIT);
+		Log.e(TAG, "Starting to record");
+		int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		mBuffer = new byte[bufferSize];
-		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
-				AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+		wasNoise = false;
+		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
+				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
+				bufferSize);
 
-		done = false;
-		mIsRecording = true;
-		mWasNotSilent = false;
-		mRecorder.startRecording();
 	}
 
-	
-
-/***
- * 
- * @param numberOfReadBytes
- * @return True - identified silence
- *         False - identified noise
- *         null - not enough info to make sure
- */
 	private Boolean checkForSilence(int numberOfReadBytes) {
 		float totalAbsValue = 0.0f;
-		short sample        = 0; 
+		short sample = 0;
 
-		if(numberOfReadBytes==0) return null;
+		if (numberOfReadBytes == 0)
+			return null;
 		// Analyze Sound.
-		for( int i=0; i<mBuffer.length; i+=2 ) 
-		{
-			sample = (short)( (mBuffer[i]) | mBuffer[i + 1] << 8 );
-			totalAbsValue += Math.abs( sample );
+		for (int i = 0; i < mBuffer.length; i += 2) {
+			sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
+			totalAbsValue += Math.abs(sample) / (numberOfReadBytes / 2);
 		}
-		totalAbsValue /= (numberOfReadBytes/2);
 
 		// Analyze temp buffer.
-		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex%TEMP_BUFFER_SIZE] = totalAbsValue;
-		float temp                   = 0.0f;
-		for( int i=0; i<TEMP_BUFFER_SIZE; ++i )
+		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex
+				% TEMP_BUFFER_SIZE] = totalAbsValue;
+		float temp = 0.0f;
+		for (int i = 0; i < TEMP_BUFFER_SIZE; ++i)
 			temp += mSilenceAccumulationBuffer[i];
 
 		mSilenceAccumulationBufferIndex++;
 
-		this.mSoundLevel = (int)temp;
-		
-		if((temp>=0) && (temp <= SILENCE_THRESHOLD))
-		{
-			if(mLastStart==-1)
-			{
+		this.mSoundLevel = (int) temp;
+
+		if ((temp >= 0) && (temp <= SILENCE_THRESHOLD)) {
+			if (mLastStart == -1) {
 				mLastStart = System.currentTimeMillis();
 				return null;
+			} else {
+				if ((System.currentTimeMillis() - mLastStart) > SILENCE_PERIOD) {
+					// long time of silence
+					return true;
+				}
+				// not enough time past
+				return null;
 			}
-
-			if((System.currentTimeMillis()-mLastStart) > SILENCE_PERIOD)
-			{
-				return true;
-			}
-			return null;
+		} else {
+			// noise
+			mLastStart = -1;
 		}
 
-		mLastStart = -1;
 		return false;
 	}
 
-	
 	public int getSoundLevel() {
 		return mSoundLevel;
 	}
 
-
-	class Producer implements Runnable 
-	{
+	/****
+	 * Read from Recorder and place in queue
+	 */
+	class Producer implements Runnable {
 		private final BlockingQueue queue;
 
-		Producer(BlockingQueue q) { 
+		Producer(BlockingQueue q) {
 			queue = q;
 		}
 
 		public void run() {
+			mRecorder.startRecording();
+
 			try {
 
-				for(int i=0;i<TEMP_BUFFER_SIZE;i++)
-				{
-					mSilenceAccumulationBuffer[i]=0.0f;
+				for (int i = 0; i < TEMP_BUFFER_SIZE; i++) {
+					mSilenceAccumulationBuffer[i] = 0.0f;
 				}
 
 				try {
-					android.os.Process.setThreadPriority(
-							android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+					android.os.Process
+							.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				} catch (Exception e) {
-					Log.e("EVA","Set rec thread priority failed: " + e.getMessage());
+					Log.e(TAG,
+							"Set rec thread priority failed: " + e.getMessage());
 				}
 
 				while (mIsRecording) {
-					//int packetSize = 2 * CHANNELS * mEncoder.speexEncoder.getFrameSize();
+					// int packetSize = 2 * CHANNELS *
+					// mEncoder.speexEncoder.getFrameSize();
 					int readSize = mRecorder.read(mBuffer, 0, mBuffer.length);
 
+					// Log.i("EVA","Read:"+readSize);
 
-
-				//	Log.i("EVA","Read:"+readSize);
-
-					if(readSize==0)
-					{
+					if (readSize == 0) {
 						try {
 							this.wait(10);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-					}
-					else
-					{
-						Boolean isSilence = checkForSilence(readSize);
-						if(Boolean.TRUE== isSilence && mWasNotSilent)
-						{
-							Log.i(TAG, "Found silence"); 
-							mIsRecording = false;  // Note this isn't the only way to stop recording - also possible from outside change of IsRecording to false
+					} else {
+						Boolean hadSilence = checkForSilence(readSize);
+						if (Boolean.FALSE == hadSilence) {
+							wasNoise = true;
 						}
-						else
-						{
-							if (Boolean.FALSE == isSilence && !mWasNotSilent) {
-								Log.i(TAG, "Identified first non-silence");
-								mWasNotSilent = true;
-							}
+						if (wasNoise && Boolean.TRUE == hadSilence) {
+							mIsRecording = false;
+						} else {
 							byte[] chunk = new byte[readSize];
 							System.arraycopy(mBuffer, 0, chunk, 0, readSize);
-
+							Log.i(TAG, "Produce chunk " + chunk.length);
 							queue.put(chunk);
 
 							Thread.sleep(10);
 						}
 					}
+
 				}
-				
+
 				queue.put(new byte[0]);
 
+				Log.i(TAG, "Finished producer thread");
 
-				Log.i("EVA","Finished producer thread");
-
-
-			} catch (InterruptedException ex)
-			{
+			} catch (InterruptedException ex) {
 				Log.i(TAG, "Interrupted recorder thread");
-			}
-			finally {
+			} finally {
 				mRecorder.stop();
-				mRecorder.release();				
+				mRecorder.release();
 			}
 		}
 
 	}
 
-	public File getWavFile() {
-		return new File(fileBase+".wav");
-	}
-	public File getSpeexFile() {
-		return new File(fileBase+".smx");
-	}
-	public File getSmpFile() {
-		return  new File(fileBase+".smp");
-	}
-	
+	private final static int SINGLE_FRAME_SIZE = 32000;
+
+	/***
+	 * Read from Queue, buffer up and send to encoder
+	 */
 	class Consumer implements Runnable {
 		private final BlockingQueue queue;
 
-		DataOutputStream dos=null;
+		DataOutputStream dos = null;
 		FileOutputStream fos = null;
 		int mAccumulationBufferPosition;
 		int mFrameSize;
 
+		byte[] mAccumulationBuffer;
+		byte[] mSecondaryBuffer;
 
-		byte [] mAccumulationBuffer;
-		byte [] mSecondaryBuffer;
-
-
-		private final static int SINGLE_FRAME_SIZE = 32000;
-
-		
 		Consumer(BlockingQueue q) {
 			mAccumulationBufferPosition = 0;
-			mFrameSize=SINGLE_FRAME_SIZE;
-			mAccumulationBuffer = new byte[2*mFrameSize];
-			mSecondaryBuffer = new byte[2*mFrameSize];
-			queue = q; 
+			mFrameSize = SINGLE_FRAME_SIZE;
+			mAccumulationBuffer = new byte[2 * mFrameSize];
+			mSecondaryBuffer = new byte[2 * mFrameSize];
+			queue = q;
 		}
+
+		private void encode(byte[] chunk) throws IOException {
+			Log.i(TAG, "encoding " + chunk.length + " bytes");
+
+			// encoded = mEncoder.encode(chunk);
+
+			ByteBuffer bf = ByteBuffer.allocateDirect(chunk.length);
+			bf.put(chunk);
+			
+			//ByteBuffer bf = ByteBuffer.wrap(chunk);
+			
+			mEncoder.write(bf, chunk.length);
+
+			return;
+		}
+
 		public void run() {
-			if(mDebugRecording)
-			{
-				File f = getSmpFile();
+			String fileBase = Environment.getExternalStorageDirectory()
+					.getPath() + "/sample";
+
+			if (mDebugRecording) {
+				File f = new File(fileBase + ".smp");
 
 				try {
 					fos = new FileOutputStream(f);
@@ -262,116 +258,111 @@ public class SpeechAudioStreamer
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-			}    
-
-			try {
-				while (mIsRecording) {
-					consume(queue.take()); 
-				}
-
-			} catch (InterruptedException ex) {
-				Log.i(TAG, "Interrupted encoding thread");
 			}
 
 			try {
-				Log.i(TAG,"Closing pipe");
-//				pipedOut.flush();
-//				pipedOut.close();
+				while (mIsRecording || !queue.isEmpty()) {
+					consume(queue.take());
+				}
 
-				if(mDebugRecording)
-				{
+			} catch (InterruptedException ex) {
+
+			}
+
+			try {
+				mEncoder.flush();
+				mEncoder.release();
+
+				if (mDebugRecording) {
 					dos.flush();
-					Log.i(TAG,"Flushed");
 					dos.close();
-					Log.i(TAG,"Closed");
-//					encodeFile(getSmpFile(), getSpeexFile());
-//					Log.i(TAG,"Encoded");
 
-					byte bytes[] = FileUtils.readFileToByteArray(getSmpFile());
-					Log.i(TAG,"Read "+bytes.length+" bytes");
+					// encodeFile(new File(fileBase+".smp"), new
+					// File(fileBase+".smx"));
 
-					WriteWavFile(getWavFile(), 16000, bytes);
-					Log.i(TAG,"Saved as Wav file");
+					byte bytes[] = FileUtils.readFileToByteArray(new File(
+							fileBase + ".smp"));
+
+					WriteWavFile(new File(fileBase + ".wav"), 16000, bytes);
 				}
 
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-//			int count=0;
-//			while(DictationHTTPClient.getInTransaction() && (count<MAX_WAIT_FOR_TRANSFER))
-//			{
-//				try {
-//					Thread.sleep(1000);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				count++;
-//			}
-//			
-//			if(DictationHTTPClient.getInTransaction())
-//			{
-//				DictationHTTPClient.stopTransfer();
-//			}
 
-			Log.i("EVA","Finished consumer thread");
-			done = true;
+			// int count=0;
+			// while(DictationHTTPClient.getInTransaction() &&
+			// (count<MAX_WAIT_FOR_TRANSFER))
+			// {
+			// try {
+			// Thread.sleep(1000);
+			// } catch (InterruptedException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
+			// count++;
+			// }
+			//
+			// if(DictationHTTPClient.getInTransaction())
+			// {
+			// DictationHTTPClient.stopTransfer();
+			// }
+
+			Log.i("EVA", "Finished consumer thread");
+
 		}
-		
-		void consume(Object x)
-		{
-			byte [] buffer = (byte[])x;
-			byte[] encoded=null;
+
+		void consume(Object x) {
+			byte[] buffer = (byte[]) x;
+			byte[] encoded = null;
 			byte[] chunk = new byte[mFrameSize];
-			
-			if(buffer.length==0)
-			{
-				Log.i(TAG,"Buffer length is 0 -- finishing!");
-				System.arraycopy(mAccumulationBuffer, 0, chunk, 0, mAccumulationBufferPosition);
-				try {
-					encoded = chunk;//mEncoder.encode(chunk);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				try {
-//					pipedOut.write(encoded);
-					if(mDebugRecording)
-					{
-						Log.i(TAG,"debug saving "+encoded.length);
-						dos.write(encoded);
+
+			Log.i(TAG, "consuming chunk " + buffer.length);
+			if (buffer.length == 0) {
+				Log.i(TAG, "Buffer length is 0");
+				System.arraycopy(mAccumulationBuffer, 0, chunk, 0,
+						mAccumulationBufferPosition);
+				if (chunk.length >0) {
+					try {
+						encode(chunk);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					if (mDebugRecording) {
+						try {
+							dos.write(chunk);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				
+
 				return;
 			}
-			
 
-			System.arraycopy(buffer, 0, mAccumulationBuffer, mAccumulationBufferPosition, buffer.length);
+			System.arraycopy(buffer, 0, mAccumulationBuffer,
+					mAccumulationBufferPosition, buffer.length);
 
-			mAccumulationBufferPosition+=buffer.length;
+			mAccumulationBufferPosition += buffer.length;
 
-			while(mAccumulationBufferPosition>=mFrameSize)
-			{
+			while (mAccumulationBufferPosition >= mFrameSize) {
 				System.arraycopy(mAccumulationBuffer, 0, chunk, 0, mFrameSize);
-				System.arraycopy(mAccumulationBuffer, mFrameSize, 
-						mSecondaryBuffer, 0, mAccumulationBufferPosition- mFrameSize);
-				byte []tmpBuffer = mAccumulationBuffer;
-				mAccumulationBuffer= mSecondaryBuffer;
+				System.arraycopy(mAccumulationBuffer, mFrameSize,
+						mSecondaryBuffer, 0, mAccumulationBufferPosition
+								- mFrameSize);
+				byte[] tmpBuffer = mAccumulationBuffer;
+				mAccumulationBuffer = mSecondaryBuffer;
 				mSecondaryBuffer = tmpBuffer;
-				
-				mAccumulationBufferPosition=mAccumulationBufferPosition-mFrameSize;
-				
+
+				mAccumulationBufferPosition = mAccumulationBufferPosition
+						- mFrameSize;
+
 				try {
-					encoded = chunk; //mEncoder.encode(chunk);
-//					pipedOut.write(encoded);
-					if(mDebugRecording)
-					{
-						Log.i(TAG,"debug saving "+encoded.length);
+					// encoded = mEncoder.encode(chunk);
+					encode(chunk);
+					if (mDebugRecording) {
 						dos.write(chunk);
 					}
 					Thread.sleep(20);
@@ -384,70 +375,141 @@ public class SpeechAudioStreamer
 		}
 	}
 
-	void start()
-	{
-//		pipedOut = new PipedOutputStream();
-//		try {
-//			pipedIn = new PipedInputStream(pipedOut);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		} 
+	/***
+	 * Read from encoder Fifo and write to HTTP stream
+	 */
+	class Uploader implements Runnable {
 
-		BlockingQueue q = new ArrayBlockingQueue<byte []>(1000);
+		@Override
+		public void run() {
+			String fileBase = Environment.getExternalStorageDirectory()
+					.getPath() + "/sample_encoded";
+
+			DataOutputStream dos = null;
+			
+			if (mDebugRecording) {
+				File f = new File(fileBase + ".fla");
+
+				try {
+					FileOutputStream fos = new FileOutputStream(f);
+					dos = new DataOutputStream(new BufferedOutputStream(fos));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+
+
+			
+			Log.i(TAG, "initing Fifo");
+			try {
+				encodedFifo = new RandomAccessFile(fifoPath, "r");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			
+			Log.i(TAG, "reading from Fifo");
+
+			while(true) {
+				
+				byte[] encodeBuffer = new byte[SINGLE_FRAME_SIZE];
+				int encodedLength = 0;
+				try {
+					encodedLength = encodedFifo.read(encodeBuffer);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				Log.i(TAG, "got " + encodedLength + " encoded bytes");
+				if (encodedLength < 0) {
+					break;
+				}
+				byte[] encoded = new byte[encodedLength];
+				System.arraycopy(encodeBuffer, 0, encoded, 0, encodedLength);
+
+				try {
+					pipedOut.write(encoded);
+					
+					if (mDebugRecording) {
+						try {
+							dos.write(encoded);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			}
+			Log.i(TAG, "Closing pipe");
+			try {
+				pipedOut.flush();
+				pipedOut.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			
+			if (mDebugRecording) {
+				try {
+				dos.flush();
+				dos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			Log.i(TAG, "Done uploading");
+		}
+
+	}
+
+	void start() {
+		if (mIsRecording) {
+			Log.w(TAG, "Already recording");
+			return;
+		}
+		mIsRecording = true;
+		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
 		Producer p = new Producer(q);
 		Consumer c = new Consumer(q);
-		mIsRecording = true;
-		new Thread(p).start();
-		consumerThread = new Thread(c);
-		consumerThread.start();
-	}
-
-	void waitForIt() throws InterruptedException {
-		consumerThread.join();
-	}
-
-	
-
-	private void encodeFile(final File inputFile, final File outputFile) throws IOException {
-
-		SpeexEncoder encoder = new SpeexEncoder();
-		encoder.init(SPEEX_MODE, SPEEX_QUALITY, SAMPLE_RATE, CHANNELS);
-
-		DataInputStream input = null;
-		AudioFileWriter output = null;
+		Uploader u = new Uploader();
+		new Thread(u).start(); // start reading from FIFO - must read before any
+								// write takes place
 		try {
-			input = new DataInputStream(new FileInputStream(inputFile));
-			output = new OggSpeexWriter(SPEEX_MODE, SAMPLE_RATE, CHANNELS, 1, false);
-			output.open(outputFile);
-			output.writeHeader("Encoded with: " + SpeexEncoder.VERSION);
-
-			byte[] buffer = new byte[2560]; // 2560 is the maximum needed value (stereo UWB)
-			int packetSize = 2 * CHANNELS * encoder.getFrameSize();
-
-			while (true) {
-				input.readFully(buffer, 0, packetSize);
-				encoder.processData(buffer, 0, packetSize);
-				int encodedBytes = encoder.getProcessedData(buffer, 0);
-				if (encodedBytes > 0) {
-					output.writePacket(buffer, 0, encodedBytes);
-				}
-			}
-		} catch (EOFException e) {
-			// This exception just provides exit from the loop
-		} finally {
-			try {
-				if (input != null) {
-					input.close();
-				}
-			} finally {
-				if (output != null) {
-					output.close();
-				}
-			}
+			Thread.sleep(20); // make sure reading has started
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+
+		Log.i(TAG, "encoder init");
+		mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16); // write header
+
+		new Thread(p).start();
+		new Thread(c).start();
 	}
 
-
+	/*
+	 * private void encodeFile(final File inputFile, final File outputFile)
+	 * throws IOException {
+	 * 
+	 * FLACStreamEncoder encoder = new FLACStreamEncoder(); encoder.(SPEEX_MODE,
+	 * SPEEX_QUALITY, SAMPLE_RATE, CHANNELS);
+	 * 
+	 * DataInputStream input = null; AudioFileWriter output = null; try { input
+	 * = new DataInputStream(new FileInputStream(inputFile)); output = new
+	 * OggSpeexWriter(SPEEX_MODE, SAMPLE_RATE, CHANNELS, 1, false);
+	 * output.open(outputFile); output.writeHeader("Encoded with: " +
+	 * SpeexEncoder.VERSION);
+	 * 
+	 * byte[] buffer = new byte[2560]; // 2560 is the maximum needed value
+	 * (stereo UWB) int packetSize = 2 * CHANNELS * encoder.getFrameSize();
+	 * 
+	 * while (true) { input.readFully(buffer, 0, packetSize);
+	 * encoder.processData(buffer, 0, packetSize); int encodedBytes =
+	 * encoder.getProcessedData(buffer, 0); if (encodedBytes > 0) {
+	 * output.writePacket(buffer, 0, encodedBytes); } } } catch (EOFException e)
+	 * { // This exception just provides exit from the loop } finally { try { if
+	 * (input != null) { input.close(); } } finally { if (output != null) {
+	 * output.close(); } } } }
+	 */
 
 	public byte[] loadBytesFromFile(File file) {
 		WritableByteChannel outputChannel = null;
@@ -481,19 +543,20 @@ public class SpeechAudioStreamer
 		return new byte[0];
 	}
 
-//	public InputStream getInputStream() throws IOException {
-//		return pipedIn;
-//
-//	}
+	public InputStream getInputStream() throws IOException {
+		pipedOut = new PipedOutputStream();
+		pipedIn = new PipedInputStream(pipedOut);
+		return pipedIn;
 
-	void WriteWavFile(File outputFile,int sampleRate,byte data[])
-	{
+	}
+
+	void WriteWavFile(File outputFile, int sampleRate, byte data[]) {
 		long longSampleRate = sampleRate;
-		int totalDataLen = data.length+36;
+		int totalDataLen = data.length + 36;
 		int totalAudioLen = data.length;
-		long byteRate = longSampleRate*2;
+		long byteRate = longSampleRate * 2;
 
-		FileOutputStream out=null;
+		FileOutputStream out = null;
 		try {
 			out = new FileOutputStream(outputFile);
 		} catch (FileNotFoundException e) {
@@ -502,7 +565,7 @@ public class SpeechAudioStreamer
 		}
 
 		byte[] header = new byte[44];
-		header[0] = 'R';  // RIFF/WAVE header
+		header[0] = 'R'; // RIFF/WAVE header
 		header[1] = 'I';
 		header[2] = 'F';
 		header[3] = 'F';
@@ -514,15 +577,15 @@ public class SpeechAudioStreamer
 		header[9] = 'A';
 		header[10] = 'V';
 		header[11] = 'E';
-		header[12] = 'f';  // 'fmt ' chunk
+		header[12] = 'f'; // 'fmt ' chunk
 		header[13] = 'm';
 		header[14] = 't';
 		header[15] = ' ';
-		header[16] = 16;  // 4 bytes: size of 'fmt ' chunk
+		header[16] = 16; // 4 bytes: size of 'fmt ' chunk
 		header[17] = 0;
 		header[18] = 0;
 		header[19] = 0;
-		header[20] = 1;  // format = 1
+		header[20] = 1; // format = 1
 		header[21] = 0;
 		header[22] = (byte) 1;
 		header[23] = 0;
@@ -534,9 +597,9 @@ public class SpeechAudioStreamer
 		header[29] = (byte) ((byteRate >> 8) & 0xff);
 		header[30] = (byte) ((byteRate >> 16) & 0xff);
 		header[31] = (byte) ((byteRate >> 24) & 0xff);
-		header[32] = (byte) (2 * 1);  // block align
+		header[32] = (byte) (2 * 1); // block align
 		header[33] = 0;
-		header[34] = 16;  // bits per sample
+		header[34] = 16; // bits per sample
 		header[35] = 0;
 		header[36] = 'd';
 		header[37] = 'a';
@@ -557,9 +620,7 @@ public class SpeechAudioStreamer
 		}
 	}
 
-
 	public void stop() {
 		mIsRecording = false;
 	}
-
 }
