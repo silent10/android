@@ -36,7 +36,7 @@ public class SpeechAudioStreamer {
 	private PipedInputStream pipedIn;
 	private PipedOutputStream pipedOut;
 
-	boolean mDebugRecording = true;
+	boolean mDebugRecording = false;
 
 	private AudioRecord mRecorder;
 	private FLACStreamEncoder mEncoder;
@@ -56,6 +56,7 @@ public class SpeechAudioStreamer {
 	long mLastStart = -1;
 	private int mSoundLevel;
 	private int mPeakSoundLevel;
+	private int mMinSoundLevel;
 	
 	boolean wasNoise;
 
@@ -75,12 +76,13 @@ public class SpeechAudioStreamer {
 	}
 
 	void initRecorder() {
-		Log.e(TAG, "Starting to record");
+		Log.e(TAG, "<<< Starting to record");
 		int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		mBuffer = new byte[bufferSize];
 		wasNoise = false;
 		mPeakSoundLevel = 0;
+		mMinSoundLevel = 999999;
 		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);
@@ -92,11 +94,14 @@ public class SpeechAudioStreamer {
 		return mSoundLevelBuffer;
 	}
 	public int getBufferIndex() {
-		return mSilenceAccumulationBufferIndex % mSoundLevelBuffer.length;
+		return mSilenceAccumulationBufferIndex;
 	}
 	
 	public int getPeakLevel() {
 		return mPeakSoundLevel;
+	}
+	public int getMinSoundLevel() {
+		return mMinSoundLevel;
 	}
 
 	private Boolean checkForSilence(int numberOfReadBytes) {
@@ -105,13 +110,19 @@ public class SpeechAudioStreamer {
 
 		if (numberOfReadBytes == 0)
 			return null;
+		if (mBuffer.length != numberOfReadBytes) {
+			Log.w(TAG, "unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
+			if (mBuffer.length < numberOfReadBytes) {
+				numberOfReadBytes = mBuffer.length;
+			}
+		}
 		// Analyze Sound.
-		for (int i = 0; i < mBuffer.length; i += 2) {
+		for (int i = 0; i < numberOfReadBytes; i += 2) {
 			sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
 			totalAbsValue += Math.abs(sample);
 		}
 		// average "sound level" of the current chunk
-		totalAbsValue /= (numberOfReadBytes / 2);
+		totalAbsValue /= numberOfReadBytes;
 
 		// Analyze temp buffer.
 		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex % TEMP_BUFFER_SIZE] = totalAbsValue;
@@ -119,21 +130,28 @@ public class SpeechAudioStreamer {
 		for (int i = 0; i < TEMP_BUFFER_SIZE; ++i)
 			temp += mSilenceAccumulationBuffer[i];
 
+		this.mSoundLevel = (int) temp;
+		mSilenceAccumulationBufferIndex++;
+		if (mSoundLevel > mPeakSoundLevel) {
+			mPeakSoundLevel = mSoundLevel;
+		}
+		if (mSoundLevel < mMinSoundLevel) {
+			mMinSoundLevel = mSoundLevel;
+		}
+		
+		// TODO: reduce Peak and increase minSound - to allow temporary peak/min to dissappear
+		
+		// identifiny speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
 		if (mSilenceAccumulationBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
 			// this last sample was half of the twice its part of last accumulation buffer
 			// this was a noise sample
 			return false;
 		}
 
-		this.mSoundLevel = (int) temp;
 		mSoundLevelBuffer[mSilenceAccumulationBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
 
-		mSilenceAccumulationBufferIndex++;
-		if (mSoundLevel > mPeakSoundLevel) {
-			mPeakSoundLevel = mSoundLevel;
-		}
-
-		if (temp <= mPeakSoundLevel/2) { // became silent
+//		Log.i(TAG, "current D: "+(temp - mMinSoundLevel)+  "  peak D: "+(mPeakSoundLevel-mMinSoundLevel));
+		if ((temp - mMinSoundLevel) <= (mPeakSoundLevel-mMinSoundLevel) * 0.20) { // became silent
 			if (mLastStart == -1) {
 				mLastStart = System.currentTimeMillis();
 				return null;
@@ -146,8 +164,10 @@ public class SpeechAudioStreamer {
 				return null;
 			}
 		} else {
-			// noise
-			mLastStart = -1;
+			if (mLastStart != -1) {
+				// noise again
+				mLastStart = -1;
+			}
 		}
 
 		return null;
@@ -203,7 +223,8 @@ public class SpeechAudioStreamer {
 						}
 					} else {
 						Boolean hadSilence = checkForSilence(readSize);
-						if (Boolean.FALSE == hadSilence) {
+						if (!wasNoise && Boolean.FALSE == hadSilence) {
+							Log.i(TAG, "<<< Found initial noise");
 							wasNoise = true;
 						}
 						if (wasNoise && Boolean.TRUE == hadSilence) {
@@ -211,7 +232,6 @@ public class SpeechAudioStreamer {
 						} else {
 							byte[] chunk = new byte[readSize];
 							System.arraycopy(mBuffer, 0, chunk, 0, readSize);
-							Log.i(TAG, "Produce chunk " + chunk.length);
 							queue.put(chunk);
 
 							Thread.sleep(10);
@@ -222,7 +242,7 @@ public class SpeechAudioStreamer {
 
 				queue.put(new byte[0]);
 
-				Log.i(TAG, "Finished producer thread");
+				Log.i(TAG, "<<< Finished producer thread");
 
 			} catch (InterruptedException ex) {
 				Log.i(TAG, "Interrupted recorder thread");
@@ -336,7 +356,7 @@ public class SpeechAudioStreamer {
 			// DictationHTTPClient.stopTransfer();
 			// }
 
-			Log.i("EVA", "Finished consumer thread");
+			Log.i(TAG, "<<< Finished consumer thread");
 
 		}
 
@@ -345,7 +365,6 @@ public class SpeechAudioStreamer {
 			byte[] encoded = null;
 			byte[] chunk = new byte[mFrameSize];
 
-			Log.i(TAG, "consuming chunk " + buffer.length);
 			if (buffer.length == 0) {
 				Log.i(TAG, "Buffer length is 0");
 				System.arraycopy(mAccumulationBuffer, 0, chunk, 0,
@@ -435,7 +454,7 @@ public class SpeechAudioStreamer {
 				e.printStackTrace();
 			}
 			
-			Log.i(TAG, "reading from Fifo");
+			Log.i(TAG, "<<< reading from encoded Fifo");
 
 			while(true) {
 				
@@ -446,7 +465,7 @@ public class SpeechAudioStreamer {
 				} catch (IOException e1) {
 					e1.printStackTrace();
 				}
-				Log.i(TAG, "got " + encodedLength + " encoded bytes");
+				//Log.i(TAG, "got " + encodedLength + " encoded bytes");
 				if (encodedLength < 0) {
 					break;
 				}
@@ -468,7 +487,7 @@ public class SpeechAudioStreamer {
 				}
 
 			}
-			Log.i(TAG, "Closing pipe");
+			Log.i(TAG, "<<< Read last encoded chunk - closing pipe");
 			try {
 				pipedOut.flush();
 				pipedOut.close();
@@ -484,7 +503,7 @@ public class SpeechAudioStreamer {
 					e.printStackTrace();
 				}
 			}
-			Log.i(TAG, "Done uploading");
+			Log.i(TAG, "<<< Done uploading");
 		}
 
 	}
@@ -650,5 +669,9 @@ public class SpeechAudioStreamer {
 
 	public void stop() {
 		mIsRecording = false;
+	}
+	
+	public boolean getIsRecording() {
+		return mIsRecording;
 	}
 }

@@ -7,6 +7,7 @@ import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 import java.io.IOException;
 
@@ -75,52 +76,74 @@ public class EvaReplyTest {
 	public void testEvaHotelResult() {
 		try {
 			when(mockDownloader.get(anyString())).thenReturn(
-			"{      \"status\":true, " +
-		    "       \"api_reply\":{ " +
-			"			   \"ean\": {" +
-			"			     \"longitude\": \"-74.00597\"," +
-			"			     \"maxStarRating\": \"3\"," +
-			"			     \"propertyCategory\": \"1\"," +
-			"			     \"latitude\": \"40.71427\"," +
-			"			     \"minStarRating\": \"3\"" +
-			"			   }," +
-			"			   \"SayIt\": \"3 stars hotel in New York City, New York\"," +
-			"			   \"ProcessedText\": \"3 Star hotels in NYC\"," +
-			"			   \"Locations\": [" +
-			"			     {" +
-			"			       \"Name\": \"Rehovot, Israel (GID=293725)\"," +
-			"			       \"Next\": 10," +
-			"			       \"Home\": \"GPS\"," +
-			"			       \"Index\": 0," +
-			"			       \"Type\": \"City\"," +
-			"			       \"Latitude\": 31.89421," +
-			"			       \"Longitude\": 34.81199," +
-			"			       \"Geoid\": 293725," +
-			"			       \"Airports\": \"TLV,SDV,JRS,BEV,MTZ\"," +
-			"			       \"Derived From\": \"GPS\"," +
-			"			       \"Country\": \"IL\"" +
-			"			     }," +
-			"			     {" +
-			"			       \"Name\": \"New York City, New York, United States (GID=5128581)\"," +
-			"			       \"Index\": 10," +
-			"			       \"Type\": \"City\"," +
-			"			       \"Latitude\": 40.71427," +
-			"			       \"Actions\": [" +
-			"			         \"Get Accommodation\"" +
-			"			       ]," +
-			"			       \"Longitude\": -74.00597," +
-			"			       \"Geoid\": 5128581," +
-			"			       \"Airports\": \"EWR,JFK,LGA,JRB\"," +
-			"			       \"All Airports Code\": \"NYC\"," +
-			"			       \"Country\": \"US\"" +
-			"			     }" +
-			"			   ]," +
-			"			   \"Hotel Attributes\": {" +
-			"			     \"Accommodation Type\": \"Hotel\"," +
-			"			     \"Quality\": [ 3, 3 ]" +
-			"			   }" +
-			"			 }" +
-			"}");
+			"{ "+
+			"  \"message\": \"Successful Parse\"," +
+			"  \"session_id\": \"8829be61-001b-11e3-96ce-1231390c5033\"," +
+			"  \"rid\": null," +
+			"  \"status\": true," +
+			"  \"transaction_key\": \"11e3-001b-87fc1d99-96ce-1231390c5033\"," +
+			"  \"ver\": \"v1.0.3585\"," +
+			"  \"api_reply\": {" +
+			"    \"SayIt\": \"3 stars hotel in New York City, New York\"," +
+			"    \"Flow\": [" +
+			"      {" +
+			"        \"SayIt\": \"When would you like to arrive to New York City, New York?\"," +
+			"        \"QuestionCategory\": \"Missing Date\"," +
+			"        \"QuestionSubCategory\": \"Arrival\"," +
+			"        \"QuestionType\": \"Open\"," +
+			"        \"Type\": \"Question\"," +
+			"        \"RelatedLocations\": [" +
+			"          1" +
+			"        ]" +
+			"      }" +
+			"    ]," +
+			"    \"ean\": {" +
+			"      \"longitude\": \"-74.00597\"," +
+			"      \"maxStarRating\": \"3\"," +
+			"      \"propertyCategory\": \"1\"," +
+			"      \"latitude\": \"40.71427\"," +
+			"      \"minStarRating\": \"3\"" +
+			"    }," +
+			"    \"ProcessedText\": \"3 Star hotels in NYC\"," +
+			"    \"Locations\": [" +
+			"      {" +
+			"        \"Name\": \"Ness Ziona, Israel (GID=294074)\"," +
+			"        \"Next\": 10," +
+			"        \"Home\": \"GPS\"," +
+			"        \"Index\": 0," +
+			"        \"Type\": \"City\"," +
+			"        \"Latitude\": 31.92933," +
+			"        \"Longitude\": 34.79868," +
+			"        \"Geoid\": 294074," +
+			"        \"Airports\": \"TLV,SDV,JRS,BEV,MTZ\"," +
+			"        \"Derived From\": \"GPS\"," +
+			"        \"Country\": \"IL\"" +
+			"      }," +
+			"      {" +
+			"        \"Name\": \"New York City, New York, United States (GID=5128581)\"," +
+			"        \"Index\": 10," +
+			"        \"Type\": \"City\"," +
+			"        \"Latitude\": 40.71427," +
+			"        \"Actions\": [" +
+			"          \"Get Accommodation\"" +
+			"        ]," +
+			"        \"Longitude\": -74.00597," +
+			"        \"Geoid\": 5128581," +
+			"        \"Airports\": \"EWR,JFK,LGA,JRB\"," +
+			"        \"All Airports Code\": \"NYC\"," +
+			"        \"Country\": \"US\"" +
+			"      }" +
+			"    ]," +
+			"    \"Hotel Attributes\": {" +
+			"      \"Accommodation Type\": \"Hotel\"," +
+			"      \"Quality\": [" +
+			"        3," +
+			"        3" +
+			"      ]" +
+			"    }" +
+			"  }," +
+			"  \"input_text\": \"3 Star hotels in NYC\"" +
+			"}" );
 			
 			when(mockProtocol.getExpediaAnswer(notNull(EvaApiReply.class), anyString())).thenReturn("{}"); // TODO: return data for hotel list
 		
@@ -129,12 +152,12 @@ public class EvaReplyTest {
 			mActivity.searchWithText("!!Testing Eva search");
 			
 			verify(mockDownloader).get(anyString());
-			verify(mockProtocol).getExpediaAnswer(notNull(EvaApiReply.class), anyString());
+			verify(mockProtocol, never()).getExpediaAnswer(notNull(EvaApiReply.class), anyString());
 		
 			// verify chat model holds the eva reply say-it
 			assertEquals(1, mChatListModel.getItemList().size());
-			assertEquals("3 stars hotel in New York City, New York",  mChatListModel.getItemList().get(0).getChat());
-			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
+			assertEquals("When would you like to arrive to New York City, New York?",  mChatListModel.getItemList().get(0).getChat());
+			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.DialogQuestion);
 
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy

@@ -78,7 +78,7 @@ public class ChatFragmentTest {
 	public void testChatList() {
 		assertEquals(0, mChatListModel.getItemList().size());
 
-		mChatFragment.addChatItem(new ChatItem("Test 1", ChatType.Eva));
+		mChatFragment.addChatItem(new ChatItem("Test 1", null, null, ChatType.Eva));
 		
 		assertEquals(1, mChatListModel.getItemList().size());
 		assertEquals("Test 1", mChatListModel.getItemList().get(0).getChat());
