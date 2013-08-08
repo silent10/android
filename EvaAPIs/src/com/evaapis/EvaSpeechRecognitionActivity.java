@@ -34,6 +34,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	Handler mUpdateLevel;
 
 	EvaVoiceClient mVoiceClient = null;
+	private SoundLevelView mSoundView;
 
 	private class EvaHttpDictationTask extends AsyncTask
 	{
@@ -100,6 +101,8 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		}
 
 	}
+	
+	
 
 
 	@SuppressWarnings("unchecked")
@@ -114,6 +117,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
 		mLevel=(TextView)findViewById(R.id.text_recordLevel);
+		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);
 		mStopButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -127,7 +131,15 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			public void handleMessage(Message msg) {
 				int level = mSpeechAudioStreamer.getSoundLevel();
 				mLevel.setText(""+level);
-				sendEmptyMessageDelayed(0, 1000);
+				if (mSpeechAudioStreamer.wasNoise) {
+					mSoundView.setSoundData(
+							mSpeechAudioStreamer.getSoundLevelBuffer(), 
+							mSpeechAudioStreamer.getBufferIndex(),
+							mSpeechAudioStreamer.getPeakLevel()
+					);
+					mSoundView.invalidate();
+				}
+				sendEmptyMessageDelayed(0, 200);
 				super.handleMessage(msg);
 			}
 		};

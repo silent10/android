@@ -8,18 +8,24 @@
     android:background="@drawable/speak_bitmap"
     android:theme="@style/Theme.Transparent" >
 
-    <TextView
-        android:id="@+id/text_listeningStatus"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Listening..." >
-    </TextView>
+        android:gravity="center_horizontal" >
 
-    <ProgressBar
-        android:id="@+id/progress_listening"
+        <TextView
+            android:id="@+id/text_listeningStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Listening..." />
+
+    </LinearLayout>
+
+    <com.evaapis.SoundLevelView
+        android:id="@+id/surfaceView_sound_wave"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-    </ProgressBar>
+        android:layout_height="80dp"
+        android:layout_margin="20dp" />
 
     <TextView
         android:id="@+id/text_recordLevel"
@@ -32,7 +38,10 @@
         android:id="@+id/btn_listeningStop"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_stop" > 
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="@string/button_stop" >
+ 
     </Button>
 
 </LinearLayout>

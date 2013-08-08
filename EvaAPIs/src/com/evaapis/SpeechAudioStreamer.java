@@ -51,6 +51,7 @@ public class SpeechAudioStreamer {
 
 	int mSilenceAccumulationBufferIndex = 0;
 	float mSilenceAccumulationBuffer[] = new float[TEMP_BUFFER_SIZE];
+	int mSoundLevelBuffer[] = new int[250];
 
 	long mLastStart = -1;
 	private int mSoundLevel;
@@ -85,6 +86,18 @@ public class SpeechAudioStreamer {
 				bufferSize);
 
 	}
+	
+	
+	public int[] getSoundLevelBuffer() {
+		return mSoundLevelBuffer;
+	}
+	public int getBufferIndex() {
+		return mSilenceAccumulationBufferIndex % mSoundLevelBuffer.length;
+	}
+	
+	public int getPeakLevel() {
+		return mPeakSoundLevel;
+	}
 
 	private Boolean checkForSilence(int numberOfReadBytes) {
 		float totalAbsValue = 0.0f;
@@ -95,24 +108,32 @@ public class SpeechAudioStreamer {
 		// Analyze Sound.
 		for (int i = 0; i < mBuffer.length; i += 2) {
 			sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
-			totalAbsValue += Math.abs(sample) / (numberOfReadBytes / 2);
+			totalAbsValue += Math.abs(sample);
 		}
+		// average "sound level" of the current chunk
+		totalAbsValue /= (numberOfReadBytes / 2);
 
 		// Analyze temp buffer.
-		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex
-				% TEMP_BUFFER_SIZE] = totalAbsValue;
+		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex % TEMP_BUFFER_SIZE] = totalAbsValue;
 		float temp = 0.0f;
 		for (int i = 0; i < TEMP_BUFFER_SIZE; ++i)
 			temp += mSilenceAccumulationBuffer[i];
 
-		mSilenceAccumulationBufferIndex++;
+		if (mSilenceAccumulationBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
+			// this last sample was half of the twice its part of last accumulation buffer
+			// this was a noise sample
+			return false;
+		}
 
 		this.mSoundLevel = (int) temp;
+		mSoundLevelBuffer[mSilenceAccumulationBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
+
+		mSilenceAccumulationBufferIndex++;
 		if (mSoundLevel > mPeakSoundLevel) {
 			mPeakSoundLevel = mSoundLevel;
 		}
 
-		if ((temp >= 0) && (temp <= mPeakSoundLevel/2)) {
+		if (temp <= mPeakSoundLevel/2) { // became silent
 			if (mLastStart == -1) {
 				mLastStart = System.currentTimeMillis();
 				return null;
@@ -129,13 +150,13 @@ public class SpeechAudioStreamer {
 			mLastStart = -1;
 		}
 
-		return false;
+		return null;
 	}
 
 	public int getSoundLevel() {
 		return mSoundLevel;
 	}
-
+	
 	/****
 	 * Read from Recorder and place in queue
 	 */
@@ -153,6 +174,9 @@ public class SpeechAudioStreamer {
 
 				for (int i = 0; i < TEMP_BUFFER_SIZE; i++) {
 					mSilenceAccumulationBuffer[i] = 0.0f;
+				}
+				for (int i=0; i<mSoundLevelBuffer.length; i++) {
+					mSoundLevelBuffer[i] = 0;
 				}
 
 				try {

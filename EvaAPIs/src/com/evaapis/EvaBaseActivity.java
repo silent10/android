@@ -65,14 +65,14 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	}
 
 	@Override
-	public void onStop() {
+	public void onDestroy() {
 		// Don't forget to shutdown!
 		if (mTts != null) {
 			mTts.stop();
 			mTts.shutdown();
 		}
 
-		super.onStop();
+		super.onDestroy();
 	}
 	
 	@Override
