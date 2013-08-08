@@ -35,6 +35,7 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
@@ -47,6 +48,8 @@ import com.evature.util.EvatureSSLSocketFactory;
 public class EvaVoiceClient {
 
 	private static final String TAG = "EvaVoiceClient";
+
+	private static final boolean LOCAL_DEBUG = false;
 	
 	private String mSiteCode = "UNKNOWN";
 	private String mAppKey = "UNKNOWN";
@@ -57,7 +60,7 @@ public class EvaVoiceClient {
 
 
 	private static short PORT = (short) 443;
-	private static String HOSTNAME = "ec2-54-227-125-132.compute-1.amazonaws.com"; //"vproxy.evaws.com";
+	private static String HOSTNAME = LOCAL_DEBUG ? "ec2-54-224-32-205.compute-1.amazonaws.com" : "vproxy.evaws.com";
 
 	private String mEvaJson;
 	private String mSessionId;
@@ -83,6 +86,8 @@ public class EvaVoiceClient {
 		HttpProtocolParams.setContentCharset(params, "UTF-8");
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setUseExpectContinue(params, false);
+		HttpConnectionParams.setConnectionTimeout(params, 10000); // wait 10 seconds to establish connection
+		HttpConnectionParams.setSoTimeout(params, 120000); // wait 120 seconds to get first byte in response
 
 		// Initialize the HTTP client
 		HttpClient httpclient = new DefaultHttpClient(params);
@@ -107,11 +112,17 @@ public class EvaVoiceClient {
 	{
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 
-		qparams.add(new BasicNameValuePair("site_code", mSiteCode));
-		qparams.add(new BasicNameValuePair("api_key", mAppKey));
+		if (LOCAL_DEBUG) {
+			qparams.add(new BasicNameValuePair("site_code", "concur_m"));//mSiteCode));
+			qparams.add(new BasicNameValuePair("api_key", "0585a2f5-9d6c-41a4-981a-842fc791b5dc"));//mAppKey));
+			qparams.add(new BasicNameValuePair("vr_service", "google_streaming"));
+		}
+		else {
+			qparams.add(new BasicNameValuePair("site_code", mSiteCode));
+			qparams.add(new BasicNameValuePair("api_key", mAppKey));
+		}
 		qparams.add(new BasicNameValuePair("id",  mDeviceId));
 		qparams.add(new BasicNameValuePair("session_id", mSessionId));
-
 		try {
 			double longitude = EvatureLocationUpdater.getLongitude();
 			double latitude = EvatureLocationUpdater.getLatitude();
@@ -197,7 +208,7 @@ public class EvaVoiceClient {
 
 		for(int i=0;i<h.length;i++)
 		{
-			Log.i("EVA","Header:"+h[i].getName()+"="+h[i].getValue());
+			Log.i(TAG,"Header:"+h[i].getName()+"="+h[i].getValue());
 		}
 
 		InputStream is = resEntity.getContent();
@@ -221,7 +232,7 @@ public class EvaVoiceClient {
 			httpclient = getHttpClient();
 
 			URI uri = getURI();
-			Log.i(TAG,"Sending post request to URI: "+uri);
+			Log.i(TAG,"<<< Sending post request to URI: "+uri);
 
 			InputStreamEntity reqEntity = setAudioContent(mSpeechAudioStreamer);
 			
@@ -231,8 +242,9 @@ public class EvaVoiceClient {
 			
 			HttpResponse response = httpclient.execute(mHttpPost);
 
-			Log.i(TAG,"After Sending post request");
+			Log.i(TAG,"<<< Getting response");
 			processResponse(response);
+			Log.i(TAG,"<<< Got response");
 
 			if( httpclient != null ) {
 				httpclient.getConnectionManager().shutdown();

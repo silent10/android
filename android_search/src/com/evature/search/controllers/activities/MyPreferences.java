@@ -3,15 +3,20 @@
  */
 package com.evature.search.controllers.activities;
 
+import java.util.Map;
+
+import roboguice.activity.RoboPreferenceActivity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.evature.search.R;
 
-public class MyPreferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+public class MyPreferences extends RoboPreferenceActivity implements OnSharedPreferenceChangeListener {
+
+	private static final String TAG = "MyPreferences";
 
 	// This approach was deprecated, but the new fragments approach is not backwards compatible!!!
 	@SuppressWarnings("deprecation")
@@ -39,6 +44,11 @@ public class MyPreferences extends PreferenceActivity implements OnSharedPrefere
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Log.i(TAG, "Preference "+key+" changed");
+		Map<String, ?> allPref = sharedPreferences.getAll();
+		for (Object k : allPref.keySet()) {
+			Log.i(TAG, "Key: "+k+"  value: "+allPref.get(k));
+		}
 	}
 
 }

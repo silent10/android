@@ -265,9 +265,6 @@ public:
   {
     //aj::log(ANDROID_LOG_DEBUG, LTAG, "Asked to write buffer of size %d", bufsize);
 
-	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write    buffer of size %d", bufsize);
-	aj::log(ANDROID_LOG_ERROR, LTAG, "--> testing logging");
-
     // We have 8 or 16 bit pcm in the buffer, but FLAC expects 32 bit samples,
     // where some of the 32 bits are unused.
     int bufsize32 = bufsize / (m_bits_per_sample / 8);
@@ -275,7 +272,6 @@ public:
 
     // Protect from overly large buffers on the JNI side.
     if (bufsize32 > m_write_buffer_size) {
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write   #2 ");
       // The only way we can handle this sanely without fragmenting buffers and
       // so forth is to use a separate code path here. In this, we'll flush the
       // current write buffer to the FIFO, and immediately append a new
@@ -290,7 +286,6 @@ public:
 
       // Signal writer to wake up.
       pthread_cond_signal(&m_writer_condition);
-      __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  ret= %d", ret);
       return ret;
     }
 
@@ -298,7 +293,6 @@ public:
     // If the current write buffer cannot hold the amount of data we've
     // got, push it onto the write FIFO and create a new buffer.
     if (m_write_buffer && m_write_buffer_offset + bufsize32 > m_write_buffer_size) {
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write   #3");
       aj::log(ANDROID_LOG_DEBUG, LTAG, "JNI buffer is full, pushing to FIFO");
       flush_to_fifo();
 
@@ -306,21 +300,16 @@ public:
       pthread_cond_signal(&m_writer_condition);
     }
 
-    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  #4");
-
     // If we need to create a new buffer, do so now.
     if (!m_write_buffer) {
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  #5");
       //aj::log(ANDROID_LOG_DEBUG, LTAG, "Need new buffer.");
       m_write_buffer = new FLAC__int32[m_write_buffer_size];
       m_write_buffer_offset = 0;
     }
 
-    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  #6  buffer=%d   bufsize=%d   bufsize32=%d", buffer, bufsize, bufsize32);
     // At this point we know that there's a write buffer, and we know that
     // there's enough space in it to write the data we've received.
     int ret = copyBuffer(buffer, bufsize, bufsize32);
-    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "--> write  ret= %d", ret);
     return ret;
   }
 
@@ -351,6 +340,7 @@ public:
 
         write_fifo_t * current = fifo;
         while (current) {
+        	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer encoding size %d", current->m_buffer_fill_size);
           //aj::log(ANDROID_LOG_DEBUG, LTAG, "Encoding current entry %p, buffer %p, size %d",
           //    current, current->m_buffer, current->m_buffer_fill_size);
 
@@ -389,12 +379,14 @@ public:
 
     pthread_mutex_unlock(&m_fifo_mutex);
 
+    __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer sleeping");
+
     //aj::log(ANDROID_LOG_DEBUG, LTAG, "Writer thread dies.");
 	for (long i=0;i<50; i++){
-		aj::log(ANDROID_LOG_DEBUG, LTAG,".");
 		usleep(5000);
 	}
-    aj::log(ANDROID_LOG_DEBUG, LTAG, "slept.");
+	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer slept");
+//    aj::log(ANDROID_LOG_DEBUG, LTAG, "slept.");
     return NULL;
   }
 
@@ -462,12 +454,7 @@ private:
       m_write_buffer_offset += bufsize32;
     }
     else if (16 == m_bits_per_sample) {
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  before copyBuffer");
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  buf= %d", buf);
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  buffer= %d", buffer);
-    	__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  bufsize= %d", bufsize);
       copyBuffer<int16_t>(buf, buffer, bufsize);
-      __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "---->  after copyBuffer");
       m_write_buffer_offset += bufsize32;
     }
     else {
@@ -626,12 +613,9 @@ Java_com_evaapis_FLACStreamEncoder_initFifo(JNIEnv * env, jobject obj,
 	*/
 	const char * APPNAME = "FLACStreamEncoder";
 	char * filename = aj::convert_jstring_path(env, outfile);
-	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "-------> unlink and mkfifo %s", filename);
 	int res = unlink(filename);
-	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "-------> unlinked %d", res);
 	res = mkfifo(filename, 0777);
 	fifo_filename = filename;
-	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "-------> created %d", res);
 }
 
 JNIEXPORT
@@ -697,7 +681,6 @@ Java_com_evaapis_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
   }
 
   char * buf = static_cast<char *>(env->GetDirectBufferAddress(buffer));
-  __android_log_print(ANDROID_LOG_VERBOSE, LTAG, "-->  FLACStreamEncoder_write  buf = %d", buf);
   return encoder->write(buf, bufsize);
 }
 
