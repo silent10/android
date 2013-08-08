@@ -42,7 +42,7 @@ public class ChatAdapterTest {
 	public void testView() {
         assertEquals(0, mChatListModel.getItemList().size());
 		
-		mAdapter.add(new ChatItem("TEST 111", ChatType.Eva));
+		mAdapter.add(new ChatItem("TEST 111", null, null, ChatType.Eva));
 		assertEquals(1, mChatListModel.getItemList().size());
 		
 		mAdapter.add(new ChatItem("222 TEST"));

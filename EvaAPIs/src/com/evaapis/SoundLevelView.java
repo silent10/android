@@ -18,6 +18,7 @@ public class SoundLevelView extends View {
 		private int soundBuffIndex;
 		private int peakSound;
 		private int numOfPoints;
+		private int minSound;
 
 		public SoundLevelView(Context ctx, AttributeSet attrSet) {
 			super(ctx, attrSet);
@@ -30,34 +31,28 @@ public class SoundLevelView extends View {
 		public void onDraw(Canvas canvas) {
 			super.onDraw(canvas);
 			if (soundBuff != null && pointsBuff != null) {
-				int min = 99999;
-				int firstNoneZero = -1;
-				for (int i=0; i<soundBuff.length; i++) {
-					float soundLevel = soundBuff[(i+this.soundBuffIndex+1) % soundBuff.length];
-					if (soundLevel > 0) {
-						if (soundLevel < min) {
-							min = soundBuff[i];
-						}
-						if (firstNoneZero == -1) {
-							firstNoneZero = i;
-						}
-					}
+				int startOfBuff = 0;
+				numOfPoints = soundBuffIndex;
+				if (soundBuffIndex > soundBuff.length) {
+					startOfBuff = soundBuffIndex+1;
+					numOfPoints = soundBuff.length;
 				}
 				int max = peakSound;
+				int min = minSound;
 				int delta = max - min;
 				// build points array
-				float prevX = 0;
 				int qi = 0;
 				int height = (canvas.getHeight()-2)/2;
 				float prevY = height;
 				float width = canvas.getWidth()-2;
-				numOfPoints = soundBuff.length - firstNoneZero;
 				float xStep = width / soundBuff.length;
-				for (int i=firstNoneZero; i<soundBuff.length; i++) {
+				float prevX = (width - numOfPoints*xStep)/2;
+				
+				for (int i=0; i<numOfPoints; i++) {
 					pointsBuff[qi] = prevX;
 					pointsBuff[qi+1] = prevY;
 					pointsBuff[qi+2] = prevX+xStep;
-					float soundLevel = soundBuff[(i+this.soundBuffIndex+1) % soundBuff.length];
+					float soundLevel = soundBuff[(i+startOfBuff) % soundBuff.length];
 					if (soundLevel > 0) {
 						soundLevel -= min;
 					}
@@ -74,12 +69,13 @@ public class SoundLevelView extends View {
 			}
 		}
 
-		public void setSoundData(int[] buff, int index, int peakSound) {
+		public void setSoundData(int[] buff, int index, int peakSound, int minSound) {
 			this.soundBuff = buff;
 			this.soundBuffIndex = index;
 			this.peakSound = peakSound;
+			this.minSound = minSound;
 			if (pointsBuff == null || buff.length*4 != pointsBuff.length) {
-				Log.i(TAG, "points buff for "+buff.length+" sound buff");
+				Log.i(TAG, "Setting points buff for "+buff.length+" sound samples");
 				pointsBuff = new float[buff.length*4];
 			}
 		}
