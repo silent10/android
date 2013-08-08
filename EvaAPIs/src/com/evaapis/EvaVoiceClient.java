@@ -57,7 +57,7 @@ public class EvaVoiceClient {
 
 
 	private static short PORT = (short) 443;
-	private static String HOSTNAME = "vproxy.evaws.com";
+	private static String HOSTNAME = "ec2-54-227-125-132.compute-1.amazonaws.com"; //"vproxy.evaws.com";
 
 	private String mEvaJson;
 	private String mSessionId;

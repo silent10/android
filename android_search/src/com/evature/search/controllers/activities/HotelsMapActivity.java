@@ -81,7 +81,7 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
        
         EvaXpediaDatabase evaDb = MyApplication.getDb();
         
-        int length=evaDb.mHotelData.length;
+        int length= evaDb.mHotelData != null ? evaDb.mHotelData.length : 0;
         if (length == 0) {
         	HotelsMapActivity.this.finishActivity(0);
         }
