@@ -1,16 +1,12 @@
 package com.evature.search.controllers.activities;
 
 import roboguice.activity.RoboFragmentActivity;
-import roboguice.event.Observes;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.controllers.events.ChatItemClicked;
-import com.evature.search.controllers.events.HotelsListUpdated;
-import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -84,6 +80,7 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
         int length= evaDb.mHotelData != null ? evaDb.mHotelData.length : 0;
         if (length == 0) {
         	HotelsMapActivity.this.finishActivity(0);
+        	return;
         }
         if(length>30) length=30;
         
