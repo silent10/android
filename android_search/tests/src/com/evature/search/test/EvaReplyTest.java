@@ -73,7 +73,7 @@ public class EvaReplyTest {
 
 	
 	@Test
-	public void testEvaHotelResult() {
+	public void testEvaHotelMissingDateResult() {
 		try {
 			when(mockDownloader.get(anyString())).thenReturn(
 			"{ "+
@@ -157,6 +157,101 @@ public class EvaReplyTest {
 			// verify chat model holds the eva reply say-it
 			assertEquals(1, mChatListModel.getItemList().size());
 			assertEquals("When would you like to arrive to New York City, New York?",  mChatListModel.getItemList().get(0).getChat());
+			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.DialogQuestion);
+
+		} catch (IOException e) {
+			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
+		}
+	}
+	
+	@Test
+	public void testEvaHotelResult() {
+		try {
+			when(mockDownloader.get(anyString())).thenReturn(
+			"{" +
+			"   \"message\": \"Successful Parse\"," +
+			"   \"session_id\": \"afa0f4d4-0038-11e3-96ce-1231390c5033\"," +
+			"   \"rid\": null," +
+			"   \"status\": true," +
+			"   \"transaction_key\": \"11e3-0038-af42ba73-96ce-1231390c5033\"," +
+			"   \"ver\": \"v1.0.3585\"," +
+			"   \"api_reply\": {" +
+			"     \"SayIt\": \"hotel in New York City, New York, arriving August 14th, 2013 for 5 nights\"," +
+			"     \"Flow\": [" +
+			"       {" +
+			"         \"SayIt\": \"Hotel in New York City, New York, arriving August 14th, 2013 for 5 nights\"," +
+			"         \"Type\": \"Hotel\"," +
+			"         \"RelatedLocations\": [" +
+			"           1" +
+			"         ]" +
+			"       }" +
+			"     ]," +
+			"     \"ean\": {" +
+			"       \"longitude\": \"-74.00597\"," +
+			"       \"arrivalDate\": \"08/14/2013\"," +
+			"       \"propertyCategory\": \"1\"," +
+			"       \"latitude\": \"40.71427\"," +
+			"       \"departureDate\": \"08/19/2013\"" +
+			"     }," +
+			"     \"ProcessedText\": \"Hotel in NYC on Wednesday for 5 nights\"," +
+			"     \"Locations\": [" +
+			"       {" +
+			"         \"Name\": \"Ness Ziona, Israel (GID=294074)\"," +
+			"         \"Next\": 10," +
+			"         \"Home\": \"GPS\"," +
+			"         \"Index\": 0," +
+			"         \"Departure\": {" +
+			"           \"Calculated\": true," +
+			"           \"Date\": \"2013-08-14\"" +
+			"         }," +
+			"         \"Type\": \"City\"," +
+			"         \"Latitude\": 31.92933," +
+			"         \"Longitude\": 34.79868," +
+			"         \"Geoid\": 294074," +
+			"         \"Airports\": \"TLV,SDV,JRS,BEV,MTZ\"," +
+			"         \"Derived From\": \"GPS\"," +
+			"         \"Country\": \"IL\"" +
+			"       }," +
+			"       {" +
+			"         \"Name\": \"New York City, New York, United States (GID=5128581)\"," +
+			"         \"Index\": 10," +
+			"         \"Type\": \"City\"," +
+			"         \"Actions\": [" +
+			"           \"Get Accommodation\"" +
+			"         ]," +
+			"         \"Arrival\": {" +
+			"           \"Date\": \"2013-08-14\"" +
+			"         }," +
+			"         \"Latitude\": 40.71427," +
+			"         \"Longitude\": -74.00597," +
+			"         \"Geoid\": 5128581," +
+			"         \"Airports\": \"EWR,JFK,LGA,JRB\"," +
+			"         \"All Airports Code\": \"NYC\"," +
+			"         \"Stay\": {" +
+			"           \"Delta\": \"days=+5\"" +
+			"         }," +
+			"         \"Country\": \"US\"" +
+			"       }" +
+			"     ]," +
+			"     \"Hotel Attributes\": {" +
+			"       \"Accommodation Type\": \"Hotel\"" +
+			"     }" +
+			"   }," +
+			"   \"input_text\": \"Hotel in NYC on Wednesday for 5 nights\"" +
+			" }");
+			
+			when(mockProtocol.getExpediaAnswer(notNull(EvaApiReply.class), anyString())).thenReturn("{}"); // TODO: return data for hotel list
+		
+			assertEquals(0, mChatListModel.getItemList().size());
+		
+			mActivity.searchWithText("!!Testing Eva search");
+			
+			verify(mockDownloader).get(anyString());
+			verify(mockProtocol).getExpediaAnswer(notNull(EvaApiReply.class), anyString());
+		
+			// verify chat model holds the eva reply say-it
+			assertEquals(1, mChatListModel.getItemList().size());
+			assertEquals("Hotel in New York City, New York, arriving August 14th, 2013 for 5 nights",  mChatListModel.getItemList().get(0).getChat());
 			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.DialogQuestion);
 
 		} catch (IOException e) {
