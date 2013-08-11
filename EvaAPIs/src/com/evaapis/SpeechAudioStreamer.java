@@ -49,14 +49,14 @@ public class SpeechAudioStreamer {
 	public static final int CHANNELS = 1;
 	private int mSampleRate;
 
-	int mSilenceAccumulationBufferIndex = 0;
+	int mBufferIndex = 0;
 	float mSilenceAccumulationBuffer[] = new float[TEMP_BUFFER_SIZE];
 	int mSoundLevelBuffer[] = new int[250];
 
 	long mLastStart = -1;
 	private int mSoundLevel;
-	private int mPeakSoundLevel;
-	private int mMinSoundLevel;
+	private float mPeakSoundLevel;
+	private float mMinSoundLevel;
 	
 	boolean wasNoise;
 
@@ -81,8 +81,8 @@ public class SpeechAudioStreamer {
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		mBuffer = new byte[bufferSize];
 		wasNoise = false;
-		mPeakSoundLevel = 0;
-		mMinSoundLevel = 999999;
+		mPeakSoundLevel = 0f;
+		mMinSoundLevel = 999999f;
 		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 				bufferSize);
@@ -94,14 +94,14 @@ public class SpeechAudioStreamer {
 		return mSoundLevelBuffer;
 	}
 	public int getBufferIndex() {
-		return mSilenceAccumulationBufferIndex;
+		return mBufferIndex;
 	}
 	
 	public int getPeakLevel() {
-		return mPeakSoundLevel;
+		return (int)mPeakSoundLevel;
 	}
 	public int getMinSoundLevel() {
-		return mMinSoundLevel;
+		return (int)mMinSoundLevel;
 	}
 
 	private Boolean checkForSilence(int numberOfReadBytes) {
@@ -110,6 +110,7 @@ public class SpeechAudioStreamer {
 
 		if (numberOfReadBytes == 0)
 			return null;
+		
 		if (mBuffer.length != numberOfReadBytes) {
 			Log.w(TAG, "unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
 			if (mBuffer.length < numberOfReadBytes) {
@@ -125,33 +126,39 @@ public class SpeechAudioStreamer {
 		totalAbsValue /= numberOfReadBytes;
 
 		// Analyze temp buffer.
-		mSilenceAccumulationBuffer[mSilenceAccumulationBufferIndex % TEMP_BUFFER_SIZE] = totalAbsValue;
+		mSilenceAccumulationBuffer[mBufferIndex % TEMP_BUFFER_SIZE] = totalAbsValue;
 		float temp = 0.0f;
 		for (int i = 0; i < TEMP_BUFFER_SIZE; ++i)
 			temp += mSilenceAccumulationBuffer[i];
 
 		this.mSoundLevel = (int) temp;
-		mSilenceAccumulationBufferIndex++;
-		if (mSoundLevel > mPeakSoundLevel) {
-			mPeakSoundLevel = mSoundLevel;
-		}
-		if (mSoundLevel < mMinSoundLevel) {
-			mMinSoundLevel = mSoundLevel;
-		}
-		
-		// TODO: reduce Peak and increase minSound - to allow temporary peak/min to dissappear
-		
-		// identifiny speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
-		if (mSilenceAccumulationBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
-			// this last sample was half of the twice its part of last accumulation buffer
-			// this was a noise sample
-			return false;
-		}
+		mBufferIndex++;
 
-		mSoundLevelBuffer[mSilenceAccumulationBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
+		// reduce Peak and increase minSound - to allow temporary peak/min to disappear over time
+//		float dist = mPeakSoundLevel - mMinSoundLevel;
+//		float factor = dist * 0.01f;
+//		mPeakSoundLevel -= factor;
+//		mMinSoundLevel += factor;
+//		
+		if (temp > mPeakSoundLevel) {
+			mPeakSoundLevel = temp;
+		}
+		if (temp < mMinSoundLevel) {
+			mMinSoundLevel = temp;
+		}
+		
+		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
+		
+		// identifying speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
+//		if (mBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
+//			// this last sample was half of the twice its part of last accumulation buffer
+//			// this was a noise sample
+//			return false;
+//		}
+
 
 //		Log.i(TAG, "current D: "+(temp - mMinSoundLevel)+  "  peak D: "+(mPeakSoundLevel-mMinSoundLevel));
-		if ((temp - mMinSoundLevel) <= (mPeakSoundLevel-mMinSoundLevel) * 0.20) { // became silent
+		if ((temp - mMinSoundLevel) <= (mPeakSoundLevel-mMinSoundLevel) * 0.20f) { // became silent
 			if (mLastStart == -1) {
 				mLastStart = System.currentTimeMillis();
 				return null;
@@ -170,7 +177,7 @@ public class SpeechAudioStreamer {
 			}
 		}
 
-		return null;
+		return false;
 	}
 
 	public int getSoundLevel() {
