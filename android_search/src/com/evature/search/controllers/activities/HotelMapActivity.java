@@ -8,21 +8,15 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.evature.search.R;
-import com.evature.search.views.HotelItemizedOverlay;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CameraPositionCreator;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.LatLngBounds.Builder;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HotelMapActivity extends RoboFragmentActivity {
@@ -61,8 +55,6 @@ public class HotelMapActivity extends RoboFragmentActivity {
 
 
 	private void addHotelToMap() {
-		MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-      
       Intent intent = getIntent();
       Bundle extras = intent.getExtras();
       
