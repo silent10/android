@@ -611,9 +611,10 @@ Java_com_evaapis_FLACStreamEncoder_initFifo(JNIEnv * env, jobject obj,
 	/*
 	Iftah:  I added the mkfifo part to allow streaming the data to Java...
 	*/
-	const char * APPNAME = "FLACStreamEncoder";
 	char * filename = aj::convert_jstring_path(env, outfile);
+	aj::log(ANDROID_LOG_INFO, LTAG, "unlinking %s", filename);
 	int res = unlink(filename);
+	aj::log(ANDROID_LOG_INFO, LTAG, "making fifo %s", filename);
 	res = mkfifo(filename, 0777);
 	fifo_filename = filename;
 }
@@ -656,6 +657,7 @@ Java_com_evaapis_FLACStreamEncoder_deinit(JNIEnv * env, jobject obj)
   delete encoder;
   set_encoder(env, obj, NULL);
   if (fifo_filename) {
+	  aj::log(ANDROID_LOG_INFO, LTAG, "unlinking %s", fifo_filename);
 	  unlink(fifo_filename);
 	  fifo_filename = 0;
   }
