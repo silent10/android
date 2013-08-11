@@ -7,6 +7,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +63,10 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	
 	@Override public int getCount() {
 		// todo: if some items are collapsed then count from start and skip them
+		if (mChatList == null || mChatList.getItemList() == null) {
+			Log.e(TAG, "null chatList");
+			return 0;
+		}
 		return mChatList.getItemList().size();
 	};
 

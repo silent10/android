@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.inject.Singleton;
@@ -34,7 +35,9 @@ public class ChatItemList {
 		if (savedInstanceState != null) {
 			Log.d(TAG, "Loading ChatItem from savedInstanceState");
 			// Restore last state for checked position.
-			mChatListEva = savedInstanceState.getParcelableArrayList("mChatListEva");
+			ArrayList<ChatItem> parcelableArrayList = savedInstanceState.getParcelableArrayList("mChatListEva");
+			if (parcelableArrayList != null)
+				mChatListEva = parcelableArrayList;
 		}
 		else {
 			mChatListEva = new ArrayList<ChatItem>();
