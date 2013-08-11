@@ -252,7 +252,6 @@ public class EvaVoiceClient {
 			}
 		}
 		catch(Exception e)	{
-			e.printStackTrace();
 			Log.e(TAG, "Exception sending voice request", e);
 		}
 		finally {
@@ -270,7 +269,9 @@ public class EvaVoiceClient {
 	{
 		if(getInTransaction())
 		{
-			mHttpPost.abort();
+			if (mHttpPost != null) {
+				mHttpPost.abort();
+			}
 			mInTransaction=false;
 		}
 	}

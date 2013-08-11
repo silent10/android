@@ -2,11 +2,8 @@ package com.evaapis;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -69,7 +66,6 @@ public class SpeechAudioStreamer {
 
 		Log.i(TAG, "initing fifo");
 		this.mEncoder = new FLACStreamEncoder();
-		mEncoder.initFifo(fifoPath);
 		mSampleRate = sampleRate;
 
 		Log.i(TAG, "Encoder=" + mEncoder.toString());
@@ -369,7 +365,6 @@ public class SpeechAudioStreamer {
 
 		void consume(Object x) {
 			byte[] buffer = (byte[]) x;
-			byte[] encoded = null;
 			byte[] chunk = new byte[mFrameSize];
 
 			if (buffer.length == 0) {
@@ -433,7 +428,8 @@ public class SpeechAudioStreamer {
 	 * Read from encoder Fifo and write to HTTP stream
 	 */
 	class Uploader implements Runnable {
-
+		boolean startedReading  = false;
+		
 		@Override
 		public void run() {
 			String fileBase = Environment.getExternalStorageDirectory()
@@ -448,17 +444,20 @@ public class SpeechAudioStreamer {
 					FileOutputStream fos = new FileOutputStream(f);
 					dos = new DataOutputStream(new BufferedOutputStream(fos));
 				} catch (FileNotFoundException e) {
-					e.printStackTrace();
+					Log.e(TAG, "Failed to open debug file",e);
 				}
 			}
 
 
 			
 			Log.i(TAG, "initing Fifo");
+			mEncoder.initFifo(fifoPath);
 			try {
+				startedReading = true;
 				encodedFifo = new RandomAccessFile(fifoPath, "r");
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				Log.e(TAG, "Failed to open FIFO from encoder");
+				throw new RuntimeException("Failed to open FIFO from encoder");
 			}
 			
 			Log.i(TAG, "<<< reading from encoded Fifo");
@@ -470,9 +469,12 @@ public class SpeechAudioStreamer {
 				try {
 					encodedLength = encodedFifo.read(encodeBuffer);
 				} catch (IOException e1) {
-					e1.printStackTrace();
+					Log.e(TAG, "IO exception reading encoded Fifo", e1);
 				}
 				//Log.i(TAG, "got " + encodedLength + " encoded bytes");
+				if (encodedLength == 0) {
+					continue;
+				}
 				if (encodedLength < 0) {
 					break;
 				}
@@ -486,11 +488,11 @@ public class SpeechAudioStreamer {
 						try {
 							dos.write(encoded);
 						} catch (IOException e) {
-							e.printStackTrace();
+							Log.w(TAG, "Exception writing debug file",e ); 
 						}
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(TAG, "Exception writing to upload stream", e);
 				}
 
 			}
@@ -499,7 +501,7 @@ public class SpeechAudioStreamer {
 				pipedOut.flush();
 				pipedOut.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				Log.e(TAG, "Exception flusing upload stream", e1);
 			}
 			
 			if (mDebugRecording) {
@@ -507,7 +509,7 @@ public class SpeechAudioStreamer {
 				dos.flush();
 				dos.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					Log.e(TAG, "Exception flusing debug file", e);
 				}
 			}
 			Log.i(TAG, "<<< Done uploading");
@@ -524,20 +526,25 @@ public class SpeechAudioStreamer {
 		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
 		Producer p = new Producer(q);
 		Consumer c = new Consumer(q);
+		Object waitForReading = new Object();
 		Uploader u = new Uploader();
-		new Thread(u).start(); // start reading from FIFO - must read before any
-								// write takes place
-		try {
-			Thread.sleep(20); // make sure reading has started
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		new Thread(u).start(); // start uploader first -
+								// must read from encoded FIFO before any write takes place
+		while (u.startedReading == false) {
+			try {
+				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing");
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
-		Log.i(TAG, "encoder init");
+		Log.i(TAG, "Encoder init");
 		mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16); // write header
 
 		new Thread(p).start();
 		new Thread(c).start();
+		Log.i(TAG, "Audio Streamer started!");
 	}
 
 	/*
