@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.json.JSONException;
+
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
 import android.app.Activity;
@@ -29,9 +31,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -77,6 +82,7 @@ import com.evature.search.views.adapters.SwipeyTabsAdapter;
 import com.evature.search.views.adapters.TrainListAdapter;
 import com.evature.search.views.fragments.ChatFragment;
 import com.evature.search.views.fragments.ChatFragment.DialogClickHandler;
+import com.evature.search.views.fragments.DebugFragment;
 import com.evature.search.views.fragments.ExamplesFragment;
 import com.evature.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.evature.search.views.fragments.FlightsFragment;
@@ -87,7 +93,10 @@ import com.evature.search.views.fragments.TrainsFragment;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInitListener, EvaDownloaderTaskInterface {
+public class MainActivity extends EvaBaseActivity implements  
+													OnSharedPreferenceChangeListener, 
+													TextToSpeech.OnInitListener, 
+													EvaDownloaderTaskInterface {
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 	// private static String mExternalIpAddress = null;
@@ -121,6 +130,14 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		
 	private boolean mIsNetworkingOk = false;
 
+	private String mChatTabName;
+
+	private String mExamplesTabName;
+	private String mDebugTabName;
+	private String mHotelsTabName;
+
+	private String mHotelTabName;
+
 	static EvaHotelDownloaderTask mHotelDownloader = null;
 
 	@Override 
@@ -144,20 +161,32 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		Log.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_main);
+		
+		mChatTabName = getString(R.string.CHAT);
+		mExamplesTabName = getString(R.string.EXAMPLES);
+		mDebugTabName = getString(R.string.DEBUG);
+		mHotelsTabName = getString(R.string.HOTELS);
+		mHotelTabName = getString(R.string.HOTEL);
+
+		
 		if (savedInstanceState != null) { // Restore state
 			// Same code as onRestoreInstanceState() ?
 			Log.d(TAG, "restoring saved instance state");
 			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
 		} else {
 			Log.d(TAG, "no saved instance state");
-			mTabTitles = new ArrayList<String>(Arrays.asList("EXAMPLES", "CHAT"));
+			mTabTitles = new ArrayList<String>(Arrays.asList(mExamplesTabName, mChatTabName));
 		}
+		
+		
+		
+
 //		getActionBar().setDisplayHomeAsUpEnabled(true);
 		mSwipeyAdapter = new SwipeyTabsPagerAdapter(this, getSupportFragmentManager(), mViewPager, mTabs);
 		mViewPager.setAdapter(mSwipeyAdapter);
 		mTabs.setAdapter(mSwipeyAdapter);
 		mViewPager.setOnPageChangeListener(mTabs); // To sync the tabs with the viewpager
-		mViewPager.setCurrentItem(1);
+		mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 		// Initialize text-to-speech. This is an asynchronous operation.
 		// The OnInitListener (of the second argument) is called after initialization completes.
 	
@@ -172,7 +201,14 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		if (!mIsNetworkingOk) {
 			fatal_error(R.string.network_error);
 		}
+
 		
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+		if (sharedPreferences.getBoolean("debug", false)) {
+			showDebugInfo();
+		}
+
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
 		// Bundle a_bundle = new Bundle();
@@ -206,7 +242,17 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		public Fragment getItem(int position) {// Asks for the main fragment
 			Log.i(TAG, "getItem " + String.valueOf(position));
 			int size = mTabTitles.size();
-			if (position < size && mTabTitles.get(position).equals(getString(R.string.EXAMPLES))) { // Examples window
+			if (position >= size) {
+				Log.e(TAG, "No fragment made for Position "+position);
+				return null;
+			}
+			if (mTabTitles.get(position).equals(mDebugTabName)) { // debug window
+				Log.d(TAG, "Debug Fragment");
+				DebugFragment fragment = injector.getInstance(DebugFragment.class);
+				return fragment;
+			}
+			
+			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
 				Log.d(TAG, "Example Fragment");
 				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
 				fragment.setExamples(examplesArray);
@@ -215,12 +261,12 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 					public void onClick(String example) {
 						Log.d(TAG, "Running example: "+example);
 						MainActivity.this.addChatItem(new ChatItem(example));
-						mViewPager.setCurrentItem(1, true);
+						mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName), true);
 						MainActivity.this.searchWithText(example);
 					}});
 				return fragment; 
 			}
-			if (position < size && mTabTitles.get(position).equals(getString(R.string.CHAT))) { // Main Chat window
+			if (mTabTitles.get(position).equals(mChatTabName)) { // Main Chat window
 				Log.i(TAG, "Chat Fragment");
 				ChatFragment chatFragment = injector.getInstance(ChatFragment.class);
 				chatFragment.setDialogHandler(new DialogClickHandler() {
@@ -234,33 +280,34 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 				});
 				return chatFragment;
 			}
-			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS))) { // Hotel list window
+			if (mTabTitles.get(position).equals(mHotelsTabName)) { // Hotel list window
 				Log.i(TAG, "Hotels Fragment");
 				return injector.getInstance(HotelsFragment.class);
 			}
 			
-			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTELS_MAP))) { // Hotel list window
+			if (mTabTitles.get(position).equals(getString(R.string.HOTELS_MAP))) { // Hotel list window
 				Log.i(TAG, "HotelsMap Fragment");
 				Fragment fragment= injector.getInstance(HotelsMapFragment.class);
 				return fragment;
 			}
 			
-			if (position < size && mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
+			if (mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
 				Log.i(TAG, "Flights Fragment");
 				return injector.getInstance(FlightsFragment.class);
 			}
-			if (position < size && mTabTitles.get(position).equals(getString(R.string.HOTEL))) { // Single hotel
+			
+			if (mTabTitles.get(position).equals(mHotelTabName)) { // Single hotel
 				int hotelIndex = MyApplication.getDb().getHotelId();
 				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
 				return HotelFragment.newInstance(hotelIndex);
-			} else if (position < size && mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
+			}
+			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 				Log.i(TAG, "Trains Fragment");
 				return injector.getInstance(TrainsFragment.class);
 			}
-			else {
-				Log.e(TAG, "No fragment made for Position "+position+(position< size ? " titled "+mTabTitles.get(position) : ""));
-				return null;
-			}
+
+			Log.e(TAG, "No fragment made for Position "+position+(position< size ? " titled "+mTabTitles.get(position) : ""));
+			return null;
 		}
 
 		@Override
@@ -327,6 +374,14 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			mTabTitles.add(name);
 			stuffChanged(position);
 		}
+		
+		public void addTab(String name, int position) { // Dynamic tabs add to certain position
+			Log.d(TAG, "addTab "+name);
+			mTabs.setAdapter(null);
+			mTabTitles.add(position, name);
+			stuffChanged(position);
+		}
+		
 
 		public void removeTab() { // Dynamic tabs remove from end
 			Log.d(TAG, "removeTab");
@@ -382,7 +437,7 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			Bundle a_bundle = new Bundle(); // Lets send some data to the preferences activity
 		//	a_bundle.putStringArrayList("mLanguages", (ArrayList<String>) mSpeechRecognition.getmGoogleLanguages());
 			intent.putExtras(a_bundle);
-			startActivity(intent); // start the activity by calling
+			startActivity(intent);
 			return true;
 		case R.id.about: // Did the user select "About us"?
 			// Links in alertDialog:
@@ -427,24 +482,25 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	
 	private void addChatItem(ChatItem item) {
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
-		String chatTabName = getString(R.string.CHAT);
-		int index = mTabTitles.indexOf(chatTabName);
+		int index = mTabTitles.indexOf(mChatTabName);
 		if (index == -1) {
-			mSwipeyAdapter.addTab(chatTabName);
+			mSwipeyAdapter.addTab(mChatTabName);
 			index = mTabTitles.size() - 1;
 		}
+		Log.i(TAG, "Chat tab at index "+index);
 		// http://stackoverflow.com/a/8886019/78234
-		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
-		if (fragment != null) // could be null if not instantiated yet
-		{
-			if (fragment.getView() != null) {
-				fragment.addChatItem(item);
-			} else {
-				Log.e(TAG, "chat fragment.getView() == null!?!");
-			}
-		} else {
-			Log.e(TAG, "chat fragment == null!?");
-		}
+		mChatListModel.getItemList().add(item);
+//		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
+//		if (fragment != null) // could be null if not instantiated yet
+//		{
+//			if (fragment.getView() != null) {
+//				fragment.addChatItem(item);
+//			} else {
+//				Log.e(TAG, "chat fragment.getView() == null!?!");
+//			}
+//		} else {
+//			Log.e(TAG, "chat fragment == null!?");
+//		}
 
 	}
 	
@@ -542,9 +598,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 		builder.create().show();
 	}
 
-	int mMapTabIndex=-1;
-	int mHotelTabIndex=-1;
-	
 	@Override
 	public void endProgressDialog(int id) { // we got the hotel search reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
@@ -565,7 +618,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			if(tabName.equals("HOTELS"))
 			{
 				mSwipeyAdapter.addTab("MAP");
-				mMapTabIndex = mTabTitles.size() - 1;
 			}
 		} else if (id == R.string.HOTEL) {
 			mSwipeyAdapter.removeTab();
@@ -574,7 +626,6 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			// fragment.mAdapter.notifyDataSetChanged();
 			// I need to invalidate the entire view somehow!!!
 			mSwipeyAdapter.stuffChanged(index);
-			mHotelTabIndex = mTabTitles.size() - 1;
 		}
 		if (id == R.string.HOTELS) {
 			HotelsFragment fragment = (HotelsFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
@@ -586,10 +637,10 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 			}
 			HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
 			
-			if(mHotelTabIndex!=-1)
+			int hotelTabIndex = mTabTitles.indexOf(mHotelTabName);
+			if(hotelTabIndex !=-1)
 			{
-				mSwipeyAdapter.removeTab(mHotelTabIndex);
-				mHotelTabIndex=-1;
+				mSwipeyAdapter.removeTab(hotelTabIndex);
 			}
 		}
 
@@ -667,10 +718,57 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	}
 
+	int mDebugTab = -1;
+	private EvaApiReply lastEvaReply = null;
+	
+	private void showDebugInfo() {
+		if (mDebugTab == -1) {
+			mDebugTab = mTabTitles.indexOf(mDebugTabName);
+			if (mDebugTab == -1) {
+				mSwipeyAdapter.addTab(mDebugTabName, 1);
+				mDebugTab = 1; //mTabTitles.size() - 1;
+			}
+		}
+		DebugFragment fragment = (DebugFragment) mSwipeyAdapter.instantiateItem(mViewPager, mDebugTab);
+		if (fragment == null) {
+			Log.e(TAG, "No debug fragment");
+			return;
+		}
+		if (lastEvaReply == null) {
+			fragment.setDebugText("No reply yet.");
+		}
+		else {
+			try {
+				fragment.setDebugText(lastEvaReply.JSONReply.toString(2));
+			} catch (JSONException e) {
+				fragment.setDebugText("Exception: "+e.getMessage());
+				Log.e(TAG, "Exception toStringing json reply", e);
+		}
+		}
+	}
+	
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Log.i(TAG, "Preference "+key+" changed");
+		if (sharedPreferences.getBoolean("debug", false)) {
+			showDebugInfo();
+		}
+		else {
+			if (mDebugTab != -1) {
+				mSwipeyAdapter.removeTab(mDebugTab);
+				mDebugTab = -1;
+			}
+		}
+	}
 	
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
+		lastEvaReply = reply;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (prefs.getBoolean("debug", false)) {
+			showDebugInfo();
+		}
+
 		
 		if ("voice".equals(cookie) && reply.inputText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
@@ -734,8 +832,19 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 
 	
 
+	/****
+	 * Display chat items for each flow element - 
+	 * execute the first question element or, if no question element, execute the first flow element
+	 * @param reply
+	 */
 	private void handleFlow(EvaApiReply reply) {
 		boolean first = true;
+		boolean hasQuestion = false;
+		for (FlowElement flow : reply.flow.Elements) {
+			if (flow.Type == TypeEnum.Question) {
+				hasQuestion = true;
+			}
+		}
 		for (FlowElement flow : reply.flow.Elements) {
 			
 			ChatItem chatItem = null;
@@ -750,13 +859,17 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 						addChatItem(new DialogAnswerChatItem(questionChatItem, index, question.choices[index]));
 					}
 				}
+				if (first) {
+					executeFlowElement(reply, flow, chatItem);
+					first = false;
+				}
 			}
 			else {
 				chatItem = new ChatItem(flow.SayIt, reply, flow, ChatType.Eva);
 				addChatItem(chatItem);
 			}
 			
-			if (first) {
+			if (!hasQuestion && first) {
 				// automatically execute first element
 				executeFlowElement(reply, flow, chatItem);
 				
@@ -808,8 +921,9 @@ public class MainActivity extends EvaBaseActivity implements TextToSpeech.OnInit
 	}
 	
 	public void onHotelsListUpdated( @Observes HotelsListUpdated event) {
-		if (mMapTabIndex != -1) {
-			HotelsMapFragment frag = (HotelsMapFragment)  mSwipeyAdapter.instantiateItem(mViewPager, mMapTabIndex);
+		int mapTabIndex = mTabTitles.indexOf("MAP");
+		if (mapTabIndex != -1) {
+			HotelsMapFragment frag = (HotelsMapFragment)  mSwipeyAdapter.instantiateItem(mViewPager, mapTabIndex);
 			if (frag != null) {
 				Activity hostedActivity = frag.getHostedActivity();
 				if (hostedActivity != null) {
