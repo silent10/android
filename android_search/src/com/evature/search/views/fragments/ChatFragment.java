@@ -58,7 +58,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 		ListView chatListView = (ListView) root.findViewById(R.id.chat_list);
 		
 		// Connect the data of the chat history to the view:
-		mChatListModel.loadInstanceState(savedInstanceState);
+//		mChatListModel.loadInstanceState(savedInstanceState);
 		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row_eva_chat, R.id.label, mChatListModel);
 		chatListView.setAdapter(mChatAdapter);
 
@@ -71,12 +71,13 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 		Log.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(instanceState);
 		
-		mChatListModel.saveInstanceState(instanceState);
+//		mChatListModel.saveInstanceState(instanceState);
 	}
 
-	public void addChatItem(ChatItem chatItem) {
-		mChatAdapter.add(chatItem);
-	}
+//	public void addChatItem(ChatItem chatItem) {
+//		
+//		mChatAdapter.add(chatItem);
+//	}
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,

@@ -123,8 +123,8 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	// Handle the results from the speech recognition activity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Log.i(TAG, "speech recognition activity result "+resultCode);
 		if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
+			Log.i(TAG, "speech recognition activity result "+resultCode);
 			Bundle bundle = data.getExtras();
 			
 			String result = bundle.getString("EVA_REPLY");
