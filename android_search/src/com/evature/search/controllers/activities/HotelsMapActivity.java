@@ -102,9 +102,16 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
         }
         
         LatLngBounds bounds = boundsBuilder.build();
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-
+        
+        try{
+        	//This line will cause the exception first times when map is still not "inflated"
+        	mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+        	Log.i(TAG, "Camera moved successfully");
+        } catch(IllegalStateException e) {
+            Log.w(TAG, "Camera move exceptoin", e);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,400,400,10));
+            Log.i(TAG, "Camera moved to hardcoded width height");
+        }
 	}
 
 	
