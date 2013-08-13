@@ -78,6 +78,11 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 //		
 //		mChatAdapter.add(chatItem);
 //	}
+	
+	public void invalidate() { 
+		if (mChatAdapter != null)
+			mChatAdapter.notifyDataSetChanged();
+	}
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
