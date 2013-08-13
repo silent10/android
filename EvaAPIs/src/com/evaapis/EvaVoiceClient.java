@@ -60,7 +60,7 @@ public class EvaVoiceClient {
 
 
 	private static short PORT = (short) 443;
-	private static String HOSTNAME = LOCAL_DEBUG ? "ec2-54-224-32-205.compute-1.amazonaws.com" : "vproxy.evaws.com";
+	private static String HOSTNAME = "vproxy.evaws.com";
 
 	private String mEvaJson;
 	private String mSessionId;
@@ -113,9 +113,11 @@ public class EvaVoiceClient {
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 
 		if (LOCAL_DEBUG) {
-			qparams.add(new BasicNameValuePair("site_code", "concur_m"));//mSiteCode));
-			qparams.add(new BasicNameValuePair("api_key", "0585a2f5-9d6c-41a4-981a-842fc791b5dc"));//mAppKey));
-			qparams.add(new BasicNameValuePair("vr_service", "google_streaming"));
+//			qparams.add(new BasicNameValuePair("site_code", "concur_m"));
+//			qparams.add(new BasicNameValuePair("api_key", "0585a2f5-9d6c-41a4-981a-842fc791b5dc"));
+			qparams.add(new BasicNameValuePair("site_code", mSiteCode));
+			qparams.add(new BasicNameValuePair("api_key", mAppKey));
+			qparams.add(new BasicNameValuePair("vr_service", "ginger_streaming"));
 		}
 		else {
 			qparams.add(new BasicNameValuePair("site_code", mSiteCode));
