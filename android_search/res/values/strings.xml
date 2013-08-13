@@ -61,4 +61,13 @@
     <string name="trip_advisor_icon">Trip Advisor Icon</string>
     <string name="distance">Distance</string>
     <string name="eva_icon">></string>
+    <string name="_new">New</string>
+    <string name="settings">Settings</string>
+    <string name="report_a_bug">Report a bug</string>
+    <string name="about">About</string>
+    <string name="bugreport_toast_text">Please wait...</string>
+    <string name="bugreport_dialog_text">Please leave a comment describing what went wrong.</string>
+    <string name="bugreport_dialog_title">Bug Report</string>
+    <string name="bugreport_dialog_comment_prompt">Comment:</string>
+    <string name="bugreport_dialog_ok_toast">Thank you !</string>
 </resources>
