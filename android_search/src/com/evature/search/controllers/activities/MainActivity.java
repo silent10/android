@@ -21,7 +21,18 @@ package com.evature.search.controllers.activities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
+import org.acra.ACRA;
+import org.acra.ACRAConfiguration;
+import org.acra.ACRAConfigurationException;
+import org.acra.CrashReportDialog;
+import org.acra.ErrorReporter;
+import org.acra.ReportingInteractionMode;
+import org.acra.collector.CrashReportData;
+import org.acra.sender.GoogleFormSender;
+import org.acra.sender.ReportSender;
+import org.acra.sender.ReportSenderException;
 import org.json.JSONException;
 
 import roboguice.event.Observes;
@@ -33,9 +44,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.Fragment;
@@ -53,6 +67,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
@@ -98,6 +113,10 @@ public class MainActivity extends EvaBaseActivity implements
 													TextToSpeech.OnInitListener, 
 													EvaDownloaderTaskInterface {
 
+	private static final String ITEMS_IN_SESSION = "items_in_session";
+
+	private static final String DEBUG_PREF_KEY = "debug";
+
 	private static final String TAG = MainActivity.class.getSimpleName();
 	// private static String mExternalIpAddress = null;
 	
@@ -139,6 +158,7 @@ public class MainActivity extends EvaBaseActivity implements
 	private String mHotelTabName;
 
 	static EvaHotelDownloaderTask mHotelDownloader = null;
+	
 
 	@Override 
 	public void onResume() {
@@ -186,7 +206,6 @@ public class MainActivity extends EvaBaseActivity implements
 		mViewPager.setAdapter(mSwipeyAdapter);
 		mTabs.setAdapter(mSwipeyAdapter);
 		mViewPager.setOnPageChangeListener(mTabs); // To sync the tabs with the viewpager
-		mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 		// Initialize text-to-speech. This is an asynchronous operation.
 		// The OnInitListener (of the second argument) is called after initialization completes.
 	
@@ -202,12 +221,13 @@ public class MainActivity extends EvaBaseActivity implements
 			fatal_error(R.string.network_error);
 		}
 
-		
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-		if (sharedPreferences.getBoolean("debug", false)) {
+		if (sharedPreferences.getBoolean(DEBUG_PREF_KEY, false)) {
 			showDebugInfo();
 		}
+
+		mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
@@ -397,6 +417,12 @@ public class MainActivity extends EvaBaseActivity implements
 			}
 		}
 		
+		public void removeTab(String tabName) {
+			int ind = mTabTitles.indexOf(tabName);
+			if (ind != -1)
+				removeTab(ind);
+		}
+		
 		public void removeTab(int tabIndex)
 		{
 			Log.d(TAG, "removeTab "+tabIndex);
@@ -413,6 +439,15 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 
 	}
+	
+	
+	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean isDebug = prefs.getBoolean(DEBUG_PREF_KEY, false);
+		menu.getItem(2).setVisible(isDebug);
+		return super.onPrepareOptionsMenu(menu);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -420,9 +455,12 @@ public class MainActivity extends EvaBaseActivity implements
 		inflater.inflate(R.menu.mainmenu, menu);
 		return true;
 	}
+	
+	
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
+		Intent intent;
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			mViewPager.setCurrentItem(1);
@@ -431,12 +469,17 @@ public class MainActivity extends EvaBaseActivity implements
 			startNewSession();
 			return true;
 		case R.id.settings: // Did the user select "settings"?
-			Intent intent = new Intent();
+			intent = new Intent();
 			// Then set the activity class that needs to be launched/started.
 			intent.setClass(this, MyPreferences.class);
 			Bundle a_bundle = new Bundle(); // Lets send some data to the preferences activity
 		//	a_bundle.putStringArrayList("mLanguages", (ArrayList<String>) mSpeechRecognition.getmGoogleLanguages());
 			intent.putExtras(a_bundle);
+			startActivity(intent);
+			return true;
+		case R.id.bug_report:
+			// Then set the activity class that needs to be launched/started.
+			intent = new Intent(this, BugReportDialog.class);
 			startActivity(intent);
 			return true;
 		case R.id.about: // Did the user select "About us"?
@@ -490,17 +533,19 @@ public class MainActivity extends EvaBaseActivity implements
 		Log.i(TAG, "Chat tab at index "+index);
 		// http://stackoverflow.com/a/8886019/78234
 		mChatListModel.getItemList().add(item);
-//		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
-//		if (fragment != null) // could be null if not instantiated yet
-//		{
+		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
+		if (fragment != null) // could be null if not instantiated yet
+		{
+			fragment.invalidate();
 //			if (fragment.getView() != null) {
 //				fragment.addChatItem(item);
 //			} else {
 //				Log.e(TAG, "chat fragment.getView() == null!?!");
 //			}
-//		} else {
-//			Log.e(TAG, "chat fragment == null!?");
-//		}
+		} 
+		else {
+			Log.w(TAG, "chat fragment == null!?");
+		}
 
 	}
 	
@@ -620,6 +665,7 @@ public class MainActivity extends EvaBaseActivity implements
 				mSwipeyAdapter.addTab("MAP");
 			}
 		} else if (id == R.string.HOTEL) {
+			// remove hotel tab and add it again
 			mSwipeyAdapter.removeTab();
 			mSwipeyAdapter.addTab(tabName);
 			// HotelFragment fragment = (HotelFragment) adapter.instantiateItem(mViewPager, index);
@@ -637,11 +683,7 @@ public class MainActivity extends EvaBaseActivity implements
 			}
 			HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
 			
-			int hotelTabIndex = mTabTitles.indexOf(mHotelTabName);
-			if(hotelTabIndex !=-1)
-			{
-				mSwipeyAdapter.removeTab(hotelTabIndex);
-			}
+			mSwipeyAdapter.removeTab(mHotelTabName);
 		}
 
 		mViewPager.setCurrentItem(index, true);
@@ -726,30 +768,34 @@ public class MainActivity extends EvaBaseActivity implements
 			mDebugTab = mTabTitles.indexOf(mDebugTabName);
 			if (mDebugTab == -1) {
 				mSwipeyAdapter.addTab(mDebugTabName, 1);
-				mDebugTab = 1; //mTabTitles.size() - 1;
+				mDebugTab = 1; // mTabTitles.size() - 1;
 			}
 		}
-		DebugFragment fragment = (DebugFragment) mSwipeyAdapter.instantiateItem(mViewPager, mDebugTab);
+		DebugFragment fragment = (DebugFragment) mSwipeyAdapter
+				.instantiateItem(mViewPager, mDebugTab);
 		if (fragment == null) {
 			Log.e(TAG, "No debug fragment");
 			return;
 		}
 		if (lastEvaReply == null) {
 			fragment.setDebugText("No reply yet.");
-		}
-		else {
+		} else {
 			try {
 				fragment.setDebugText(lastEvaReply.JSONReply.toString(2));
 			} catch (JSONException e) {
-				fragment.setDebugText("Exception: "+e.getMessage());
+				fragment.setDebugText("Exception: " + e.getMessage());
 				Log.e(TAG, "Exception toStringing json reply", e);
+			}
 		}
-		}
+		
 	}
 	
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		Log.i(TAG, "Preference "+key+" changed");
-		if (sharedPreferences.getBoolean("debug", false)) {
+		if (DEBUG_PREF_KEY.equals(key)) {
+			invalidateOptionsMenu();
+		}
+		if (sharedPreferences.getBoolean(DEBUG_PREF_KEY, false)) {
 			showDebugInfo();
 		}
 		else {
@@ -765,9 +811,22 @@ public class MainActivity extends EvaBaseActivity implements
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 		lastEvaReply = reply;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (prefs.getBoolean("debug", false)) {
+		if (prefs.getBoolean(DEBUG_PREF_KEY, false)) {
 			showDebugInfo();
 		}
+		
+		ErrorReporter bugReporter = ACRA.getErrorReporter();
+		String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
+		int items;
+		if (itemsStr == null) {
+			items = 0;
+		}
+		else {
+			items = Integer.parseInt(itemsStr);
+		}
+		items++;
+		bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
+		bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 
 		
 		if ("voice".equals(cookie) && reply.inputText != null) {
@@ -907,14 +966,29 @@ public class MainActivity extends EvaBaseActivity implements
 			addChatItem(new ChatItem("Start new search"));
 			resetSession();
 		}
+		ErrorReporter bugReporter = ACRA.getErrorReporter();
+		String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
+		int items;
+		if (itemsStr == null) {
+			items = 0;
+		}
+		else {
+			items = Integer.parseInt(itemsStr);
+		}
+		bugReporter.putCustomData(ITEMS_IN_SESSION, "0");
+
+		for (int i=0; i<items; i++) {
+			bugReporter.removeCustomData("eva_session_"+i);
+		}
 	}
 	
 	@Inject private ChatItemList mChatListModel;
 	
 	protected void newSessionStart(@Observes NewSessionStarted event) {
-		for (ChatItem chatItem : mChatListModel.getItemList()) {
-			chatItem.setInSession(false);
-		}
+//		for (ChatItem chatItem : mChatListModel.getItemList()) {
+//			chatItem.setInSession(false);
+//		}
+		mChatListModel.getItemList().clear();
 		String sessionText = "Starting a new search. How may I help you?";
 		addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
 		speak(sessionText);

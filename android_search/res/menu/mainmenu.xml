@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/new_session"
-        android:title="New"
+        android:title="@string/_new"
         android:icon="@drawable/session_restart"
         >
         <!-- android:showAsAction="ifRoom|withText" -->
@@ -12,11 +12,16 @@
      
     <item
         android:id="@+id/settings"
-        android:title="Settings">
+        android:title="@string/settings">
+    </item>
+    <item
+        android:id="@+id/bug_report"
+        android:visible="false"
+        android:title="@string/report_a_bug">
     </item>
     <item
         android:id="@+id/about"
-        android:title="About">
+        android:title="@string/about">
     </item>
 
 </menu>
