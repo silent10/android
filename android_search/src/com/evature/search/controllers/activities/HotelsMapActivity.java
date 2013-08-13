@@ -73,17 +73,18 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
 	
 	private void addHotelsToMap()
 	{	    
-        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
        
         EvaXpediaDatabase evaDb = MyApplication.getDb();
         
-        int length= evaDb.mHotelData != null ? evaDb.mHotelData.length : 0;
+        int length= (evaDb != null && evaDb.mHotelData != null) ? evaDb.mHotelData.length : 0;
         if (length == 0) {
         	HotelsMapActivity.this.finishActivity(0);
         	return;
         }
-        if(length>30) length=30;
+        if(length>30) 
+        	length=30;
         
+        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
         Builder boundsBuilder = new LatLngBounds.Builder();
         
         for(int i=0;i<length;i++)
