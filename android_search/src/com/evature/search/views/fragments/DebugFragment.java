@@ -6,10 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.evature.search.R;
@@ -29,7 +25,6 @@ public class DebugFragment extends RoboFragment {
 		debugText = (TextView)view.findViewById(R.id.eva_debug_text);
 		if (savedInstanceState != null) {
 			debugTextStr = savedInstanceState.getString("debugText", "");
-			Log.i(TAG, "Loading from savedInstanceState: "+debugTextStr);
 		}
 		debugText.setText(debugTextStr);
 		return view;
@@ -37,9 +32,13 @@ public class DebugFragment extends RoboFragment {
 	
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {
-		Log.d(TAG, "onSaveInstanceState saving "+debugTextStr);
-		super.onSaveInstanceState(instanceState);
-		instanceState.putString("debugText", debugTextStr);
+		try {
+			super.onSaveInstanceState(instanceState);
+			instanceState.putString("debugText", debugTextStr);
+		}
+		catch(Exception e) {
+			Log.e(TAG, "Exception while saving instance state in DebugFragment", e);
+		}
 	}
 
 	

@@ -33,7 +33,10 @@ public class SpeechAudioStreamer {
 	private PipedInputStream pipedIn;
 	private PipedOutputStream pipedOut;
 
-	boolean mDebugRecording = false;
+	boolean mDebugSaveEncoded = true;
+	boolean mDebugSavePCM = true;
+	private static final String FILENAME = "recording" ;
+	
 
 	private AudioRecord mRecorder;
 	private FLACStreamEncoder mEncoder;
@@ -184,13 +187,44 @@ public class SpeechAudioStreamer {
 	 * Read from Recorder and place in queue
 	 */
 	class Producer implements Runnable {
-		private final BlockingQueue queue;
+		DataOutputStream dos = null;
+		FileOutputStream fos = null;
 
-		Producer(BlockingQueue q) {
-			queue = q;
+		Producer() {
+		}
+		
+		private void encode(byte[] chunk) throws IOException {
+//			Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
+
+			// encoded = mEncoder.encode(chunk);
+
+			long startTime = System.nanoTime();
+			
+			ByteBuffer bf = ByteBuffer.allocateDirect(chunk.length);
+			bf.put(chunk);
+			
+			//ByteBuffer bf = ByteBuffer.wrap(chunk);
+			
+			mEncoder.write(bf, chunk.length);
+			long duration = System.nanoTime() - startTime;
+//			Log.i(TAG, "<<< Writing "+chunk.length+" bytes to encoder took "+duration/1000000 + " ms");
 		}
 
 		public void run() {
+			String fileBase = Environment.getExternalStorageDirectory()
+					.getPath() + "/sample";
+
+			if (mDebugSavePCM) {
+				File f = new File(fileBase + ".smp");
+
+				try {
+					fos = new FileOutputStream(f);
+					dos = new DataOutputStream(new BufferedOutputStream(fos));
+				} catch (FileNotFoundException e) {
+					Log.w(TAG, "Failed to open file to save PCM");
+				}
+			}
+			
 			mRecorder.startRecording();
 
 			try {
@@ -213,7 +247,10 @@ public class SpeechAudioStreamer {
 				while (mIsRecording) {
 					// int packetSize = 2 * CHANNELS *
 					// mEncoder.speexEncoder.getFrameSize();
+					long startTime = System.nanoTime();
 					int readSize = mRecorder.read(mBuffer, 0, mBuffer.length);
+					long duration = System.nanoTime() - startTime;
+//					Log.i(TAG, "<<< Reading from microphone "+readSize+" bytes took "+duration/1000000+" ms");
 
 					// Log.i("EVA","Read:"+readSize);
 
@@ -235,20 +272,41 @@ public class SpeechAudioStreamer {
 						} else {
 							byte[] chunk = new byte[readSize];
 							System.arraycopy(mBuffer, 0, chunk, 0, readSize);
-							queue.put(chunk);
+							try {
+								encode(chunk);
+							} catch (IOException e) {
+								Log.e(TAG, "IO error while sending to encoder");
+							}
+							
+							if (mDebugSavePCM) {
+								dos.write(chunk);
+							}
 
-							Thread.sleep(10);
+//							Thread.sleep(10);
 						}
 					}
 
 				}
 
-				queue.put(new byte[0]);
+				mEncoder.flush();
+				mEncoder.release();
+				
+				if (mDebugSavePCM) {
+					dos.flush();
+					dos.close();
+
+					byte bytes[] = FileUtils.readFileToByteArray(new File(
+							fileBase + ".smp"));
+
+					WriteWavFile(new File(fileBase + ".wav"), 16000, bytes);
+				}
+				
+//				queue.put(new byte[0]);
 
 				Log.i(TAG, "<<< Finished producer thread");
 
-			} catch (InterruptedException ex) {
-				Log.i(TAG, "Interrupted recorder thread");
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			} finally {
 				mRecorder.stop();
 				mRecorder.release();
@@ -257,172 +315,6 @@ public class SpeechAudioStreamer {
 
 	}
 
-	private final static int SINGLE_FRAME_SIZE = 32000;
-
-	/***
-	 * Read from Queue, buffer up and send to encoder
-	 */
-	class Consumer implements Runnable {
-		private final BlockingQueue queue;
-
-		DataOutputStream dos = null;
-		FileOutputStream fos = null;
-		int mAccumulationBufferPosition;
-		int mFrameSize;
-
-		byte[] mAccumulationBuffer;
-		byte[] mSecondaryBuffer;
-
-		Consumer(BlockingQueue q) {
-			mAccumulationBufferPosition = 0;
-			mFrameSize = SINGLE_FRAME_SIZE;
-			mAccumulationBuffer = new byte[2 * mFrameSize];
-			mSecondaryBuffer = new byte[2 * mFrameSize];
-			queue = q;
-		}
-
-		private void encode(byte[] chunk) throws IOException {
-			Log.i(TAG, "encoding " + chunk.length + " bytes");
-
-			// encoded = mEncoder.encode(chunk);
-
-			ByteBuffer bf = ByteBuffer.allocateDirect(chunk.length);
-			bf.put(chunk);
-			
-			//ByteBuffer bf = ByteBuffer.wrap(chunk);
-			
-			mEncoder.write(bf, chunk.length);
-
-			return;
-		}
-
-		public void run() {
-			String fileBase = Environment.getExternalStorageDirectory()
-					.getPath() + "/sample";
-
-			if (mDebugRecording) {
-				File f = new File(fileBase + ".smp");
-
-				try {
-					fos = new FileOutputStream(f);
-					dos = new DataOutputStream(new BufferedOutputStream(fos));
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-
-			try {
-				while (mIsRecording || !queue.isEmpty()) {
-					consume(queue.take());
-				}
-
-			} catch (InterruptedException ex) {
-
-			}
-
-			try {
-				mEncoder.flush();
-				mEncoder.release();
-
-				if (mDebugRecording) {
-					dos.flush();
-					dos.close();
-
-					// encodeFile(new File(fileBase+".smp"), new
-					// File(fileBase+".smx"));
-
-					byte bytes[] = FileUtils.readFileToByteArray(new File(
-							fileBase + ".smp"));
-
-					WriteWavFile(new File(fileBase + ".wav"), 16000, bytes);
-				}
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			// int count=0;
-			// while(DictationHTTPClient.getInTransaction() &&
-			// (count<MAX_WAIT_FOR_TRANSFER))
-			// {
-			// try {
-			// Thread.sleep(1000);
-			// } catch (InterruptedException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			// count++;
-			// }
-			//
-			// if(DictationHTTPClient.getInTransaction())
-			// {
-			// DictationHTTPClient.stopTransfer();
-			// }
-
-			Log.i(TAG, "<<< Finished consumer thread");
-
-		}
-
-		void consume(Object x) {
-			byte[] buffer = (byte[]) x;
-			byte[] chunk = new byte[mFrameSize];
-
-			if (buffer.length == 0) {
-				Log.i(TAG, "Buffer length is 0");
-				System.arraycopy(mAccumulationBuffer, 0, chunk, 0,
-						mAccumulationBufferPosition);
-				if (chunk.length >0) {
-					try {
-						encode(chunk);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					if (mDebugRecording) {
-						try {
-							dos.write(chunk);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				
-
-				return;
-			}
-
-			System.arraycopy(buffer, 0, mAccumulationBuffer,
-					mAccumulationBufferPosition, buffer.length);
-
-			mAccumulationBufferPosition += buffer.length;
-
-			while (mAccumulationBufferPosition >= mFrameSize) {
-				System.arraycopy(mAccumulationBuffer, 0, chunk, 0, mFrameSize);
-				System.arraycopy(mAccumulationBuffer, mFrameSize,
-						mSecondaryBuffer, 0, mAccumulationBufferPosition
-								- mFrameSize);
-				byte[] tmpBuffer = mAccumulationBuffer;
-				mAccumulationBuffer = mSecondaryBuffer;
-				mSecondaryBuffer = tmpBuffer;
-
-				mAccumulationBufferPosition = mAccumulationBufferPosition
-						- mFrameSize;
-
-				try {
-					// encoded = mEncoder.encode(chunk);
-					encode(chunk);
-					if (mDebugRecording) {
-						dos.write(chunk);
-					}
-					Thread.sleep(20);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-			}
-		}
-	}
 
 	/***
 	 * Read from encoder Fifo and write to HTTP stream
@@ -433,12 +325,12 @@ public class SpeechAudioStreamer {
 		@Override
 		public void run() {
 			String fileBase = Environment.getExternalStorageDirectory()
-					.getPath() + "/sample_encoded";
+					.getPath() + "/"+FILENAME;
 
 			DataOutputStream dos = null;
 			
-			if (mDebugRecording) {
-				File f = new File(fileBase + ".fla");
+			if (mDebugSaveEncoded) {
+				File f = new File(fileBase + ".flac");
 
 				try {
 					FileOutputStream fos = new FileOutputStream(f);
@@ -464,10 +356,16 @@ public class SpeechAudioStreamer {
 
 			while(true) {
 				
-				byte[] encodeBuffer = new byte[SINGLE_FRAME_SIZE];
+				byte[] encodeBuffer = new byte[32000];
 				int encodedLength = 0;
 				try {
+					long startTime = System.nanoTime();
 					encodedLength = encodedFifo.read(encodeBuffer);
+					long endTime = System.nanoTime();
+
+					long duration = endTime - startTime;
+					Log.i(TAG, "<<< Reading encoded chunk "+encodedLength+" bytes took "+duration/1000000 + " ms");
+					
 				} catch (IOException e1) {
 					Log.e(TAG, "IO exception reading encoded Fifo", e1);
 				}
@@ -482,32 +380,39 @@ public class SpeechAudioStreamer {
 				System.arraycopy(encodeBuffer, 0, encoded, 0, encodedLength);
 
 				try {
+					long startTime = System.nanoTime();
 					pipedOut.write(encoded);
+					long duration = System.nanoTime() - startTime;
+					Log.i(TAG, "<<< Sending "+encoded.length+" bytes to upload took "+duration/1000000+" ms");
 					
-					if (mDebugRecording) {
-						try {
-							dos.write(encoded);
-						} catch (IOException e) {
-							Log.w(TAG, "Exception writing debug file",e ); 
-						}
-					}
 				} catch (IOException e) {
 					Log.e(TAG, "Exception writing to upload stream", e);
+				}
+					
+				if (mDebugSaveEncoded) {
+					try {
+						dos.write(encoded);
+					} catch (IOException e) {
+						Log.w(TAG, "Exception writing debug file",e ); 
+					}
 				}
 
 			}
 			Log.i(TAG, "<<< Read last encoded chunk - closing pipe");
 			try {
+				long startTime = System.nanoTime();
 				pipedOut.flush();
 				pipedOut.close();
+				long duration = System.nanoTime() - startTime;
+				Log.i(TAG, "<<< Flush upload took "+duration/1000000+" ms");
 			} catch (IOException e1) {
 				Log.e(TAG, "Exception flusing upload stream", e1);
 			}
 			
-			if (mDebugRecording) {
+			if (mDebugSaveEncoded) {
 				try {
 				dos.flush();
-				dos.close();
+				dos.close(); 
 				} catch (IOException e) {
 					Log.e(TAG, "Exception flusing debug file", e);
 				}
@@ -523,10 +428,9 @@ public class SpeechAudioStreamer {
 			return;
 		}
 		mIsRecording = true;
-		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
-		Producer p = new Producer(q);
-		Consumer c = new Consumer(q);
-		Object waitForReading = new Object();
+//		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
+		Producer p = new Producer();
+		//	Consumer c = new Consumer(q);
 		Uploader u = new Uploader();
 		new Thread(u).start(); // start uploader first -
 								// must read from encoded FIFO before any write takes place
@@ -543,7 +447,7 @@ public class SpeechAudioStreamer {
 		mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16); // write header
 
 		new Thread(p).start();
-		new Thread(c).start();
+		//new Thread(c).start();
 		Log.i(TAG, "Audio Streamer started!");
 	}
 
