@@ -28,17 +28,18 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	private SpeechAudioStreamer mSpeechAudioStreamer;
 	private EvaHttpDictationTask dictationTask;
 
-	Button mStopButton;
-	TextView mLevel;
+	private Button mStopButton;
+	private TextView mLevel;
+	private TextView mStatusText;
+	private ProgressBar mProgressBar;
+	private SoundLevelView mSoundView;
+
 	
 	Handler mUpdateLevel;
 
 	EvaVoiceClient mVoiceClient = null;
-	private SoundLevelView mSoundView;
 
-	private TextView mStatusText;
 
-	private ProgressBar mProgressBar;
 
 	private class EvaHttpDictationTask extends AsyncTask
 	{
@@ -108,7 +109,6 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 	}
 	
-	
 
 
 	@SuppressWarnings("unchecked")
@@ -119,13 +119,14 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		String sessionId = getIntent().getStringExtra("SessionId");
 		
 		Log.i(TAG,"Creating speech recognition activity");
-		setContentView(R.layout.listening);
 
+		setContentView(R.layout.listening);
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
 		mLevel=(TextView)findViewById(R.id.text_recordLevel);
 		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
 		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);
+
 		mStopButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -162,10 +163,13 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		
 		String appKey = EvaAPIs.API_KEY;
 		String siteCode = EvaAPIs.SITE_CODE;
-		
+
 		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 		String deviceId=telephonyManager.getDeviceId();
-
+		if (deviceId==null) {
+			deviceId="none";
+		}
+		
 
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
@@ -175,13 +179,11 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);
 			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
-
 		} catch (Exception e) {
 			setResult(RESULT_CANCELED);
 			finish();
 			e.printStackTrace();
 		}
-
 	}
 	
 	@Override
