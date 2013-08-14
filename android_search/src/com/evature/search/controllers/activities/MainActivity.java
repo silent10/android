@@ -767,7 +767,11 @@ public class MainActivity extends EvaBaseActivity implements
 		if (mDebugTab == -1) {
 			mDebugTab = mTabTitles.indexOf(mDebugTabName);
 			if (mDebugTab == -1) {
-				mSwipeyAdapter.addTab(mDebugTabName, 1);
+				try {
+					mSwipeyAdapter.addTab(mDebugTabName, 1);
+				} catch (IllegalStateException e) {
+					Log.e(TAG, "Exception of IllegalStateException while adding debug tab",e);
+				}
 				mDebugTab = 1; // mTabTitles.size() - 1;
 			}
 		}
@@ -961,11 +965,27 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 	}
 
+	/****
+	 * Start new session from menu item 
+	 */
 	private void startNewSession() {
 		if (isNewSession() == false) {
 			addChatItem(new ChatItem("Start new search"));
 			resetSession();
+			String sessionText = "Starting a new search. How may I help you?";
+			addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
+			speak(sessionText);
+
 		}
+	}
+	
+	@Inject private ChatItemList mChatListModel;
+	
+	/****
+	 * handler for  "new session was started" event 
+	 * @param event
+	 */
+	protected void newSessionStart(@Observes NewSessionStarted event) {
 		ErrorReporter bugReporter = ACRA.getErrorReporter();
 		String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
 		int items;
@@ -980,18 +1000,18 @@ public class MainActivity extends EvaBaseActivity implements
 		for (int i=0; i<items; i++) {
 			bugReporter.removeCustomData("eva_session_"+i);
 		}
-	}
-	
-	@Inject private ChatItemList mChatListModel;
-	
-	protected void newSessionStart(@Observes NewSessionStarted event) {
+		
 //		for (ChatItem chatItem : mChatListModel.getItemList()) {
 //			chatItem.setInSession(false);
 //		}
-		mChatListModel.getItemList().clear();
-		String sessionText = "Starting a new search. How may I help you?";
-		addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
-		speak(sessionText);
+		List<ChatItem> chatList = mChatListModel.getItemList();
+		if (chatList.size() > 0) {
+			ChatItem lastItem = chatList.get(chatList.size()-1);
+			chatList.clear();
+			if (lastItem.getType() == ChatType.Me) {
+				chatList.add(lastItem);
+			}
+		}		
 	}
 	
 	public void onHotelsListUpdated( @Observes HotelsListUpdated event) {
