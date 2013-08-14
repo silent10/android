@@ -20,6 +20,7 @@ import com.google.inject.Injector;
 
 abstract public class EvaBaseActivity extends RoboFragmentActivity implements EvaSearchReplyListener, OnInitListener{ 
 
+	private static final int VOICE_RECOGNITION_REQUEST_CODE_EVA = 0xBABE;
 	protected String mSessionId = "1";
 	private final String TAG = "EvaBaseActivity";
 	private String mPreferedLanguage = "en-US";	
@@ -29,7 +30,6 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
-	protected SpeechRecognition mSpeechRecognition;
 
 	@Inject private ExternalIpAddressGetter mExternalIpAddressGetter;
 	@Inject private EvatureLocationUpdater mLocationUpdater;
@@ -123,7 +123,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	// Handle the results from the speech recognition activity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == SpeechRecognitionEva.VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
+		if (requestCode == VOICE_RECOGNITION_REQUEST_CODE_EVA && resultCode == RESULT_OK) {
 			Log.i(TAG, "speech recognition activity result "+resultCode);
 			Bundle bundle = data.getExtras();
 			
@@ -145,8 +145,6 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 			mTtsConfigured = false;
 
 		mTts = new TextToSpeech(this, this);
-		mSpeechRecognition = new SpeechRecognitionEva(this);
-		
 		super.onCreate(arg0);
 	}
 	
@@ -163,7 +161,11 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		}
 		
 		Log.i(TAG, "search with voice starting, lang="+mPreferedLanguage);
-		mSpeechRecognition.startVoiceRecognitionActivity(mPreferedLanguage, mSessionId);
+
+		Intent intent = new Intent(this.getApplicationContext(), EvaSpeechRecognitionActivity.class);
+		intent.putExtra("SessionId", mSessionId);
+		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
+
 		mLastLanguageUsed = mPreferedLanguage;
 	}
 

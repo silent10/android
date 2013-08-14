@@ -123,7 +123,7 @@ public class EvaVoiceClient {
 			qparams.add(new BasicNameValuePair("site_code", mSiteCode));
 			qparams.add(new BasicNameValuePair("api_key", mAppKey));
 		}
-		qparams.add(new BasicNameValuePair("id",  mDeviceId));
+		qparams.add(new BasicNameValuePair("uid",  mDeviceId));
 		qparams.add(new BasicNameValuePair("session_id", mSessionId));
 		try {
 			double longitude = EvatureLocationUpdater.getLongitude();
@@ -217,7 +217,7 @@ public class EvaVoiceClient {
 
 		mEvaJson = inputStreamToString(is).toString();
 
-		Log.i(TAG, "Response: \n"+mEvaJson);
+		//Log.i(TAG, "Response: \n"+mEvaJson);
 		
 		resEntity.consumeContent();
 	}
