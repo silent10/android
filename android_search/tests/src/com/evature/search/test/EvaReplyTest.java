@@ -252,7 +252,7 @@ public class EvaReplyTest {
 			// verify chat model holds the eva reply say-it
 			assertEquals(1, mChatListModel.getItemList().size());
 			assertEquals("Hotel in New York City, New York, arriving August 14th, 2013 for 5 nights",  mChatListModel.getItemList().get(0).getChat());
-			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.DialogQuestion);
+			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
 
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
