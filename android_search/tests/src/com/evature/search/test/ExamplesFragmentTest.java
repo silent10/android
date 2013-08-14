@@ -16,6 +16,7 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLog;
@@ -92,17 +93,14 @@ public class ExamplesFragmentTest {
         ListView examplesListView = (ListView) examplesFragment.getView().findViewById(R.id.examples_list);
 
         String expectedChat = "3 Star hotels in NYC";
-        assertEquals(expectedChat, examplesListView.getItemAtPosition(2).toString());
+        assertEquals(expectedChat, examplesListView.getItemAtPosition(1).toString());
 
 		assertEquals(0, mChatListModel.getItemList().size());
 		
-		assertTrue( examplesListView.performItemClick(examplesListView, 2, 0) );
+		assertTrue( examplesListView.performItemClick(examplesListView, 1, 0) );
 		
 		try {
-			verify(mockDownloader).get( "http://freeapi.evature.com/api/v1.0?" +
-					"site_code=thack&api_key=thack-london-june-2012" +
-					"&language=en&session_id=1&input_text=3+Star+hotels+in+NYC");
-			// TODO: this fails if testEvaIPAddr runs first!  (because IP-addr is stored in global state) - need to isolate tests!
+			verify(mockDownloader).get( Matchers.contains("input_text=3+Star+hotels+in+NYC"));
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
 		}
@@ -110,7 +108,7 @@ public class ExamplesFragmentTest {
 		// should have one item in chat
 		assertEquals(1, mChatListModel.getItemList().size());
 		assertEquals(expectedChat,  mChatListModel.getItemList().get(0).getChat());
-		assertEquals(false, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
+		assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Me);
 	}
     
 

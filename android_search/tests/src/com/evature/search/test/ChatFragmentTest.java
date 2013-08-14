@@ -51,7 +51,7 @@ public class ChatFragmentTest {
     	mChatFragment = (ChatFragment) adapter.instantiateItem(viewPager, 1);
 		FragmentManager.enableDebugLogging(true);
 		
-		startFragment(mChatFragment);
+		//startFragment(mChatFragment);
 		
         assertThat(mChatFragment, notNullValue());
         assertThat(mChatFragment.getActivity(), notNullValue());

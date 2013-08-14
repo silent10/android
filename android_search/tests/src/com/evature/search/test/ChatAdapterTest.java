@@ -51,13 +51,11 @@ public class ChatAdapterTest {
         View child0 = mAdapter.getView(0, null, new LinearLayout(new Activity()));
  		ImageView chatRowIcon = (ImageView) child0.findViewById(R.id.icon);
  		ShadowDrawable shadowChatDrawable = Robolectric.shadowOf(chatRowIcon.getDrawable());
- 		assertThat(shadowChatDrawable.getCreatedFromResId(), equalTo(R.drawable.eva_icon));
+ 		assertThat(shadowChatDrawable.getCreatedFromResId(), equalTo(R.drawable.eva_head));
  		assertEquals("TEST 111", ((TextView)child0.findViewById(R.id.label)).getText()); 		
  		
  		View child1 = mAdapter.getView(1, null, new LinearLayout(new Activity()));
- 		chatRowIcon = (ImageView) child1.findViewById(R.id.icon);
- 		shadowChatDrawable = Robolectric.shadowOf(chatRowIcon.getDrawable());
- 		assertThat(shadowChatDrawable.getCreatedFromResId(), equalTo(R.drawable.chat_icon));
+ 		assertEquals(">", ((TextView)child1.findViewById(R.id.icon)).getText());
  		assertEquals("222 TEST", ((TextView)child1.findViewById(R.id.label)).getText());
 
 	}
