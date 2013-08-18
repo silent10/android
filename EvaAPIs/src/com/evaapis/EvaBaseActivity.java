@@ -3,6 +3,9 @@ package com.evaapis;
 
 import java.util.Locale;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.EventManager;
 import android.content.Intent;
@@ -35,6 +38,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	@Inject private EvatureLocationUpdater mLocationUpdater;
 
 	@Inject protected EventManager eventManager;
+	private boolean mDebug;
 
 	protected void speak(String sayIt) {
 		if (mTts != null) {
@@ -94,6 +98,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		String oldLanguage = new String(mPreferedLanguage);
+		mDebug = prefs.getBoolean("debug", false);
 		mPreferedLanguage = prefs.getString("languages", "en-US");
 		if (!oldLanguage.equals(mPreferedLanguage)) // User changed the settings and chose a new speech recognition
 			// language
@@ -127,9 +132,22 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 			Log.i(TAG, "speech recognition activity result "+resultCode);
 			Bundle bundle = data.getExtras();
 			
-			String result = bundle.getString("EVA_REPLY");
-			
-			EvaApiReply apiReply = new EvaApiReply(result);		
+			String result = bundle.getString(EvaSpeechRecognitionActivity.RESULT_EVA_REPLY);
+
+			EvaApiReply apiReply = new EvaApiReply(result);
+			if (mDebug && apiReply.JSONReply != null) {
+				JSONObject debugData = new JSONObject();
+				try {
+					debugData.put("Time spent uploading", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_UPLOADING)+"ms");
+					debugData.put("Time spent recording", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_RECORDING)+"ms");
+					debugData.put("Time spent creating activity", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_ACTIVITY_CREATE)+"ms");
+					debugData.put("Time in HTTP Execute", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_EXECUTE)+"ms");
+					debugData.put("Time reading HTTP response", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_RESPONSE)+"ms");
+					apiReply.JSONReply.put("debug", debugData);
+				} catch (JSONException e) {
+					Log.e(TAG, "Failed setting debug data", e);
+				}
+			}
 			
 			onEvaReply(apiReply, "voice");		
 		}
@@ -164,6 +182,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 
 		Intent intent = new Intent(this.getApplicationContext(), EvaSpeechRecognitionActivity.class);
 		intent.putExtra("SessionId", mSessionId);
+		intent.putExtra("debug", mDebug);
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
 
 		mLastLanguageUsed = mPreferedLanguage;

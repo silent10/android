@@ -9,16 +9,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -39,8 +36,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
-import android.content.Context;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.evature.util.EvatureSSLSocketFactory;
@@ -62,13 +57,19 @@ public class EvaVoiceClient {
 	private static short PORT = (short) 443;
 	private static String HOSTNAME = "vproxy.evaws.com";
 
-	private String mEvaJson;
+	private String mEvaResponse;
 	private String mSessionId;
 
 	private SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 	HttpPost mHttpPost = null;
+
+	// debug time measurements
+	public long timeSpentReadingResponse;
+	public long timeSpentExecute;
+
+	boolean hadError;
 
 
 	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, SpeechAudioStreamer speechAudioStreamer) {
@@ -202,6 +203,9 @@ public class EvaVoiceClient {
 
 	private void processResponse(HttpResponse response) throws IllegalStateException, IOException
 	{
+		Log.i(TAG,"<<< Getting response");
+		long t0 = System.nanoTime();
+
 		HttpEntity resEntity = response.getEntity();
 
 
@@ -215,20 +219,25 @@ public class EvaVoiceClient {
 
 		InputStream is = resEntity.getContent();
 
-		mEvaJson = inputStreamToString(is).toString();
+		mEvaResponse = inputStreamToString(is).toString();
 
-		//Log.i(TAG, "Response: \n"+mEvaJson);
+		//Log.i(TAG, "Response: \n"+mEvaResponse);
 		
 		resEntity.consumeContent();
+		
+		timeSpentReadingResponse = (System.nanoTime() - t0) / 1000000;
+		Log.i(TAG,"<<< Got response");
+
 	}
 	
-	public String getEvaJson()
+	public String getEvaResponse()
 	{
-		return mEvaJson;
+		return mEvaResponse;
 	}
 
 	public void startVoiceRequest() throws Exception{
 		mInTransaction = true;
+		hadError = false;
 		HttpClient httpclient = null;
 		try {
 			httpclient = getHttpClient();
@@ -242,11 +251,11 @@ public class EvaVoiceClient {
 			mHttpPost = getHeader(uri, 0);	//fileSize);
 			mHttpPost.setEntity(reqEntity);		
 			
+			long t0 = System.nanoTime();
 			HttpResponse response = httpclient.execute(mHttpPost);
+			timeSpentExecute = (System.nanoTime() - t0) / 1000000;
 
-			Log.i(TAG,"<<< Getting response");
 			processResponse(response);
-			Log.i(TAG,"<<< Got response");
 
 			if( httpclient != null ) {
 				httpclient.getConnectionManager().shutdown();
@@ -255,6 +264,7 @@ public class EvaVoiceClient {
 		}
 		catch(Exception e)	{
 			Log.e(TAG, "Exception sending voice request", e);
+			hadError = true;
 		}
 		finally {
 			// When HttpClient instance is no longer needed, 
