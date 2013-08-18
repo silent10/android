@@ -19,6 +19,15 @@ import android.widget.Toast;
 
 public class EvaSpeechRecognitionActivity extends RoboActivity {
 
+	public static final String RESULT_TIME_UPLOADING = "TIME_UPLOADING";
+	public static final String RESULT_TIME_ACTIVITY_CREATE = "TIME_CREATE";
+	public static final String RESULT_TIME_RECORDING = "TIME_RECORDING";
+	public static final String RESULT_TIME_RESPONSE = "TIME_RESPONSE";
+	public static final String RESULT_TIME_EXECUTE = "TIME_EXECUTE";
+	
+	public static final String RESULT_EVA_REPLY = "EVA_REPLY";
+
+	
 	private static final String TAG = EvaSpeechRecognitionActivity.class.getSimpleName();;
 
 	public static final int SAMPLE_RATE = 16000;
@@ -38,12 +47,13 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	Handler mUpdateLevel;
 
 	EvaVoiceClient mVoiceClient = null;
+	private long mTimeActivityCreation;
+	private boolean mDebug;
 
 
 
 	private class EvaHttpDictationTask extends AsyncTask
 	{
-		
 		public EvaSpeechRecognitionActivity mParent;
 		private EvaVoiceClient  mVoiceClient;
 		
@@ -55,7 +65,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 		@Override
 		protected void onPostExecute(Object result) {
-			String evaJson = mVoiceClient.getEvaJson();		
+			String evaJson = mVoiceClient.getEvaResponse();		
 
 			if(mParent==null) return;
 			
@@ -63,13 +73,25 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			{
 				Intent intent = new Intent();
 
-				intent.putExtra("EVA_REPLY", evaJson);
+				intent.putExtra(RESULT_EVA_REPLY, evaJson);
+				if (mDebug) {
+					intent.putExtra(RESULT_TIME_UPLOADING, mSpeechAudioStreamer.totalTimeUploading);
+					intent.putExtra(RESULT_TIME_RECORDING, mSpeechAudioStreamer.totalTimeRecording);
+					intent.putExtra(RESULT_TIME_EXECUTE, mVoiceClient.timeSpentExecute);
+					intent.putExtra(RESULT_TIME_RESPONSE, mVoiceClient.timeSpentReadingResponse);
+					intent.putExtra(RESULT_TIME_ACTIVITY_CREATE, mTimeActivityCreation);
+				}
 
 				setResult(RESULT_OK, intent);
 			}
 			else
 			{
-				Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", Toast.LENGTH_SHORT).show();
+ 				if (mVoiceClient.hadError) {
+					Toast.makeText(EvaSpeechRecognitionActivity.this, "There was an error contacting the server, please check your interenet connection or try again later", Toast.LENGTH_SHORT).show();
+				}
+				else {
+	  				Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", Toast.LENGTH_SHORT).show();
+				}
 				setResult(RESULT_CANCELED);
 			}
 			Log.i(TAG,"<<< Finish speech recognition activity");
@@ -114,9 +136,11 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
+		long t0 = System.nanoTime();
 		super.onCreate(savedInstanceState);
 		
 		String sessionId = getIntent().getStringExtra("SessionId");
+		mDebug = getIntent().getBooleanExtra("debug", false);
 		
 		Log.i(TAG,"Creating speech recognition activity");
 
@@ -184,6 +208,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			finish();
 			e.printStackTrace();
 		}
+		mTimeActivityCreation = (System.nanoTime() - t0)/1000000;
 	}
 	
 	@Override

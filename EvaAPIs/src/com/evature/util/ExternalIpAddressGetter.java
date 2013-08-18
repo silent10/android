@@ -24,13 +24,16 @@ public class ExternalIpAddressGetter {
 	
 	private static String IpAddress;
 	
+	private static final long CHECK_IP_EVERY_MS = 5 * 60 * 1000; // repeat check every X minutes
+	
 	@Inject protected Injector injector;
+	private long lastTimeChecked = -1;
 	
 	public ExternalIpAddressGetter() {
 		mRunnable = new Runnable() {
 			public void run() {
 				executeGetIpAddr();
-				mHandler.postDelayed(mRunnable, 5 * 60 * 1000); // and repeat every X minutes!
+				mHandler.postDelayed(mRunnable, CHECK_IP_EVERY_MS); // and repeat every X minutes!
 			}
 		};
 	}
@@ -49,6 +52,12 @@ public class ExternalIpAddressGetter {
 
 
 	public void executeGetIpAddr() {
+		if (System.currentTimeMillis() - lastTimeChecked < CHECK_IP_EVERY_MS-100) {
+			Log.d(TAG, "Not spamming IP check - too soon");
+			return;
+		}
+		lastTimeChecked = System.currentTimeMillis();
+		
 		GetExternalIpAddress ipGetter = injector.getInstance(GetExternalIpAddress.class);
 		ipGetter.execute(); // Get the external IP address (in the background)
 	}
@@ -66,7 +75,6 @@ public class ExternalIpAddressGetter {
 	// an HttpUrlConnection. Once the connection has been established, the AsyncTask downloads the contents of the
 	// webpage as an InputStream. Finally, the InputStream is converted into a string, which is saved to the Model.
 	private static class GetExternalIpAddress extends AsyncTask<String, Integer, String> {
-
 		@Inject DownloadUrl urlDownloader;
 		
 		@Override

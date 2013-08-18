@@ -16,16 +16,16 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.io.FileUtils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class SpeechAudioStreamer {
@@ -36,6 +36,10 @@ public class SpeechAudioStreamer {
 	boolean mDebugSaveEncoded = true;
 	boolean mDebugSavePCM = true;
 	private static final String FILENAME = "recording" ;
+	
+	// debug - time measurments
+	public long totalTimeUploading;  // sum of time spent writing to upload fifo
+	public long totalTimeRecording;  // time from recording start to end (VAD detection)
 	
 
 	private AudioRecord mRecorder;
@@ -70,12 +74,18 @@ public class SpeechAudioStreamer {
 		Log.i(TAG, "initing fifo");
 		this.mEncoder = new FLACStreamEncoder();
 		mSampleRate = sampleRate;
-
+		totalTimeRecording = totalTimeUploading = 0;
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		mDebugSavePCM = prefs.getBoolean("save_pcm", false);
+		mDebugSaveEncoded = prefs.getBoolean("save_encoded", false);
+		
 		Log.i(TAG, "Encoder=" + mEncoder.toString());
 	}
 
 	void initRecorder() {
 		Log.e(TAG, "<<< Starting to record");
+		
 		int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 		mBuffer = new byte[bufferSize];
@@ -193,24 +203,25 @@ public class SpeechAudioStreamer {
 		Producer() {
 		}
 		
-		private void encode(byte[] chunk) throws IOException {
+		private void encode(byte[] chunk, int readSize) throws IOException {
 //			Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
 
 			// encoded = mEncoder.encode(chunk);
 
-			long startTime = System.nanoTime();
+//			long startTime = System.nanoTime();
 			
-			ByteBuffer bf = ByteBuffer.allocateDirect(chunk.length);
-			bf.put(chunk);
+			ByteBuffer bf = ByteBuffer.allocateDirect(readSize);
+			bf.put(chunk, 0, readSize);
 			
 			//ByteBuffer bf = ByteBuffer.wrap(chunk);
 			
-			mEncoder.write(bf, chunk.length);
-			long duration = System.nanoTime() - startTime;
-//			Log.i(TAG, "<<< Writing "+chunk.length+" bytes to encoder took "+duration/1000000 + " ms");
+			mEncoder.write(bf, readSize);
+//			long duration = (System.nanoTime() - startTime)/1000000;
+//			Log.i(TAG, "<<< Writing "+chunk.length+" bytes to encoder took "+duration + " ms");
 		}
 
 		public void run() {
+			long t0 = System.nanoTime();
 			String fileBase = Environment.getExternalStorageDirectory()
 					.getPath() + "/sample";
 
@@ -225,7 +236,6 @@ public class SpeechAudioStreamer {
 				}
 			}
 			
-			mRecorder.startRecording();
 
 			try {
 
@@ -235,6 +245,7 @@ public class SpeechAudioStreamer {
 				for (int i=0; i<mSoundLevelBuffer.length; i++) {
 					mSoundLevelBuffer[i] = 0;
 				}
+				mRecorder.startRecording();
 
 				try {
 					android.os.Process
@@ -247,15 +258,13 @@ public class SpeechAudioStreamer {
 				while (mIsRecording) {
 					// int packetSize = 2 * CHANNELS *
 					// mEncoder.speexEncoder.getFrameSize();
-					long startTime = System.nanoTime();
 					int readSize = mRecorder.read(mBuffer, 0, mBuffer.length);
-					long duration = System.nanoTime() - startTime;
-//					Log.i(TAG, "<<< Reading from microphone "+readSize+" bytes took "+duration/1000000+" ms");
 
 					// Log.i("EVA","Read:"+readSize);
 
 					if (readSize == 0) {
 						try {
+							Log.i(TAG, "Waiting for microphone to produce data");
 							this.wait(10);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
@@ -270,16 +279,14 @@ public class SpeechAudioStreamer {
 						if (wasNoise && Boolean.TRUE == hadSilence) {
 							mIsRecording = false;
 						} else {
-							byte[] chunk = new byte[readSize];
-							System.arraycopy(mBuffer, 0, chunk, 0, readSize);
 							try {
-								encode(chunk);
+								encode(mBuffer, readSize);
 							} catch (IOException e) {
 								Log.e(TAG, "IO error while sending to encoder");
 							}
 							
 							if (mDebugSavePCM) {
-								dos.write(chunk);
+								dos.write(mBuffer, 0, readSize);
 							}
 
 //							Thread.sleep(10);
@@ -310,6 +317,7 @@ public class SpeechAudioStreamer {
 			} finally {
 				mRecorder.stop();
 				mRecorder.release();
+				totalTimeRecording = (System.nanoTime() - t0) / 1000000;
 			}
 		}
 
@@ -321,6 +329,7 @@ public class SpeechAudioStreamer {
 	 */
 	class Uploader implements Runnable {
 		boolean startedReading  = false;
+		private long timeDoneUploading;
 		
 		@Override
 		public void run() {
@@ -359,13 +368,7 @@ public class SpeechAudioStreamer {
 				byte[] encodeBuffer = new byte[32000];
 				int encodedLength = 0;
 				try {
-					long startTime = System.nanoTime();
 					encodedLength = encodedFifo.read(encodeBuffer);
-					long endTime = System.nanoTime();
-
-					long duration = endTime - startTime;
-					Log.i(TAG, "<<< Reading encoded chunk "+encodedLength+" bytes took "+duration/1000000 + " ms");
-					
 				} catch (IOException e1) {
 					Log.e(TAG, "IO exception reading encoded Fifo", e1);
 				}
@@ -382,8 +385,9 @@ public class SpeechAudioStreamer {
 				try {
 					long startTime = System.nanoTime();
 					pipedOut.write(encoded);
-					long duration = System.nanoTime() - startTime;
-					Log.i(TAG, "<<< Sending "+encoded.length+" bytes to upload took "+duration/1000000+" ms");
+					long duration = (System.nanoTime() - startTime)/1000000;
+					totalTimeUploading += duration;
+					Log.i(TAG, "<<< Sending "+encoded.length+" bytes to upload took "+duration+" ms");
 					
 				} catch (IOException e) {
 					Log.e(TAG, "Exception writing to upload stream", e);
@@ -400,11 +404,8 @@ public class SpeechAudioStreamer {
 			}
 			Log.i(TAG, "<<< Read last encoded chunk - closing pipe");
 			try {
-				long startTime = System.nanoTime();
 				pipedOut.flush();
 				pipedOut.close();
-				long duration = System.nanoTime() - startTime;
-				Log.i(TAG, "<<< Flush upload took "+duration/1000000+" ms");
 			} catch (IOException e1) {
 				Log.e(TAG, "Exception flusing upload stream", e1);
 			}
@@ -417,6 +418,7 @@ public class SpeechAudioStreamer {
 					Log.e(TAG, "Exception flusing debug file", e);
 				}
 			}
+			timeDoneUploading = System.nanoTime();
 			Log.i(TAG, "<<< Done uploading");
 		}
 
