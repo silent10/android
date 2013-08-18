@@ -169,9 +169,9 @@ public class EvaVoiceClient {
 	 * @throws Exception
 	 */
 	private InputStreamEntity setAudioContent(SpeechAudioStreamer speechAudioStreamer) throws NumberFormatException, Exception
-	{		
-		InputStreamEntity reqEntity  = new InputStreamEntity(speechAudioStreamer.getInputStream(), -1);
-		speechAudioStreamer.start();
+	{
+		InputStream stream = speechAudioStreamer.start();
+ 		InputStreamEntity reqEntity  = new InputStreamEntity(stream, -1);
 
 		reqEntity.setContentType(CODEC);
 
