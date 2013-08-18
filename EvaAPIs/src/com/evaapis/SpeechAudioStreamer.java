@@ -71,7 +71,6 @@ public class SpeechAudioStreamer {
 			throws Exception {
 		fifoPath = context.getApplicationInfo().dataDir + "/flac_stream_fifo";
 
-		Log.i(TAG, "initing fifo");
 		this.mEncoder = new FLACStreamEncoder();
 		mSampleRate = sampleRate;
 		totalTimeRecording = totalTimeUploading = 0;
@@ -329,6 +328,7 @@ public class SpeechAudioStreamer {
 	 */
 	class Uploader implements Runnable {
 		boolean startedReading  = false;
+		InputStream encodedStream;
 		private long timeDoneUploading;
 		
 		@Override
@@ -355,12 +355,13 @@ public class SpeechAudioStreamer {
 			mEncoder.initFifo(fifoPath);
 			try {
 				startedReading = true;
-				encodedFifo = new RandomAccessFile(fifoPath, "r");
+				encodedStream = new FileInputStream(fifoPath);
+				//encodedFifo = new RandomAccessFile(fifoPath, "r");
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, "Failed to open FIFO from encoder");
 				throw new RuntimeException("Failed to open FIFO from encoder");
 			}
-			
+			/*
 			Log.i(TAG, "<<< reading from encoded Fifo");
 
 			while(true) {
@@ -420,14 +421,15 @@ public class SpeechAudioStreamer {
 			}
 			timeDoneUploading = System.nanoTime();
 			Log.i(TAG, "<<< Done uploading");
+			*/
 		}
 
 	}
 
-	void start() {
+	public InputStream start() {
 		if (mIsRecording) {
 			Log.w(TAG, "Already recording");
-			return;
+			return null;
 		}
 		mIsRecording = true;
 //		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
@@ -451,6 +453,7 @@ public class SpeechAudioStreamer {
 		new Thread(p).start();
 		//new Thread(c).start();
 		Log.i(TAG, "Audio Streamer started!");
+		return u.encodedStream;
 	}
 
 	/*
@@ -510,12 +513,14 @@ public class SpeechAudioStreamer {
 		return new byte[0];
 	}
 
-	public InputStream getInputStream() throws IOException {
-		pipedOut = new PipedOutputStream();
-		pipedIn = new PipedInputStream(pipedOut);
-		return pipedIn;
-
-	}
+//	public InputStream getInputStream() throws IOException {
+////		pipedOut = new PipedOutputStream();
+////		pipedIn = new PipedInputStream(pipedOut);
+////		return pipedIn;
+//		Log.i(TAG, "initing Fifo");
+//		mEncoder.initFifo(fifoPath);
+//		return new FileInputStream(fifoPath);
+//	}
 
 	void WriteWavFile(File outputFile, int sampleRate, byte data[]) {
 		long longSampleRate = sampleRate;
