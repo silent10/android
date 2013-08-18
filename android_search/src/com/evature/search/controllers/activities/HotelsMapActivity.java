@@ -84,7 +84,7 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
         if(length>30) 
         	length=30;
         
-        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
+        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small);
         Builder boundsBuilder = new LatLngBounds.Builder();
         
         for(int i=0;i<length;i++)
