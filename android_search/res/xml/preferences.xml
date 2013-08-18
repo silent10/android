@@ -8,6 +8,14 @@
             android:key="debug"
             android:summary="@string/summary_parent_preference"
             android:title="@string/title_debug_parent_preference" />
-    </PreferenceCategory>
+        <CheckBoxPreference
+            android:key="save_pcm"
+            android:summary="@string/save_recording_pcm_file_wav_"
+            android:title="Save PCM" />
+        <CheckBoxPreference
+            android:key="save_encoded"
+            android:summary="@string/save_encoded_recording_file_flac_"
+            android:title="Save FLAC" />
+        </PreferenceCategory>
 
 </PreferenceScreen>

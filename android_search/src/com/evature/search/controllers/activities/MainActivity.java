@@ -506,7 +506,13 @@ public class MainActivity extends EvaBaseActivity implements
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		// Save UI state changes to the savedInstanceState.
 		// This bundle will be passed to onCreate if the process is killed and restarted.
-		super.onSaveInstanceState(savedInstanceState);
+		try {
+			super.onSaveInstanceState(savedInstanceState);
+		}
+		catch (IllegalStateException e) {
+			// this sometimes happens when "fragment not in fragment manager" - not sure why
+			Log.e(TAG, "Illegal state while saving instance state in main activity", e);
+		}
 
 		savedInstanceState.putBoolean("mTtsWasConfigured", mSpeechToTextWasConfigured);
 		// savedInstanceState.putString("mExternalIpAddress", mExternalIpAddress);

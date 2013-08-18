@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="hello">Hello World, Test1Activity!</string>
     <string name="app_name">Eva Travel Search</string>
-    <string name="button">Travel Search</string>
-    <string name="textview"/>
-    <string name="button2">Now press me!</string>
-    <string name="button3">voice?</string>
     <string name="inline_preferences">inline preferences</string>
     <string name="title_checkbox_preference">title checkbox preference</string>
     <string name="summary_checkbox_preference">summary checkbox preference</string>
@@ -18,21 +13,8 @@
     <string name="advanced_menu">Advanced Menu</string>
     <string name="summary_parent_preference">Enable various debug features</string>
     <string name="title_debug_parent_preference">Debug</string>
-    <string name="title_next_screen_toggle_preference">title_next_screen_toggle_preference</string>
     <string name="launch_preferences">launch_preferences</string>
     <string name="dialog_title_list_preference">dialog_title_list_preference</string>
-    <string name="summary_list_preference">summary_list_preference</string>
-    <string name="summary_engine_preference">summary_engine_preference</string>
-    <string-array name="entries_list_preference"/>
-    <string-array name="entryvalues_list_preference"/>
-    <string-array name="engine_list_preference">
-    	<item>Eva</item>
-        <item>Google</item>
-    </string-array>
-    <string-array name="enginevalues_list_preference">
-    	<item>Eva</item>
-        <item>Google</item>
-    </string-array>
     <string name="eva_logo">EVA Logo</string>
     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>
     <string name="ok_button">OK, got it.</string>
@@ -70,4 +52,6 @@
     <string name="bugreport_dialog_title">Bug Report</string>
     <string name="bugreport_dialog_comment_prompt">Comment:</string>
     <string name="bugreport_dialog_ok_toast">Thank you !</string>
+    <string name="save_recording_pcm_file_wav_">Save raw recording (.wav file)</string>
+    <string name="save_encoded_recording_file_flac_">Save encoded recording (.flac file)</string>
 </resources>
