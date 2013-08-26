@@ -28,21 +28,21 @@ public class ChatItemList {
 		return mChatListEva.get(position);
 	}
 
-	public void saveInstanceState(Bundle instanceState) {
-		instanceState.putParcelableArrayList("mChatListEva", (ArrayList<ChatItem>) mChatListEva);
-	}
-	public void loadInstanceState(Bundle savedInstanceState) {
-		if (savedInstanceState != null) {
-			Log.d(TAG, "Loading ChatItem from savedInstanceState");
-			// Restore last state for checked position.
-			ArrayList<ChatItem> parcelableArrayList = savedInstanceState.getParcelableArrayList("mChatListEva");
-			if (parcelableArrayList != null)
-				mChatListEva = parcelableArrayList;
-		}
-		else {
-			mChatListEva = new ArrayList<ChatItem>();
-		}
-	}
+//	public void saveInstanceState(Bundle instanceState) {
+//		instanceState.putParcelableArrayList("mChatListEva", (ArrayList<ChatItem>) mChatListEva);
+//	}
+//	public void loadInstanceState(Bundle savedInstanceState) {
+//		if (savedInstanceState != null) {
+//			Log.d(TAG, "Loading ChatItem from savedInstanceState");
+//			// Restore last state for checked position.
+//			ArrayList<ChatItem> parcelableArrayList = savedInstanceState.getParcelableArrayList("mChatListEva");
+//			if (parcelableArrayList != null)
+//				mChatListEva = parcelableArrayList;
+//		}
+//		else {
+//			mChatListEva = new ArrayList<ChatItem>();
+//		}
+//	}
 
 
 }
