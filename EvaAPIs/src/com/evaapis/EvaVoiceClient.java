@@ -68,15 +68,21 @@ public class EvaVoiceClient {
 	// debug time measurements
 	public long timeSpentReadingResponse;
 	public long timeSpentExecute;
+	public long timeWaitingForServer;
 
+	DebugStream uploadStream;
+	
 	boolean hadError;
 
+	private String mLocale = null;
 
-	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, SpeechAudioStreamer speechAudioStreamer) {
+
+	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, String locale, SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
 		mDeviceId = deviceId;
 		mSessionId = sessionId;
+		mLocale = locale;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
@@ -136,6 +142,10 @@ public class EvaVoiceClient {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+		
+		if (mLocale != null) {
+			qparams.add(new BasicNameValuePair("locale", mLocale));
+		}
 
 		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, "", URLEncodedUtils.format(qparams, "UTF-8"), null);
 
@@ -170,8 +180,9 @@ public class EvaVoiceClient {
 	 */
 	private InputStreamEntity setAudioContent(SpeechAudioStreamer speechAudioStreamer) throws NumberFormatException, Exception
 	{
-		InputStream stream = speechAudioStreamer.start();
- 		InputStreamEntity reqEntity  = new InputStreamEntity(stream, -1);
+		InputStream encodedStream = speechAudioStreamer.start();
+		uploadStream = new DebugStream(encodedStream);
+ 		InputStreamEntity reqEntity  = new InputStreamEntity(uploadStream, -1);
 
 		reqEntity.setContentType(CODEC);
 
@@ -253,7 +264,9 @@ public class EvaVoiceClient {
 			
 			long t0 = System.nanoTime();
 			HttpResponse response = httpclient.execute(mHttpPost);
-			timeSpentExecute = (System.nanoTime() - t0) / 1000000;
+			long t1 = System.nanoTime();
+			timeWaitingForServer = (t1 - uploadStream.timeOfLastBuffer) / 1000000;
+			timeSpentExecute = (t1 - t0) / 1000000;
 
 			processResponse(response);
 
@@ -292,5 +305,6 @@ public class EvaVoiceClient {
 	{
 		return mInTransaction;
 	}
+
 
 }

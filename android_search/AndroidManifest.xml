@@ -4,7 +4,7 @@
     android:versionCode="23"
     android:versionName="Pre-alpha" >
 
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
+    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="17"/>
     <permission
         android:name="com.evature.permission.MAPS_RECEIVE"
         android:protectionLevel="signature"/>

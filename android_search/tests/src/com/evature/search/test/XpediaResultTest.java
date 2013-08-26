@@ -41,7 +41,7 @@ public class XpediaResultTest {
             transcript.add("onPreExecute");
         }
 
-        @Override protected Void doInBackground(Void... voids) {
+        @Override protected String doInBackground(Void... voids) {
             transcript.add("doInBackground ");
             return super.doInBackground(voids);
         }
@@ -51,7 +51,7 @@ public class XpediaResultTest {
             super.onProgressUpdate(values);
         }
 
-        @Override protected void onPostExecute(Void result) {
+        @Override protected void onPostExecute(String result) {
             transcript.add("onPostExecute ");
             super.onPostExecute(result);
         }

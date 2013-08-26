@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.views.adapters.FlightListAdapter;
 import com.evature.search.views.adapters.FlightListAdapterTP;
 
 public class FlightsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener {
@@ -24,7 +25,7 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 	// private LinearLayout mFooterView;
 	View mView;
 	ListView mFlightListView;
-	private FlightListAdapterTP mAdapter;
+	private FlightListAdapter mAdapter;
 	private static final String TAG = "FlightsFragment";
 
 	@Override
@@ -94,7 +95,7 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 	}
 
 	void setAdapter() {
-		if (MyApplication.getDb() != null) {
+		if (MyApplication.getJourneyDb() != null) {
 
 			// if (MyApplication.getDb().mMoreResultsAvailable) {
 			// LayoutInflater li = getActivity().getLayoutInflater();
@@ -102,7 +103,7 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 			// mFlightListView.addFooterView(mFooterView);
 			// }
 
-			mAdapter = new FlightListAdapterTP(this);
+			mAdapter = new FlightListAdapter(this, MyApplication.getJourneyDb().mJourneys);
 			mFlightListView.setAdapter(mAdapter);
 			mFlightListView.setOnItemClickListener(this);
 		}
@@ -137,13 +138,10 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 		return false;
 	}
 
-	public FlightListAdapterTP getAdapter() {
+	public FlightListAdapter getAdapter() {
 		return mAdapter;
 	}
 
-	public void setAdapter(FlightListAdapterTP mAdapter) {
-		this.mAdapter = mAdapter;
-	}
 
 	// public void updateDisplay() {
 	// // Do whatever is needed to update the display

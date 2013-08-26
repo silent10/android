@@ -29,7 +29,7 @@ public class FlightListAdapter extends BaseAdapter {
 	// private FlightsFragment mParent;
 	private VayantJourneys journeys = null;
 
-	FlightListAdapter(FlightsFragment parent, VayantJourneys journeys) {
+	public FlightListAdapter(FlightsFragment parent, VayantJourneys journeys) {
 		Log.d(TAG, "CTOR");
 		mInflater = LayoutInflater.from(parent.getActivity());
 		// mParent = parent;
@@ -59,9 +59,8 @@ public class FlightListAdapter extends BaseAdapter {
 		return position;
 	}
 
-	@Override
+	@Override   // TODO: reuse views
 	public View getView(int position, View convertView, ViewGroup parent) {
-		Log.d(TAG, "getView " + String.valueOf(position));
 		BookingSolution solution = journeys.mJourneys[position].mBookingSolutions[0];
 		View row = mInflater.inflate(R.layout.flight_list_item, parent, false);
 
@@ -69,31 +68,36 @@ public class FlightListAdapter extends BaseAdapter {
 		// label.setText("$" + String.valueOf(solution.mPrice) + " ");
 
 		LinearLayout linearLayout = (LinearLayout) row.findViewById(R.id.flight_list_item_layout);
-		for (Segment segment : solution.mSegments) {
-			View child = mInflater.inflate(R.layout.flight_list_item2, null);
+		int segmentCount = 1;
+		//for (Segment segment : solution.mSegments) {
+		Segment segment = solution.mSegments.get(0);
+		
+			View child = mInflater.inflate(R.layout.flight_list_item_vayant, null);
 
 			// TextView stops_count = (TextView) child.findViewById(R.id.itinerary_view_stops_count);
 			// stops_count.setText(segment.isDirect() ? "Direct" : "Not Direct");
 
 			TextView departure_time = (TextView) child.findViewById(R.id.itinerary_view_departure_time);
 			Date departureDateTime = segment.flights.get(0).departureDateTime;
-			String departureTime = String.valueOf(departureDateTime.getHours()) + ":"
-					+ String.valueOf(departureDateTime.getMinutes());
-			departure_time.setText(departureTime + " " + segment.flights.get(0).org);
-
+			String departureTime = String.format("%1$d:%2$02d", departureDateTime.getHours(), departureDateTime.getMinutes());
+			departure_time.setText(departureTime + " " + segment.flights.get(0).origin);
+			
 			TextView arrival_time = (TextView) child.findViewById(R.id.itinerary_view_arrival_time);
 			Flight flight = segment.flights.get(segment.flights.size() - 1);
 			Date arrivalDateTime = flight.arrivalDateTime;
-			String ArrivalTime = String.valueOf(arrivalDateTime.getHours()) + ":"
-					+ String.valueOf(arrivalDateTime.getMinutes());
-			arrival_time.setText(ArrivalTime + " " + flight.dst);
+			String ArrivalTime = String.format("%1$d:%2$02d", arrivalDateTime.getHours(), arrivalDateTime.getMinutes());
+			arrival_time.setText(ArrivalTime + " " + flight.destination);
 
 			TextView airline = (TextView) child.findViewById(R.id.itinerary_view_airline);
-			airline.setText(segment.flights.get(0).mcxr);
+			airline.setText(segment.flights.get(0).marketingCarrier);
 
+			
+			TextView price = (TextView) child.findViewById(R.id.itinerary_view_price);
+			price.setText( String.format("%1$,.2f %2$s", solution.mOutboundPrice, solution.mCurrency));
+			
 			linearLayout.addView(child);
-			Log.d(TAG, "getView addView");
-		}
+			//Log.d(TAG, "getView position "+String.valueOf(position)+" adding view for segment "+(segmentCount++));
+		//}
 		return (row);
 
 		// ViewHolder holder;

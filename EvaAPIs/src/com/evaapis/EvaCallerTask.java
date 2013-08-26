@@ -25,7 +25,7 @@ import com.google.inject.Inject;
 
 		EvaSearchReplyListener mSearchReplyListener;
 		String mSessionId = "1";
-		String mLanguage = "US";
+		//String mLanguage = "US";
 		Object mCookie; // 
 		String mInputText;
 		int mResponseId;
@@ -47,7 +47,7 @@ import com.google.inject.Inject;
 								Object cookie) {
 			mSearchReplyListener = searchReplyListener;
 			mSessionId = sessionId;
-			mLanguage = languageCode.substring(0, 2);
+			//mLanguage = languageCode.substring(0, 2);
 			mResponseId = responseId;
 			mInputText = inputText;
 			mCookie = cookie;
@@ -60,8 +60,9 @@ import com.google.inject.Inject;
 			String evatureUrl = EvaAPIs.API_ROOT + "/api/v1.0?";
 			evatureUrl += ("site_code=" + SITE_CODE);
 			evatureUrl += ("&api_key=" + API_KEY);
-			evatureUrl += ("&language=" + mLanguage);
+			//evatureUrl += ("&language=" + mLanguage);
 			evatureUrl += ("&session_id=" + mSessionId);
+			evatureUrl += ("&locale="+EvaAPIs.locale);
 			if (mResponseId != -1) {
 				evatureUrl += ("&dialog_response="+mResponseId);
 			}

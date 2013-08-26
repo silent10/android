@@ -34,8 +34,11 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		mCurrencyCode = currencyCode;
 	}
 
-	boolean createHotelData(String hotelListResponse) {
+	String createHotelData(String hotelListResponse) {
 
+		if (hotelListResponse == null) {
+			return null;
+		}
 		JSONObject hotelListResponseJSON;
 		try {
 			hotelListResponseJSON = new JSONObject(hotelListResponse);
@@ -50,19 +53,19 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 //			else {
 //				 MyApplication.setDb(db);
 //			}
-			return true;
+			return hotelListResponseJSON.toString(2);
 		} catch (JSONException e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		} catch (NullPointerException e) {
 			e.printStackTrace();
-			return false;
+			return null;
 		}
 
 	}
 
 	@Override
-	protected Void doInBackground(Void... params) {
+	protected String doInBackground(Void... params) {
 
 		Log.i(TAG, "doInBackground: start");
 		// String searchQuery = EvaProtocol.getEvatureResponse(mQueryString);
@@ -77,19 +80,21 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 			Log.d(TAG, hotelListResponse);
 		}
 		mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
-		if ((hotelListResponse == null) || (false == createHotelData(hotelListResponse))) {
+		hotelListResponse = createHotelData(hotelListResponse);
+		if (hotelListResponse == null) {
 			Log.i(TAG, "doInBackground: Error in Expedia response");
 			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH_WITH_ERROR;
-		} else {
-			Log.i(TAG, "doInBackground: All OK");
-			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
-			MyApplication.getDb().setArrivalDate(apiReply.ean.get("arrivalDate"));
-			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
-			MyApplication.getDb().setDepartueDate(apiReply.ean.get("departureDate"));
-			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
-			MyApplication.getDb().setNumberOfAdults(1);
-		}
+			return null;
+		} 
+		
+		Log.i(TAG, "doInBackground: All OK");
+		mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
+		MyApplication.getDb().setArrivalDate(apiReply.ean.get("arrivalDate"));
+		// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
+		MyApplication.getDb().setDepartueDate(apiReply.ean.get("departureDate"));
+		// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
+		MyApplication.getDb().setNumberOfAdults(1);
 		Log.i(TAG, "doInBackground: end");
-		return null;
+		return hotelListResponse;
 	}
 }
