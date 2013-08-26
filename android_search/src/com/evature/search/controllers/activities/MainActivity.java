@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -46,6 +47,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,6 +63,7 @@ import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaDialog.DialogElement;
+import com.evaapis.EvaWarning;
 import com.evaapis.events.NewSessionStarted;
 import com.evaapis.flow.FlowElement;
 import com.evaapis.flow.FlowElement.TypeEnum;
@@ -127,7 +131,6 @@ public class MainActivity extends EvaBaseActivity implements
 	private String mExamplesTabName;
 	private String mDebugTabName;
 	private String mHotelsTabName;
-	private String mVayantDebugTabName;
 
 	private String mHotelTabName;
 
@@ -265,7 +268,7 @@ public class MainActivity extends EvaBaseActivity implements
 				chatFragment.setDialogHandler(new DialogClickHandler() {
 					
 					@Override
-					public void onClick(String dialogResponse, int responseIndex) {
+					public void onClick(SpannableString dialogResponse, int responseIndex) {
 						MainActivity.this.addChatItem(new ChatItem(dialogResponse));
 						MainActivity.this.replyToDialog(responseIndex);
 						//MainActivity.this.searchWithText(dialogResponse);
@@ -832,9 +835,20 @@ public class MainActivity extends EvaBaseActivity implements
 		bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 
 		
-		if ("voice".equals(cookie) && reply.inputText != null) {
+		if ("voice".equals(cookie) && reply.processedText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
-			addChatItem(new ChatItem(reply.inputText));
+			SpannableString chat = new SpannableString(reply.processedText);
+			if (reply.evaWarnings.size() > 0) {
+				int col = getResources().getColor(R.color.my_chat_no_session_text);
+				for (EvaWarning warning: reply.evaWarnings) {
+					if (warning.position == -1) {
+						continue;
+					}
+					chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
+					chat.setSpan( new StyleSpan(Typeface.ITALIC), warning.position, warning.position+warning.text.length(), 0);
+				}
+			}
+			addChatItem(new ChatItem(chat));
 		}
 		
 		super.onEvaReply(reply, cookie);
