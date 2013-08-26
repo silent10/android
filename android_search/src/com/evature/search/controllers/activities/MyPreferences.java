@@ -3,14 +3,8 @@
  */
 package com.evature.search.controllers.activities;
 
-import java.util.Map;
-
 import roboguice.activity.RoboPreferenceActivity;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.evature.search.R;
 

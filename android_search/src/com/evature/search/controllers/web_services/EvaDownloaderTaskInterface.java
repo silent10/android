@@ -7,11 +7,11 @@ public interface EvaDownloaderTaskInterface {
 	int PROGRESS_EXPEDIA_HOTEL_FETCH = 3;
 	int PROGRESS_FINISH_WITH_ERROR = 4;
 
-	void endProgressDialog(int id);
+	void endProgressDialog(int id, String result);
 
 	void startProgressDialog(int id);
 
-	void endProgressDialogWithError(int id);
+	void endProgressDialogWithError(int id, String result);
 
 	void updateProgress(int id, int mProgress);
 

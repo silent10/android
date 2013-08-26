@@ -11,33 +11,31 @@ import android.util.Log;
 
 public class Flight {
 
-	public String org;
-	public String dst;
-	public String ocxr;
-	public String mcxr;
-	public String dep;
-	public String arr;
-	public int seg;
+	public String origin;
+	public String destination;
+	public String operatingCarrier;
+	public String marketingCarrier;
+	public int segment;
 	public Date arrivalDateTime;
 	public Date departureDateTime;
 
 	public Flight(JSONObject flight) {
 		try {
-			org = flight.getString("org");
-			dst = flight.getString("dst");
-			ocxr = flight.getString("ocxr");
-			mcxr = flight.getString("mcxr");
-			dep = flight.getString("dep");
-			arr = flight.getString("arr");
-			seg = flight.getInt("seg");
+			origin = flight.getString("org");
+			destination = flight.getString("dst");
+			operatingCarrier = flight.getString("ocxr");
+			marketingCarrier = flight.getString("mcxr");
+			String departureDate = flight.getString("dep");
+			String arrivalDate = flight.getString("arr");
+			segment = flight.getInt("seg");
 
 			// String mytime = "2011-12-03 12:00:19"; // 2012-06-28T14:35:00
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 			try {
-				arrivalDateTime = dateFormat.parse(arr);
-				departureDateTime = dateFormat.parse(dep);
+				arrivalDateTime = dateFormat.parse(arrivalDate);
+				departureDateTime = dateFormat.parse(departureDate);
 			} catch (ParseException e) {
-				Log.e("VAYANT", "Bad Date = " + arr);
+				Log.e("VAYANT", "Bad Date = " + arrivalDate);
 			}
 
 		} catch (JSONException e) {

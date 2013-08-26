@@ -21,6 +21,7 @@ import com.evature.search.models.vayant.EvaVayantDatabase;
 public class MyApplication extends Application {
 
 	static EvaXpediaDatabase mEvaDb = null;
+	static EvaVayantDatabase mVayantDb = null;
 	static String mExpediaSecret = null;
 	static String mExpediaApiKey = null;
 	static String mExpediaClientId = null;
@@ -98,7 +99,10 @@ public class MyApplication extends Application {
 	}
 	
 	public static EvaVayantDatabase getJourneyDb() {
-		return null;
+		if (mVayantDb == null) {
+			mVayantDb = new EvaVayantDatabase();
+		}
+		return mVayantDb;
 	}
 
 }

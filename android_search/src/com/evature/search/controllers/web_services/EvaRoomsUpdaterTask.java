@@ -11,8 +11,8 @@ import com.evature.search.views.fragments.CalendarFragment;
 public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	
 	@Override
-	protected void onPostExecute(Void result) {
-		mListener.endProgressDialog(mProgress);
+	protected void onPostExecute(String result) {
+		mListener.endProgressDialog(mProgress, result);
 		super.onPostExecute(result);
 	}
 
@@ -22,7 +22,7 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	
 	
 		@Override
-	protected Void doInBackground(Void... params) {
+	protected String doInBackground(Void... params) {
 		String str= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
 				MyApplication.getDb().mArrivalDateParam,
 				MyApplication.getDb().mDepartureDateParam,
@@ -31,7 +31,7 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 
 		mHotelData.mSummary.updateRoomDetails(str);
 
-		return super.doInBackground(params);
+		return str;
 	}
 
 	

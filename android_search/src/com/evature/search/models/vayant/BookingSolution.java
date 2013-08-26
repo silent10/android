@@ -12,7 +12,10 @@ import android.util.Log;
 public class BookingSolution {
 
 	public Flight mFlights[];
-	public double mPrice;
+	public double mTotalPrice;
+	public double mOutboundPrice;
+	public double mInboundPrice;
+	public String mCurrency;
 	public List<Segment> mSegments = new ArrayList<Segment>();
 
 	public BookingSolution(JSONObject solution) {
@@ -23,13 +26,19 @@ public class BookingSolution {
 			for (int index = 0; index < flights.length(); index++) {
 				Flight flight = new Flight(flights.getJSONObject(index));
 				mFlights[index] = flight;
-				if (flight.seg > mSegments.size()) {
+				if (flight.segment > mSegments.size()) {
 					mSegments.add(new Segment());
 				}
-				mSegments.get(flight.seg - 1).addFlight(flight);
+				mSegments.get(flight.segment - 1).addFlight(flight);
 			}
-			mPrice = solution.getJSONObject("Price").getJSONObject("Total").optDouble("sum");
+			
+			JSONObject jTotalPrice = solution.getJSONObject("Price").getJSONObject("Total");
+			mTotalPrice = jTotalPrice.optDouble("sum");
+			mOutboundPrice = solution.getJSONObject("OutboundPrice").getJSONObject("Total").optDouble("sum");
+			mInboundPrice = solution.getJSONObject("InboundPrice").getJSONObject("Total").optDouble("sum");
+			mCurrency = jTotalPrice.optString("cur");
 		} catch (JSONException e) {
+			e.printStackTrace();
 			Log.e("VAYANT", "Bad solution");
 		}
 

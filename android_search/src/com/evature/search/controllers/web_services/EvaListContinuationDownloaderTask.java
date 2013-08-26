@@ -30,7 +30,7 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected void onPostExecute(Void result) {
+	protected void onPostExecute(String result) {
 
 		if (mListener == null)
 			return;
@@ -40,7 +40,7 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected Void doInBackground(Void... params) {
+	protected String doInBackground(Void... params) {
 		Log.i(TAG, "Do in background");
 
 		String hotelListResponse = XpediaProtocolStatic.getExpediaNext(mNextQuery, mCurrencyCode);
@@ -57,7 +57,7 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 
 		publishProgress((Integer[]) null);
 
-		return null;
+		return hotelListResponse;
 	}
 
 	boolean addHotelData(String hotelListResponse) {

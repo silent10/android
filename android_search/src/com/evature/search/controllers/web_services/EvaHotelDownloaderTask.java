@@ -37,7 +37,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected Void doInBackground(Void... params) {
+	protected String doInBackground(Void... params) {
 		Log.d(TAG, "doInBackground()");
 
 		EvaXpediaDatabase db = MyApplication.getDb();
@@ -48,34 +48,40 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 		String hotelInfo = XpediaProtocolStatic.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
 				EvaSettingsAPI.getCurrencyCode((Context) mListener));
 
-		JSONObject jHotel;
+		if (hotelInfo == null) {
+			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH_WITH_ERROR;
+			return null;
+		}
+		
+		JSONObject jHotel = null;
 		try {
-			if (hotelInfo != null) {
-				jHotel = new JSONObject(hotelInfo);
+			jHotel = new JSONObject(hotelInfo);
 
-				JSONObject jHotelInfo = jHotel.getJSONObject("HotelInformationResponse");
+			JSONObject jHotelInfo = jHotel.getJSONObject("HotelInformationResponse");
 
-				hotelData.mDetails = new HotelDetails(jHotelInfo);
+			hotelData.mDetails = new HotelDetails(jHotelInfo);
 
-				if (db.mArrivalDateParam != null && db.mDepartureDateParam != null) {
-					String str = XpediaProtocolStatic.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
-							db.mArrivalDateParam, db.mDepartureDateParam,
-							EvaSettingsAPI.getCurrencyCode((Context) mListener), db.mNumberOfAdultsParam);
-					Log.d(TAG, str);
-					hotelData.mSummary.updateRoomDetails(str);
-				}
-				mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
-
-			} else {
-				mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH_WITH_ERROR;
+			if (db.mArrivalDateParam != null && db.mDepartureDateParam != null) {
+				String str = XpediaProtocolStatic.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
+						db.mArrivalDateParam, db.mDepartureDateParam,
+						EvaSettingsAPI.getCurrencyCode((Context) mListener), db.mNumberOfAdultsParam);
+				Log.d(TAG, str);
+				hotelData.mSummary.updateRoomDetails(str);
 			}
+			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
 
 		} catch (JSONException e) {
 			Log.e(TAG, "JSON exception getting hotel details");
 			e.printStackTrace();
 		}
 
-		return null;
+		try {
+			String result = jHotel.toString(2);
+			return result;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return hotelInfo;
+		}
 	}
 
 	public int getHotelIndex() {

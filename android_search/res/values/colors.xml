@@ -156,4 +156,5 @@
     <color name="eva_chat_no_session_text">#606060</color>
     <color name="eva_chat_in_session_bg">#f4f4f4</color>
     <color name="eva_chat_in_session_text">#404040</color>
+    <color name="white">#fff</color>
 </resources>

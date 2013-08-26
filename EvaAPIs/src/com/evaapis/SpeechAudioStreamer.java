@@ -38,7 +38,6 @@ public class SpeechAudioStreamer {
 	private static final String FILENAME = "recording" ;
 	
 	// debug - time measurments
-	public long totalTimeUploading;  // sum of time spent writing to upload fifo
 	public long totalTimeRecording;  // time from recording start to end (VAD detection)
 	
 
@@ -73,7 +72,7 @@ public class SpeechAudioStreamer {
 
 		this.mEncoder = new FLACStreamEncoder();
 		mSampleRate = sampleRate;
-		totalTimeRecording = totalTimeUploading = 0;
+		totalTimeRecording = 0;
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		mDebugSavePCM = prefs.getBoolean("save_pcm", false);
