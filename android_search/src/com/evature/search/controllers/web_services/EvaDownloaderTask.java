@@ -3,7 +3,7 @@ package com.evature.search.controllers.web_services;
 import android.os.AsyncTask;
 import android.util.Log;
 
-abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, Void> {
+abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String> {
 
 	static private final String TAG = EvaDownloaderTask.class.getSimpleName();
 
@@ -24,13 +24,13 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, Void> {
 	}
 
 	@Override
-	protected Void doInBackground(Void... params) {
+	protected String doInBackground(Void... params) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	protected void onPostExecute(Void result) {
+	protected void onPostExecute(String result) {
 
 		Log.d(TAG, "onPostExecute");
 
@@ -38,9 +38,9 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, Void> {
 			return;
 
 		if (mProgress == EvaDownloaderTaskInterface.PROGRESS_FINISH) {
-			mListener.endProgressDialog(getId());
+			mListener.endProgressDialog(getId(), result);
 		} else {
-			mListener.endProgressDialogWithError(getId());
+			mListener.endProgressDialogWithError(getId(), result);
 		}
 		super.onPostExecute(result);
 	}

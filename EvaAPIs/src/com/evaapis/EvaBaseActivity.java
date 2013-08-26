@@ -39,6 +39,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 
 	@Inject protected EventManager eventManager;
 	private boolean mDebug;
+	private long startOfTextSearch;
 
 	protected void speak(String sayIt) {
 		if (mTts != null) {
@@ -122,6 +123,17 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 			// no session support - every reply starts a new session
 			resetSession();
 		}
+		
+		if ("voice".equals(cookie) == false) {
+			// coming from text search
+			JSONObject debugData = new JSONObject();
+			try {
+				debugData.put("Time in HTTP Execute", ((System.nanoTime() - startOfTextSearch)/1000000)+"ms");
+				reply.JSONReply.put("debug", debugData);
+			} catch (JSONException e) {
+				Log.e(TAG, "Failed setting debug data", e);
+			}
+		}
 	}
 	
 	
@@ -138,10 +150,10 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 			if (mDebug && apiReply.JSONReply != null) {
 				JSONObject debugData = new JSONObject();
 				try {
-					debugData.put("Time spent uploading", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_UPLOADING)+"ms");
 					debugData.put("Time spent recording", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_RECORDING)+"ms");
 					debugData.put("Time spent creating activity", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_ACTIVITY_CREATE)+"ms");
 					debugData.put("Time in HTTP Execute", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_EXECUTE)+"ms");
+					debugData.put("Time spent server side", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_SERVER)+"ms");
 					debugData.put("Time reading HTTP response", bundle.getLong(EvaSpeechRecognitionActivity.RESULT_TIME_RESPONSE)+"ms");
 					apiReply.JSONReply.put("debug", debugData);
 				} catch (JSONException e) {
@@ -191,6 +203,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	public void searchWithText(String searchString) {
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
+		startOfTextSearch = System.nanoTime();
 		callerTask.initialize(this, mSessionId, mLastLanguageUsed, searchString, -1, null);
 		callerTask.execute();
 	}

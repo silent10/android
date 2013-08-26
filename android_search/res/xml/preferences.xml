@@ -2,7 +2,24 @@
 <!-- http://developer.android.com/resources/samples/ApiDemos/res/xml/preferences.html -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-
+	<PreferenceCategory android:title="@string/preferences_title">
+	    <ListPreference 
+	        android:key="preference_currency"
+	        android:title="@string/currency_pref_title"
+	        android:summary="@string/currency_pref_summary"
+	        android:entries="@array/entries_currency_preference"
+	        android:entryValues="@array/entryvalues_currency_preference" />
+	    <ListPreference 
+	        android:key="preference_locale"
+	        android:title="Locale"
+	        android:summary="How to parse dates, weekends"
+	        android:entries="@array/locales"
+	        android:entryValues="@array/locale_values"
+	        />
+	</PreferenceCategory>
+	
+	
+    
     <PreferenceCategory android:title="@string/advanced_menu" >
         <CheckBoxPreference
             android:key="debug"
@@ -12,10 +29,6 @@
             android:key="save_pcm"
             android:summary="@string/save_recording_pcm_file_wav_"
             android:title="Save PCM" />
-        <CheckBoxPreference
-            android:key="save_encoded"
-            android:summary="@string/save_encoded_recording_file_flac_"
-            android:title="Save FLAC" />
         </PreferenceCategory>
 
 </PreferenceScreen>

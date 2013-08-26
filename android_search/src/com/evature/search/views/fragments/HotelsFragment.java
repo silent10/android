@@ -196,7 +196,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	};
 
 	@Override
-	public void endProgressDialog(int id) {
+	public void endProgressDialog(int id, String result) {
 		mDownLoader = null;
 
 		if (mProgressDialog != null) {
@@ -208,7 +208,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	ProgressDialog mProgressDialog = null;
 
 	@Override
-	public void endProgressDialogWithError(int id) {
+	public void endProgressDialogWithError(int id, String result) {
 		Toast.makeText(getActivity(), "Error getting hotel information, please try again", Toast.LENGTH_LONG).show();
 
 		if (mProgressDialog != null) {

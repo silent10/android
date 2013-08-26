@@ -48,6 +48,8 @@ public class ExamplesFragmentTest {
 	@Inject ChatItemList mChatListModel;
 	
 	DownloadUrl mockDownloader = mock(DownloadUrl.class);
+
+	private String[] examples;
 	
 	private class ExamplesTestModule extends AbstractModule {
 		@Override
@@ -75,6 +77,7 @@ public class ExamplesFragmentTest {
         injector.injectMembers(this);
         
 		MainActivity activity = Robolectric.buildActivity(MainActivity.class).create().start().get();
+		examples = activity.getResources().getStringArray(R.array.examples);
 		ViewPager viewPager = (ViewPager) activity.findViewById(R.id.viewpager);
 		
     	SwipeyTabsPagerAdapter adapter = (SwipeyTabsPagerAdapter) viewPager.getAdapter();
@@ -92,7 +95,7 @@ public class ExamplesFragmentTest {
 
         ListView examplesListView = (ListView) examplesFragment.getView().findViewById(R.id.examples_list);
 
-        String expectedChat = "3 Star hotels in NYC";
+        String expectedChat = examples[1];
         assertEquals(expectedChat, examplesListView.getItemAtPosition(1).toString());
 
 		assertEquals(0, mChatListModel.getItemList().size());
@@ -100,7 +103,7 @@ public class ExamplesFragmentTest {
 		assertTrue( examplesListView.performItemClick(examplesListView, 1, 0) );
 		
 		try {
-			verify(mockDownloader).get( Matchers.contains("input_text=3+Star+hotels+in+NYC"));
+			verify(mockDownloader).get( Matchers.contains("input_text=Hotel+in+NYC+on+Wednesday+for+5+nights"));
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
 		}

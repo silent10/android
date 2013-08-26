@@ -19,9 +19,9 @@ import android.widget.Toast;
 
 public class EvaSpeechRecognitionActivity extends RoboActivity {
 
-	public static final String RESULT_TIME_UPLOADING = "TIME_UPLOADING";
 	public static final String RESULT_TIME_ACTIVITY_CREATE = "TIME_CREATE";
 	public static final String RESULT_TIME_RECORDING = "TIME_RECORDING";
+	public static final String RESULT_TIME_SERVER = "TIME_SERVER";
 	public static final String RESULT_TIME_RESPONSE = "TIME_RESPONSE";
 	public static final String RESULT_TIME_EXECUTE = "TIME_EXECUTE";
 	
@@ -75,10 +75,10 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 				intent.putExtra(RESULT_EVA_REPLY, evaJson);
 				if (mDebug) {
-					intent.putExtra(RESULT_TIME_UPLOADING, mSpeechAudioStreamer.totalTimeUploading);
 					intent.putExtra(RESULT_TIME_RECORDING, mSpeechAudioStreamer.totalTimeRecording);
-					intent.putExtra(RESULT_TIME_EXECUTE, mVoiceClient.timeSpentExecute);
+					intent.putExtra(RESULT_TIME_SERVER, mVoiceClient.timeWaitingForServer);
 					intent.putExtra(RESULT_TIME_RESPONSE, mVoiceClient.timeSpentReadingResponse);
+					intent.putExtra(RESULT_TIME_EXECUTE, mVoiceClient.timeSpentExecute);
 					intent.putExtra(RESULT_TIME_ACTIVITY_CREATE, mTimeActivityCreation);
 				}
 
@@ -187,6 +187,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		
 		String appKey = EvaAPIs.API_KEY;
 		String siteCode = EvaAPIs.SITE_CODE;
+		String locale = EvaAPIs.locale;
 
 		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 		String deviceId=telephonyManager.getDeviceId();
@@ -198,7 +199,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
 			mSpeechAudioStreamer = new SpeechAudioStreamer(this, SAMPLE_RATE);
-			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, mSpeechAudioStreamer);
+			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, locale, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);

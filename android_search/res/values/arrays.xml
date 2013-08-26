@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    
     <string-array name="entries_currency_preference">
         <item >USD</item>
         <item >EUR</item>
@@ -64,4 +65,29 @@
         <item >18</item>
     </string-array>
    
+   <string-array name="locales">
+        <item>US style -\n 10/3/2014 is October 3rd\n weekend is Sat-Sun</item>
+        <item>UK style -\n 10/3/2014 is March 10th\n weekend is Sat-Sun</item>
+        <item>IL style -\n 10/3/2010 is March 10th\n weekend is Fri-Sat</item>
+    </string-array>
+    <string-array name="locale_values">
+        <item>US</item>
+        <item>UK</item>
+        <item>IL</item>
+    </string-array>
+    
+    <string-array name="examples">
+        <item>Fly from London to NYC next Tuesday morning</item>
+        <!-- <item>Hotels in Arlington</item> -->
+        <item>Hotel in NYC on Wednesday for 5 nights</item>
+        <!-- <item>Fly from Minto to Heatherwood</item> -->
+        <item>Fly to NY next Sunday, stay 5 nights in Arlignton, return</item>
+        <!-- <item>Hotels in Heatherwood</item> -->
+        <item>3 Star hotels in NYC sorted by price</item>
+        <item>3 Star hotels in NYC sorted by name</item>
+        <item>3 Star hotels in NYC, on Wednesday for two nights, sorted by price descending</item>
+        <item>3 Star hotels in Miami FL, on Wednesday for two nights, sorted by price ascending</item>
+        <!-- <item>Fly to Madrid</item> -->
+        <!-- <item>Train ride from NYC to Washington DC next Wednesday</item> -->
+    </string-array>
 </resources>

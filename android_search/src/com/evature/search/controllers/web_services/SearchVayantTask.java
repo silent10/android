@@ -5,8 +5,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Locale;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,14 +68,16 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 			JSONObject obj = new JSONObject();
 
 			try { // Encoding examples: http://code.google.com/p/json-simple/wiki/EncodingExamples
-				obj.put("User", "tal@evature.com");
-				obj.put("Pass", "cfccc293b6d6398404e95100693cefd8457c6a0d");
-				JSONArray origins = new JSONArray();
-				origins.put(airport_code0);
-				obj.put("Origin", origins);
+				obj.put("User", "iftah@evature.com"); // "tal@evature.com");
+				obj.put("Pass", "91bab377e2d27afff60160c0508621d1d924b5f7");//"cfccc293b6d6398404e95100693cefd8457c6a0d");
+				obj.put("Origin", airport_code0);
 				obj.put("Destination", airport_code1);
 				obj.put("Environment", "fast_search_1_0");
-				obj.put("DepartureFrom", "2012-06-28");
+				String dateStr = String.format(Locale.US, "%1$tY-%1$tm-%1$te", Calendar.getInstance().getTime());
+				obj.put("DepartureFrom", dateStr); //"2012-06-28");
+				obj.put("DepartureTo", dateStr); //"2012-06-28");
+				obj.put("Response", "json");
+				obj.put("MaxSolutions", 20);
 			} catch (JSONException e) {
 				// This should not happen!
 				e.printStackTrace();
@@ -83,11 +86,10 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 			try {
 				return callApi(json_dump);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		return null;
+		return "";
 	}
 
 	// Call the Vayant API, sending the JSON request and receiving the JSON reply.
@@ -120,17 +122,25 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 			buf.append((char) ch);
 		}
 		String str = buf.toString();
+		Log.d(TAG, "Response read "+str.length()+" chars");
 		JSONObject vayantReply;
 		VayantJourneys journeys = null;
 		try {
 			vayantReply = new JSONObject(str);
 			journeys = new VayantJourneys(vayantReply.getJSONArray("Journeys"));
 			MyApplication.getJourneyDb().mJourneys = journeys;
+			Log.d(TAG, "JSON parsed");
 		} catch (JSONException e) {
 			Log.e("VAYANT", "Bad reply");
+			return null;
 		}
 
-		return journeys.toString();
+		try {
+			return vayantReply.toString(2);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	@Override
@@ -139,11 +149,10 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 		if (result != null) {
 			Log.d(TAG, "Got Vayant Response!");
 			if (mMainActivity != null) {
-				mMainActivity.setVayantReply();
+				mMainActivity.setVayantReply(result);
 			}
 		} else {
-			Log.w(TAG, "Did NOT get Vayant Response!");
-			Log.w(TAG, "did get this: " + result);
+			Log.e(TAG, "Error getting Vayant Response!");
 		}
 
 	}

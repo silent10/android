@@ -21,18 +21,9 @@ package com.evature.search.controllers.activities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 
 import org.acra.ACRA;
-import org.acra.ACRAConfiguration;
-import org.acra.ACRAConfigurationException;
-import org.acra.CrashReportDialog;
 import org.acra.ErrorReporter;
-import org.acra.ReportingInteractionMode;
-import org.acra.collector.CrashReportData;
-import org.acra.sender.GoogleFormSender;
-import org.acra.sender.ReportSender;
-import org.acra.sender.ReportSenderException;
 import org.json.JSONException;
 
 import roboguice.event.Observes;
@@ -44,12 +35,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.Fragment;
@@ -67,8 +55,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaDialog.DialogElement;
@@ -92,7 +80,6 @@ import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
 import com.evature.search.views.SwipeyTabs;
-import com.evature.search.views.adapters.FlightListAdapterTP;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
 import com.evature.search.views.adapters.TrainListAdapter;
 import com.evature.search.views.fragments.ChatFragment;
@@ -116,25 +103,11 @@ public class MainActivity extends EvaBaseActivity implements
 	private static final String ITEMS_IN_SESSION = "items_in_session";
 
 	private static final String DEBUG_PREF_KEY = "debug";
+	private static final String LOCALE_PREF_KEY = "preference_locale";
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 	// private static String mExternalIpAddress = null;
 	
-	final static String[] examplesArray = {
-//			"Fly to NY next Tuesday morning",
-//			"Hotels in Arlington",
-			"Hotel in NYC on Wednesday for 5 nights",
-			"3 Star hotels in NYC",
-//			"Fly from Minto to Heatherwood",
-			"Fly to NY next Sunday, stay 5 nights in Arlignton, return",
-//			"Hotels in Heatherwood",
-			"3 Star hotels in NYC sorted by price",
-			"3 Star hotels in NYC sorted by name",
-			"3 Star hotels in NYC, on Wednesday for two nights, sorted by price descending",
-			"3 Star hotels in Miami FL, on Wednesday for two nights, sorted by price ascending",
-//			"Fly to Madrid"
-//			"Train ride from NYC to Washington DC next Wednesday"
-		};
 	
 	private static boolean mSpeechToTextWasConfigured = false;
 	private List<String> mTabTitles;
@@ -154,6 +127,7 @@ public class MainActivity extends EvaBaseActivity implements
 	private String mExamplesTabName;
 	private String mDebugTabName;
 	private String mHotelsTabName;
+	private String mVayantDebugTabName;
 
 	private String mHotelTabName;
 
@@ -221,11 +195,10 @@ public class MainActivity extends EvaBaseActivity implements
 			fatal_error(R.string.network_error);
 		}
 
+		setDebugData(DebugTextType.None, "");
+
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-		if (sharedPreferences.getBoolean(DEBUG_PREF_KEY, false)) {
-			showDebugInfo();
-		}
+		EvaAPIs.locale = sharedPreferences.getString(LOCALE_PREF_KEY, "US");
 
 		mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 
@@ -275,7 +248,7 @@ public class MainActivity extends EvaBaseActivity implements
 			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
 				Log.d(TAG, "Example Fragment");
 				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
-				fragment.setExamples(examplesArray);
+				fragment.setExamples(getResources().getStringArray(R.array.examples));
 				fragment.setHandler(new ExampleClickedHandler() {
 					@Override
 					public void onClick(String example) {
@@ -572,23 +545,25 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 
 
-	public void setVayantReply() {
+	public void setVayantReply(String response) {
+		setDebugData(DebugTextType.VayantDebug, response);
 		String tabName = getString(R.string.FLIGHTS);
 		int index = mTabTitles.indexOf(tabName);
 		if (index == -1) {
 			mSwipeyAdapter.addTab(tabName);
 			index = mTabTitles.size() - 1;
 		}
+		mSwipeyAdapter.stuffChanged(index);
 		// get the fragment: http://stackoverflow.com/a/7393477/78234
-		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
-		FlightsFragment fragment = (FlightsFragment) getSupportFragmentManager().findFragmentByTag(tag);
-		if (fragment != null) // could be null if not instantiated yet
-		{
-			fragment.getAdapter().notifyDataSetChanged();
-		} else {
-			Log.e(TAG, "Flights fragment == null!?!");
-		}
-		
+//		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
+//		FlightsFragment fragment = (FlightsFragment) getSupportFragmentManager().findFragmentByTag(tag);
+//		if (fragment != null) // could be null if not instantiated yet
+//		{
+//			fragment.getAdapter().notifyDataSetChanged();
+//		} else {
+//			Log.e(TAG, "Flights fragment == null!?!");
+//		}
+//		
 		mViewPager.setCurrentItem(index, true);
 	}
 
@@ -621,13 +596,13 @@ public class MainActivity extends EvaBaseActivity implements
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				// fragment.updateDisplay();
-				FlightListAdapterTP adapter = fragment.getAdapter();
-				if (adapter != null) {
-					adapter.notifyDataSetChanged();
-					Log.d(TAG, "Flights fragment adapter notifyDataSetChanged()");
-				} else {
-					Log.e(TAG, "Flights fragment adapter == null!?!");
-				}
+//				FlightListAdapterTP adapter = fragment.getAdapter();
+//				if (adapter != null) {
+//					adapter.notifyDataSetChanged();
+//					Log.d(TAG, "Flights fragment adapter notifyDataSetChanged()");
+//				} else {
+//					Log.e(TAG, "Flights fragment adapter == null!?!");
+//				}
 			} else {
 				Log.e(TAG, "Flights fragment == null!?!");
 			}
@@ -650,9 +625,11 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 
 	@Override
-	public void endProgressDialog(int id) { // we got the hotel search reply successfully
+	public void endProgressDialog(int id, String result) { // we got the hotel search reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
 
+		setDebugData(DebugTextType.ExpediaDebug, result);
+		
 		if (id == R.string.HOTEL && mHotelDownloader != null) {
 			int hotelIndex = mHotelDownloader.getHotelIndex();
 			Log.d(TAG, "endProgressDialog() Hotel # " + hotelIndex);
@@ -716,20 +693,15 @@ public class MainActivity extends EvaBaseActivity implements
 
 	@Override
 	public void startProgressDialog(int id) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	public void endProgressDialogWithError(int id) {
-		// TODO Auto-generated method stub
-
+	public void endProgressDialogWithError(int id, String result) {
+		setDebugData(DebugTextType.ExpediaDebug, result);
 	}
 
 	@Override
 	public void updateProgress(int id, int mProgress) {
-		// TODO Auto-generated method stub
-
 	}
 
 	// search button click handler ("On Click property" of the button in the xml)
@@ -767,9 +739,39 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 
 	int mDebugTab = -1;
-	private EvaApiReply lastEvaReply = null;
+	private String lastEvaReply;
+	private String lastVayantReply;
+	private String lastExpediaReply;
+	enum DebugTextType {
+		None,
+		EvaDebug,
+		VayantDebug,
+		ExpediaDebug
+	}
 	
-	private void showDebugInfo() {
+	private void setDebugData(DebugTextType debugType, String txt) {
+		switch (debugType) {
+		case EvaDebug:
+			lastEvaReply = txt;
+			break;
+		case VayantDebug:
+			lastVayantReply = txt;
+			break;
+		case ExpediaDebug:
+			lastExpediaReply = txt;
+			break;
+		}
+
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (false == prefs.getBoolean(DEBUG_PREF_KEY, false)) {
+			if (mDebugTab != -1) {
+				mSwipeyAdapter.removeTab(mDebugTab);
+				mDebugTab = -1;
+			}
+			return;
+		}
+		
 		if (mDebugTab == -1) {
 			mDebugTab = mTabTitles.indexOf(mDebugTabName);
 			if (mDebugTab == -1) {
@@ -787,15 +789,16 @@ public class MainActivity extends EvaBaseActivity implements
 			Log.e(TAG, "No debug fragment");
 			return;
 		}
-		if (lastEvaReply == null) {
-			fragment.setDebugText("No reply yet.");
-		} else {
-			try {
-				fragment.setDebugText(lastEvaReply.JSONReply.toString(2));
-			} catch (JSONException e) {
-				fragment.setDebugText("Exception: " + e.getMessage());
-				Log.e(TAG, "Exception toStringing json reply", e);
-			}
+		switch (debugType) {
+		case EvaDebug:
+			fragment.setDebugText(lastEvaReply);
+			break;
+		case VayantDebug:
+			fragment.setVayantDebugText(lastVayantReply);
+			break;
+		case ExpediaDebug:
+			fragment.setExpediaDebugText(lastExpediaReply);
+			break;
 		}
 		
 	}
@@ -805,26 +808,16 @@ public class MainActivity extends EvaBaseActivity implements
 		if (DEBUG_PREF_KEY.equals(key)) {
 			invalidateOptionsMenu();
 		}
-		if (sharedPreferences.getBoolean(DEBUG_PREF_KEY, false)) {
-			showDebugInfo();
+		if (LOCALE_PREF_KEY.equals(key)) {
+			EvaAPIs.locale = sharedPreferences.getString(key, "US");
 		}
-		else {
-			if (mDebugTab != -1) {
-				mSwipeyAdapter.removeTab(mDebugTab);
-				mDebugTab = -1;
-			}
-		}
+		setDebugData(DebugTextType.None, "");
 	}
 	
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
-		lastEvaReply = reply;
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (prefs.getBoolean(DEBUG_PREF_KEY, false)) {
-			showDebugInfo();
-		}
-		
+
 		ErrorReporter bugReporter = ACRA.getErrorReporter();
 		String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
 		int items;
@@ -845,6 +838,13 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 		
 		super.onEvaReply(reply, cookie);
+		
+		try {
+			setDebugData(DebugTextType.EvaDebug, reply.JSONReply.toString(2));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	
 		
 		if (reply.flow != null ) {
 			handleFlow(reply);
@@ -885,11 +885,11 @@ public class MainActivity extends EvaBaseActivity implements
 				mSearchExpediaTask.initialize(this, reply, "$");
 				mSearchExpediaTask.execute();
 			}
-//			if (reply.isFlightSearch()) {
-//				Log.d(TAG, "Running Vayant Search!");
-//				mSearchVayantTask = new SearchVayantTask(this, reply);
-//				mSearchVayantTask.execute();
-//			}
+			if (reply.isFlightSearch()) {
+				Log.d(TAG, "Running Vayant Search!");
+				mSearchVayantTask = new SearchVayantTask(this, reply);
+				mSearchVayantTask.execute();
+			}
 //			if (reply.isTrainSearch()) {
 //				Log.d(TAG, "Running Travelport Search!");
 //				mSearchTravelportTask = new SearchTravelportTask(this, reply);
@@ -963,7 +963,9 @@ public class MainActivity extends EvaBaseActivity implements
 			mSearchExpediaTask.execute();
 			break;
 		case Flight:
-			//setVayantReply(); // pretend a flight search response arrived
+			Log.d(TAG, "Running Vayant Search!"); // TODO: change to be based on flow element
+			mSearchVayantTask = new SearchVayantTask(this, reply);
+			mSearchVayantTask.execute();
 			break;
 		case Question:
 			break;
