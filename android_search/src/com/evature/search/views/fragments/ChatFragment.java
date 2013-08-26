@@ -1,9 +1,9 @@
 package com.evature.search.views.fragments;
 
 import roboguice.event.EventManager;
-import roboguice.event.Observes;
 import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
+import android.text.SpannableString;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,18 +15,16 @@ import android.widget.ListView;
 import com.evature.search.R;
 import com.evature.search.controllers.events.ChatItemClicked;
 import com.evature.search.models.chat.ChatItem;
-import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
 import com.evature.search.views.adapters.ChatAdapter;
-import com.evaapis.events.NewSessionStarted;
 import com.google.inject.Inject;
 
 public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	
 	public interface DialogClickHandler {
-		public void onClick(String dialog, int responseId);
+		public void onClick(SpannableString dialog, int responseId);
 	}
 	
 //	@Override
