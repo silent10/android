@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <resources>
     <string name="app_name">EvaAPIs</string>
-    <string name="hello">Hello World, Test1Activity!</string>
     <string name="button">Travel Search</string>
     <string name="eva_logo">EVA Logo</string>
     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>

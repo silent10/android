@@ -1,29 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="app_name">Eva Travel Search</string>
-    <string name="inline_preferences">inline preferences</string>
-    <string name="title_checkbox_preference">title checkbox preference</string>
-    <string name="summary_checkbox_preference">summary checkbox preference</string>
-    <string name="title_edittext_preference">title edittext preference</string>
-    <string name="summary_edittext_preference">summary_edittext_preference</string>
-    <string name="dialog_based_preferences">dialog_based_preferences</string>
-    <string name="title_language_preference">Input language</string>
-    <string name="title_engine_preference">Engine</string>
-    <string name="dialog_title_edittext_preference">dialog_title_edittext_preference</string>
     <string name="advanced_menu">Advanced Menu</string>
     <string name="summary_parent_preference">Enable various debug features</string>
     <string name="title_debug_parent_preference">Debug</string>
-    <string name="launch_preferences">launch_preferences</string>
-    <string name="dialog_title_list_preference">dialog_title_list_preference</string>
-    <string name="eva_logo">EVA Logo</string>
     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>
     <string name="ok_button">OK, got it.</string>
-    <string name="speech_recognition_preferences">Speech Recognition Preferences</string>
     <string name="fatal_error">Fatal Error</string>
-    <string name="missing_recognizer">No Speech Recognition Engine could be found on your device.\nSorry.\s</string>
     <string name="microphone_button">Microphone Button</string>
     <string name="chat_icon_description">chat icon</string>
-    <string name="summary_of_empty_languages_list">Not initialized yet</string>
     <string name="network_error">Network Error - Sorry!</string>
     <string name="error_tts_init">Could not initialize text-to-speech</string>
     <string name="DEBUG">DEBUG</string>
