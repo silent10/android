@@ -30,9 +30,9 @@ public class DebugFragment extends RoboFragment {
 		radioButtons = (RadioGroup) view.findViewById(R.id.radioGroup_debug);
 		debugText = (TextView)view.findViewById(R.id.eva_debug_text);
 		if (savedInstanceState != null) {
-			debugTextEva = savedInstanceState.getString("debugTextEva", "No reply yet.");
-			debugTextVayant = savedInstanceState.getString("debugTextVayant", "No reply yet.");
-			debugTextExpedia = savedInstanceState.getString("debugTextExpedia", "No reply yet.");
+			debugTextEva = savedInstanceState.getString("debugTextEva");
+			debugTextVayant = savedInstanceState.getString("debugTextVayant");
+			debugTextExpedia = savedInstanceState.getString("debugTextExpedia");
 			int buttonId = savedInstanceState.getInt("debugTab");
 			if (buttonId != 0)
 				radioButtons.check(savedInstanceState.getInt("debugTab"));
@@ -54,13 +54,13 @@ public class DebugFragment extends RoboFragment {
 	private void updateChecked() {
 		switch(radioButtons.getCheckedRadioButtonId()) {
 		case R.id.radio_dbg_eva:
-			debugText.setText(debugTextEva);
+			debugText.setText(debugTextEva == null ? "No reply yet." : debugTextEva);
 			break;
 		case R.id.radio_dbg_vayant:
-			debugText.setText(debugTextVayant);
+			debugText.setText(debugTextVayant == null ? "No reply yet." : debugTextVayant);
 			break;
 		case R.id.radio_dbg_expedia:
-			debugText.setText(debugTextExpedia);
+			debugText.setText(debugTextExpedia == null ? "No reply yet." : debugTextExpedia);
 			break;
 		}
 	}

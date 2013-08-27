@@ -2,7 +2,6 @@ package com.evature.search.views.fragments;
 
 import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.evature.search.R;
-import com.evature.search.models.chat.ChatItemList;
 
 public class ExamplesFragment extends RoboFragment { // TODO: change to ListFragment ?
 	static final String TAG = "ExamplesFragment";
