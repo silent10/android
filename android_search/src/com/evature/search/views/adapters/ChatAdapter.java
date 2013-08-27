@@ -9,8 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evaapis.flow.FlowElement;
 import com.evature.search.R;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItem.ChatType;
@@ -126,6 +128,19 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			}
 		}
 		else {
+			FlowElement flow = chatItem.getFlowElement();
+			if (flow != null) {
+				ImageView img = (ImageView) row.findViewById(R.id.icon);
+				switch (flow.Type) {
+				case Hotel:
+					img.setImageResource(R.drawable.hotel_small);
+					break;
+				case Flight:
+					img.setImageResource(R.drawable.airplane_small);
+					break;
+				}
+			}
+			
 			if (chatItem.isInSession()) {
 				row.setBackgroundColor(evaChatInSessionBg);
 				label.setTextColor(evaChatInSessionText);
