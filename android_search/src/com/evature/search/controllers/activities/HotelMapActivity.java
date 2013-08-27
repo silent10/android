@@ -1,10 +1,8 @@
 package com.evature.search.controllers.activities;
 
 import roboguice.activity.RoboFragmentActivity;
-import roboguice.inject.InjectResource;
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import com.evature.search.R;
@@ -27,8 +25,6 @@ public class HotelMapActivity extends RoboFragmentActivity {
     public static String HOTEL_LONGITUDE="LONGITUDE";
     private GoogleMap mMap = null;
 	
-	@InjectResource(R.drawable.hotel_ico)  Drawable hotelIcon;
-
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +64,7 @@ public class HotelMapActivity extends RoboFragmentActivity {
       
       LatLng point = new LatLng(latitude,longitude);
       
-      BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_ico);
+      BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small);
       
       mMap.addMarker(new MarkerOptions()
 		            .position(point)
