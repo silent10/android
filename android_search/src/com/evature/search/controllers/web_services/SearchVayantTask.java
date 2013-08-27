@@ -15,7 +15,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.evaapis.EvaApiReply;
+import com.evaapis.EvaLocation;
 import com.evaapis.RequestAttributes;
+import com.evaapis.flow.FlowElement;
 import com.evature.search.MyApplication;
 import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.models.vayant.VayantJourneys;
@@ -25,68 +27,65 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 	private static final String TAG = "SearchVayantTask";
 	MainActivity mMainActivity;
 	private EvaApiReply mApiReply;
+	private FlowElement mFlowElement;
 
-	public SearchVayantTask(MainActivity mainActivity, EvaApiReply apiReply) {
+	public SearchVayantTask(MainActivity mainActivity, EvaApiReply apiReply, FlowElement flowElement) {
 		mMainActivity = mainActivity;
 		mApiReply = apiReply;
+		mFlowElement = flowElement;
 	}
 
 	@Override
 	protected String doInBackground(String... unusedParams) {
-		String airport_code0 = "";
-		String airport_code1 = "";
+		String airport_code0 = null;
+		String airport_code1 = null;
 		if (mApiReply.locations.length >= 2) {
-			Log.i(TAG, "Eva returned 2 locations!");
-			boolean airplane = false;
-			if (mApiReply.locations[0].requestAttributes != null) {
-				RequestAttributes request_attributes = mApiReply.locations[0].requestAttributes;
-				if (request_attributes.transportType.size() > 0) {
-					airplane = request_attributes.transportType.get(0).equals("Airplane");
-					Log.d(TAG, "airplane = " + String.valueOf(airplane));
-				}
+			EvaLocation loc1, loc2;
+			if (mFlowElement != null && mFlowElement.RelatedLocations.length > 1) {
+				loc1 = mFlowElement.RelatedLocations[0];
+				loc2 = mFlowElement.RelatedLocations[mFlowElement.RelatedLocations.length-1];
 			}
-			if (airplane || mApiReply.flightAttributes != null) {
-				Log.i(TAG, "Eva said transport type is an airplane or flight attribute!");
-			}
-			if (mApiReply.locations[0].allAirportCode != null)
-				airport_code0 = mApiReply.locations[0].allAirportCode;
-			else
-				airport_code0 = mApiReply.locations[0].airports.get(0);
-			Log.i(TAG, "airport_code0 = " + airport_code0);
-
-			if (mApiReply.locations[1].allAirportCode != null)
-				airport_code1 = mApiReply.locations[1].allAirportCode;
 			else {
-				if (mApiReply.locations[1].airports != null && mApiReply.locations[1].airports.size() > 0) {
-					airport_code1 = mApiReply.locations[1].airports.get(0);
+				loc1 = mApiReply.locations[0];
+				loc2 = mApiReply.locations[1];
+			}
+			airport_code0 = loc1.airportCode();
+			airport_code1 = loc2.airportCode();
+			Log.i(TAG, "airport_codes = " + airport_code1);
+			
+			if (airport_code0 != null && airport_code1 != null) {
+				// Encode the request to Vayant:
+				JSONObject obj = new JSONObject();
+	
+				try { // Encoding examples: http://code.google.com/p/json-simple/wiki/EncodingExamples
+					obj.put("User", "iftah@evature.com"); // "tal@evature.com");
+					obj.put("Pass", "91bab377e2d27afff60160c0508621d1d924b5f7");//"cfccc293b6d6398404e95100693cefd8457c6a0d");
+					obj.put("Origin", airport_code0);
+					obj.put("Destination", airport_code1);
+					obj.put("Environment", "fast_search_1_0");
+					
+					String dateStr;
+					if (loc1.Departure != null && loc1.Departure.Date != null) {
+						dateStr = loc1.Departure.Date;
+					}
+					else {
+						// using today
+						dateStr = String.format(Locale.US, "%1$tY-%1$tm-%1$te", Calendar.getInstance().getTime());
+					}
+					obj.put("DepartureFrom", dateStr); //"2012-06-28");
+					obj.put("DepartureTo", dateStr); //"2012-06-28");
+					obj.put("Response", "json");
+					obj.put("MaxSolutions", 20);
+				} catch (JSONException e) {
+					// This should not happen!
+					e.printStackTrace();
 				}
-			}
-			Log.i(TAG, "airport_code1 = " + airport_code1);
-		}
-		if (!airport_code0.equals("") && !airport_code1.equals("")) {
-			// Encode the request to Vayant:
-			JSONObject obj = new JSONObject();
-
-			try { // Encoding examples: http://code.google.com/p/json-simple/wiki/EncodingExamples
-				obj.put("User", "iftah@evature.com"); // "tal@evature.com");
-				obj.put("Pass", "91bab377e2d27afff60160c0508621d1d924b5f7");//"cfccc293b6d6398404e95100693cefd8457c6a0d");
-				obj.put("Origin", airport_code0);
-				obj.put("Destination", airport_code1);
-				obj.put("Environment", "fast_search_1_0");
-				String dateStr = String.format(Locale.US, "%1$tY-%1$tm-%1$te", Calendar.getInstance().getTime());
-				obj.put("DepartureFrom", dateStr); //"2012-06-28");
-				obj.put("DepartureTo", dateStr); //"2012-06-28");
-				obj.put("Response", "json");
-				obj.put("MaxSolutions", 20);
-			} catch (JSONException e) {
-				// This should not happen!
-				e.printStackTrace();
-			}
-			String json_dump = obj.toString();
-			try {
-				return callApi(json_dump);
-			} catch (IOException e) {
-				e.printStackTrace();
+				String json_dump = obj.toString();
+				try {
+					return callApi(json_dump);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return "";

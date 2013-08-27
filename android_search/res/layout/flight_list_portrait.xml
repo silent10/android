@@ -105,7 +105,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:duplicateParentState="true"
-                android:text="£ per" />
+                android:text="Price per" />
 
             <ImageView
                 android:id="@+id/search_results_person_icon"

@@ -887,13 +887,13 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 		else {
 			sayIt = reply.sayIt;
-			if (sayIt != null && !sayIt.isEmpty() && !sayIt.trim().isEmpty()) {
+			if (sayIt != null && !"".equals(sayIt.trim())) {
 				// say_it = "Searching for a " + say_it; Need to create an international version of this...
 				addChatItem(new ChatItem(sayIt, reply,  null, ChatType.Eva));
 				speak(sayIt);
 			}
 			
-			if (reply.ean != null && !reply.ean.isEmpty()) {  //isHotelSearch()) {
+			if (reply.ean != null && !"".equals(reply.ean)) {  //isHotelSearch()) {
 				Log.d(TAG, "Running Hotel Search!");
 				mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 				mSearchExpediaTask.initialize(this, reply, "$");
@@ -901,7 +901,7 @@ public class MainActivity extends EvaBaseActivity implements
 			}
 			if (reply.isFlightSearch()) {
 				Log.d(TAG, "Running Vayant Search!");
-				mSearchVayantTask = new SearchVayantTask(this, reply);
+				mSearchVayantTask = new SearchVayantTask(this, reply, null);
 				mSearchVayantTask.execute();
 			}
 //			if (reply.isTrainSearch()) {
@@ -964,7 +964,7 @@ public class MainActivity extends EvaBaseActivity implements
 
 	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem) {
 //		chatItem.setActivated(true);
-		if (flow.SayIt != null && flow.SayIt.isEmpty() == false) {
+		if (flow.SayIt != null && !"".equals(flow.SayIt) ) {
 			speak(flow.SayIt);
 		}
 		//chatItem.setActivated();
@@ -977,8 +977,8 @@ public class MainActivity extends EvaBaseActivity implements
 			mSearchExpediaTask.execute();
 			break;
 		case Flight:
-			Log.d(TAG, "Running Vayant Search!"); // TODO: change to be based on flow element
-			mSearchVayantTask = new SearchVayantTask(this, reply);
+			Log.d(TAG, "Running Vayant Search!");
+			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
 			mSearchVayantTask.execute();
 			break;
 		case Question:
