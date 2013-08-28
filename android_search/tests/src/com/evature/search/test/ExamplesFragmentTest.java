@@ -98,7 +98,7 @@ public class ExamplesFragmentTest {
         String expectedChat = examples[1];
         assertEquals(expectedChat, examplesListView.getItemAtPosition(1).toString());
 
-		assertEquals(0, mChatListModel.getItemList().size());
+		assertEquals(0, mChatListModel.size());
 		
 		assertTrue( examplesListView.performItemClick(examplesListView, 1, 0) );
 		
@@ -109,9 +109,9 @@ public class ExamplesFragmentTest {
 		}
 
 		// should have one item in chat
-		assertEquals(1, mChatListModel.getItemList().size());
-		assertEquals(expectedChat,  mChatListModel.getItemList().get(0).getChat());
-		assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Me);
+		assertEquals(1, mChatListModel.size());
+		assertEquals(expectedChat,  mChatListModel.get(0).getChat());
+		assertEquals(true, mChatListModel.get(0).getType() == ChatType.Me);
 	}
     
 

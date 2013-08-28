@@ -40,13 +40,13 @@ public class ChatAdapterTest {
 	
 	@Test
 	public void testView() {
-        assertEquals(0, mChatListModel.getItemList().size());
+        assertEquals(0, mChatListModel.size());
 		
 		mAdapter.add(new ChatItem("TEST 111", null, null, ChatType.Eva));
-		assertEquals(1, mChatListModel.getItemList().size());
+		assertEquals(1, mChatListModel.size());
 		
 		mAdapter.add(new ChatItem("222 TEST"));
-		assertEquals(2, mChatListModel.getItemList().size());
+		assertEquals(2, mChatListModel.size());
 		
         View child0 = mAdapter.getView(0, null, new LinearLayout(new Activity()));
  		ImageView chatRowIcon = (ImageView) child0.findViewById(R.id.icon);

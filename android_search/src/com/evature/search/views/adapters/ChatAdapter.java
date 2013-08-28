@@ -32,7 +32,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	int evaChatInSessionBg, evaChatInSessionText, evaChatNoSessionBg, evaChatNoSessionText;
 	
 	public ChatAdapter(Activity activity, int resource, int textViewResourceId, ChatItemList chatList) {
-		super(activity, resource, textViewResourceId, chatList.getItemList());
+		super(activity, resource, textViewResourceId, chatList);
 		mChatList = chatList;
 		mInflater = LayoutInflater.from(activity);
 		
@@ -61,11 +61,11 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	
 	@Override public int getCount() {
 		// todo: if some items are collapsed then count from start and skip them
-		if (mChatList == null || mChatList.getItemList() == null) {
+		if (mChatList == null) {
 			Log.e(TAG, "null chatList");
 			return 0;
 		}
-		return mChatList.getItemList().size();
+		return mChatList.size();
 	};
 
 	@Override

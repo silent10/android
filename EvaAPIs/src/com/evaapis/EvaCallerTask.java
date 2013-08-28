@@ -24,10 +24,11 @@ import com.google.inject.Inject;
 		@Inject DownloadUrl urlDownloader;
 
 		EvaSearchReplyListener mSearchReplyListener;
-		String mSessionId = "1";
+		private String mSessionId = "1";
+		private String mLanguage;
 		//String mLanguage = "US";
-		Object mCookie; // 
-		String mInputText;
+		private Object mCookie; // 
+		private String mInputText;
 		int mResponseId;
 		
 		/****
@@ -47,7 +48,7 @@ import com.google.inject.Inject;
 								Object cookie) {
 			mSearchReplyListener = searchReplyListener;
 			mSessionId = sessionId;
-			//mLanguage = languageCode.substring(0, 2);
+			mLanguage = languageCode;
 			mResponseId = responseId;
 			mInputText = inputText;
 			mCookie = cookie;
@@ -62,6 +63,9 @@ import com.google.inject.Inject;
 			evatureUrl += ("&api_key=" + API_KEY);
 			//evatureUrl += ("&language=" + mLanguage);
 			evatureUrl += ("&session_id=" + mSessionId);
+			if (mLanguage != null && !"".equals(mLanguage)) {
+				evatureUrl += "&language="+mLanguage;
+			}
 			evatureUrl += ("&locale="+EvaAPIs.locale);
 			if (mResponseId != -1) {
 				evatureUrl += ("&dialog_response="+mResponseId);
@@ -83,7 +87,7 @@ import com.google.inject.Inject;
 				evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
 			}
 
-			Log.d(TAG, "Eva URL = " + evatureUrl);
+			Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
 			try {
 				return urlDownloader.get(evatureUrl);
 			} catch (IOException e) {

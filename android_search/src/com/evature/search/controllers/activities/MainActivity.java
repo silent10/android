@@ -34,16 +34,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -59,7 +60,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
-import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaDialog.DialogElement;
@@ -99,15 +99,12 @@ import com.evature.search.views.fragments.TrainsFragment;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-public class MainActivity extends EvaBaseActivity implements  
-													OnSharedPreferenceChangeListener, 
+public class MainActivity extends EvaBaseActivity implements 
 													TextToSpeech.OnInitListener, 
 													EvaDownloaderTaskInterface {
 
 	private static final String ITEMS_IN_SESSION = "items_in_session";
 
-	private static final String DEBUG_PREF_KEY = "debug";
-	private static final String LOCALE_PREF_KEY = "preference_locale";
 
 	private static final String TAG = MainActivity.class.getSimpleName();
 	// private static String mExternalIpAddress = null;
@@ -141,6 +138,7 @@ public class MainActivity extends EvaBaseActivity implements
 	public void onResume() {
 		Log.d(TAG, "onResume()");
 		super.onResume();
+		setDebugData(DebugTextType.None, "");
 	}
 	
 	@Override
@@ -198,11 +196,6 @@ public class MainActivity extends EvaBaseActivity implements
 			fatal_error(R.string.network_error);
 		}
 
-		setDebugData(DebugTextType.None, "");
-
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		EvaAPIs.locale = sharedPreferences.getString(LOCALE_PREF_KEY, "US");
-
 		mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 
 		// patch for debug - bypass the speech recognition:
@@ -251,7 +244,6 @@ public class MainActivity extends EvaBaseActivity implements
 			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
 				Log.d(TAG, "Example Fragment");
 				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
-				fragment.setExamples(getResources().getStringArray(R.array.examples));
 				fragment.setHandler(new ExampleClickedHandler() {
 					@Override
 					public void onClick(String example) {
@@ -419,9 +411,7 @@ public class MainActivity extends EvaBaseActivity implements
 	
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean isDebug = prefs.getBoolean(DEBUG_PREF_KEY, false);
-		menu.getItem(2).setVisible(isDebug);
+		menu.getItem(2).setVisible(mDebug);
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -514,7 +504,7 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 		Log.i(TAG, "Chat tab at index "+index);
 		// http://stackoverflow.com/a/8886019/78234
-		mChatListModel.getItemList().add(item);
+		mChatListModel.add(item);
 		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
 		if (fragment != null) // could be null if not instantiated yet
 		{
@@ -766,9 +756,15 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 
 		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (false == prefs.getBoolean(DEBUG_PREF_KEY, false)) {
+		if (false == mDebug) {
 			if (mDebugTab != -1) {
+//				DebugFragment fragment = (DebugFragment) mSwipeyAdapter
+//						.instantiateItem(mViewPager, mDebugTab);
+//				if (fragment != null) {
+//					FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//					ft.hide(fragment);
+//					ft.commit();
+//				}
 				mSwipeyAdapter.removeTab(mDebugTab);
 				mDebugTab = -1;
 			}
@@ -806,15 +802,12 @@ public class MainActivity extends EvaBaseActivity implements
 		
 	}
 	
+	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		Log.i(TAG, "Preference "+key+" changed");
+		super.onSharedPreferenceChanged(sharedPreferences, key);
 		if (DEBUG_PREF_KEY.equals(key)) {
-			invalidateOptionsMenu();
+			ActivityCompat.invalidateOptionsMenu(this);
 		}
-		if (LOCALE_PREF_KEY.equals(key)) {
-			EvaAPIs.locale = sharedPreferences.getString(key, "US");
-		}
-		setDebugData(DebugTextType.None, "");
 	}
 	
 
@@ -833,7 +826,6 @@ public class MainActivity extends EvaBaseActivity implements
 		items++;
 		bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
 		bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
-
 		
 		if ("voice".equals(cookie) && reply.processedText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
@@ -858,7 +850,6 @@ public class MainActivity extends EvaBaseActivity implements
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-	
 		
 		if (reply.flow != null ) {
 			handleFlow(reply);
@@ -1026,12 +1017,11 @@ public class MainActivity extends EvaBaseActivity implements
 //		for (ChatItem chatItem : mChatListModel.getItemList()) {
 //			chatItem.setInSession(false);
 //		}
-		List<ChatItem> chatList = mChatListModel.getItemList();
-		if (chatList.size() > 0) {
-			ChatItem lastItem = chatList.get(chatList.size()-1);
-			chatList.clear();
+		if (mChatListModel.size() > 0) {
+			ChatItem lastItem = mChatListModel.get(mChatListModel.size()-1);
+			mChatListModel.clear();
 			if (lastItem.getType() == ChatType.Me) {
-				chatList.add(lastItem);
+				mChatListModel.add(lastItem);
 			}
 		}		
 	}

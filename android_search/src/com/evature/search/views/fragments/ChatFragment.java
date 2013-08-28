@@ -59,7 +59,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 //		mChatListModel.loadInstanceState(savedInstanceState);
 		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row_eva_chat, R.id.label, mChatListModel);
 		chatListView.setAdapter(mChatAdapter);
-
+		
 		chatListView.setOnItemClickListener(this);
 		return root;
 	}
