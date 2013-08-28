@@ -5,9 +5,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 import java.io.IOException;
 
@@ -24,9 +24,8 @@ import roboguice.inject.RoboInjector;
 
 import com.evaapis.EvaApiReply;
 import com.evature.search.controllers.activities.MainActivity;
-import com.evature.search.models.chat.ChatItem;
-import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.ChatItem.ChatType;
+import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.expedia.XpediaProtocol;
 import com.evature.util.DownloadUrl;
 import com.google.inject.AbstractModule;
@@ -147,7 +146,7 @@ public class EvaReplyTest {
 			
 			when(mockProtocol.getExpediaAnswer(notNull(EvaApiReply.class), anyString())).thenReturn("{}"); // TODO: return data for hotel list
 		
-			assertEquals(0, mChatListModel.getItemList().size());
+			assertEquals(0, mChatListModel.size());
 		
 			mActivity.searchWithText("!!Testing Eva search");
 			
@@ -155,9 +154,9 @@ public class EvaReplyTest {
 			verify(mockProtocol, never()).getExpediaAnswer(notNull(EvaApiReply.class), anyString());
 		
 			// verify chat model holds the eva reply say-it
-			assertEquals(1, mChatListModel.getItemList().size());
-			assertEquals("When would you like to arrive to New York City, New York?",  mChatListModel.getItemList().get(0).getChat());
-			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.DialogQuestion);
+			assertEquals(1, mChatListModel.size());
+			assertEquals("When would you like to arrive to New York City, New York?",  mChatListModel.get(0).getChat());
+			assertEquals(true, mChatListModel.get(0).getType() == ChatType.DialogQuestion);
 
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy
@@ -242,7 +241,7 @@ public class EvaReplyTest {
 			
 			when(mockProtocol.getExpediaAnswer(notNull(EvaApiReply.class), anyString())).thenReturn("{}"); // TODO: return data for hotel list
 		
-			assertEquals(0, mChatListModel.getItemList().size());
+			assertEquals(0, mChatListModel.size());
 		
 			mActivity.searchWithText("!!Testing Eva search");
 			
@@ -250,9 +249,9 @@ public class EvaReplyTest {
 			verify(mockProtocol).getExpediaAnswer(notNull(EvaApiReply.class), anyString());
 		
 			// verify chat model holds the eva reply say-it
-			assertEquals(1, mChatListModel.getItemList().size());
-			assertEquals("Hotel in New York City, New York, arriving August 14th, 2013 for 5 nights",  mChatListModel.getItemList().get(0).getChat());
-			assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
+			assertEquals(1, mChatListModel.size());
+			assertEquals("Hotel in New York City, New York, arriving August 14th, 2013 for 5 nights",  mChatListModel.get(0).getChat());
+			assertEquals(true, mChatListModel.get(0).getType() == ChatType.Eva);
 
 		} catch (IOException e) {
 			fail(); // shoudln't get here because mock downloader does not actually cause IO so has no IO exception... but must use "catch" to make compiler happy

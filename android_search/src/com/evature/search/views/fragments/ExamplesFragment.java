@@ -26,10 +26,6 @@ public class ExamplesFragment extends RoboFragment { // TODO: change to ListFrag
 	private ListView mExamplesListView;
 	
 
-	public void setExamples(String[] examples) {
-		mExamples = examples;
-	}
-	
 	public void setHandler(ExampleClickedHandler clickHandler) {
 		this.clickHandler = clickHandler;		
 	}
@@ -40,6 +36,7 @@ public class ExamplesFragment extends RoboFragment { // TODO: change to ListFrag
 		Log.d(TAG, "onCreateView");
 		
 		try {
+			mExamples = getResources().getStringArray(R.array.examples);
 			ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_examples, null);
 			mExamplesListView = ((ListView) root.findViewById(R.id.examples_list));
 			

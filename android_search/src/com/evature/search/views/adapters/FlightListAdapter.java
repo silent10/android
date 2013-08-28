@@ -1,5 +1,6 @@
 package com.evature.search.views.adapters;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.util.Log;
@@ -11,8 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
 import com.evature.search.models.vayant.BookingSolution;
 import com.evature.search.models.vayant.Flight;
 import com.evature.search.models.vayant.Segment;
@@ -28,12 +27,15 @@ public class FlightListAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
 	// private FlightsFragment mParent;
 	private VayantJourneys journeys = null;
+	private SimpleDateFormat dateFormatter;
 
 	public FlightListAdapter(FlightsFragment parent, VayantJourneys journeys) {
 		Log.d(TAG, "CTOR");
 		mInflater = LayoutInflater.from(parent.getActivity());
 		// mParent = parent;
 		this.journeys = journeys;
+		
+		dateFormatter = new SimpleDateFormat("yyyy-MM-dd\n HH:mm");
 	}
 
 	public void setJourneys(VayantJourneys journeys) {
@@ -44,7 +46,7 @@ public class FlightListAdapter extends BaseAdapter {
 	@Override
 	public int getCount() {
 		if (journeys != null) {
-			return journeys.mJourneys.length;
+			return journeys.mOneWayJourneys.size();
 		}
 		return 0;
 	}
@@ -61,7 +63,7 @@ public class FlightListAdapter extends BaseAdapter {
 
 	@Override   // TODO: reuse views
 	public View getView(int position, View convertView, ViewGroup parent) {
-		BookingSolution solution = journeys.mJourneys[position].mBookingSolutions[0];
+		BookingSolution solution = journeys.mOneWayJourneys.get(position).mBookingSolutions[0];
 		View row = mInflater.inflate(R.layout.flight_list_item, parent, false);
 
 		// TextView label = (TextView) row.findViewById(R.id.price);
@@ -79,18 +81,18 @@ public class FlightListAdapter extends BaseAdapter {
 
 			TextView departure_time = (TextView) child.findViewById(R.id.itinerary_view_departure_time);
 			Date departureDateTime = segment.flights.get(0).departureDateTime;
-			String departureTime = String.format("%1$d:%2$02d", departureDateTime.getHours(), departureDateTime.getMinutes());
+			String departureTime = dateFormatter.format(departureDateTime);
+//			String departureTime = String.format("%1$d:%2$02d", departureDateTime.getHours(), departureDateTime.getMinutes());
 			departure_time.setText(departureTime + " " + segment.flights.get(0).origin);
 			
 			TextView arrival_time = (TextView) child.findViewById(R.id.itinerary_view_arrival_time);
 			Flight flight = segment.flights.get(segment.flights.size() - 1);
 			Date arrivalDateTime = flight.arrivalDateTime;
-			String ArrivalTime = String.format("%1$d:%2$02d", arrivalDateTime.getHours(), arrivalDateTime.getMinutes());
+			String ArrivalTime = dateFormatter.format(arrivalDateTime); //String.format("%1$d:%2$02d", arrivalDateTime.getHours(), arrivalDateTime.getMinutes());
 			arrival_time.setText(ArrivalTime + " " + flight.destination);
 
 			TextView airline = (TextView) child.findViewById(R.id.itinerary_view_airline);
 			airline.setText(segment.flights.get(0).marketingCarrier);
-
 			
 			TextView price = (TextView) child.findViewById(R.id.itinerary_view_price);
 			price.setText( String.format("%1$,.2f %2$s", solution.mOutboundPrice, solution.mCurrency));

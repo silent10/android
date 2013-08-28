@@ -1,32 +1,12 @@
 package com.evature.search.models.chat;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.Log;
 
 import com.google.inject.Singleton;
 
 @Singleton
-public class ChatItemList {
+public class ChatItemList extends ArrayList<ChatItem> {
 	static final String TAG = "ChatItemList";
-	
-	protected List<ChatItem> mChatListEva = new ArrayList<ChatItem>();
-
-
-	public List<ChatItem> getItemList() {
-		return mChatListEva;
-	}
-	
-	public void setItemList(List<ChatItem> list) {
-		mChatListEva = list;
-	}
-
-	public ChatItem get(int position) {
-		return mChatListEva.get(position);
-	}
 
 //	public void saveInstanceState(Bundle instanceState) {
 //		instanceState.putParcelableArrayList("mChatListEva", (ArrayList<ChatItem>) mChatListEva);

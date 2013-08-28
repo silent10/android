@@ -74,15 +74,17 @@ public class EvaVoiceClient {
 	
 	boolean hadError;
 
-	private String mLocale = null;
+	private String mLocale;
+	private String mLanguage;
 
 
-	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, String locale, SpeechAudioStreamer speechAudioStreamer) {
+	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, String locale, String language, SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
 		mDeviceId = deviceId;
 		mSessionId = sessionId;
 		mLocale = locale;
+		mLanguage = language;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
@@ -141,6 +143,10 @@ public class EvaVoiceClient {
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
+		}
+		
+		if (mLanguage != null) {
+			qparams.add(new BasicNameValuePair("language", mLanguage));
 		}
 		
 		if (mLocale != null) {

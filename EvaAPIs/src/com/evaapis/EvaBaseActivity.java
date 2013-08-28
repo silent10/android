@@ -10,10 +10,12 @@ import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.EventManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.evaapis.events.NewSessionStarted;
@@ -21,14 +23,22 @@ import com.evature.util.ExternalIpAddressGetter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-abstract public class EvaBaseActivity extends RoboFragmentActivity implements EvaSearchReplyListener, OnInitListener{ 
+abstract public class EvaBaseActivity extends RoboFragmentActivity 
+									implements 
+									OnSharedPreferenceChangeListener, 
+									EvaSearchReplyListener, OnInitListener{ 
 
 	private static final int VOICE_RECOGNITION_REQUEST_CODE_EVA = 0xBABE;
 	protected String mSessionId = "1";
 	private final String TAG = "EvaBaseActivity";
-	private String mPreferedLanguage = "en-US";	
-	private String mLastLanguageUsed = "en-US";
+	private String mPreferedLanguage = "en";	
+	private String mLastLanguageUsed = "en";
 
+	protected static final String DEBUG_PREF_KEY = "debug";
+	protected static final String LOCALE_PREF_KEY = "preference_locale";
+	protected static final String LANG_PREF_KEY = "preference_language";
+
+	
 	@Inject protected Injector injector;
 
 	private boolean mTtsConfigured = false;
@@ -38,7 +48,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	@Inject private EvatureLocationUpdater mLocationUpdater;
 
 	@Inject protected EventManager eventManager;
-	private boolean mDebug;
+	protected boolean mDebug;
 	private long startOfTextSearch;
 
 	protected void speak(String sayIt) {
@@ -50,7 +60,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	private void setTtsLanguage(String destLanguage) {
 		// Set preferred language to whatever the user used to speak to phone.
 		// Note that a language may not be available, and the result will indicate this.
-		Locale aLocale = Locale.US; // new Locale(destLanguage.substring(0, 2), destLanguage.substring(3, 5));
+		Locale aLocale = /*Locale.US*/ new Locale(destLanguage);
 		mTts.setLanguage(aLocale);
 		 
 	}
@@ -59,6 +69,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	public void onInit(int status) {
 		// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
 		if (status == TextToSpeech.SUCCESS) {
+			Log.i(TAG, "Setting TTS language to "+mLastLanguageUsed);
 			setTtsLanguage(mLastLanguageUsed);
 			// Check the documentation for other possible result codes.
 			// For example, the language may be available for the locale, but not for the specified country and variant.
@@ -95,18 +106,26 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		super.onResume();
 		mExternalIpAddressGetter.start();
 		mLocationUpdater.startGPS();
-		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		
-		String oldLanguage = new String(mPreferedLanguage);
-		mDebug = prefs.getBoolean("debug", false);
-		mPreferedLanguage = prefs.getString("languages", "en-US");
+	}
+	
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		Log.i(TAG, "Preference "+key+" changed");
+		EvaAPIs.locale = sharedPreferences.getString(LOCALE_PREF_KEY, "US");
+		if (DEBUG_PREF_KEY.equals(key)) {
+			ActivityCompat.invalidateOptionsMenu(this);
+		}
+		mDebug = sharedPreferences.getBoolean(DEBUG_PREF_KEY, false);
+
+		String oldLanguage = mPreferedLanguage;
+		mPreferedLanguage = sharedPreferences.getString(LANG_PREF_KEY, "en");
 		if (!oldLanguage.equals(mPreferedLanguage)) // User changed the settings and chose a new speech recognition
 			// language
-			if (mTtsConfigured)
+			if (mTtsConfigured) {
+				Log.i(TAG, "Setting TTS language to "+mLastLanguageUsed);
 				setTtsLanguage(mPreferedLanguage);
-		mLastLanguageUsed = new String(mPreferedLanguage);
+			}
 	}
+
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
@@ -171,17 +190,19 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 	@Override
 	protected void onCreate(Bundle arg0) {
 	
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+		mDebug = sharedPreferences.getBoolean(DEBUG_PREF_KEY, false);
+		mLastLanguageUsed = mPreferedLanguage = sharedPreferences.getString(LANG_PREF_KEY, "en");
+
 		if (mTts == null)
 			mTtsConfigured = false;
-
 		mTts = new TextToSpeech(this, this);
+
 		super.onCreate(arg0);
 	}
 	
-	public void setPrefredLanguage(String preffredLanguage)
-	{
-		mPreferedLanguage = preffredLanguage;
-	}
 	
 	public void searchWithVoice()
 	{
@@ -189,18 +210,20 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity implements Ev
 		if (mTts != null) {
 			mTts.stop();
 		}
+		mLastLanguageUsed = mPreferedLanguage;
 		
 		Log.i(TAG, "search with voice starting, lang="+mPreferedLanguage);
 
 		Intent intent = new Intent(this.getApplicationContext(), EvaSpeechRecognitionActivity.class);
 		intent.putExtra("SessionId", mSessionId);
 		intent.putExtra("debug", mDebug);
+		intent.putExtra("language", mPreferedLanguage);
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
 
-		mLastLanguageUsed = mPreferedLanguage;
 	}
 
 	public void searchWithText(String searchString) {
+		mLastLanguageUsed = mPreferedLanguage;
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		EvaCallerTask callerTask = injector.getInstance(EvaCallerTask.class);
 		startOfTextSearch = System.nanoTime();

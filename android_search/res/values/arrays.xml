@@ -90,4 +90,51 @@
         <!-- <item>Fly to Madrid</item> -->
         <!-- <item>Train ride from NYC to Washington DC next Wednesday</item> -->
     </string-array>
+    
+    
+    <string-array name="entries_languages">
+        <item>Arabic</item>     <!-- ar -->
+        <item>Catalan</item>    <!-- ca -->
+        <item>Chinese Simplified</item>  <!-- zh-cn -->
+        <item>Czech</item>      <!-- cs -->
+        <item>Danish</item>     <!-- da -->
+        <item>Dutch</item>      <!-- nl -->
+        <item>English</item>    <!-- en -->
+        <item>Finnish</item>    <!-- fi -->
+        <item>French</item>     <!-- fr -->
+        <item>German</item>     <!-- de -->
+        <item>Greek</item>      <!-- el -->
+        <item>Italian</item>    <!-- it -->
+        <item>Japanese</item>   <!-- ja -->
+        <item>Norwegian</item>  <!-- no -->
+        <item>Polish</item>     <!-- pl -->
+        <item>Portuguese</item> <!-- pt -->
+        <item>Russian</item>    <!-- ru -->
+        <item>Spanish</item>    <!-- es -->
+        <item>Swedish</item>    <!-- sv -->
+        <item>Turkish</item>    <!-- tr -->
+    </string-array>
+    
+    <string-array name="entryvalues_languages">
+        <item>ar</item>  <!-- Arabic -->
+        <item>ca</item>  <!-- Catalan -->
+        <item>zh-cn</item>  <!-- Chinese_Simplified -->
+        <item>cs</item>  <!-- Czech -->
+        <item>da</item>  <!-- Danish -->
+        <item>nl</item>  <!-- Dutch -->
+        <item>en</item>  <!-- English -->
+        <item>fi</item>  <!-- Finnish -->
+        <item>fr</item>  <!-- French -->
+        <item>de</item>  <!-- German -->
+        <item>el</item>  <!-- Greek -->
+        <item>it</item>  <!-- Italian -->
+        <item>ja</item>  <!-- Japanese -->
+        <item>no</item>  <!-- Norwegian -->
+        <item>pl</item>  <!-- Polish -->
+        <item>pt</item>  <!-- Portuguese -->
+        <item>ru</item>  <!-- Russian -->
+        <item>es</item>  <!-- Spanish -->
+        <item>sv</item>  <!-- Swedish -->
+        <item>tr</item>  <!-- Turkish -->
+    </string-array>
 </resources>
