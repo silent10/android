@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.Display;
@@ -27,8 +26,6 @@ import android.widget.Toast;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
 import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.XpediaProtocolStatic;

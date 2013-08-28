@@ -39,10 +39,10 @@
     <string name="bugreport_dialog_ok_toast">Thank you !</string>
     <string name="save_recording_pcm_file_wav_">Save raw recording (.wav file)</string>
     <string name="save_encoded_recording_file_flac_">Save encoded recording (.flac file)</string>
-    <string name="currency_pref_summary">Default currency to use, when evaluating text (eg. \'price no more than 400\') and when displaying results.</string>
     <string name="currency_pref_title">Default Currency</string>
-    <string name="preferences_title">Preferences</string>
+    <string name="internalization_title">Internalization</string>
     <string name="debug_eva">Eva</string>
     <string name="debug_vayant">Vayant</string>
     <string name="debug_expedia">Expedia</string>
+    <string name="currency_summary">Show results using this currency</string>
 </resources>

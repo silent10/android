@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -30,9 +29,6 @@ import android.widget.TextView;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.drawable;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
 import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.controllers.activities.HotelMapActivity;
 import com.evature.search.models.expedia.HotelData;

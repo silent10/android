@@ -68,12 +68,12 @@ public class ChatFragmentTest {
 	
 	@Test
 	public void testChatList() {
-		assertEquals(0, mChatListModel.getItemList().size());
+		assertEquals(0, mChatListModel.size());
 
-		mChatListModel.getItemList().add(new ChatItem("Test 1", null, null, ChatType.Eva));
+		mChatListModel.add(new ChatItem("Test 1", null, null, ChatType.Eva));
 		
-		assertEquals(1, mChatListModel.getItemList().size());
-		assertEquals("Test 1", mChatListModel.getItemList().get(0).getChat());
-		assertEquals(true, mChatListModel.getItemList().get(0).getType() == ChatType.Eva);
+		assertEquals(1, mChatListModel.size());
+		assertEquals("Test 1", mChatListModel.get(0).getChat());
+		assertEquals(true, mChatListModel.get(0).getType() == ChatType.Eva);
 	}
 }

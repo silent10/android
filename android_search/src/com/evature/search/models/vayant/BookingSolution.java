@@ -26,7 +26,11 @@ public class BookingSolution {
 			for (int index = 0; index < flights.length(); index++) {
 				Flight flight = new Flight(flights.getJSONObject(index));
 				mFlights[index] = flight;
-				if (flight.segment > mSegments.size()) {
+				if (flight.segment > 2) {
+					Log.e("VAYANT", "unexpexcted segment - "+flight.segment);
+					continue;
+				}
+				while (flight.segment > mSegments.size()) {
 					mSegments.add(new Segment());
 				}
 				mSegments.get(flight.segment - 1).addFlight(flight);
@@ -34,12 +38,16 @@ public class BookingSolution {
 			
 			JSONObject jTotalPrice = solution.getJSONObject("Price").getJSONObject("Total");
 			mTotalPrice = jTotalPrice.optDouble("sum");
-			mOutboundPrice = solution.getJSONObject("OutboundPrice").getJSONObject("Total").optDouble("sum");
-			mInboundPrice = solution.getJSONObject("InboundPrice").getJSONObject("Total").optDouble("sum");
+			if (solution.has("OutboundPrice")) {
+				mOutboundPrice = solution.getJSONObject("OutboundPrice").getJSONObject("Total").optDouble("sum");
+			}
+			if (solution.has("InboundPrice")) {
+				mInboundPrice = solution.getJSONObject("InboundPrice").getJSONObject("Total").optDouble("sum");
+			}
 			mCurrency = jTotalPrice.optString("cur");
 		} catch (JSONException e) {
 			e.printStackTrace();
-			Log.e("VAYANT", "Bad solution");
+			Log.e("VAYANT", "Bad solution",e);
 		}
 
 	}

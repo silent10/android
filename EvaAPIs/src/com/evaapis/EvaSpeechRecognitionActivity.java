@@ -139,8 +139,9 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		long t0 = System.nanoTime();
 		super.onCreate(savedInstanceState);
 		
-		String sessionId = getIntent().getStringExtra("SessionId");
-		mDebug = getIntent().getBooleanExtra("debug", false);
+		Intent intent = getIntent();
+		String sessionId = intent.getStringExtra("SessionId");
+		mDebug = intent.getBooleanExtra("debug", false);
 		
 		Log.i(TAG,"Creating speech recognition activity");
 
@@ -188,6 +189,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		String appKey = EvaAPIs.API_KEY;
 		String siteCode = EvaAPIs.SITE_CODE;
 		String locale = EvaAPIs.locale;
+		String language = intent.getStringExtra("language");
 
 		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 		String deviceId=telephonyManager.getDeviceId();
@@ -199,7 +201,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
 			mSpeechAudioStreamer = new SpeechAudioStreamer(this, SAMPLE_RATE);
-			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, locale, mSpeechAudioStreamer);
+			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, locale, language, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);

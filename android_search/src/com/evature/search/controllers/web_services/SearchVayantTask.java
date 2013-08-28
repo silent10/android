@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Locale;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -75,7 +76,7 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 					obj.put("DepartureFrom", dateStr); //"2012-06-28");
 					obj.put("DepartureTo", dateStr); //"2012-06-28");
 					obj.put("Response", "json");
-					obj.put("MaxSolutions", 20);
+					obj.put("MaxSolutions", 100);
 				} catch (JSONException e) {
 					// This should not happen!
 					e.printStackTrace();
