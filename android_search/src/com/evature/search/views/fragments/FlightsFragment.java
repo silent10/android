@@ -18,7 +18,6 @@ import android.widget.TextView;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.views.adapters.FlightListAdapter;
-import com.evature.search.views.adapters.FlightListAdapterTP;
 
 public class FlightsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener {
 

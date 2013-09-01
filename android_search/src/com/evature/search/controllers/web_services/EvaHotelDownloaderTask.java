@@ -9,6 +9,7 @@ import android.util.Log;
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.HotelDetails;
@@ -17,6 +18,8 @@ import com.evature.search.models.expedia.XpediaProtocolStatic;
 public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	private static final String TAG = EvaHotelDownloaderTask.class.getSimpleName();
 
+	public String lastResponse = null;
+	
 	@Override
 	public int getId() {
 		return R.string.HOTEL;
@@ -29,10 +32,12 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	}
 
 	int mHotelIndex;
+	Context mContext;
 
-	public EvaHotelDownloaderTask(Context listener, int hotelndex) {
+	public EvaHotelDownloaderTask(EvaDownloaderTaskInterface listener, int hotelndex) {
 		Log.d(TAG, "CTOR");
-		attach((EvaDownloaderTaskInterface) listener);
+		attach(listener);
+		mContext = (Context) listener;
 		mHotelIndex = hotelndex;
 	}
 
@@ -46,10 +51,10 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 		publishProgress();
 
 		String hotelInfo = XpediaProtocolStatic.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
-				EvaSettingsAPI.getCurrencyCode((Context) mListener));
+				EvaSettingsAPI.getCurrencyCode(mContext));
 
 		if (hotelInfo == null) {
-			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH_WITH_ERROR;
+			mProgress = DownloaderStatus.FinishedWithError;
 			return null;
 		}
 		
@@ -64,11 +69,11 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 			if (db.mArrivalDateParam != null && db.mDepartureDateParam != null) {
 				String str = XpediaProtocolStatic.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
 						db.mArrivalDateParam, db.mDepartureDateParam,
-						EvaSettingsAPI.getCurrencyCode((Context) mListener), db.mNumberOfAdultsParam);
+						EvaSettingsAPI.getCurrencyCode(mContext), db.mNumberOfAdultsParam);
 				Log.d(TAG, str);
 				hotelData.mSummary.updateRoomDetails(str);
 			}
-			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
+			mProgress = DownloaderStatus.Finished;
 
 		} catch (JSONException e) {
 			Log.e(TAG, "JSON exception getting hotel details");
@@ -76,8 +81,9 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 		}
 
 		try {
-			String result = jHotel.toString(2);
-			return result;
+			lastResponse = jHotel.toString(2);
+			
+			return lastResponse;
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return hotelInfo;

@@ -2,10 +2,12 @@ package com.evature.search.controllers.web_services;
 
 public interface EvaDownloaderTaskInterface {
 
-	int PROGRESS_FINISH = 1;
-	int PROGRESS_CREATE_HOTEL_DATA = 2;
-	int PROGRESS_EXPEDIA_HOTEL_FETCH = 3;
-	int PROGRESS_FINISH_WITH_ERROR = 4;
+	enum DownloaderStatus {
+		NotStarted,
+		Started,
+		Finished,
+		FinishedWithError
+	}
 
 	void endProgressDialog(int id, String result);
 
@@ -13,6 +15,6 @@ public interface EvaDownloaderTaskInterface {
 
 	void endProgressDialogWithError(int id, String result);
 
-	void updateProgress(int id, int mProgress);
+	void updateProgress(int id, DownloaderStatus mProgress);
 
 }

@@ -201,7 +201,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
 			mSpeechAudioStreamer = new SpeechAudioStreamer(this, SAMPLE_RATE);
-			mVoiceClient = new EvaVoiceClient(siteCode, appKey, deviceId, sessionId, locale, language, mSpeechAudioStreamer);
+			mVoiceClient = new EvaVoiceClient(this, siteCode, appKey, deviceId, sessionId, locale, language, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);

@@ -7,6 +7,8 @@
     <string name="EVA_SITE_CODE">thack</string>
     <string name="EXPEDIA_API_KEY">kg9fd64ndnfw4nggggp543e3</string> 
     <string name="EXPEDIA_SECRET">CfyYPjmE</string>   
-    <string name="EXPEDIA_CLIENT_ID">352395</string>   
+    <string name="EXPEDIA_CLIENT_ID">352395</string>
+    <string name="VAYANT_USER">iftah@evature.com</string>
+    <string name="VAYANT_PASSWORD">91bab377e2d27afff60160c0508621d1d924b5f7</string>   
     
 </resources>

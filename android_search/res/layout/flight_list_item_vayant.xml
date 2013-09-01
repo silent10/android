@@ -30,18 +30,34 @@
             android:textSize="14.0sp"
             android:textStyle="bold" />
 
+        <FrameLayout
+        android:layout_width="50dip"
+        android:layout_height="50dip"
+        >
+
+        <ImageView
+            android:id="@+id/airline_logo"
+            android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+            android:contentDescription="@string/airline_logo"
+            android:padding="0dip"
+            android:gravity="center"
+            android:src="@drawable/logo_us" />
+        
         <TextView
-            android:id="@+id/itinerary_view_airline"
-            android:layout_width="48.0dip"
-            android:layout_height="fill_parent"
+            android:id="@+id/airline_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginRight="1.0dip"
             android:ellipsize="end"
             android:singleLine="true"
             android:gravity="center"
+            android:visibility="gone"
             android:text="Airline"
             android:textColor="@color/itinerary_airline"
             android:textSize="11.0sp"
             android:textStyle="bold" />
+        </FrameLayout>
 
      <TextView
             android:id="@+id/itinerary_view_price"

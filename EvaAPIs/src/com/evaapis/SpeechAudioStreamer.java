@@ -33,7 +33,6 @@ public class SpeechAudioStreamer {
 	private PipedInputStream pipedIn;
 	private PipedOutputStream pipedOut;
 
-	boolean mDebugSaveEncoded = true;
 	boolean mDebugSavePCM = true;
 	private static final String FILENAME = "recording" ;
 	
@@ -76,7 +75,6 @@ public class SpeechAudioStreamer {
 		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		mDebugSavePCM = prefs.getBoolean("save_pcm", false);
-		mDebugSaveEncoded = prefs.getBoolean("save_encoded", false);
 		
 		Log.i(TAG, "Encoder=" + mEncoder.toString());
 	}
@@ -332,30 +330,29 @@ public class SpeechAudioStreamer {
 		
 		@Override
 		public void run() {
-			String fileBase = Environment.getExternalStorageDirectory()
-					.getPath() + "/"+FILENAME;
+//			String fileBase = Environment.getExternalStorageDirectory()
+//					.getPath() + "/"+FILENAME;
 
-			DataOutputStream dos = null;
-			
-			if (mDebugSaveEncoded) {
-				File f = new File(fileBase + ".flac");
-
-				try {
-					FileOutputStream fos = new FileOutputStream(f);
-					dos = new DataOutputStream(new BufferedOutputStream(fos));
-				} catch (FileNotFoundException e) {
-					Log.e(TAG, "Failed to open debug file",e);
-				}
-			}
-
-
+//			DataOutputStream dos = null;
+//			
+//			if (mDebugSaveEncoded) {
+//				File f = new File(fileBase + ".flac");
+//
+//				try {
+//					FileOutputStream fos = new FileOutputStream(f);
+//					dos = new DataOutputStream(new BufferedOutputStream(fos));
+//				} catch (FileNotFoundException e) {
+//					Log.e(TAG, "Failed to open debug file",e);
+//				}
+//			}
+//
+//
 			
 			Log.i(TAG, "initing Fifo");
 			mEncoder.initFifo(fifoPath);
 			try {
 				startedReading = true;
 				encodedStream = new FileInputStream(fifoPath);
-				//encodedFifo = new RandomAccessFile(fifoPath, "r");
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, "Failed to open FIFO from encoder");
 				throw new RuntimeException("Failed to open FIFO from encoder");
