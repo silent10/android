@@ -45,4 +45,8 @@
     <string name="debug_vayant">Vayant</string>
     <string name="debug_expedia">Expedia</string>
     <string name="currency_summary">Show results using this currency</string>
+    <string name="search_icon">Search</string>
+    <string name="save_encoded_file_flac_">Save encoded file (.flac)</string>
+    <string name="save_encoded">Save Encoded</string>
+    <string name="airline_logo">Airline Logo</string>
 </resources>

@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Locale;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,13 +16,14 @@ import android.util.Log;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaLocation;
-import com.evaapis.RequestAttributes;
 import com.evaapis.flow.FlowElement;
 import com.evature.search.MyApplication;
 import com.evature.search.controllers.activities.MainActivity;
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
+import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.vayant.VayantJourneys;
 
-public class SearchVayantTask extends AsyncTask<String, Integer, String> {
+public class SearchVayantTask extends EvaDownloaderTask {
 
 	private static final String TAG = "SearchVayantTask";
 	MainActivity mMainActivity;
@@ -37,7 +37,7 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 	}
 
 	@Override
-	protected String doInBackground(String... unusedParams) {
+	protected String doInBackground(Void... unusedParams) {
 		String airport_code0 = null;
 		String airport_code1 = null;
 		if (mApiReply.locations.length >= 2) {
@@ -123,37 +123,33 @@ public class SearchVayantTask extends AsyncTask<String, Integer, String> {
 		}
 		String str = buf.toString();
 		Log.d(TAG, "Response read "+str.length()+" chars");
-		JSONObject vayantReply;
-		VayantJourneys journeys = null;
-		try {
-			vayantReply = new JSONObject(str);
-			journeys = new VayantJourneys(vayantReply.getJSONArray("Journeys"));
-			MyApplication.getJourneyDb().mJourneys = journeys;
-			Log.d(TAG, "JSON parsed");
-		} catch (JSONException e) {
-			Log.e("VAYANT", "Bad reply");
-			return null;
-		}
-
-		try {
-			return vayantReply.toString(2);
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return str;
 	}
 
 	@Override
 	protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
-
 		if (result != null) {
+			JSONObject vayantReply;
+			VayantJourneys journeys = null;
+			try {
+				vayantReply = new JSONObject(result);
+				journeys = new VayantJourneys(vayantReply.getJSONArray("Journeys"));
+				MyApplication.getJourneyDb().mJourneys = journeys;
+				Log.d(TAG, "JSON parsed");
+			} catch (JSONException e) {
+				Log.e("VAYANT", "Bad reply");
+			}
+			
 			Log.d(TAG, "Got Vayant Response!");
 			if (mMainActivity != null) {
 				mMainActivity.setVayantReply(result);
 			}
+			mProgress = DownloaderStatus.Finished;
 		} else {
 			Log.e(TAG, "Error getting Vayant Response!");
+			mProgress = DownloaderStatus.FinishedWithError;
 		}
-
+		super.onPostExecute(result);
+		
 	}
 }

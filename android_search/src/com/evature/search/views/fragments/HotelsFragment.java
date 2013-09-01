@@ -233,7 +233,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	}
 
 	@Override
-	public void updateProgress(int id, int mProgress) {
+	public void updateProgress(int id, DownloaderStatus progress) {
 
 		Log.i(TAG, "Update progress");
 

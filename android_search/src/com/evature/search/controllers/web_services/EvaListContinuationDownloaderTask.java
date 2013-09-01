@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.fragments.HotelsFragment;
@@ -15,11 +16,13 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	private static final String TAG = EvaListContinuationDownloaderTask.class.getSimpleName();
 	private String mNextQuery;
 	private String mCurrencyCode;
+	private HotelsFragment hotelFragment;
 
-	public EvaListContinuationDownloaderTask(EvaDownloaderTaskInterface listener, String nextQuery, String currencyCode) {
+	public EvaListContinuationDownloaderTask(HotelsFragment listener, String nextQuery, String currencyCode) {
 		Log.i(TAG, "CTOR");
 		mNextQuery = nextQuery;
 		attach(listener);
+		hotelFragment = listener;
 		mCurrencyCode = currencyCode;
 		
 	}
@@ -32,10 +35,10 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	@Override
 	protected void onPostExecute(String result) {
 
-		if (mListener == null)
+		if (hotelFragment == null)
 			return;
 
-		((HotelsFragment) mListener).finishPaging();
+		hotelFragment.finishPaging();
 		super.onPostExecute(result);
 	}
 
@@ -48,14 +51,12 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 			Log.e(TAG, "Response for next null");
 		else
 			Log.i(TAG, "Next: " + hotelListResponse);
-		mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
+//		mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
 		if (false == addHotelData(hotelListResponse)) {
-			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH_WITH_ERROR;
+			mProgress = DownloaderStatus.FinishedWithError;
 		} else {
-			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
+			mProgress = DownloaderStatus.Finished;
 		}
-
-		publishProgress((Integer[]) null);
 
 		return hotelListResponse;
 	}

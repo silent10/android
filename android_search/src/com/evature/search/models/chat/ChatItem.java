@@ -6,23 +6,34 @@ import com.evaapis.EvaApiReply;
 import com.evaapis.flow.FlowElement;
 
 
-public class ChatItem {//implements Parcelable { // http://stackoverflow.com/a/2141166/78234
+public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/2141166/78234
 	
 	public enum ChatType {
 		Me,
 		Eva,
+		EvaSearch,
 		DialogQuestion,
 		DialogAnswer
 	}
 	
-	static ChatItem lastActivated = null;
+	public enum Status {
+		None,
+		ToSearch,
+		InSearch,
+		HasResults
+	}
+	
+//	static ChatItem lastActivated = null;
 	
 	protected SpannableString chat = new SpannableString("");
 	protected ChatType chatType;
 	protected boolean inSession = true;
 	
-	protected FlowElement flow = null;
-	protected EvaApiReply evaReply = null;
+	private Status status;
+	
+	private String mResults = null;
+	protected FlowElement flow;
+	protected EvaApiReply evaReply;
 
 	public ChatItem(String chat) {
 		this(new SpannableString(chat));
@@ -33,8 +44,7 @@ public class ChatItem {//implements Parcelable { // http://stackoverflow.com/a/2
 	}
 	
 	public ChatItem(SpannableString chat) {
-		this.chat = chat;
-		chatType = ChatType.Me;
+		this(chat, null, null, ChatType.Me);
 	}
 	
 	public ChatItem(SpannableString chat, EvaApiReply evaReply, FlowElement flow, ChatType chatType) {
@@ -42,6 +52,12 @@ public class ChatItem {//implements Parcelable { // http://stackoverflow.com/a/2
 		this.flow = flow;
 		this.evaReply = evaReply;
 		this.chatType = chatType;
+		if (chatType == ChatType.Eva && flow != null && flow.Type != FlowElement.TypeEnum.Question) {
+			setStatus(Status.ToSearch);
+		}
+		else {
+			setStatus(Status.None);
+		}
 	}
 
 	public SpannableString getChat() {
@@ -105,4 +121,21 @@ public class ChatItem {//implements Parcelable { // http://stackoverflow.com/a/2
 	public EvaApiReply getEvaReply() {
 		return evaReply;
 	}
+
+	public Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Status status) {
+		this.status = status;
+	}
+
+	public void setSearchResults(String result) {
+		mResults = result;
+	}
+
+	public String getSearchResult() {
+		return mResults;
+	}
+
 }

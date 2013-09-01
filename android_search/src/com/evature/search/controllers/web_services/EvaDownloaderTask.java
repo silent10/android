@@ -1,5 +1,9 @@
 package com.evature.search.controllers.web_services;
 
+import java.util.ArrayList;
+
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -7,17 +11,17 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String>
 
 	static private final String TAG = EvaDownloaderTask.class.getSimpleName();
 
-	EvaDownloaderTaskInterface mListener = null;
+	ArrayList<EvaDownloaderTaskInterface> mListeners = new ArrayList<EvaDownloaderTaskInterface>();
 
 	public void attach(EvaDownloaderTaskInterface listener) {
-		mListener = listener;
+		mListeners.add(listener);
 	}
 
 	public void detach() {
-		mListener = null;
+		mListeners = new ArrayList<EvaDownloaderTaskInterface>();
 	}
 
-	int mProgress = 0;
+	DownloaderStatus mProgress = DownloaderStatus.NotStarted;
 
 	public int getId() {
 		return 0;
@@ -28,19 +32,26 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+
+	public void setCachedResults(String cachedResult) {
+		Log.i(TAG, "Using cached Result");
+		onPostExecute(cachedResult);
+	}
+	
 
 	@Override
 	protected void onPostExecute(String result) {
 
 		Log.d(TAG, "onPostExecute");
 
-		if (mListener == null)
-			return;
 
-		if (mProgress == EvaDownloaderTaskInterface.PROGRESS_FINISH) {
-			mListener.endProgressDialog(getId(), result);
-		} else {
-			mListener.endProgressDialogWithError(getId(), result);
+		for (EvaDownloaderTaskInterface listener : mListeners) {
+			if (mProgress == DownloaderStatus.Finished) {
+				listener.endProgressDialog(getId(), result);
+			} else {
+				listener.endProgressDialogWithError(getId(), result);
+			}
 		}
 		super.onPostExecute(result);
 	}
@@ -49,7 +60,10 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String>
 	protected void onPreExecute() {
 		Log.d(TAG, "onPreExecute");
 
-		mListener.startProgressDialog(getId());
+		mProgress = DownloaderStatus.Started;
+		for (EvaDownloaderTaskInterface listener : mListeners) {
+			listener.startProgressDialog(getId());
+		}
 
 		super.onPreExecute();
 	}
@@ -59,15 +73,14 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String>
 
 		Log.d(TAG, "onProgressUpdate:" + mProgress);
 
-		if (mListener != null) {
-			Log.d(TAG, "updating progress");
-			mListener.updateProgress(getId(), mProgress);
+		for (EvaDownloaderTaskInterface listener : mListeners) {
+			listener.updateProgress(getId(), mProgress);
 		}
 		super.onProgressUpdate(values);
 	}
-
+	
 	public Object getProgress() {
-		return Integer.valueOf(mProgress);
+		return Integer.valueOf(mProgress.ordinal());
 	}
 
 }

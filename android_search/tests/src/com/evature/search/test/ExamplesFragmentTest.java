@@ -10,7 +10,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 import java.io.IOException;
 
 import org.junit.Before;
@@ -25,14 +24,12 @@ import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
 import android.support.v4.view.ViewPager;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.evature.search.R;
 import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.controllers.activities.MainActivity.SwipeyTabsPagerAdapter;
-import com.evature.search.models.chat.ChatItem;
-import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.ChatItem.ChatType;
+import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.views.fragments.ExamplesFragment;
 import com.evature.util.DownloadUrl;
 import com.google.inject.AbstractModule;

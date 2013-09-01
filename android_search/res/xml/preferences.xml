@@ -37,6 +37,10 @@
             android:key="save_pcm"
             android:summary="@string/save_recording_pcm_file_wav_"
             android:title="Save PCM" />
+        <CheckBoxPreference
+            android:key="save_encoded"
+            android:summary="@string/save_encoded_file_flac_"
+            android:title="@string/save_encoded" />
         </PreferenceCategory>
 
 </PreferenceScreen>

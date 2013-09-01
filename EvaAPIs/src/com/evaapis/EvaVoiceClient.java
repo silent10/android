@@ -36,6 +36,10 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.evature.util.EvatureSSLSocketFactory;
@@ -77,14 +81,19 @@ public class EvaVoiceClient {
 	private String mLocale;
 	private String mLanguage;
 
+	private Context mContext;
 
-	public EvaVoiceClient(String siteCode, String appKey, String deviceId, String sessionId, String locale, String language, SpeechAudioStreamer speechAudioStreamer) {
+
+	public EvaVoiceClient(Context context,
+			String siteCode, String appKey, String deviceId, String sessionId, String locale, String language, 
+			SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
 		mDeviceId = deviceId;
 		mSessionId = sessionId;
 		mLocale = locale;
 		mLanguage = language;
+		mContext = context;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
@@ -154,7 +163,6 @@ public class EvaVoiceClient {
 		}
 
 		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, "", URLEncodedUtils.format(qparams, "UTF-8"), null);
-
 		return uri;
 	}
 
@@ -187,7 +195,13 @@ public class EvaVoiceClient {
 	private InputStreamEntity setAudioContent(SpeechAudioStreamer speechAudioStreamer) throws NumberFormatException, Exception
 	{
 		InputStream encodedStream = speechAudioStreamer.start();
-		uploadStream = new DebugStream(encodedStream);
+		String filepath = null;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean saveEncoded = prefs.getBoolean("save_encoded", false);
+		if (saveEncoded) {
+			filepath = Environment.getExternalStorageDirectory().getPath() + "/recording.flac";
+		}
+		uploadStream = new DebugStream(encodedStream, saveEncoded, filepath);
  		InputStreamEntity reqEntity  = new InputStreamEntity(uploadStream, -1);
 
 		reqEntity.setContentType(CODEC);
@@ -238,12 +252,11 @@ public class EvaVoiceClient {
 
 		mEvaResponse = inputStreamToString(is).toString();
 
-		//Log.i(TAG, "Response: \n"+mEvaResponse);
 		
 		resEntity.consumeContent();
 		
 		timeSpentReadingResponse = (System.nanoTime() - t0) / 1000000;
-		Log.i(TAG,"<<< Got response");
+		Log.i(TAG, "<<< Got Response");//: \n"+mEvaResponse);
 
 	}
 	
@@ -260,6 +273,7 @@ public class EvaVoiceClient {
 			httpclient = getHttpClient();
 
 			URI uri = getURI();
+//			URI uri = new URI("https://www.google.com/speech-api/v1/recognize?lang=ru&maxresults=5&xjerr=1&pfilter=0");
 			Log.i(TAG,"<<< Sending post request to URI: "+uri);
 
 			InputStreamEntity reqEntity = setAudioContent(mSpeechAudioStreamer);

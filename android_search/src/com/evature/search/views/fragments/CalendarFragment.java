@@ -159,9 +159,7 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 	}
 
 	@Override
-	public void updateProgress(int id, int mProgress) {
-		// TODO Auto-generated method stub
-		
+	public void updateProgress(int id, DownloaderStatus mProgress) {
 	}
 
 	

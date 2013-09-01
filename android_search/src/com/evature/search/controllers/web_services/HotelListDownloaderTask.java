@@ -8,6 +8,7 @@ import android.util.Log;
 import com.evaapis.EvaApiReply;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.XpediaProtocol;
 import com.google.inject.Inject;
@@ -69,7 +70,7 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 
 		Log.i(TAG, "doInBackground: start");
 		// String searchQuery = EvaProtocol.getEvatureResponse(mQueryString);
-		mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
+		//mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
 		String hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, mCurrencyCode);
@@ -79,22 +80,29 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		else {
 			Log.d(TAG, hotelListResponse);
 		}
-		mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
-		hotelListResponse = createHotelData(hotelListResponse);
-		if (hotelListResponse == null) {
-			Log.i(TAG, "doInBackground: Error in Expedia response");
-			mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH_WITH_ERROR;
-			return null;
-		} 
+		//mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
 		
-		Log.i(TAG, "doInBackground: All OK");
-		mProgress = EvaDownloaderTaskInterface.PROGRESS_FINISH;
-		MyApplication.getDb().setArrivalDate(apiReply.ean.get("arrivalDate"));
-		// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
-		MyApplication.getDb().setDepartueDate(apiReply.ean.get("departureDate"));
-		// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
-		MyApplication.getDb().setNumberOfAdults(1);
-		Log.i(TAG, "doInBackground: end");
 		return hotelListResponse;
+	}
+	
+	@Override
+	protected void onPostExecute(String result) {
+		if (result == null) {
+			Log.i(TAG, "doInBackground: Error in Expedia response");
+			mProgress = DownloaderStatus.FinishedWithError;
+		}
+		else {
+			result = createHotelData(result);
+			
+			Log.i(TAG, "doInBackground: All OK");
+			mProgress = DownloaderStatus.Finished;
+			MyApplication.getDb().setArrivalDate(apiReply.ean.get("arrivalDate"));
+			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
+			MyApplication.getDb().setDepartueDate(apiReply.ean.get("departureDate"));
+			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
+			MyApplication.getDb().setNumberOfAdults(1);
+			Log.i(TAG, "doInBackground: end");
+		}	
+		super.onPostExecute(result);
 	}
 }

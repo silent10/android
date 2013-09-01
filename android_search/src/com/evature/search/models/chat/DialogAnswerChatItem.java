@@ -1,5 +1,7 @@
 package com.evature.search.models.chat;
 
+import com.evature.search.models.chat.ChatItem.Status;
+
 
 
 

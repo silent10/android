@@ -60,7 +60,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="5.0dip"
                 android:duplicateParentState="true"
-                android:src="@drawable/searchresults_tableheader_plane_nw" />
+                android:src="@drawable/searchresults_tableheader_plane_se" />
 
             <TextView
                 android:id="@+id/search_results_arrival_date"
@@ -74,7 +74,7 @@
 
         <LinearLayout
             android:id="@+id/search_results_column_header_airline"
-            android:layout_width="48.0dip"
+            android:layout_width="50.0dip"
             android:layout_height="fill_parent"
             android:layout_marginRight="1.0dip"
             android:background="@drawable/searchresults_tableheader_background"

@@ -33,7 +33,7 @@
         <item >¥</item>
         <item >kr</item>
         <item >HK$</item>
-        <item >ILS</item>
+        <item >₪</item>
         <item >₨</item>
         <item >¥</item>
         <item >₩</item>
@@ -83,6 +83,8 @@
         <!-- <item>Fly from Minto to Heatherwood</item> -->
         <item>Fly to NY next Sunday, stay 5 nights in Arlignton, return</item>
         <!-- <item>Hotels in Heatherwood</item> -->
+        <item>Round trip flight from London to NYC next Wednesday, stay in a 5 star hotel for two weeks</item>
+        <item>Flights from Los Angeles to Paris on september 20, return on september 25th</item>
         <item>3 Star hotels in NYC sorted by price</item>
         <item>3 Star hotels in NYC sorted by name</item>
         <item>3 Star hotels in NYC, on Wednesday for two nights, sorted by price descending</item>
