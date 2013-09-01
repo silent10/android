@@ -2,30 +2,50 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" 
     android:background="@color/eva_chat_in_session_bg"
-     >
+    android:orientation="horizontal" >
 
- 
     <TextView
         android:id="@+id/label"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/icon"
+        android:layout_toLeftOf="@+id/right_pane"
+        android:paddingBottom="2dip"
         android:paddingLeft="3dip"
         android:paddingRight="3dip"
-        android:paddingBottom="2dip"
         android:textColor="@color/eva_chat_in_session_text"
         android:textSize="16sp" />
-    
-    <ImageView
-        android:id="@id/icon"
+
+    <FrameLayout
+        android:id="@id/right_pane"
         android:layout_width="40dip"
         android:layout_height="40dip"
         android:layout_alignParentRight = "true"
-        android:padding="2dip"
-        android:src="@drawable/eva_head" 
-        android:contentDescription="@string/chat_icon_description"/>
-    
+        >
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+            android:contentDescription="@string/chat_icon_description"
+            android:padding="2dip"
+            android:src="@drawable/eva_head" />
+
+        <ImageView
+            android:id="@+id/top_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/search_icon"
+            android:padding="2dip"
+            android:src="@drawable/search"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progressBar_search"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
 
 </RelativeLayout>

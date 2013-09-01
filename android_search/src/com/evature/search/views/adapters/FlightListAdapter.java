@@ -2,12 +2,15 @@ package com.evature.search.views.adapters;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,6 +31,7 @@ public class FlightListAdapter extends BaseAdapter {
 	// private FlightsFragment mParent;
 	private VayantJourneys journeys = null;
 	private SimpleDateFormat dateFormatter;
+	private HashMap<String, Integer> airlineLogos = new HashMap<String, Integer>();
 
 	public FlightListAdapter(FlightsFragment parent, VayantJourneys journeys) {
 		Log.d(TAG, "CTOR");
@@ -35,7 +39,26 @@ public class FlightListAdapter extends BaseAdapter {
 		// mParent = parent;
 		this.journeys = journeys;
 		
-		dateFormatter = new SimpleDateFormat("yyyy-MM-dd\n HH:mm");
+		dateFormatter = new SimpleDateFormat("yyyy-MM-dd\n HH:mm");  // TODO: base on chosen Locale
+		
+		
+		airlineLogos.put("DL", R.drawable.logo_dl);
+		airlineLogos.put("KL", R.drawable.logo_kl);
+		airlineLogos.put("US", R.drawable.logo_us); // 
+		airlineLogos.put("VS", R.drawable.logo_vs); // Virgin
+		airlineLogos.put("AF", R.drawable.logo_af); // AirFrance
+		airlineLogos.put("AZ", R.drawable.logo_az); // Alitalia
+		airlineLogos.put("AY", R.drawable.logo_ay); // Finnair Oyj
+		airlineLogos.put("UA", R.drawable.logo_ua); // United Airlines
+		airlineLogos.put("AC", R.drawable.logo_ac);	// Air Canada
+		airlineLogos.put("AA", R.drawable.logo_aa);	// American Airlines
+		airlineLogos.put("TK", R.drawable.logo_tk);	// Turkish Airlines
+		airlineLogos.put("LH", R.drawable.logo_lh);	// Deutsche Lufthansa 
+		airlineLogos.put("TN", R.drawable.logo_tn);	// Air Tahiti Nui
+		airlineLogos.put("SU", R.drawable.logo_su);	// Aeroflot Russian Airlines
+		airlineLogos.put("BA", R.drawable.logo_ba);	// British Airways
+		airlineLogos.put("SN", R.drawable.logo_sn);	// Brussels Airlines
+		airlineLogos.put("LX", R.drawable.logo_lx);	// SWISS International Air Lines
 	}
 
 	public void setJourneys(VayantJourneys journeys) {
@@ -91,11 +114,22 @@ public class FlightListAdapter extends BaseAdapter {
 			String ArrivalTime = dateFormatter.format(arrivalDateTime); //String.format("%1$d:%2$02d", arrivalDateTime.getHours(), arrivalDateTime.getMinutes());
 			arrival_time.setText(ArrivalTime + " " + flight.destination);
 
-			TextView airline = (TextView) child.findViewById(R.id.itinerary_view_airline);
-			airline.setText(segment.flights.get(0).marketingCarrier);
+			String airlineCode = segment.flights.get(0).marketingCarrier.toUpperCase(Locale.US);
+			ImageView logoImg = (ImageView) child.findViewById(R.id.airline_logo);
+			TextView airline = (TextView) child.findViewById(R.id.airline_text);
+			if (airlineLogos.containsKey(airlineCode)) {
+				airline.setVisibility(View.GONE);
+				logoImg.setImageResource(airlineLogos.get(airlineCode));
+				logoImg.setVisibility(View.VISIBLE);
+			}
+			else {
+				logoImg.setVisibility(View.GONE);
+				airline.setText(airlineCode);
+				airline.setVisibility(View.VISIBLE);
+			}
 			
 			TextView price = (TextView) child.findViewById(R.id.itinerary_view_price);
-			price.setText( String.format("%1$,.2f %2$s", solution.mOutboundPrice, solution.mCurrency));
+			price.setText( String.format("%1$,.2f %2$s", solution.mOutboundPrice, solution.mCurrency.equals("USD") ? "$" : solution.mCurrency));
 			
 			linearLayout.addView(child);
 			//Log.d(TAG, "getView position "+String.valueOf(position)+" adding view for segment "+(segmentCount++));

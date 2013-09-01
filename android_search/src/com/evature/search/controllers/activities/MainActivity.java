@@ -78,8 +78,10 @@ import com.evature.search.controllers.web_services.EvaHotelDownloaderTask;
 import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
+import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItem.ChatType;
+import com.evature.search.models.chat.ChatItem.Status;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
@@ -497,6 +499,11 @@ public class MainActivity extends EvaBaseActivity implements
 	
 	private void addChatItem(ChatItem item) {
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
+		mChatListModel.add(item);
+		invalidateChatFragment();
+	}
+	
+	private void invalidateChatFragment() {
 		int index = mTabTitles.indexOf(mChatTabName);
 		if (index == -1) {
 			mSwipeyAdapter.addTab(mChatTabName);
@@ -504,7 +511,6 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 		Log.i(TAG, "Chat tab at index "+index);
 		// http://stackoverflow.com/a/8886019/78234
-		mChatListModel.add(item);
 		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
 		if (fragment != null) // could be null if not instantiated yet
 		{
@@ -694,7 +700,7 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 
 	@Override
-	public void updateProgress(int id, int mProgress) {
+	public void updateProgress(int id, DownloaderStatus mProgress) {
 	}
 
 	// search button click handler ("On Click property" of the button in the xml)
@@ -827,20 +833,27 @@ public class MainActivity extends EvaBaseActivity implements
 		bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
 		bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 		
-		if ("voice".equals(cookie) && reply.processedText != null) {
-			// reply of voice -  add a "Me" chat item for the input text
-			SpannableString chat = new SpannableString(reply.processedText);
-			if (reply.evaWarnings.size() > 0) {
-				int col = getResources().getColor(R.color.my_chat_no_session_text);
-				for (EvaWarning warning: reply.evaWarnings) {
-					if (warning.position == -1) {
-						continue;
+		if ("voice".equals(cookie)) {
+			SpannableString chat = null;
+			if (reply.originalInputText != null) {
+				chat = new SpannableString(reply.originalInputText);
+			}
+			else if (reply.processedText != null) {
+				// reply of voice -  add a "Me" chat item for the input text
+				chat = new SpannableString(reply.processedText);
+				if (reply.evaWarnings.size() > 0) {
+					int col = getResources().getColor(R.color.my_chat_no_session_text);
+					for (EvaWarning warning: reply.evaWarnings) {
+						if (warning.position == -1) {
+							continue;
+						}
+						chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
+						chat.setSpan( new StyleSpan(Typeface.ITALIC), warning.position, warning.position+warning.text.length(), 0);
 					}
-					chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
-					chat.setSpan( new StyleSpan(Typeface.ITALIC), warning.position, warning.position+warning.text.length(), 0);
 				}
 			}
-			addChatItem(new ChatItem(chat));
+			if (chat != null)
+				addChatItem(new ChatItem(chat));
 		}
 		
 		super.onEvaReply(reply, cookie);
@@ -853,9 +866,15 @@ public class MainActivity extends EvaBaseActivity implements
 		
 		if (reply.flow != null ) {
 			handleFlow(reply);
-			return;
 		}
-		
+//		else {
+//			handleNonFlow(reply);  // old code
+//		}		
+	}
+
+	
+/*
+	private void handleNonFlow(EvaApiReply reply) {
 		String sayIt = handleChat(reply);
 		if (sayIt != null) {
 			addChatItem(new ChatItem(sayIt, reply, null, ChatType.Eva));
@@ -901,10 +920,7 @@ public class MainActivity extends EvaBaseActivity implements
 //				mSearchTravelportTask.execute();
 //			}
 		}
-		
-	}
-
-	
+	}*/
 
 	/****
 	 * Display chat items for each flow element - 
@@ -917,8 +933,10 @@ public class MainActivity extends EvaBaseActivity implements
 		for (FlowElement flow : reply.flow.Elements) {
 			if (flow.Type == TypeEnum.Question) {
 				hasQuestion = true;
+				break;
 			}
 		}
+		
 		for (FlowElement flow : reply.flow.Elements) {
 			
 			ChatItem chatItem = null;
@@ -934,6 +952,7 @@ public class MainActivity extends EvaBaseActivity implements
 					}
 				}
 				if (first) {
+					// execute first question
 					executeFlowElement(reply, flow, chatItem);
 					first = false;
 				}
@@ -944,7 +963,7 @@ public class MainActivity extends EvaBaseActivity implements
 			}
 			
 			if (!hasQuestion && first) {
-				// automatically execute first element
+				// automatically execute first element - if no questions exist
 				executeFlowElement(reply, flow, chatItem);
 				
 				first = false;
@@ -953,24 +972,88 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 	}
 
+
+	static ChatItem lastHotelCompleted = null;
+	static ChatItem lastFlightCompleted = null;
+
+	class DownloaderListener implements EvaDownloaderTaskInterface {
+		
+		ChatItem currentItem;
+		
+		DownloaderListener(ChatItem chatItem) {
+			currentItem = chatItem;
+		}
+		@Override
+		public void endProgressDialog(int id, String result) {
+			Log.i(TAG, "End search for "+currentItem.getChat());
+			currentItem.setStatus(Status.HasResults);
+			currentItem.setSearchResults(result);
+			// this is ugly hack - there can be only one hotel chat item with results, and only one flight search with results
+			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
+				if (lastHotelCompleted != null && lastHotelCompleted != currentItem) {
+					lastHotelCompleted.setStatus(Status.ToSearch);
+				}
+				lastHotelCompleted = currentItem;
+			}
+			if (currentItem.getFlowElement().Type == TypeEnum.Flight) {
+				if (lastFlightCompleted != null && lastFlightCompleted != currentItem) {
+					lastFlightCompleted.setStatus(Status.ToSearch);
+				}
+				lastFlightCompleted = currentItem;
+			}
+			invalidateChatFragment();
+		}
+
+		@Override
+		public void startProgressDialog(int id) {
+			Log.i(TAG, "Start search for "+currentItem.getChat());
+			currentItem.setStatus(Status.InSearch);
+			invalidateChatFragment();
+		}
+
+		@Override
+		public void endProgressDialogWithError(int id, String result) {
+			Log.i(TAG, "End search with ERROR for "+currentItem.getChat());
+			currentItem.setStatus(Status.ToSearch);
+			invalidateChatFragment();
+		}
+
+		@Override
+		public void updateProgress(int id, DownloaderStatus mProgress) {
+		}
+	}
+
 	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem) {
 //		chatItem.setActivated(true);
 		if (flow.SayIt != null && !"".equals(flow.SayIt) ) {
 			speak(flow.SayIt);
 		}
-		//chatItem.setActivated();
 		
 		switch (flow.Type) {
 		case Hotel:
 			Log.d(TAG, "Running Hotel Search!");
 			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-			mSearchExpediaTask.initialize(this, reply, "$"); // TODO: change to be based on flow element
-			mSearchExpediaTask.execute();
+			mSearchExpediaTask.initialize(this, reply, "$"); // TODO: change to be based on flow element, // TODO: change to use currency
+			mSearchExpediaTask.attach(new DownloaderListener(chatItem));
+			if (chatItem.getStatus() == Status.HasResults) {
+				// this chat item was already activated and has results - bypass the cloud service and fake results
+				mSearchExpediaTask.setCachedResults(chatItem.getSearchResult());
+			}
+			else {
+				mSearchExpediaTask.execute();
+			}
 			break;
 		case Flight:
 			Log.d(TAG, "Running Vayant Search!");
 			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
-			mSearchVayantTask.execute();
+			mSearchVayantTask.attach(new DownloaderListener(chatItem));
+			if (chatItem.getStatus() == Status.HasResults) {
+				// this chat item was already activated and has results - bypass the cloud service and fake results
+				mSearchVayantTask.setCachedResults(chatItem.getSearchResult());
+			}
+			else {
+				mSearchVayantTask.execute();
+			}
 			break;
 		case Question:
 			break;

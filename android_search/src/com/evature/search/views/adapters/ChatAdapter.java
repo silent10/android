@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.evaapis.flow.FlowElement;
@@ -77,10 +78,10 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ChatItem chatItem = getItem(position);
-//		Log.d(TAG, "Creating view for row "+position+"  chat: "+chatItem.getChat());
 		ChatType viewType = chatItem.getType(); // should be same logic as getItemViewType
 		View row = convertView;
 		if (row == null) {
+//			Log.d(TAG, "Creating view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
 			switch (viewType) {
 			case Me:
 				row = mInflater.inflate(R.layout.row_mychat, parent, false);
@@ -93,6 +94,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				row = mInflater.inflate(R.layout.row_eva_dialog, parent, false);
 				break;
 			}
+		}
+		else {
+//			Log.d(TAG, "reusing view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
 		}
 		
 		TextView label = (TextView) row.findViewById(R.id.label);
@@ -114,6 +118,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			break;
 		}
 		
+		
 		if (viewType == ChatType.Me) {
 			TextView icon = (TextView)row.findViewById(R.id.icon);
 			if (chatItem.isInSession()) {
@@ -128,9 +133,16 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			}
 		}
 		else {
+			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
+			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
+			progress.setVisibility(View.GONE);
+			topImg.setVisibility(View.GONE);
 			FlowElement flow = chatItem.getFlowElement();
-			if (flow != null) {
-				ImageView img = (ImageView) row.findViewById(R.id.icon);
+			ImageView img = (ImageView) row.findViewById(R.id.icon);
+			if (flow == null) {
+				img.setImageResource(R.drawable.eva_head);
+			}
+			else {
 				switch (flow.Type) {
 				case Hotel:
 					img.setImageResource(R.drawable.hotel_small);
@@ -138,7 +150,23 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				case Flight:
 					img.setImageResource(R.drawable.airplane_small);
 					break;
+				case Question:
+					img.setImageResource(R.drawable.eva_head);
 				}
+			}
+			
+			switch(chatItem.getStatus()) {
+			case HasResults:
+				topImg.setImageResource(R.drawable.see_results);
+				topImg.setVisibility(View.VISIBLE);
+				break;
+			case InSearch:
+				progress.setVisibility(View.VISIBLE);
+				break;
+			case ToSearch:
+				topImg.setImageResource(R.drawable.search);
+				topImg.setVisibility(View.VISIBLE);
+				break;				
 			}
 			
 			if (chatItem.isInSession()) {
