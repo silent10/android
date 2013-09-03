@@ -66,13 +66,14 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 
 			hotelData.mDetails = new HotelDetails(jHotelInfo);
 
-			if (db.mArrivalDateParam != null && db.mDepartureDateParam != null) {
-				String str = XpediaProtocolStatic.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
-						db.mArrivalDateParam, db.mDepartureDateParam,
-						EvaSettingsAPI.getCurrencyCode(mContext), db.mNumberOfAdultsParam);
-				Log.d(TAG, str);
-				hotelData.mSummary.updateRoomDetails(str);
-			}
+//			if (db.mArrivalDateParam != null && db.mDepartureDateParam != null) {
+//				String str = XpediaProtocolStatic.getRoomInformationForHotel(hotelData.mSummary.mHotelId,
+//						db.mArrivalDateParam, db.mDepartureDateParam,
+//						EvaSettingsAPI.getCurrencyCode(mContext), db.mNumberOfAdultsParam);
+			
+//				Log.d(TAG, str);
+//				hotelData.mSummary.updateRoomDetails(str);
+//			}
 			mProgress = DownloaderStatus.Finished;
 
 		} catch (JSONException e) {

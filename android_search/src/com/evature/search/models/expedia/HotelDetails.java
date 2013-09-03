@@ -72,7 +72,8 @@ public class HotelDetails {
 				name = jobj.getString("name");
 				category = jobj.getInt("category");
 				type = jobj.getInt("type");
-				caption = jobj.getString("caption");
+				if (jobj.has("caption"))
+					caption = jobj.getString("caption");
 				url = jobj.getString("url");
 				thumbnailUrl = jobj.getString("thumbnailUrl");
 			} catch (JSONException e) {
@@ -115,12 +116,14 @@ public class HotelDetails {
 				descriptionLong = jsonObject.getString("descriptionLong");
 				roomTypeId = jsonObject.getInt("@roomTypeId");
 				roomCode = jsonObject.getInt("@roomCode");
-				JSONObject jAmenitiesObject = jsonObject.getJSONObject("RoomAmenities");
-				JSONArray jAmenitiesArray = jAmenitiesObject.getJSONArray("RoomAmenity");
-				roomAmenities = new Amenity[jAmenitiesArray.length()];					
-				for( int index=0; index<jAmenitiesArray.length(); index++)
-				{
-					roomAmenities[index]=new Amenity(jAmenitiesArray.getJSONObject(index));
+				if (jsonObject.has("RoomAmenities")) {
+					JSONObject jAmenitiesObject = jsonObject.getJSONObject("RoomAmenities");
+					JSONArray jAmenitiesArray = jAmenitiesObject.getJSONArray("RoomAmenity");
+					roomAmenities = new Amenity[jAmenitiesArray.length()];					
+					for( int index=0; index<jAmenitiesArray.length(); index++)
+					{
+						roomAmenities[index]=new Amenity(jAmenitiesArray.getJSONObject(index));
+					}
 				}
 			} catch (JSONException e) {
 				Log.e("XPD","RoomType: JSON Element not found!");

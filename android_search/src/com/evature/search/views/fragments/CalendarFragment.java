@@ -20,6 +20,7 @@ import com.evature.search.R;
 import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaRoomsUpdaterTask;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 
 public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskInterface{
 
@@ -34,6 +35,9 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 	private CalendarView mCalendar;
 	private EditText mNumAdults;	
 	static protected EvaRoomsUpdaterTask mRoomsUpdater;
+	
+	static final SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,11 +85,12 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 					if (selDate[1] != null)
 						dateDeparture += selDate[1].month + "/" + selDate[1].day + "/" + selDate[1].year;
 				}
-				Integer intNumAdults = new Integer(mNumAdults.getText().toString());
+				int intNumAdults = Integer.parseInt(mNumAdults.getText().toString());
 
-				MyApplication.getDb().setArrivalDate(dateArrival);
-				MyApplication.getDb().setDepartueDate(dateDeparture);
-				MyApplication.getDb().setNumberOfAdults(intNumAdults.intValue());
+				EvaXpediaDatabase db = MyApplication.getDb();
+				db.setArrivalDate(dateArrival);
+				db.setDepartueDate(dateDeparture);
+				db.setNumberOfAdults(intNumAdults);
 
 				mRoomsUpdater = new EvaRoomsUpdaterTask(CalendarFragment.this, mEvaCheckoutActivity.getHotelIndex());
 
@@ -95,7 +100,6 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 		});
 
 		Calendar rightNow = Calendar.getInstance();
-		SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 		String from = df.format(rightNow.getTime());
 		rightNow.add(Calendar.DAY_OF_MONTH, 1);
 		String to = df.format(rightNow.getTime());

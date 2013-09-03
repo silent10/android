@@ -4,9 +4,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 
 public class RoomDetails {
 
+	private static final String TAG = "RoomDetails";
 	private String mRoomTypeCode;
 	private String mRateCode;
 	private int mMaxRoomOccupancy;
@@ -53,26 +56,28 @@ public class RoomDetails {
 				
 				mRateInfo = new RateInfo(jRateInfo);
 				
-				JSONObject jValueAdds = jsonObject.getJSONObject("ValueAdds");
-				
-				int size = EvaXpediaDatabase.getSafeInt(jValueAdds, "size");
-				
-				if(size==-1) size =1;
-				
-				mValueAdds = new ValueAdd[size];
-				
-				if(size==1)
-				{
-					JSONObject jValueAdd = jValueAdds.getJSONObject("ValueAdd");
-					mValueAdds[0] = new ValueAdd(jValueAdd);
-				}
-				else
-				{
-					JSONArray jValueAddsArray = jValueAdds.getJSONArray("ValueAdd");
-					for(int i=0;i<size;i++)
+				if (jsonObject.has("ValueAdds")) {
+					JSONObject jValueAdds = jsonObject.getJSONObject("ValueAdds");
+					
+					int size = EvaXpediaDatabase.getSafeInt(jValueAdds, "@size");
+					
+					if(size==-1) size =1;
+					
+					mValueAdds = new ValueAdd[size];
+					
+					if(size==1)
 					{
-						JSONObject jValueAdd = jValueAddsArray.getJSONObject(i);
-						mValueAdds[i] = new ValueAdd(jValueAdd);
+						JSONObject jValueAdd = jValueAdds.getJSONObject("ValueAdd");
+						mValueAdds[0] = new ValueAdd(jValueAdd);
+					}
+					else
+					{
+						JSONArray jValueAddsArray = jValueAdds.getJSONArray("ValueAdd");
+						for(int i=0;i<size;i++)
+						{
+							JSONObject jValueAdd = jValueAddsArray.getJSONObject(i);
+							mValueAdds[i] = new ValueAdd(jValueAdd);
+						}
 					}
 				}
 			} catch (JSONException e) {	
@@ -106,13 +111,14 @@ public class RoomDetails {
 		url += "&rateCode=" + mRateCode;
 		url += "&roomTypeCode=" + mRoomTypeCode;
 		url += "&hrnQuoteKey=" + rateKey;
-		url += "&selectedPrice=" + mRateInfo.mChargableRateInfo.mAverageBaseRate;
+		url += "&selectedPrice=" + mRateInfo.mChargableRateInfo.mTotal;//mAverageBaseRate;
 		url += "&linkId=HotSearch:Hot:ResultsList:Book";
 		url += "&pagename=ToStep1";
 		if (mSupplierType.equals("E"))
 			url += "&supplierType=H";
 		else
 			url += "&supplierType=" + mSupplierType;
+		Log.i(TAG, "Rate Code: "+mRateCode + "   room type: "+mRoomTypeCode+ "  selectedPrice: "+mRateInfo.mChargableRateInfo.mTotal);
 		return url;
 	}
 

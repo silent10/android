@@ -11,9 +11,9 @@ public class NightlyRate {
 	private double mBaseRate;
 
 	public NightlyRate(JSONObject jRate) {
-		mPromo = EvaXpediaDatabase.getSafeBool(jRate, "promo");
-		mRate = EvaXpediaDatabase.getSafeDouble(jRate, "rate");
-		mBaseRate = EvaXpediaDatabase.getSafeDouble(jRate, "baseRate");
+		mPromo = EvaXpediaDatabase.getSafeBool(jRate, "@promo");
+		mRate = EvaXpediaDatabase.getSafeDouble(jRate, "@rate");
+		mBaseRate = EvaXpediaDatabase.getSafeDouble(jRate, "@baseRate");
 
 	}
 
