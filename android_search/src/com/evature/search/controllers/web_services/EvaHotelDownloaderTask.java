@@ -76,16 +76,12 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 //			}
 			mProgress = DownloaderStatus.Finished;
 
-		} catch (JSONException e) {
-			Log.e(TAG, "JSON exception getting hotel details");
-			e.printStackTrace();
-		}
-
-		try {
 			lastResponse = jHotel.toString(2);
 			
 			return lastResponse;
+
 		} catch (JSONException e) {
+			Log.e(TAG, "JSON exception getting hotel details");
 			e.printStackTrace();
 			return hotelInfo;
 		}

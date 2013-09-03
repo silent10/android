@@ -7,11 +7,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.zip.GZIPInputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.evaapis.EvaApiReply;
@@ -20,7 +20,6 @@ import com.evaapis.flow.FlowElement;
 import com.evature.search.MyApplication;
 import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
-import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.vayant.VayantJourneys;
 
 public class SearchVayantTask extends EvaDownloaderTask {
@@ -105,15 +104,19 @@ public class SearchVayantTask extends EvaDownloaderTask {
 		conn.setDoOutput(true);
 		conn.setRequestProperty("Content-Type", "application/json");
 		conn.setRequestProperty("Accept", "application/json");
+		conn.addRequestProperty("Accept-Encoding","gzip");
 		conn.setRequestProperty("Content-Length", Integer.toString(data.length()));
 		conn.getOutputStream().write(data.getBytes());
 		conn.getOutputStream().flush();
 		// Starts the query
 		conn.connect();
+		
 		int response = conn.getResponseCode();
 		Log.d(TAG, "The response is: " + response);
+		
+		// for some reason the GZIPINputStream is needed (HttpURLConnection should handle the gzip) - I guess Vayant doesn't return the right header but does encode the content
 		// Read from web: http://stackoverflow.com/a/1381784/78234
-		Reader r = new InputStreamReader(conn.getInputStream(), "UTF-8");
+		Reader r = new InputStreamReader(new GZIPInputStream(conn.getInputStream()), "UTF-8");
 		StringBuilder buf = new StringBuilder();
 		char[] sBuffer = new char[512];
 		int readBytes = 0;

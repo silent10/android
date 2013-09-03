@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -178,6 +179,7 @@ public class EvaVoiceClient {
 		httppost.addHeader("Content-Language", LANGUAGE);
 		httppost.addHeader("Accept-Language", LANGUAGE);
 		httppost.addHeader("Accept", RESULTS_FORMAT);
+		//httppost.addHeader("Accept-Encoding","gzip");
 
 		return httppost;
 	}
@@ -209,12 +211,12 @@ public class EvaVoiceClient {
 	}
 
 
-	private StringBuilder inputStreamToString(InputStream is) {
+	private StringBuilder inputStreamToString(InputStream is) throws UnsupportedEncodingException {
 		String line = "";
 		StringBuilder total = new StringBuilder();
 
 		// Wrap a BufferedReader around the InputStream
-		BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+		BufferedReader rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
 		// Read response until the end
 		try {
@@ -246,6 +248,11 @@ public class EvaVoiceClient {
 		}
 
 		InputStream is = resEntity.getContent();
+		Header contentEncoding = response.getFirstHeader("Content-Encoding");
+		if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+			is = new GZIPInputStream(is);
+		}
+
 
 		mEvaResponse = inputStreamToString(is).toString();
 
