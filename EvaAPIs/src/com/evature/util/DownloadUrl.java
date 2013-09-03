@@ -22,6 +22,7 @@ public class DownloadUrl {
 		conn.setReadTimeout(20000 /* milliseconds */);
 		conn.setConnectTimeout(25000 /* milliseconds */);
 		conn.setRequestMethod("GET");
+		conn.addRequestProperty("Accept-Encoding","gzip");
 		conn.setDoInput(true);
 		// Starts the query
 		conn.connect();

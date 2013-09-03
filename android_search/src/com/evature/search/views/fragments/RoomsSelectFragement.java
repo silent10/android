@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.controllers.activities.EvaCheckoutActivity;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.RoomListAdapter;
@@ -70,7 +71,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				{	
 					Bitmap bmp = null;
 
-					if(mHotelData.mDetails.hotelImages[0]!=null)
+					if(mHotelData.mDetails != null && mHotelData.mDetails.hotelImages[0]!=null)
 					{
 						if(mHotelData.mDetails.hotelImages[0].url!=null)
 						{
@@ -114,11 +115,12 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				mHotelIndex=savedInstanceState.getInt(HOTEL_INDEX);
 			}
 
-			if (mHotelIndex < MyApplication.getDb().mHotelData.length) {
-				mHotelData = MyApplication.getDb().mHotelData[mHotelIndex];
+			EvaXpediaDatabase db = MyApplication.getDb();
+			if (db != null && db.mHotelData != null &&  mHotelIndex < db.mHotelData.length) {
+				mHotelData = db.mHotelData[mHotelIndex];
 				
 
-				Bitmap hotelBitmap = MyApplication.getDb().mImagesMap.get(mHotelData.mSummary.mThumbNailUrl);
+				Bitmap hotelBitmap = db.mImagesMap.get(mHotelData.mSummary.mThumbNailUrl);
 				if(hotelBitmap!=null)
 				{
 					mHotelImage.setImageBitmap(hotelBitmap);

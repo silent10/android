@@ -12,7 +12,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -32,7 +34,6 @@ import android.util.Log;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvatureLocationUpdater;
-import com.evaapis.RequestAttributes.SortEnum;
 import com.evaapis.RequestAttributes.SortOrderEnum;
 import com.evature.search.MyApplication;
 
@@ -40,17 +41,6 @@ public class XpediaProtocolStatic {
 
 	private final static String TAG = XpediaProtocolStatic.class.getSimpleName();
 	private static String minorRev = "16";
-
-	public class MessagePair {
-		public MessagePair(int i, String string) {
-			mMessageText = string;
-			mMessageId = i;
-		}
-
-		public String mMessageText;
-		public int mMessageId;
-
-	}
 
 	/**
 	 * {@link StatusLine} HTTP status code when no server error has occurred.
@@ -131,7 +121,6 @@ public class XpediaProtocolStatic {
 	}
 
 	static public String getExpediaHotelInformation(int hotelId, String currencyCode) {
-		byte[] sBuffer = new byte[512];
 		String urlString = HOTEL_INFO_URL;
 		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
 		urlString += "&cid=" + getClientId() + "&";
@@ -140,44 +129,7 @@ public class XpediaProtocolStatic {
 		urlString += "&hotelId=" + hotelId;
 		urlString += "&options=0";
 
-		DefaultHttpClient client = new DefaultHttpClient();
-
-		HttpGet request = new HttpGet(urlString);
-
-		try {
-
-			HttpResponse response = executeWithTimeout(client, request);
-
-			// Check if server response is valid
-			StatusLine status = response.getStatusLine();
-			if (status.getStatusCode() != HTTP_STATUS_OK) {
-
-				Log.e(TAG, "Invalid response from server!");
-				HttpEntity entity = response.getEntity();
-				Log.e(TAG, "" + EntityUtils.toString(entity));
-				return null;
-			}
-
-			// Pull content stream from response
-			HttpEntity entity = response.getEntity();
-			InputStream inputStream = entity.getContent();
-
-			ByteArrayOutputStream content = new ByteArrayOutputStream();
-
-			// Read response into a buffered stream
-			int readBytes = 0;
-			while ((readBytes = inputStream.read(sBuffer)) != -1) {
-				content.write(sBuffer, 0, readBytes);
-			}
-
-			// Return result from buffered stream
-			return new String(content.toByteArray());
-		} catch (IOException e) {
-			Log.e(TAG, "Problem communicating with API");
-			Log.e(TAG, e.getStackTrace().toString());
-			return null;
-		}
-
+		return executeWithTimeout(urlString);
 	}
 
 	public static String getExpediaAnswer(EvaApiReply apiReply, String currencyCode) {
@@ -250,7 +202,6 @@ public class XpediaProtocolStatic {
 
 		}
 
-		DefaultHttpClient client = new DefaultHttpClient();
 
 		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
@@ -259,28 +210,45 @@ public class XpediaProtocolStatic {
 		urlString += CONSTANT_HTTP_PARAMS + "&currencyCode=" + currencyCode;
 		urlString += params;
 		
-		HttpGet request = new HttpGet(urlString);
+		return executeWithTimeout(urlString);
+	}
 
-		Log.i(TAG, "EXPEDIA URL = " + urlString);
+	private static String executeWithTimeout(String url) {
+		
+		Log.d(TAG, "Fetching "+url);
+		
+		HttpGet request = new HttpGet(url);
+		request.addHeader("Accept-Encoding","gzip");
 
+		HttpParams params = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(params, HTTP_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(params, HTTP_TIMEOUT);
+
+		DefaultHttpClient client = new DefaultHttpClient();
+		client.setParams(params);
 		try {
-
-			HttpResponse response = executeWithTimeout(client, request);
-
+			HttpResponse response = client.execute(request);
+			
+			
+			
 			// Check if server response is valid
-			StatusLine status = response.getStatusLine();
-			if (status.getStatusCode() != HTTP_STATUS_OK) {
-
-				Log.e(TAG, "Invalid response from server!");
-
+			int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode != HTTP_STATUS_OK) {
+				Log.e(TAG, "Status code from server: "+statusCode);
+				Log.e(TAG, "Content: "+EntityUtils.toString(response.getEntity()));
 				return null;
 			}
-
+	
 			// Pull content stream from response
 			HttpEntity entity = response.getEntity();
 			InputStream inputStream = entity.getContent();
-
+			Header contentEncoding = response.getFirstHeader("Content-Encoding");
+			if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+				inputStream = new GZIPInputStream(inputStream);
+			}
+			
 			ByteArrayOutputStream content = new ByteArrayOutputStream();
+			byte[] sBuffer = new byte[512];
 
 			// Read response into a buffered stream
 			int readBytes = 0;
@@ -289,26 +257,16 @@ public class XpediaProtocolStatic {
 			}
 
 			// Return result from buffered stream
-			return new String(content.toByteArray()); // Got an out of memory error here!
-		} catch (IOException e) {
-			Log.e(TAG, "Problem communicating with API");
-			Log.e(TAG, e.getStackTrace().toString());
+			return new String(content.toByteArray());
+		}
+		catch(IOException e) {
+			Log.e(TAG, "Problem communicating with API", e);
 			return null;
 		}
 	}
 
-	private static HttpResponse executeWithTimeout(DefaultHttpClient client, HttpGet request)
-			throws ClientProtocolException, IOException {
-		HttpParams params = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(params, HTTP_TIMEOUT);
-		HttpConnectionParams.setSoTimeout(params, HTTP_TIMEOUT);
-		client.setParams(params);
-		return client.execute(request);
-	}
-
 	public static String getRoomInformationForHotel(int hotelId, String arrivalDateParam, String departureDateParam,
 			String currencyCode, int numOfAdults) {
-		byte[] sBuffer = new byte[512];
 		String urlString = HOTEL_AVAILABILITY_URL;
 		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
 		urlString += "&cid=" + getClientId() + "&";
@@ -318,111 +276,24 @@ public class XpediaProtocolStatic {
 		urlString += "&" + arrivalDateParam + "&" + departureDateParam + "&room1=" + numOfAdults;
 		urlString += "&options=0";
 
-		DefaultHttpClient client = new DefaultHttpClient();
 		// LayoutInflater li = this.getLayoutInflater();
 		// LinearLayout foot = (LinearLayout) li.inflate(R.layout.listfoot, null);
 		// mHotelListView.addFooterView(foot);
-		HttpGet request = new HttpGet(urlString);
 
-		try {
-
-			HttpResponse response = client.execute(request);
-
-			// Check if server response is valid
-			StatusLine status = response.getStatusLine();
-			if (status.getStatusCode() != HTTP_STATUS_OK) {
-
-				Log.e(TAG, "Invalid response from server!");
-
-				return null;
-			}
-
-			// Pull content stream from response
-			HttpEntity entity = response.getEntity();
-			InputStream inputStream = entity.getContent();
-
-			ByteArrayOutputStream content = new ByteArrayOutputStream();
-
-			// Read response into a buffered stream
-			int readBytes = 0;
-			while ((readBytes = inputStream.read(sBuffer)) != -1) {
-				content.write(sBuffer, 0, readBytes);
-			}
-
-			// Return result from buffered stream
-			return new String(content.toByteArray());
-		} catch (IOException e) {
-			Log.e(TAG, "Problem communicating with API");
-			Log.e(TAG, e.getStackTrace().toString());
-			return null;
-		}
-
+		
+		return executeWithTimeout(urlString);
 	}
 
 	public static String getExpediaNext(String mQueryString, String currencyCode) {
-		DefaultHttpClient client = new DefaultHttpClient();
-
-		byte[] sBuffer = new byte[512];
-		String urlString = "";
-
-		urlString = HOTEL_LIST_URL;
+		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
 		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
 		urlString += "&cid=" + getClientId() + "&";
 		urlString += CONSTANT_HTTP_PARAMS + "&currencyCode=" + currencyCode;
 		urlString += mQueryString;
 
-		HttpGet request = new HttpGet(urlString);
-
-		try {
-
-			HttpResponse response = executeWithTimeout(client, request);
-
-			// Check if server response is valid
-			StatusLine status = response.getStatusLine();
-			if (status.getStatusCode() != HTTP_STATUS_OK) {
-
-				Log.e(TAG, "Invalid response from server!");
-
-				return null;
-			}
-
-			// Pull content stream from response
-			HttpEntity entity = response.getEntity();
-			InputStream inputStream = entity.getContent();
-
-			ByteArrayOutputStream content = new ByteArrayOutputStream();
-
-			// Read response into a buffered stream
-			int readBytes = 0;
-			while ((readBytes = inputStream.read(sBuffer)) != -1) {
-				content.write(sBuffer, 0, readBytes);
-			}
-
-			// Return result from buffered stream
-			return new String(content.toByteArray());
-		} catch (IOException e) {
-			Log.e(TAG, "Problem communicating with API");
-			Log.e(TAG, e.getStackTrace().toString());
-			return null;
-		}
+		return executeWithTimeout(urlString);
 	}
 
-	public static void printJsonObject(JSONObject jobj) {
-		try {
-			Iterator jsonIterator = jobj.keys();
-
-			while(jsonIterator.hasNext())
-			{
-				String key = String.valueOf(jsonIterator.next());
-				String value = jobj.getString(key);
-				Log.i("TAG",key+"="+value);
-			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
 
 }
