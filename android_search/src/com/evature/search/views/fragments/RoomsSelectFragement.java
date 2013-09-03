@@ -98,7 +98,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
-			mView = inflater.inflate(R.layout.select_room,container,false);
+			mView = inflater.inflate(R.layout.select_hotel,container,false);
 
 			mHotelImage = (ImageView)mView.findViewById(R.id.hotelThumbnail);
 

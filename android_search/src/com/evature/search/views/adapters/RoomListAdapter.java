@@ -1,20 +1,19 @@
 package com.evature.search.views.adapters;
 
+import java.text.DecimalFormat;
+
 import android.content.Context;
+import android.graphics.Paint;
 import android.text.Html;
 import android.text.Spanned;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
 import com.evature.search.models.expedia.HotelData;
 
 public class RoomListAdapter extends BaseAdapter {
@@ -23,6 +22,7 @@ public class RoomListAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
 	private Context mParent;
 	
+	static final DecimalFormat formatter = new DecimalFormat("#.##");
 		
 	public RoomListAdapter(Context context, HotelData hotel)
 	{	
@@ -57,7 +57,10 @@ public class RoomListAdapter extends BaseAdapter {
 			 holder = new ViewHolder();
 			 
 			 holder.promo = (TextView)convertView.findViewById(R.id.promo);
-			 holder.rate = (TextView)convertView.findViewById(R.id.rate);
+			 holder.full_rate_nights = (TextView)convertView.findViewById(R.id.per_night_full);
+			 holder.full_rate = (TextView)convertView.findViewById(R.id.full_rate);
+			 holder.full_rate.setPaintFlags(holder.full_rate.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+			 holder.promo_rate = (TextView)convertView.findViewById(R.id.promo_rate);
 			 holder.details = (TextView)convertView.findViewById(R.id.details);
 			 convertView.setTag(holder);				 						 				 				 
 		 } else {
@@ -70,9 +73,9 @@ public class RoomListAdapter extends BaseAdapter {
 		 
 		 String name = spannedName.toString();
 		  
-		 Display display = ((WindowManager) mParent.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
 		 /* Now we can retrieve all display-related infos */
+//		 Display display = ((WindowManager) mParent.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 //		 int width = display.getWidth();
 //		 int height = display.getHeight();		 
 //		 
@@ -89,19 +92,29 @@ public class RoomListAdapter extends BaseAdapter {
 		 
 		 if(mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo!=null)
 		 {
-			 double rateInfo = mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo.mChargableRateInfo.mAverageBaseRate;
-			 int wholePart = (int)rateInfo;
-			 int fraction = (int)((rateInfo-wholePart)*100.);
-		 
-			 double twoDigitsRate = (double)wholePart+((double)fraction)/100.;
-		 
-			 String rate = EvaSettingsAPI.getCurrencySymbol(mParent) + " " + twoDigitsRate;
-		 
-			 holder.rate.setText(rate);
+			 double fullRate = mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo.mChargableRateInfo.mAverageBaseRate;
+			 double promoRate = mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo.mChargableRateInfo.mAverageRate;
+			 String fullRateStr = formatter.format(fullRate);
+			 String promoRateStr = formatter.format(promoRate);
+			 
+			 String dollar = EvaSettingsAPI.getCurrencySymbol(mParent)+" ";
+			 if (promoRate > 0 && promoRate < fullRate) {
+				 holder.full_rate.setText(dollar + fullRateStr);
+				 holder.full_rate.setVisibility(View.VISIBLE);
+				 holder.full_rate_nights.setVisibility(View.VISIBLE);
+				 holder.promo_rate.setText(dollar + promoRateStr);
+			 }
+			 else {
+				 holder.full_rate.setVisibility(View.GONE);
+				 holder.full_rate_nights.setVisibility(View.GONE);
+				 holder.promo_rate.setText(dollar+fullRateStr);
+				 
+			 }
 		 }
 		 else
 		 {
-			 holder.rate.setText("NA");
+			 holder.full_rate.setVisibility(View.GONE);
+			 holder.promo_rate.setText("NA");
 		 }
 		 
 		 holder.details.setText(mHotel.mSummary.roomDetails[holder.roomIndex].mPromoDescription);
@@ -113,8 +126,10 @@ public class RoomListAdapter extends BaseAdapter {
 
 	static class ViewHolder
 	{
+		TextView full_rate_nights;
 		TextView promo;
-		TextView rate;
+		TextView full_rate;
+		TextView promo_rate;
 		TextView details;
 		int roomIndex;
 	}
