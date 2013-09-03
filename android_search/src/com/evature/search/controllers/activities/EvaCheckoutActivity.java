@@ -1,18 +1,14 @@
 package com.evature.search.controllers.activities;
 
 import roboguice.activity.RoboFragmentActivity;
-
-import com.evature.search.R;
-import com.evature.search.R.id;
-import com.evature.search.R.layout;
-import com.evature.search.views.fragments.CalendarFragment;
-import com.evature.search.views.fragments.RoomsSelectFragement;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+
+import com.evature.search.R;
+import com.evature.search.views.fragments.CalendarFragment;
+import com.evature.search.views.fragments.RoomsSelectFragement;
 
 public class EvaCheckoutActivity extends RoboFragmentActivity{
 	

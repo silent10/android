@@ -13,7 +13,7 @@ public class ChargeableRateInfo {
 	private double mSurchargeTotal;
 	private double mNightlyRateTotal;
 	public double mAverageBaseRate;
-	private double mAverageRate;
+	public double mAverageRate;
 	private double mMaxNightlyRate;
 	public String mCurrencyCode;	
 	private NightlyRate[] mNightlyRatesPerRoom;

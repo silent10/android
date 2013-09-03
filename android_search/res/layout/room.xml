@@ -3,6 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
+  android:background="@color/white"
   android:descendantFocusability="blocksDescendants">
 
     <RelativeLayout
@@ -16,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:text="TextView"
+            android:text="Room Name"
             android:textColor="#FF000000"
             android:textSize="16dip"
             android:ellipsize="marquee"
@@ -34,21 +35,38 @@
             android:orientation="horizontal" >
 
             <TextView
-                android:id="@+id/rate"
+                android:id="@+id/full_rate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView"
+                android:text="Rate"
+                android:textColor="#FF7777CC"
+                android:textSize="18dip" />
+
+            <TextView
+                android:id="@+id/per_night_full"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/night   ⇢  "
+                android:textColor="#ff000000"
+                android:textSize="14dip" />
+
+                  <TextView
+                android:id="@+id/promo_rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rate"
                 android:textColor="#FF0000FF"
                 android:textSize="24dip" />
 
             <TextView
-                android:id="@+id/perNightTitle"
+                android:id="@+id/per_night_promo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="/night"
                 android:textColor="#ff000000"
-                android:textSize="12dip" />
-        </LinearLayout>
+                android:textSize="14dip" />
+            
+           </LinearLayout>
 
         <TextView
             android:id="@+id/details"
@@ -56,7 +74,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/linearLayout1"
-            android:text="TextView" android:textColor="#222222"/>
+            android:text="Details" 
+            android:textColor="#222222"/>
 
     </RelativeLayout>
 
