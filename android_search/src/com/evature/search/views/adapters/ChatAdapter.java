@@ -116,10 +116,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				label.setTypeface(null, Typeface.NORMAL);
 			}
 			break;
-		}
-		
-		
-		if (viewType == ChatType.Me) {
+			
+		case Me:
 			TextView icon = (TextView)row.findViewById(R.id.icon);
 			if (chatItem.isInSession()) {
 				row.setBackgroundColor(myChatInSessionBg);
@@ -131,8 +129,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				label.setTextColor(myChatNoSessionText);
 				icon.setTextColor(myChatNoSessionText);
 			}
-		}
-		else {
+			break;
+			
+		default:
 			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
 			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
 			progress.setVisibility(View.GONE);

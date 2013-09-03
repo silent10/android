@@ -9,13 +9,16 @@ import org.json.JSONObject;
 import roboguice.util.Ln;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 
 
 public class EvaXpediaDatabase {
 
 	// Indicator for printing stack trace (in a result of 77 hotels it can save up to 3 seconds)
-	public static final boolean PRINT_STACKTRACE = false;
+	public static final boolean PRINT_STACKTRACE = true;
+
+	private static final String TAG = "EvaXpediaDatabase";
 	
 	String mCustomerSessionId;
 	int mNumberOfRoomsRequested;
@@ -30,12 +33,19 @@ public class EvaXpediaDatabase {
 	public static double getSafeDouble(JSONObject obj,String name)
 	{
 		double retVal;
-		try {
-			retVal = obj.getDouble(name);
-		} catch (JSONException e) {
+		if (obj.has(name)) {
+			try {
+				retVal = obj.getDouble(name);
+			} catch (JSONException e) {
+				retVal = -1;
+				Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
+				if (PRINT_STACKTRACE)
+					e.printStackTrace();
+			}
+		}
+		else {
 			retVal = -1;
-			if (PRINT_STACKTRACE)
-				e.printStackTrace();
+			Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
 		}
 		return retVal;
 	}
@@ -44,16 +54,23 @@ public class EvaXpediaDatabase {
 	public static String getSafeString(JSONObject obj,String name)
 	{
 		String retVal=null;
-		try {
-			retVal = obj.getString(name);
-		} catch (JSONException e) {
-			retVal = null;
-			if (PRINT_STACKTRACE)
+		if (obj.has(name)) {
+			try {
+				retVal = obj.getString(name);
+			} catch (JSONException e) {
+				Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
+				if (PRINT_STACKTRACE)
+					e.printStackTrace();
+			}
+			catch(OutOfMemoryError e)
+			{
+				Log.w(TAG, "Out of memory error: "+name);
 				e.printStackTrace();
+			}
 		}
-		catch(OutOfMemoryError e)
-		{
-			e.printStackTrace();
+		else {
+			Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
+			Log.d(TAG, "");
 		}
 		return retVal;
 	}
@@ -61,12 +78,19 @@ public class EvaXpediaDatabase {
 	public static int getSafeInt(JSONObject obj,String name)
 	{
 		int retVal;
-		try {
-			retVal = obj.getInt(name);
-		} catch (JSONException e) {
+		if (obj.has(name)) {
+			try {
+				retVal = obj.getInt(name);
+			} catch (JSONException e) {
+				retVal = -1;
+				Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
+				if (PRINT_STACKTRACE)
+					e.printStackTrace();
+			}
+		}
+		else {
+			Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
 			retVal = -1;
-			if (PRINT_STACKTRACE)
-				e.printStackTrace();
 		}
 		return retVal;
 	}
@@ -74,13 +98,21 @@ public class EvaXpediaDatabase {
 	public static boolean getSafeBool(JSONObject obj,String name)
 	{
 		boolean retVal;
-		try {
-			retVal = obj.getBoolean(name);
-		} catch (JSONException e) {
-			retVal = false;
-			if (PRINT_STACKTRACE)
-				e.printStackTrace();
+		if (obj.has(name)) {
+			try {
+				retVal = obj.getBoolean(name);
+			} catch (JSONException e) {
+				retVal = false;
+				Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
+				if (PRINT_STACKTRACE)
+					e.printStackTrace();
+			}
 		}
+		else {
+			retVal = false;
+			Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
+		}
+			
 		return retVal;
 	}
 

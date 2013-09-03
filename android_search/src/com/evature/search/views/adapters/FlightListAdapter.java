@@ -86,94 +86,73 @@ public class FlightListAdapter extends BaseAdapter {
 
 	@Override   // TODO: reuse views
 	public View getView(int position, View convertView, ViewGroup parent) {
+		
 		BookingSolution solution = journeys.mOneWayJourneys.get(position).mBookingSolutions[0];
-		View row = mInflater.inflate(R.layout.flight_list_item, parent, false);
+		ViewHolder holder;		
+		if (convertView == null) 
+		{
+			convertView  = mInflater.inflate(R.layout.flight_list_item_vayant, parent, false);
+			holder = new ViewHolder();
+			 
+			holder.logo = (ImageView) convertView.findViewById(R.id.airline_logo);
+			holder.airline =  (TextView) convertView.findViewById(R.id.airline_text);
+			holder.departure = (TextView) convertView.findViewById(R.id.itinerary_view_departure_time);
+			holder.arrival = (TextView) convertView.findViewById(R.id.itinerary_view_arrival_time);
+			holder.rate = (TextView) convertView.findViewById(R.id.itinerary_view_price);
+			convertView.setTag(holder);				 						 				 				 
+		} else {
+			holder = (ViewHolder) convertView.getTag();
+		}
+		
 
 		// TextView label = (TextView) row.findViewById(R.id.price);
 		// label.setText("$" + String.valueOf(solution.mPrice) + " ");
 
-		LinearLayout linearLayout = (LinearLayout) row.findViewById(R.id.flight_list_item_layout);
 		int segmentCount = 1;
 		//for (Segment segment : solution.mSegments) {
 		Segment segment = solution.mSegments.get(0);
 		
-			View child = mInflater.inflate(R.layout.flight_list_item_vayant, null);
+		// TextView stops_count = (TextView) child.findViewById(R.id.itinerary_view_stops_count);
+		// stops_count.setText(segment.isDirect() ? "Direct" : "Not Direct");
 
-			// TextView stops_count = (TextView) child.findViewById(R.id.itinerary_view_stops_count);
-			// stops_count.setText(segment.isDirect() ? "Direct" : "Not Direct");
-
-			TextView departure_time = (TextView) child.findViewById(R.id.itinerary_view_departure_time);
-			Date departureDateTime = segment.flights.get(0).departureDateTime;
-			String departureTime = dateFormatter.format(departureDateTime);
+		Date departureDateTime = segment.flights.get(0).departureDateTime;
+		String departureTime = dateFormatter.format(departureDateTime);
 //			String departureTime = String.format("%1$d:%2$02d", departureDateTime.getHours(), departureDateTime.getMinutes());
-			departure_time.setText(departureTime + " " + segment.flights.get(0).origin);
-			
-			TextView arrival_time = (TextView) child.findViewById(R.id.itinerary_view_arrival_time);
-			Flight flight = segment.flights.get(segment.flights.size() - 1);
-			Date arrivalDateTime = flight.arrivalDateTime;
-			String ArrivalTime = dateFormatter.format(arrivalDateTime); //String.format("%1$d:%2$02d", arrivalDateTime.getHours(), arrivalDateTime.getMinutes());
-			arrival_time.setText(ArrivalTime + " " + flight.destination);
+		holder.departure.setText(departureTime + " " + segment.flights.get(0).origin);
+		
+		Flight flight = segment.flights.get(segment.flights.size() - 1);
+		Date arrivalDateTime = flight.arrivalDateTime;
+		String ArrivalTime = dateFormatter.format(arrivalDateTime); //String.format("%1$d:%2$02d", arrivalDateTime.getHours(), arrivalDateTime.getMinutes());
+		holder.arrival.setText(ArrivalTime + " " + flight.destination);
 
-			String airlineCode = segment.flights.get(0).marketingCarrier.toUpperCase(Locale.US);
-			ImageView logoImg = (ImageView) child.findViewById(R.id.airline_logo);
-			TextView airline = (TextView) child.findViewById(R.id.airline_text);
-			if (airlineLogos.containsKey(airlineCode)) {
-				airline.setVisibility(View.GONE);
-				logoImg.setImageResource(airlineLogos.get(airlineCode));
-				logoImg.setVisibility(View.VISIBLE);
-			}
-			else {
-				logoImg.setVisibility(View.GONE);
-				airline.setText(airlineCode);
-				airline.setVisibility(View.VISIBLE);
-			}
-			
-			TextView price = (TextView) child.findViewById(R.id.itinerary_view_price);
-			price.setText( String.format("%1$,.2f %2$s", solution.mOutboundPrice, solution.mCurrency.equals("USD") ? "$" : solution.mCurrency));
-			
-			linearLayout.addView(child);
-			//Log.d(TAG, "getView position "+String.valueOf(position)+" adding view for segment "+(segmentCount++));
+		String airlineCode = segment.flights.get(0).marketingCarrier.toUpperCase(Locale.US);
+		if (airlineLogos.containsKey(airlineCode)) {
+			holder.airline.setVisibility(View.GONE);
+			holder.logo.setImageResource(airlineLogos.get(airlineCode));
+			holder.logo.setVisibility(View.VISIBLE);
+		}
+		else {
+			holder.logo.setVisibility(View.GONE);
+			holder.airline.setText(airlineCode);
+			holder.airline.setVisibility(View.VISIBLE);
+		}
+		
+		holder.rate.setText( String.format("%1$,.2f %2$s", solution.mOutboundPrice, solution.mCurrency.equals("USD") ? "$" : solution.mCurrency));
+		
+//		holder.layout.addView(child);
+		//Log.d(TAG, "getView position "+String.valueOf(position)+" adding view for segment "+(segmentCount++));
 		//}
-		return (row);
+		return (convertView);
 
-		// ViewHolder holder;
-		// if (convertView == null) {
-		// convertView = mInflater.inflate(R.layout.flight_list_item, null);
-		// holder = new ViewHolder();
-		// holder.origin = (TextView) convertView.findViewById(R.id.vayant_list_origin);
-		// } else {
-		// holder = (ViewHolder) convertView.getTag();
-		// }
-		//
-		// holder.index = position;
-		// Spanned spannedName = Html.fromHtml("123123");
-		// String name = spannedName.toString();
-		// ((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-		// holder.name.setText(name);
-		// holder.origin.setText("123");
-		// // Format price
-		// DecimalFormat rateFormat = new DecimalFormat("#.00");
-		// if (position < journeys.mJourneys.length) {
-		// BookingSolution booking_solution = journeys.mJourneys[position].mBookingSolutions[0];
-		// String formattedRate = rateFormat.format(booking_solution.mPrice);
-		// String rate = "$" + formattedRate;
-		// holder.rate.setText(rate);
-		// }
-		// // S3DrawableBackgroundLoader.getInstance().loadDrawable(
-		// // "http://images.travelnow.com" + holder.hotel.mSummary.mThumbNailUrl, holder.image, mEvaHotelIcon);
-		// // holder.layout.setOnClickListener(mParent);
-		// return convertView;
 	}
 
 	public static class ViewHolder {
 		public LinearLayout layout;
-		// ImageView image;
-		TextView name;
-		TextView origin;
+		ImageView logo;
+		TextView airline;
+		TextView departure;
+		TextView arrival;
 		TextView rate;
-		// TextView distance;
-		// RatingBar rating;
-		int index;
 	}
 
 }

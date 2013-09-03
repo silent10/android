@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 	}
 
 	private static final String HOTEL_INDEX = "HotelIndex";
+	private static final String TAG = "RoomsSelectFragement";
 	private View mView;
 	private ImageView mHotelImage;
 	private TextView mHotelName;
@@ -186,9 +188,10 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 					MyApplication.getDb().mNumberOfAdultsParam,
 					mHotelData.mSummary.mCurrentRoomDetails.mRateKey);
 			//String url = mHotelData.mSummary.roomDetails[arg2].mDeepLink;
-			String s = Html.fromHtml(newUrl).toString();
+			Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());
 			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(Uri.parse(s));
+			i.setData(uri);
+			Log.i(TAG, "Setting Browser to url:  "+uri);
 			startActivity(i);
 
 		}

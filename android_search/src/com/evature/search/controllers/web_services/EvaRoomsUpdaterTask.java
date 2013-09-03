@@ -1,7 +1,5 @@
 package com.evature.search.controllers.web_services;
 
-import android.support.v4.app.Fragment;
-
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
@@ -26,11 +24,7 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 		super.onPostExecute(result);
 	}
 
-
-
-	
-	
-		@Override
+	@Override
 	protected String doInBackground(Void... params) {
 		String str= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
 				MyApplication.getDb().mArrivalDateParam,
