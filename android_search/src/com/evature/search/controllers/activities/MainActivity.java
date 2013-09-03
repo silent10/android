@@ -546,36 +546,25 @@ public class MainActivity extends EvaBaseActivity implements
 
 	public void setVayantReply(String response) {
 		setDebugData(DebugTextType.VayantDebug, response);
-		String tabName = getString(R.string.FLIGHTS);
+		showTab(R.string.FLIGHTS);
+	}
+	
+	private int showTab(int tabNameId) {
+		String tabName = getString(tabNameId);
 		int index = mTabTitles.indexOf(tabName);
 		if (index == -1) {
 			mSwipeyAdapter.addTab(tabName);
 			index = mTabTitles.size() - 1;
 		}
 		mSwipeyAdapter.stuffChanged(index);
-		// get the fragment: http://stackoverflow.com/a/7393477/78234
-//		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
-//		FlightsFragment fragment = (FlightsFragment) getSupportFragmentManager().findFragmentByTag(tag);
-//		if (fragment != null) // could be null if not instantiated yet
-//		{
-//			fragment.getAdapter().notifyDataSetChanged();
-//		} else {
-//			Log.e(TAG, "Flights fragment == null!?!");
-//		}
-//		
 		mViewPager.setCurrentItem(index, true);
+		return index;
 	}
 
 	public void setTravelportReply(boolean train) {
 		// get the fragment: http://stackoverflow.com/a/7393477/78234
 		int string_id = train ? R.string.TRAINS : R.string.FLIGHTS;
-		String tabName = getString(string_id);
-		int index = mTabTitles.indexOf(tabName);
-		if (index == -1) {
-			mSwipeyAdapter.addTab(tabName);
-			index = mTabTitles.size() - 1;
-		}
-		mViewPager.setCurrentItem(index, true);
+		int index = showTab(string_id);
 		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
 		if (train) {
 			TrainsFragment fragment = (TrainsFragment) getSupportFragmentManager().findFragmentByTag(tag);
@@ -732,7 +721,7 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 
 		mHotelDownloader = new EvaHotelDownloaderTask(this, hotelIndex);
-
+		this.endProgressDialog(R.string.HOTEL, "fake response");
 		mHotelDownloader.execute();
 
 	}
@@ -1065,14 +1054,15 @@ public class MainActivity extends EvaBaseActivity implements
 	 * Start new session from menu item 
 	 */
 	private void startNewSession() {
-		if (isNewSession() == false) {
+//		if (isNewSession() == false) {
+			showTab(R.string.CHAT);
 			addChatItem(new ChatItem("Start new search"));
 			resetSession();
 			String sessionText = "Starting a new search. How may I help you?";
 			addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
 			speak(sessionText);
 
-		}
+//		}
 	}
 	
 	@Inject private ChatItemList mChatListModel;

@@ -4,9 +4,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 
 public class HotelSummary {
 	
+	private static final String TAG = "HotelSummary";
 	public int mHotelId;
 	public String mName;
 	String mAddress1;
@@ -76,14 +79,11 @@ public class HotelSummary {
 		{
 			jRoomDetailsList = jHotel.getJSONObject("RoomRateDetailsList");
 
-			int size = EvaXpediaDatabase.getSafeInt(jRoomDetailsList,"size");
-
-			if(size==-1) size = 1;
-
-			roomDetails = new RoomDetails[size];
-
 			JSONArray jRoomDetalisArray = jRoomDetailsList.getJSONArray("RoomRateDetails");
-			for(int i=0; i<size; i++)
+
+			roomDetails = new RoomDetails[jRoomDetalisArray.length()];
+
+			for(int i=0; i<jRoomDetalisArray.length(); i++)
 			{
 				jRoomDetails = jRoomDetalisArray.getJSONObject(i);
 				roomDetails[i] = new RoomDetails(jRoomDetails);
@@ -108,6 +108,12 @@ public class HotelSummary {
 						
 			JSONObject jServerResponseData = jServerResponse.getJSONObject("HotelRoomAvailabilityResponse");
 
+			if (jServerResponseData.has("EanWsError")) {
+				Log.w(TAG, "There was an error getting hotel details");
+				Log.w(TAG, jServerResponseData.getJSONObject("EanWsError").toString(4));
+				return;
+			}
+			
 			mCurrentRoomDetails = new CurrentRoomDetails();
 			
 			mCurrentRoomDetails.mRateKey = EvaXpediaDatabase.getSafeString(jServerResponseData, "rateKey");

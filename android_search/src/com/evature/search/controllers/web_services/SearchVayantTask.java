@@ -115,11 +115,10 @@ public class SearchVayantTask extends EvaDownloaderTask {
 		// Read from web: http://stackoverflow.com/a/1381784/78234
 		Reader r = new InputStreamReader(conn.getInputStream(), "UTF-8");
 		StringBuilder buf = new StringBuilder();
-		while (true) {
-			int ch = r.read();
-			if (ch < 0)
-				break;
-			buf.append((char) ch);
+		char[] sBuffer = new char[512];
+		int readBytes = 0;
+		while ((readBytes = r.read(sBuffer)) != -1) {
+			buf.append(sBuffer, 0, readBytes);
 		}
 		String str = buf.toString();
 		Log.d(TAG, "Response read "+str.length()+" chars");
@@ -133,6 +132,7 @@ public class SearchVayantTask extends EvaDownloaderTask {
 			VayantJourneys journeys = null;
 			try {
 				vayantReply = new JSONObject(result);
+				result = vayantReply.toString(2);
 				journeys = new VayantJourneys(vayantReply.getJSONArray("Journeys"));
 				MyApplication.getJourneyDb().mJourneys = journeys;
 				Log.d(TAG, "JSON parsed");

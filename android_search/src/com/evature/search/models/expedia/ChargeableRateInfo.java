@@ -9,7 +9,7 @@ import org.json.JSONObject;
 public class ChargeableRateInfo {
 
 	private double mCommissionableUsdTotal;
-	private double mTotal;
+	public double mTotal;
 	private double mSurchargeTotal;
 	private double mNightlyRateTotal;
 	public double mAverageBaseRate;
@@ -20,12 +20,12 @@ public class ChargeableRateInfo {
 	private Surcharge[] mSurcharges;
 
 	public ChargeableRateInfo(JSONObject jChargeableRateInfo) {
-		mCommissionableUsdTotal= EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"commissionableUsdTotal");
-		mTotal = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"total");
-		mSurchargeTotal = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"surchargeTotal");
-		mNightlyRateTotal = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"nightlyRateTotal");
+		mCommissionableUsdTotal= EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@commissionableUsdTotal");
+		mTotal = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@total");
+		mSurchargeTotal = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@surchargeTotal");
+		mNightlyRateTotal = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@nightlyRateTotal");
 		mAverageBaseRate = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@averageBaseRate");
-		mAverageRate = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"averageRate");
+		mAverageRate = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@averageRate");
 		mMaxNightlyRate = EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@maxNightlyRate");
 		mCurrencyCode = EvaXpediaDatabase.getSafeString(jChargeableRateInfo,"@currencyCode");
 		
@@ -71,7 +71,7 @@ public class ChargeableRateInfo {
 		try {
 			JSONObject jSurcharges = jChargeableRateInfo.getJSONObject("Surcharges");
 			
-			int size = EvaXpediaDatabase.getSafeInt(jSurcharges,"size");
+			int size = EvaXpediaDatabase.getSafeInt(jSurcharges,"@size");
 			
 			if(size==-1)
 			{

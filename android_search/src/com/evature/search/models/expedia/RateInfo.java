@@ -13,9 +13,9 @@ public class RateInfo {
 	public ChargeableRateInfo mChargableRateInfo;
 
 	public RateInfo(JSONObject jRateInfo) {
-		mRateChange = EvaXpediaDatabase.getSafeBool(jRateInfo,"rateChange");
-		mPromo = EvaXpediaDatabase.getSafeBool(jRateInfo,"promo");
-		mPriceBreakdown = EvaXpediaDatabase.getSafeBool(jRateInfo,"priceBreakdown");
+		mRateChange = EvaXpediaDatabase.getSafeBool(jRateInfo,"@rateChange");
+		mPromo = EvaXpediaDatabase.getSafeBool(jRateInfo,"@promo");
+		mPriceBreakdown = EvaXpediaDatabase.getSafeBool(jRateInfo,"@priceBreakdown");
 		
 		try {
 			JSONObject jChargeableRateInfo = jRateInfo.getJSONObject("ChargeableRateInfo");
