@@ -64,11 +64,22 @@
         <item >17</item>
         <item >18</item>
     </string-array>
+    
+    <string-array name="entries_vr_service">
+        <item>None</item>
+        <item>Ginger</item>
+        <item>Google</item>
+    </string-array>
+    <string-array name="entryvalues_vr_service">
+        <item>none</item>
+        <item>ginger_streaming</item>
+        <item>google_streaming</item>
+    </string-array>
    
    <string-array name="locales">
         <item>US style -\n 10/3/2014 is October 3rd\n weekend is Sat-Sun</item>
         <item>UK style -\n 10/3/2014 is March 10th\n weekend is Sat-Sun</item>
-        <item>IL style -\n 10/3/2010 is March 10th\n weekend is Fri-Sat</item>
+        <item>IL style -\n 10/3/2014 is March 10th\n weekend is Fri-Sat</item>
     </string-array>
     <string-array name="locale_values">
         <item>US</item>

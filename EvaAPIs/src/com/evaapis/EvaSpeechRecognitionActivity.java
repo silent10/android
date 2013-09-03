@@ -190,6 +190,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		String siteCode = EvaAPIs.SITE_CODE;
 		String locale = EvaAPIs.locale;
 		String language = intent.getStringExtra("language");
+		String vrService = intent.getStringExtra("vr_service");
 
 		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 		String deviceId=telephonyManager.getDeviceId();
@@ -201,7 +202,7 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
 			mSpeechAudioStreamer = new SpeechAudioStreamer(this, SAMPLE_RATE);
-			mVoiceClient = new EvaVoiceClient(this, siteCode, appKey, deviceId, sessionId, locale, language, mSpeechAudioStreamer);
+			mVoiceClient = new EvaVoiceClient(this, siteCode, appKey, deviceId, sessionId, locale, language, vrService, mSpeechAudioStreamer);
 			mSpeechAudioStreamer.initRecorder();
 			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
 			dictationTask.execute((Object[])null);

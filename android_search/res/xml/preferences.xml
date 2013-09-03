@@ -33,6 +33,13 @@
             android:key="debug"
             android:summary="@string/summary_parent_preference"
             android:title="@string/title_debug_parent_preference" />
+        <ListPreference 
+            android:key="vr_service"
+            android:title="Preferred VProxy service"
+            android:summary="Backend of Voice Recognition"
+            android:entries="@array/entries_vr_service"
+            android:entryValues="@array/entryvalues_vr_service"
+            />
         <CheckBoxPreference
             android:key="save_pcm"
             android:summary="@string/save_recording_pcm_file_wav_"

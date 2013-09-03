@@ -48,8 +48,6 @@ public class EvaVoiceClient {
 
 	private static final String TAG = "EvaVoiceClient";
 
-	private static final boolean LOCAL_DEBUG = false;
-	
 	private String mSiteCode = "UNKNOWN";
 	private String mAppKey = "UNKNOWN";
     private String mDeviceId = "0000";
@@ -80,12 +78,15 @@ public class EvaVoiceClient {
 
 	private String mLocale;
 	private String mLanguage;
+	private String mVrService;
 
 	private Context mContext;
 
 
+
 	public EvaVoiceClient(Context context,
-			String siteCode, String appKey, String deviceId, String sessionId, String locale, String language, 
+			String siteCode, String appKey, String deviceId, String sessionId, 
+			String locale, String language, String vrService, 
 			SpeechAudioStreamer speechAudioStreamer) {
 		mSiteCode = siteCode;
 		mAppKey = appKey;
@@ -94,6 +95,7 @@ public class EvaVoiceClient {
 		mLocale = locale;
 		mLanguage = language;
 		mContext = context;
+		mVrService = "none".equals(vrService) ? null : vrService;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
@@ -130,17 +132,8 @@ public class EvaVoiceClient {
 	{
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 
-		if (LOCAL_DEBUG) {
-//			qparams.add(new BasicNameValuePair("site_code", "concur_m"));
-//			qparams.add(new BasicNameValuePair("api_key", "0585a2f5-9d6c-41a4-981a-842fc791b5dc"));
-			qparams.add(new BasicNameValuePair("site_code", mSiteCode));
-			qparams.add(new BasicNameValuePair("api_key", mAppKey));
-			qparams.add(new BasicNameValuePair("vr_service", "ginger_streaming"));
-		}
-		else {
-			qparams.add(new BasicNameValuePair("site_code", mSiteCode));
-			qparams.add(new BasicNameValuePair("api_key", mAppKey));
-		}
+		qparams.add(new BasicNameValuePair("site_code", mSiteCode));
+		qparams.add(new BasicNameValuePair("api_key", mAppKey));
 		qparams.add(new BasicNameValuePair("uid",  mDeviceId));
 		qparams.add(new BasicNameValuePair("session_id", mSessionId));
 		try {
@@ -152,6 +145,10 @@ public class EvaVoiceClient {
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
+		}
+		
+		if (mVrService != null) {
+			qparams.add(new BasicNameValuePair("vr_service", mVrService));
 		}
 		
 		if (mLanguage != null) {

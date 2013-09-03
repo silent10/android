@@ -37,6 +37,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity
 	protected static final String DEBUG_PREF_KEY = "debug";
 	protected static final String LOCALE_PREF_KEY = "preference_locale";
 	protected static final String LANG_PREF_KEY = "preference_language";
+	protected static final String VRSERV_PREF_KEY = "vr_service";
 
 	
 	@Inject protected Injector injector;
@@ -49,6 +50,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity
 
 	@Inject protected EventManager eventManager;
 	protected boolean mDebug;
+	protected String mVrService;
 	private long startOfTextSearch;
 
 	protected void speak(String sayIt) {
@@ -115,6 +117,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity
 			ActivityCompat.invalidateOptionsMenu(this);
 		}
 		mDebug = sharedPreferences.getBoolean(DEBUG_PREF_KEY, false);
+		mVrService = sharedPreferences.getString(VRSERV_PREF_KEY, "none");
 
 		String oldLanguage = mPreferedLanguage;
 		mPreferedLanguage = sharedPreferences.getString(LANG_PREF_KEY, "en");
@@ -194,6 +197,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 		mDebug = sharedPreferences.getBoolean(DEBUG_PREF_KEY, false);
+		mVrService = sharedPreferences.getString(VRSERV_PREF_KEY, "none"); 
 		mLastLanguageUsed = mPreferedLanguage = sharedPreferences.getString(LANG_PREF_KEY, "en");
 
 		if (mTts == null)
@@ -218,6 +222,7 @@ abstract public class EvaBaseActivity extends RoboFragmentActivity
 		intent.putExtra("SessionId", mSessionId);
 		intent.putExtra("debug", mDebug);
 		intent.putExtra("language", mPreferedLanguage);
+		intent.putExtra("vr_service", mVrService);
 		startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
 
 	}

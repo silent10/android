@@ -80,6 +80,16 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 
 				if (selDate != null)
 				{
+					if (selDate[0] != null && selDate[1] != null && selDate[1].month <= selDate[0].month && selDate[1].day <= selDate[0].day  && selDate[1].year <= selDate[0].year) {
+						// selDate[1] must be at least one day after selDate[0]
+						Calendar calendar = Calendar.getInstance();
+						calendar.set(selDate[0].year, selDate[0].month, selDate[0].day);
+						calendar.add(Calendar.DAY_OF_MONTH, 1);
+						selDate[1] = new SimpleDate( calendar.get(Calendar.YEAR), 
+													 calendar.get(Calendar.MONTH),
+													 calendar.get(Calendar.DAY_OF_MONTH));
+						
+					}
 					if (selDate[0] != null)
 						dateArrival += selDate[0].month + "/" + selDate[0].day + "/" + selDate[0].year;
 					if (selDate[1] != null)
@@ -93,7 +103,6 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 				db.setNumberOfAdults(intNumAdults);
 
 				mRoomsUpdater = new EvaRoomsUpdaterTask(CalendarFragment.this, mEvaCheckoutActivity.getHotelIndex());
-
 				mRoomsUpdater.execute();
 
 			}
@@ -115,9 +124,6 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 		if(mRoomsUpdater!=null)
 		{
 			mRoomsUpdater.attach(this);
-			mProgressDialog = ProgressDialog.show(getActivity(),
-					"Getting Room Availability", "Contacting search server", true,
-					false); 
 		}
 
 		return mView;
@@ -137,7 +143,7 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 			mProgressDialog.dismiss();
 			mEvaCheckoutActivity.selectRoom();
 		}
-		
+		mRoomsUpdater = null;
 	}
 
 	@Override
@@ -170,25 +176,3 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 }
 
 
-/*
-@Override
-public void endProgressDialog() {
-	
-}
-
-@Override
-public void startProgressDialog() {
-	
-}
-
-@Override
-public void endProgressDialogWithError() {
-
-	
-}
-
-@Override
-public void updateProgress(int mProgress) {
-	// TODO Auto-generated method stub
-
-}*/
