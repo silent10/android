@@ -10,7 +10,6 @@ import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -18,7 +17,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
@@ -42,6 +40,7 @@ public class XpediaProtocolStatic {
 	private final static String TAG = XpediaProtocolStatic.class.getSimpleName();
 	private static String minorRev = "16";
 
+	private static final boolean PRINT_RESPONSES = true;
 	/**
 	 * {@link StatusLine} HTTP status code when no server error has occurred.
 	 */
@@ -147,7 +146,6 @@ public class XpediaProtocolStatic {
 			latitude = 10000;
 		}
 
-		byte[] sBuffer = new byte[512];
 		String params = "";
 
 		if ((apiReply.ean == null) || !apiReply.ean.containsKey("latitude") || !apiReply.ean.containsKey("longitude")) {
@@ -257,12 +255,22 @@ public class XpediaProtocolStatic {
 			}
 
 			// Return result from buffered stream
-			return new String(content.toByteArray());
+			String result = new String(content.toByteArray());
+			if (PRINT_RESPONSES) {
+				try {
+					Log.d(TAG, new JSONObject(result).toString(2));
+				}
+				catch (JSONException e) {
+					Log.w(TAG, "Not json object?");
+					Log.d(TAG, result);
+				}
+			}
+			return result;
 		}
 		catch(IOException e) {
 			Log.e(TAG, "Problem communicating with API", e);
 			return null;
-		}
+		} 
 	}
 
 	public static String getRoomInformationForHotel(int hotelId, String arrivalDateParam, String departureDateParam,

@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +35,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+
+import roboguice.util.Ln;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -179,7 +180,7 @@ public class EvaVoiceClient {
 		httppost.addHeader("Content-Language", LANGUAGE);
 		httppost.addHeader("Accept-Language", LANGUAGE);
 		httppost.addHeader("Accept", RESULTS_FORMAT);
-		//httppost.addHeader("Accept-Encoding","gzip");
+		httppost.addHeader("Accept-Encoding","gzip");
 
 		return httppost;
 	}
@@ -250,6 +251,7 @@ public class EvaVoiceClient {
 		InputStream is = resEntity.getContent();
 		Header contentEncoding = response.getFirstHeader("Content-Encoding");
 		if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+			Ln.d(TAG, "gzip encoded vproxy result");
 			is = new GZIPInputStream(is);
 		}
 

@@ -38,13 +38,11 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
@@ -57,12 +55,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
-import com.evaapis.EvaDialog.DialogElement;
 import com.evaapis.EvaWarning;
 import com.evaapis.events.NewSessionStarted;
 import com.evaapis.flow.FlowElement;
@@ -78,7 +76,6 @@ import com.evature.search.controllers.web_services.EvaHotelDownloaderTask;
 import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.controllers.web_services.SearchTravelportTask;
 import com.evature.search.controllers.web_services.SearchVayantTask;
-import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItem.Status;
@@ -228,6 +225,7 @@ public class MainActivity extends EvaBaseActivity implements
 			mViewPager.setOnPageChangeListener(this);
 			this.mContext = context;
 		}
+		
 
 		@Override
 		public Fragment getItem(int position) {// Asks for the main fragment
@@ -320,12 +318,12 @@ public class MainActivity extends EvaBaseActivity implements
 			return view;
 		}
 		
-//		@Override
-//		public Object instantiateItem(ViewGroup container, int position) {
-//			Object item = super.instantiateItem(container, position);
-//			this.finishUpdate(container);
-//			return item;
-//		}
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+			Object item = super.instantiateItem(container, position);
+			this.finishUpdate(container);
+			return item;
+		}
 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
