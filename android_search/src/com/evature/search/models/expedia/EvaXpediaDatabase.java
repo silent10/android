@@ -135,7 +135,7 @@ public class EvaXpediaDatabase {
 			responseObject = responseObject.getJSONObject("HotelList");
 
 			int size = getSafeInt(responseObject, "@size");
-//			Ln.d("Hotel List Response:  size=%s  cahceKey=%s  moreAvail=%s  location=%s", size, mCacheKey, mMoreResultsAvailable, mCacheLocation);
+			Ln.d("Hotel List Response:  size=%s  cahceKey=%s  moreAvail=%s  location=%s", size, mCacheKey, mMoreResultsAvailable, mCacheLocation);
 
 			if(size==-1)
 			{

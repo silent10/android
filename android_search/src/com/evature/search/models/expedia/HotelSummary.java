@@ -13,7 +13,6 @@ public class HotelSummary {
 	public int mHotelId;
 	public String mName;
 	String mAddress1;
-	String mAddress2;
 	public String mCity;
 	String mPostalCode;
 	public String mCountryCode;
@@ -53,7 +52,6 @@ public class HotelSummary {
 		mThumbNailUrl = EvaXpediaDatabase.getSafeString(jHotel,"thumbNailUrl");
 
 		mAddress1 = EvaXpediaDatabase.getSafeString(jHotel,"address1");
-		mAddress2 = EvaXpediaDatabase.getSafeString(jHotel,"address2");
 		mCity = EvaXpediaDatabase.getSafeString(jHotel,"city");
 		mPostalCode = EvaXpediaDatabase.getSafeString(jHotel,"postalCode");
 		mCountryCode = EvaXpediaDatabase.getSafeString(jHotel,"countryCode");
@@ -78,21 +76,32 @@ public class HotelSummary {
 		try 
 		{
 			jRoomDetailsList = jHotel.getJSONObject("RoomRateDetailsList");
-
-			JSONArray jRoomDetalisArray = jRoomDetailsList.getJSONArray("RoomRateDetails");
-
-			roomDetails = new RoomDetails[jRoomDetalisArray.length()];
-
-			for(int i=0; i<jRoomDetalisArray.length(); i++)
-			{
-				jRoomDetails = jRoomDetalisArray.getJSONObject(i);
-				roomDetails[i] = new RoomDetails(jRoomDetails);
+			
+			try {
+				JSONArray jRoomDetailsArray = jRoomDetailsList.getJSONArray("RoomRateDetails");
+	
+				roomDetails = new RoomDetails[jRoomDetailsArray.length()];
+	
+				for(int i=0; i<jRoomDetailsArray.length(); i++)
+				{
+					jRoomDetails = jRoomDetailsArray.getJSONObject(i);
+					roomDetails[i] = new RoomDetails(jRoomDetails);
+				}
+	
+	
+			} catch (JSONException e) {
+				try {
+					JSONObject jRoomDetailsObj = jRoomDetailsList.getJSONObject("RoomRateDetails");
+					roomDetails = new RoomDetails[1];
+					roomDetails[0] = new RoomDetails(jRoomDetailsObj);
+				} catch (JSONException e2) {
+					Log.e(TAG, "Json Exception getting RoomRateDetails", e2);
+					return;
+				}
 			}
-
-
-		} catch (JSONException e) {
-			if (EvaXpediaDatabase.PRINT_STACKTRACE)
-				e.printStackTrace();
+		}
+		catch (JSONException e2) {
+			Log.e(TAG, "Json Exception getting RoomRateDetailsList", e2);
 			return;
 		}
 	}
