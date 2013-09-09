@@ -32,58 +32,58 @@ public class RoomDetails {
 
 	public RoomDetails(JSONObject jsonObject) {
 		
-			mRoomTypeDescription =	EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeDescription");
-			mRoomTypeCode = EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeCode");
-			mRateCode = EvaXpediaDatabase.getSafeString(jsonObject, "rateCode");
-			mMaxRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "maxRoomOccupancy");
-			mQuotedRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "quotedRoomOccupancy");
-			mMinGuestAge = EvaXpediaDatabase.getSafeInt(jsonObject, "minGuestAge");
-			mRoomDescription  = EvaXpediaDatabase.getSafeString(jsonObject, "roomDescription");
-			mPromoId = EvaXpediaDatabase.getSafeInt(jsonObject, "promoId");
-			mPromoDescription = EvaXpediaDatabase.getSafeString(jsonObject, "promoDescription");
-			mCurrentAllotment = EvaXpediaDatabase.getSafeInt(jsonObject, "currentAllotment");
-			mPropertyAvailable = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyAvailable");
-			mPropertyRestricted = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyRestricted");
-			mExpediaPropertyId = EvaXpediaDatabase.getSafeInt(jsonObject, "expediaPropertyId");
-			//mRateKey =  EvaDatabase.getSafeString(jsonObject, "rateKey");
-			mRateDescription = EvaXpediaDatabase.getSafeString(jsonObject, "rateDescription");
-			mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
-			mSupplierType = EvaXpediaDatabase.getSafeString(jsonObject, "supplierType");
+		mRoomTypeDescription =	EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeDescription");
+		mRoomTypeCode = EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeCode");
+		mRateCode = EvaXpediaDatabase.getSafeString(jsonObject, "rateCode");
+		mMaxRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "maxRoomOccupancy");
+		mQuotedRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "quotedRoomOccupancy");
+		mMinGuestAge = EvaXpediaDatabase.getSafeInt(jsonObject, "minGuestAge");
+		mRoomDescription  = EvaXpediaDatabase.getSafeString(jsonObject, "roomDescription");
+		mPromoId = EvaXpediaDatabase.getSafeInt(jsonObject, "promoId");
+		mPromoDescription = EvaXpediaDatabase.getSafeString(jsonObject, "promoDescription");
+		mCurrentAllotment = EvaXpediaDatabase.getSafeInt(jsonObject, "currentAllotment");
+		mPropertyAvailable = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyAvailable");
+		mPropertyRestricted = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyRestricted");
+		mExpediaPropertyId = EvaXpediaDatabase.getSafeInt(jsonObject, "expediaPropertyId");
+		//mRateKey =  EvaDatabase.getSafeString(jsonObject, "rateKey");
+		mRateDescription = EvaXpediaDatabase.getSafeString(jsonObject, "rateDescription");
+		mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
+		mSupplierType = EvaXpediaDatabase.getSafeString(jsonObject, "supplierType");
+		
+		try {
+			JSONObject jRateInfos = jsonObject.getJSONObject("RateInfos");
+			JSONObject jRateInfo = jRateInfos.getJSONObject("RateInfo");
 			
-			try {
-				JSONObject jRateInfos = jsonObject.getJSONObject("RateInfos");
-				JSONObject jRateInfo = jRateInfos.getJSONObject("RateInfo");
+			mRateInfo = new RateInfo(jRateInfo);
+			
+			if (jsonObject.has("ValueAdds")) {
+				JSONObject jValueAdds = jsonObject.getJSONObject("ValueAdds");
 				
-				mRateInfo = new RateInfo(jRateInfo);
+				int size = EvaXpediaDatabase.getSafeInt(jValueAdds, "@size");
 				
-				if (jsonObject.has("ValueAdds")) {
-					JSONObject jValueAdds = jsonObject.getJSONObject("ValueAdds");
-					
-					int size = EvaXpediaDatabase.getSafeInt(jValueAdds, "@size");
-					
-					if(size==-1) size =1;
-					
-					mValueAdds = new ValueAdd[size];
-					
-					if(size==1)
+				if(size==-1) size =1;
+				
+				mValueAdds = new ValueAdd[size];
+				
+				if(size==1)
+				{
+					JSONObject jValueAdd = jValueAdds.getJSONObject("ValueAdd");
+					mValueAdds[0] = new ValueAdd(jValueAdd);
+				}
+				else
+				{
+					JSONArray jValueAddsArray = jValueAdds.getJSONArray("ValueAdd");
+					for(int i=0;i<size;i++)
 					{
-						JSONObject jValueAdd = jValueAdds.getJSONObject("ValueAdd");
-						mValueAdds[0] = new ValueAdd(jValueAdd);
-					}
-					else
-					{
-						JSONArray jValueAddsArray = jValueAdds.getJSONArray("ValueAdd");
-						for(int i=0;i<size;i++)
-						{
-							JSONObject jValueAdd = jValueAddsArray.getJSONObject(i);
-							mValueAdds[i] = new ValueAdd(jValueAdd);
-						}
+						JSONObject jValueAdd = jValueAddsArray.getJSONObject(i);
+						mValueAdds[i] = new ValueAdd(jValueAdd);
 					}
 				}
-			} catch (JSONException e) {	
-				if (EvaXpediaDatabase.PRINT_STACKTRACE)
-					e.printStackTrace();
 			}
+		} catch (JSONException e) {	
+			if (EvaXpediaDatabase.PRINT_STACKTRACE)
+				e.printStackTrace();
+		}
 	}
 	
 	public String buildTravelUrl(int hotelId, String checkin, String checkout, int adultsCount, String rateKey) {
