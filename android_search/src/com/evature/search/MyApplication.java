@@ -29,13 +29,14 @@ public class MyApplication extends Application {
 	private static Context context; // http://stackoverflow.com/a/5114361/78234
 	private String mEvaSiteCode;
 	private String mEvaApiKey;
+	public static boolean AcraInitialized = false;
 
 	@Override
 	public void onCreate() {
 
 		// if (!BuildConfig.DEBUG) // Not when in debug mode!
 		// The following line triggers the initialization of ACRA
-		ACRA.init(this);
+		//ACRA.init(this); AcraInitialized = true;
 		Log.d(TAG, "onCreate");
 
 		Resources resources = getResources();

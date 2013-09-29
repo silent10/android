@@ -12,6 +12,7 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	private CalendarFragment mCalenderFragment;
 
 	public EvaRoomsUpdaterTask(CalendarFragment calendarFragment, int hotelIndex) {
+		super(-1);
 		mHotelData =MyApplication.getDb().mHotelData[hotelIndex];			
 		attach(calendarFragment);	
 		mCalenderFragment = calendarFragment;

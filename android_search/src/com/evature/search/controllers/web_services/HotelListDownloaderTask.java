@@ -22,9 +22,8 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 	
 	@Inject XpediaProtocol xpediaProtocol;
 
-	@Override
-	public int getId() {
-		return R.string.HOTELS;
+	public HotelListDownloaderTask() {
+		super(R.string.HOTELS);
 	}
 
 	public void initialize(EvaDownloaderTaskInterface listener, EvaApiReply apiReply, String currencyCode) {
