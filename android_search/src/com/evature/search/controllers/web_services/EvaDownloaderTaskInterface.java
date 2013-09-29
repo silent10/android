@@ -5,6 +5,7 @@ public interface EvaDownloaderTaskInterface {
 	enum DownloaderStatus {
 		NotStarted,
 		Started,
+		MadeSomeProgress,
 		Finished,
 		FinishedWithError
 	}

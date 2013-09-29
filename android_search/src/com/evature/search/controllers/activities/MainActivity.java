@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -55,18 +56,20 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaWarning;
 import com.evaapis.events.NewSessionStarted;
+import com.evaapis.flow.FlightFlowElement;
 import com.evaapis.flow.FlowElement;
 import com.evaapis.flow.FlowElement.TypeEnum;
 import com.evaapis.flow.QuestionElement;
 import com.evature.components.MyViewPager;
+import com.evature.search.EvaSettingsAPI;
 import com.evature.search.MyApplication;
 import com.evature.search.R;
 import com.evature.search.controllers.events.ChatItemClicked;
@@ -82,6 +85,7 @@ import com.evature.search.models.chat.ChatItem.Status;
 import com.evature.search.models.chat.ChatItemList;
 import com.evature.search.models.chat.DialogAnswerChatItem;
 import com.evature.search.models.chat.DialogQuestionChatItem;
+import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.views.SwipeyTabs;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
 import com.evature.search.views.adapters.TrainListAdapter;
@@ -195,7 +199,7 @@ public class MainActivity extends EvaBaseActivity implements
 			fatal_error(R.string.network_error);
 		}
 
-		mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName));
+		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
@@ -226,6 +230,11 @@ public class MainActivity extends EvaBaseActivity implements
 			this.mContext = context;
 		}
 		
+//		@Override 
+//		public int getItemPosition(Object item) {
+//			return POSITION_NONE;
+//		}
+		
 
 		@Override
 		public Fragment getItem(int position) {// Asks for the main fragment
@@ -249,7 +258,7 @@ public class MainActivity extends EvaBaseActivity implements
 					public void onClick(String example) {
 						Log.d(TAG, "Running example: "+example);
 						MainActivity.this.addChatItem(new ChatItem(example));
-						mViewPager.setCurrentItem(mTabTitles.indexOf(mChatTabName), true);
+						mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 						MainActivity.this.searchWithText(example);
 					}});
 				return fragment; 
@@ -312,7 +321,7 @@ public class MainActivity extends EvaBaseActivity implements
 			view.setText(mTabTitles.get(position));
 			view.setOnClickListener(new OnClickListener() { // You can swipe AND click on a specific tab
 				public void onClick(View v) {
-					mViewPager.setCurrentItem(position, true);
+					mSwipeyAdapter.showTab(position);
 				}
 			});
 			return view;
@@ -340,50 +349,41 @@ public class MainActivity extends EvaBaseActivity implements
 		@Override
 		public void notifyDataSetChanged() {
 			Log.i(TAG, "notifyDataSetChanged()");
-			mTabs.setAdapter(this);
+			try {
+				mTabs.setAdapter(this);
+				mViewPager.setAdapter(this);
+			}
+			catch(IllegalStateException e) {
+				Log.w(TAG, "Illegal state exception while 'notifyDataSetChange'",e);
+			}
 			super.notifyDataSetChanged();
 		}
 
 		// Internal helper function
-		public void stuffChanged(int position) {
-			Log.d(TAG, "stuffChanged "+position);
-			mTabs.setAdapter(mSwipeyAdapter);
-			mViewPager.setAdapter(mSwipeyAdapter); // I crashed here once ?! java.lang.IllegalStateException: Fragment
-													// ChatFragment{41ac6dd0} is not currently in the FragmentManager
+		public void showTab(int position) {
+			Log.d(TAG, "showTab "+position);
 			this.notifyDataSetChanged();
-			mTabs.onPageSelected(position);
+			//mTabs.onPageSelected(position);
 			mViewPager.setCurrentItem(position, true);
 		}
 
 		public void addTab(String name) { // Dynamic tabs add to end
 			Log.d(TAG, "addTab "+name);
-			int position = mViewPager.getCurrentItem();
 			mTabs.setAdapter(null);
+			mViewPager.setAdapter(null);
 			mTabTitles.add(name);
-			stuffChanged(position);
+			notifyDataSetChanged();
 		}
 		
 		public void addTab(String name, int position) { // Dynamic tabs add to certain position
 			Log.d(TAG, "addTab "+name);
 			mTabs.setAdapter(null);
+			mViewPager.setAdapter(null);
 			mTabTitles.add(position, name);
-			stuffChanged(position);
+			notifyDataSetChanged();
 		}
 		
 
-		public void removeTab() { // Dynamic tabs remove from end
-			Log.d(TAG, "removeTab");
-			int position = mViewPager.getCurrentItem();
-			int size = mTabTitles.size();
-			if (size > 0) { // fast clicking on remove gets us here...
-				if (position == size - 1) { // We are at the last tab
-					position = position - 1; // Move to the NEW last tab
-				}
-				mTabs.setAdapter(null);
-				mTabTitles.remove(size - 1);
-				stuffChanged(position);
-			}
-		}
 		
 		public void removeTab(String tabName) {
 			int ind = mTabTitles.indexOf(tabName);
@@ -394,16 +394,10 @@ public class MainActivity extends EvaBaseActivity implements
 		public void removeTab(int tabIndex)
 		{
 			Log.d(TAG, "removeTab "+tabIndex);
+			mTabs.setAdapter(null);
+			mViewPager.setAdapter(null);
 			mTabTitles.remove(tabIndex);
-			
-			if(tabIndex!=0)
-			{
-				stuffChanged(tabIndex-1);
-			}
-			else
-			{
-				stuffChanged(tabIndex);
-			}
+			notifyDataSetChanged();
 		}
 
 	}
@@ -429,7 +423,7 @@ public class MainActivity extends EvaBaseActivity implements
 		Intent intent;
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			mViewPager.setCurrentItem(1);
+			mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 			return true;
 		case R.id.new_session:
 			startNewSession();
@@ -454,7 +448,19 @@ public class MainActivity extends EvaBaseActivity implements
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getString(R.string.app_name));
 			final TextView message = new TextView(this);
-			final SpannableString s = new SpannableString(this.getText(R.string.lots_of_text));
+			String text = this.getText(R.string.lots_of_text).toString();
+			
+			try {
+				int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+				text += "\n\nVersion: "+version;
+				if (!MyApplication.AcraInitialized) {
+					text += "\n\n  --->  ACRA not initalized!";
+				}
+			} catch (NameNotFoundException e) {
+				Log.w(TAG, "Name not found getting version", e);
+			}
+			
+			final SpannableString s = new SpannableString(text);
 			Linkify.addLinks(s, Linkify.WEB_URLS);
 			message.setText(s);
 			message.setMovementMethod(LinkMovementMethod.getInstance());
@@ -502,12 +508,13 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 	
 	private void invalidateChatFragment() {
+		//showTab(R.string.CHAT);
 		int index = mTabTitles.indexOf(mChatTabName);
+				Log.i(TAG, "Chat tab at index "+index);
 		if (index == -1) {
 			mSwipeyAdapter.addTab(mChatTabName);
 			index = mTabTitles.size() - 1;
 		}
-		Log.i(TAG, "Chat tab at index "+index);
 		// http://stackoverflow.com/a/8886019/78234
 		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
 		if (fragment != null) // could be null if not instantiated yet
@@ -522,7 +529,7 @@ public class MainActivity extends EvaBaseActivity implements
 		else {
 			Log.w(TAG, "chat fragment == null!?");
 		}
-
+		
 	}
 	
 
@@ -554,8 +561,7 @@ public class MainActivity extends EvaBaseActivity implements
 			mSwipeyAdapter.addTab(tabName);
 			index = mTabTitles.size() - 1;
 		}
-		mSwipeyAdapter.stuffChanged(index);
-		mViewPager.setCurrentItem(index, true);
+		mSwipeyAdapter.showTab(index);
 		return index;
 	}
 
@@ -611,7 +617,7 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 
 	@Override
-	public void endProgressDialog(int id, String result) { // we got the hotel search reply successfully
+	public void endProgressDialog(int id, String result) { // we got the hotels list or hotel details reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
 
 		setDebugData(DebugTextType.ExpediaDebug, result);
@@ -620,42 +626,18 @@ public class MainActivity extends EvaBaseActivity implements
 			int hotelIndex = mHotelDownloader.getHotelIndex();
 			Log.d(TAG, "endProgressDialog() Hotel # " + hotelIndex);
 			MyApplication.getDb().setHotelId(hotelIndex);
-		}
-
-		String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
-		
-		int index = mTabTitles.indexOf(tabName);
-		if (index == -1) {
-			mSwipeyAdapter.addTab(tabName);
-			index = mTabTitles.size() - 1;
 			
-			if(tabName.equals("HOTELS"))
-			{
-				mSwipeyAdapter.addTab("MAP");
-			}
-		} else if (id == R.string.HOTEL) {
 			// remove hotel tab and add it again
-			mSwipeyAdapter.removeTab();
+			String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
+			int index = mTabTitles.indexOf(tabName);
+			if (index != -1)
+				mSwipeyAdapter.removeTab(index);
 			mSwipeyAdapter.addTab(tabName);
-			// HotelFragment fragment = (HotelFragment) adapter.instantiateItem(mViewPager, index);
-			// fragment.mAdapter.notifyDataSetChanged();
-			// I need to invalidate the entire view somehow!!!
-			mSwipeyAdapter.stuffChanged(index);
-		}
-		if (id == R.string.HOTELS) {
-			HotelsFragment fragment = (HotelsFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
-			if (fragment != null && fragment.getAdapter() != null) {
-				fragment.getAdapter().notifyDataSetChanged();
-			}
-			else {
-				Log.w(TAG, "Unexpected hotel fragment or fragment adaptor are null");
-			}
-			HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
-			
-			mSwipeyAdapter.removeTab(mHotelTabName);
+			index = mTabTitles.indexOf(tabName);
+			mSwipeyAdapter.showTab(index);
 		}
 
-		mViewPager.setCurrentItem(index, true);
+		
 
 		// mAdapter = new HotelListAdapter(mHotelsFragment, MyApplication.getDb());
 
@@ -719,7 +701,7 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 
 		mHotelDownloader = new EvaHotelDownloaderTask(this, hotelIndex);
-		this.endProgressDialog(R.string.HOTEL, "fake response");
+		//this.endProgressDialog(R.string.HOTEL, "fake response");
 		mHotelDownloader.execute();
 
 	}
@@ -807,19 +789,20 @@ public class MainActivity extends EvaBaseActivity implements
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 
-		ErrorReporter bugReporter = ACRA.getErrorReporter();
-		String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
-		int items;
-		if (itemsStr == null) {
-			items = 0;
+		if (MyApplication.AcraInitialized) {
+			ErrorReporter bugReporter = ACRA.getErrorReporter();
+			String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
+			int items;
+			if (itemsStr == null) {
+				items = 0;
+			}
+			else {
+				items = Integer.parseInt(itemsStr);
+			}
+			items++;
+			bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
+			bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 		}
-		else {
-			items = Integer.parseInt(itemsStr);
-		}
-		items++;
-		bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
-		bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
-		
 		if ("voice".equals(cookie)) {
 			SpannableString chat = null;
 			if (reply.originalInputText != null) {
@@ -929,7 +912,7 @@ public class MainActivity extends EvaBaseActivity implements
 			ChatItem chatItem = null;
 			if (flow.Type == TypeEnum.Question) {
 				QuestionElement question = (QuestionElement) flow;
-				DialogQuestionChatItem  questionChatItem = new DialogQuestionChatItem(flow.SayIt, reply, flow);
+				DialogQuestionChatItem  questionChatItem = new DialogQuestionChatItem(flow.getSayIt(), reply, flow);
 				chatItem = questionChatItem;
 				addChatItem(questionChatItem);
 				
@@ -940,20 +923,26 @@ public class MainActivity extends EvaBaseActivity implements
 				}
 				if (first) {
 					// execute first question
-					executeFlowElement(reply, flow, chatItem);
+					executeFlowElement(reply, flow, chatItem, true);
 					first = false;
 				}
 			}
 			else {
-				chatItem = new ChatItem(flow.SayIt, reply, flow, ChatType.Eva);
+				chatItem = new ChatItem(flow.getSayIt(), reply, flow, ChatType.Eva);
 				addChatItem(chatItem);
 			}
 			
-			if (!hasQuestion && first) {
-				// automatically execute first element - if no questions exist
-				executeFlowElement(reply, flow, chatItem);
-				
-				first = false;
+			if (!hasQuestion) {
+				// if no questions exist
+				if ( first) {
+					// automatically execute first element and switch to result
+					executeFlowElement(reply, flow, chatItem, true);
+					
+					first = false;
+				}
+				else {
+					executeFlowElement(reply, flow, chatItem, false);
+				}
 			}
 			
 		}
@@ -966,15 +955,47 @@ public class MainActivity extends EvaBaseActivity implements
 	class DownloaderListener implements EvaDownloaderTaskInterface {
 		
 		ChatItem currentItem;
+		boolean switchToResult;
 		
-		DownloaderListener(ChatItem chatItem) {
+		DownloaderListener(ChatItem chatItem, boolean switchToResult) {
 			currentItem = chatItem;
+			this.switchToResult = switchToResult;
 		}
 		@Override
 		public void endProgressDialog(int id, String result) {
 			Log.i(TAG, "End search for "+currentItem.getChat());
-			currentItem.setStatus(Status.HasResults);
 			currentItem.setSearchResults(result);
+			currentItem.setStatus(Status.HasResults);
+			
+			String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
+			
+			int index = mTabTitles.indexOf(tabName);
+			if (index == -1) {
+				mSwipeyAdapter.addTab(tabName);
+				index = mTabTitles.size() - 1;
+				
+				if(tabName.equals("HOTELS"))
+				{
+					mSwipeyAdapter.addTab("MAP");
+				}
+			} else 
+			if (id == R.string.HOTELS) {
+				HotelsFragment fragment = (HotelsFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
+				if (fragment != null && fragment.getAdapter() != null) {
+					fragment.getAdapter().notifyDataSetChanged();
+				}
+				else {
+					Log.w(TAG, "Unexpected hotel fragment or fragment adaptor are null");
+				}
+				HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
+				
+				mSwipeyAdapter.removeTab(mHotelTabName);
+			}
+			if (this.switchToResult) {
+				mSwipeyAdapter.showTab(index);
+			}
+			
+			
 			// this is ugly hack - there can be only one hotel chat item with results, and only one flight search with results
 			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
 				if (lastHotelCompleted != null && lastHotelCompleted != currentItem) {
@@ -1002,6 +1023,13 @@ public class MainActivity extends EvaBaseActivity implements
 		public void endProgressDialogWithError(int id, String result) {
 			Log.i(TAG, "End search with ERROR for "+currentItem.getChat());
 			currentItem.setStatus(Status.ToSearch);
+			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
+				EvaXpediaDatabase db = MyApplication.getDb();
+				if (db != null && db.unrecoverableError && EvaXpediaDatabase.retries < 5) {
+					EvaXpediaDatabase.retries++;
+					executeFlowElement(currentItem.getEvaReply(), currentItem.getFlowElement(), currentItem, false);
+				}
+			}
 			invalidateChatFragment();
 		}
 
@@ -1010,18 +1038,26 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 	}
 
-	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem) {
+	public static void clearExpediaCache() {
+		if (lastHotelCompleted != null) {
+			
+			lastHotelCompleted.setStatus(Status.ToSearch);
+		}
+	}
+	
+	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem, boolean switchToResult) {
 //		chatItem.setActivated(true);
-		if (flow.SayIt != null && !"".equals(flow.SayIt) ) {
-			speak(flow.SayIt);
+		String sayIt = flow.getSayIt();
+		if (sayIt != null && !"".equals(sayIt) ) {
+			speak(sayIt);
 		}
 		
 		switch (flow.Type) {
 		case Hotel:
 			Log.d(TAG, "Running Hotel Search!");
 			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-			mSearchExpediaTask.initialize(this, reply, "$"); // TODO: change to be based on flow element, // TODO: change to use currency
-			mSearchExpediaTask.attach(new DownloaderListener(chatItem));
+			mSearchExpediaTask.initialize(this, reply,  EvaSettingsAPI.getCurrencyCode(this)); // TODO: change to be based on flow element, // TODO: change to use currency
+			mSearchExpediaTask.attach(new DownloaderListener(chatItem, switchToResult));
 			if (chatItem.getStatus() == Status.HasResults) {
 				// this chat item was already activated and has results - bypass the cloud service and fake results
 				mSearchExpediaTask.setCachedResults(chatItem.getSearchResult());
@@ -1033,7 +1069,7 @@ public class MainActivity extends EvaBaseActivity implements
 		case Flight:
 			Log.d(TAG, "Running Vayant Search!");
 			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
-			mSearchVayantTask.attach(new DownloaderListener(chatItem));
+			mSearchVayantTask.attach(new DownloaderListener(chatItem, switchToResult));
 			if (chatItem.getStatus() == Status.HasResults) {
 				// this chat item was already activated and has results - bypass the cloud service and fake results
 				mSearchVayantTask.setCachedResults(chatItem.getSearchResult());
@@ -1067,24 +1103,26 @@ public class MainActivity extends EvaBaseActivity implements
 	
 	/****
 	 * handler for  "new session was started" event 
+	 * this is either in response to menu click or to a server side initiated new session
 	 * @param event
 	 */
 	protected void newSessionStart(@Observes NewSessionStarted event) {
-		ErrorReporter bugReporter = ACRA.getErrorReporter();
-		String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
-		int items;
-		if (itemsStr == null) {
-			items = 0;
+		if (MyApplication.AcraInitialized) {
+			ErrorReporter bugReporter = ACRA.getErrorReporter();
+			String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
+			int items;
+			if (itemsStr == null) {
+				items = 0;
+			}
+			else {
+				items = Integer.parseInt(itemsStr);
+			}
+			bugReporter.putCustomData(ITEMS_IN_SESSION, "0");
+	
+			for (int i=0; i<items; i++) {
+				bugReporter.removeCustomData("eva_session_"+i);
+			}
 		}
-		else {
-			items = Integer.parseInt(itemsStr);
-		}
-		bugReporter.putCustomData(ITEMS_IN_SESSION, "0");
-
-		for (int i=0; i<items; i++) {
-			bugReporter.removeCustomData("eva_session_"+i);
-		}
-		
 //		for (ChatItem chatItem : mChatListModel.getItemList()) {
 //			chatItem.setInSession(false);
 //		}
@@ -1095,6 +1133,41 @@ public class MainActivity extends EvaBaseActivity implements
 				mChatListModel.add(lastItem);
 			}
 		}		
+
+		mViewPager.setAdapter(null);
+		mTabs.setAdapter(null);
+		
+		// clear the hotel, flights and map
+		int index = mTabTitles.indexOf(mHotelsTabName);
+		if (index != -1)
+			mTabTitles.remove(index);
+		index = mTabTitles.indexOf(mHotelTabName);
+		if (index != -1)
+			mTabTitles.remove(index);
+		index = mTabTitles.indexOf(getString(R.string.FLIGHTS));
+		if (index != -1)
+			mTabTitles.remove(index);
+		index = mTabTitles.indexOf("MAP");
+		if (index != -1)
+			mTabTitles.remove(index);
+		
+		// not sure why - but in order for chat fragment to update I remove it here also :b
+		index = mTabTitles.indexOf(getString(R.string.CHAT));
+		if (index != -1)
+			mTabTitles.remove(index);
+		
+		//mSwipeyAdapter.stuffChanged(mTabTitles.indexOf(mChatTabName));
+		
+		EvaXpediaDatabase evaDb = MyApplication.getDb();
+		if (evaDb != null) {
+			evaDb.mHotelData = null;
+			if (evaDb.mImagesMap != null) {
+				evaDb.mImagesMap.clear();
+				evaDb.mImagesMap = null;
+			}
+		}
+		
+		
 	}
 	
 	public void onHotelsListUpdated( @Observes HotelsListUpdated event) {
@@ -1115,7 +1188,7 @@ public class MainActivity extends EvaBaseActivity implements
 		ChatItem chatItem = event.chatItem;
 		Log.i(TAG, "Chat Item clicked "+chatItem.getChat());
 		if (chatItem.getFlowElement() != null) {
-			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem);
+			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);
 		}
 	}
 

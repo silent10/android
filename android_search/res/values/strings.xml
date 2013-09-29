@@ -4,7 +4,17 @@
     <string name="advanced_menu">Advanced Menu</string>
     <string name="summary_parent_preference">Enable various debug features</string>
     <string name="title_debug_parent_preference">Debug</string>
-    <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\nWe will, someday.\nWe promise.\n\nCheck us out at\n\nhttp://www.evature.com\n</string>
+    <string name="lots_of_text">
+This is a cool Travel Search application for which we did not write the about text yet.\n
+We will, someday.\n
+We promise.\n
+\n
+Using:\n
+  Vayant API for travel search.\n
+  Expedia API for hotel search.\n
+\n
+Check us out at\n
+\nhttp://www.evature.com\n</string>
     <string name="ok_button">OK, got it.</string>
     <string name="fatal_error">Fatal Error</string>
     <string name="microphone_button">Microphone Button</string>

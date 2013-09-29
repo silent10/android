@@ -128,6 +128,9 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 
 	public void setStatus(Status status) {
 		this.status = status;
+		if (status != Status.HasResults ) {
+			mResults = null;
+		}
 	}
 
 	public void setSearchResults(String result) {

@@ -18,6 +18,7 @@ import com.evaapis.EvaApiReply;
 import com.evaapis.EvaLocation;
 import com.evaapis.flow.FlowElement;
 import com.evature.search.MyApplication;
+import com.evature.search.R;
 import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 import com.evature.search.models.vayant.VayantJourneys;
@@ -30,6 +31,7 @@ public class SearchVayantTask extends EvaDownloaderTask {
 	private FlowElement mFlowElement;
 
 	public SearchVayantTask(MainActivity mainActivity, EvaApiReply apiReply, FlowElement flowElement) {
+		super(R.string.FLIGHTS);
 		mMainActivity = mainActivity;
 		mApiReply = apiReply;
 		mFlowElement = flowElement;
@@ -74,6 +76,7 @@ public class SearchVayantTask extends EvaDownloaderTask {
 					}
 					obj.put("DepartureFrom", dateStr); //"2012-06-28");
 					obj.put("DepartureTo", dateStr); //"2012-06-28");
+					obj.put("LengthOfStay", 3);
 					obj.put("Response", "json");
 					obj.put("MaxSolutions", 100);
 				} catch (JSONException e) {
@@ -81,6 +84,12 @@ public class SearchVayantTask extends EvaDownloaderTask {
 					e.printStackTrace();
 				}
 				String json_dump = obj.toString();
+				try {
+					Log.d(TAG, "Vayant query: "+obj.toString(2));
+				} catch (JSONException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				try {
 					return callApi(json_dump);
 				} catch (IOException e) {
@@ -94,7 +103,7 @@ public class SearchVayantTask extends EvaDownloaderTask {
 	// Call the Vayant API, sending the JSON request and receiving the JSON reply.
 	// Tips on posting a JSON object: http://mycenes.wordpress.com/tag/json/
 	private String callApi(String data) throws IOException {
-		final String vayant_url = "http://fs-json.demo.vayant.com:7081";
+		final String vayant_url = "http://fs-json.demo.vayant.com:80"; //7081";
 		URL url = new URL(vayant_url);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setReadTimeout(10000 /* milliseconds */);

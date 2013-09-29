@@ -20,10 +20,6 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 
 	public String lastResponse = null;
 	
-	@Override
-	public int getId() {
-		return R.string.HOTEL;
-	}
 
 	@Override
 	protected void onProgressUpdate(Integer... values) {
@@ -35,6 +31,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	Context mContext;
 
 	public EvaHotelDownloaderTask(EvaDownloaderTaskInterface listener, int hotelndex) {
+		super( R.string.HOTEL);
 		Log.d(TAG, "CTOR");
 		attach(listener);
 		mContext = (Context) listener;
