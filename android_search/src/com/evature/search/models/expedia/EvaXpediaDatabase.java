@@ -15,16 +15,24 @@ import android.util.Log;
 
 public class EvaXpediaDatabase {
 
-	// Indicator for printing stack trace (in a result of 77 hotels it can save up to 3 seconds)
 	public static final boolean PRINT_STACKTRACE = true;
 
 	private static final String TAG = "EvaXpediaDatabase";
+	
+	public static int retries=0;
 	
 	String mCustomerSessionId;
 	int mNumberOfRoomsRequested;
 	public boolean mMoreResultsAvailable;
 	String mCacheKey;
 	String mCacheLocation;
+	
+	public boolean hasError = false;
+	public boolean unrecoverableError = false;
+	public String errorMessage = null;
+	public String errorVerboseMessage = null;
+	public String errorHandling = null;
+	
 
 	public HotelData mHotelData[];
 
@@ -127,6 +135,20 @@ public class EvaXpediaDatabase {
 			JSONObject responseObject = new JSONObject(response);
 
 			mCustomerSessionId = getSafeString(responseObject,"customerSessionId");
+			if (responseObject.has("EanWsError")) {
+				JSONObject wsError = responseObject.getJSONObject("EanWsError");
+				hasError = true;
+				errorHandling = getSafeString(wsError, "handling");
+				errorMessage = getSafeString(wsError, "presentationMessage");
+				errorVerboseMessage = getSafeString(wsError, "verboseMessage");
+				Log.w(TAG, "Xpedia Web service error: "+errorVerboseMessage);
+				if ("UNRECOVERABLE".equals(errorHandling)) {
+					unrecoverableError = true;
+					Log.w(TAG, "Unrecoverable error returned from Xpedia Web service");
+					return;
+				}
+			}
+			retries=0;
 			mNumberOfRoomsRequested= getSafeInt(responseObject, "numberOfRoomsRequested");
 			mMoreResultsAvailable = getSafeBool(responseObject,"moreResultsAvailable");
 			mCacheKey= getSafeString(responseObject, "cacheKey");

@@ -10,9 +10,14 @@ import android.util.Log;
 abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String> {
 
 	static private final String TAG = EvaDownloaderTask.class.getSimpleName();
-
+	
+	protected int id;
 	ArrayList<EvaDownloaderTaskInterface> mListeners = new ArrayList<EvaDownloaderTaskInterface>();
 
+	public EvaDownloaderTask(int id) {
+		this.id = id;
+	}
+	
 	public void attach(EvaDownloaderTaskInterface listener) {
 		mListeners.add(listener);
 	}
@@ -24,7 +29,7 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String>
 	DownloaderStatus mProgress = DownloaderStatus.NotStarted;
 
 	public int getId() {
-		return 0;
+		return id;
 	}
 
 	@Override

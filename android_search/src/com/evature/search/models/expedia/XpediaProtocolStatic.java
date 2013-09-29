@@ -23,8 +23,6 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -40,7 +38,6 @@ public class XpediaProtocolStatic {
 	private final static String TAG = XpediaProtocolStatic.class.getSimpleName();
 	private static String minorRev = "16";
 
-	private static final boolean PRINT_RESPONSES = true;
 	/**
 	 * {@link StatusLine} HTTP status code when no server error has occurred.
 	 */
@@ -126,7 +123,7 @@ public class XpediaProtocolStatic {
 		urlString += CONSTANT_HTTP_PARAMS;
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
 		urlString += "&hotelId=" + hotelId;
-		urlString += "&options=0";
+		//urlString += "&options=0";
 
 		return executeWithTimeout(urlString);
 	}
@@ -256,15 +253,6 @@ public class XpediaProtocolStatic {
 
 			// Return result from buffered stream
 			String result = new String(content.toByteArray());
-			if (PRINT_RESPONSES) {
-				try {
-					Log.d(TAG, new JSONObject(result).toString(2));
-				}
-				catch (JSONException e) {
-					Log.w(TAG, "Not json object?");
-					Log.d(TAG, result);
-				}
-			}
 			return result;
 		}
 		catch(IOException e) {

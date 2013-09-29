@@ -26,7 +26,6 @@ import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.controllers.events.HotelsListUpdated;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaListContinuationDownloaderTask;
-import com.evature.search.controllers.web_services.HotelListDownloaderTask;
 import com.evature.search.views.adapters.HotelListAdapter;
 import com.google.inject.Inject;
 
@@ -37,7 +36,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Inject protected EventManager eventManager;
 	
-	HotelListDownloaderTask mDownLoader = null;
 	EvaListContinuationDownloaderTask mContinuationLoader = null;
 	private LinearLayout mFooterView;
 	boolean mClickEnabled = true;
@@ -51,6 +49,26 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		Log.d(TAG, "onDestroyView");
 		super.onDestroyView();
 	}
+	
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+	    super.setUserVisibleHint(isVisibleToUser);
+
+	    // Make sure that we are currently visible
+	    if (this.isVisible()) {
+	        // If we are becoming invisible, then...
+	        if (!isVisibleToUser) {
+	            Log.i(TAG, "Not visible anymore.  Stopping audio.");
+	            // TODO stop audio playback
+	        }
+	        else {
+	        	Log.i(TAG, "Becoming visible. Starting audio.");
+	        }
+	    }
+	    else {
+	    	Log.w(TAG, "hint called while not visible?");
+	    }
+	}
 
 	@Override
 	public void onPause() {
@@ -62,11 +80,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			mContinuationLoader = null;
 		}
 		
-		if (mDownLoader != null) {
-			mDownLoader.detach();
-			mDownLoader.cancel(true);
-			mDownLoader = null;
-		}
 		super.onPause();
 	}
 
@@ -97,13 +110,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
-		if (mDownLoader != null) {
-			mProgressDialog = ProgressDialog.show(getActivity(), "Getting Hotel Information",
-					"Contacting search server", true, false);
-
-			mDownLoader.attach(this);
-		}
-
+		
 		super.onCreate(savedInstanceState);
 	}
 
@@ -113,6 +120,12 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		mView = inflater.inflate(R.layout.hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 
+		if (mContinuationLoader != null) {
+			mContinuationLoader.detach();
+			mContinuationLoader.cancel(true);
+			mContinuationLoader = null;
+		}
+		
 		setAdapter();
 		// mCheckQueryLength.sendEmptyMessageDelayed(0, 500);
 
@@ -125,7 +138,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			mHotelListView.removeFooterView(mFooterView);
 
 		mEnabledPaging = false;
-		mPaging = false;
 
 		if (MyApplication.getDb() != null) {
 
@@ -169,7 +181,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	}
 
-	private boolean mPaging = false;
 	private boolean mEnabledPaging = false;
 
 	private OnScrollListener mListScroll = new OnScrollListener() {
@@ -182,9 +193,9 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-			if ((visibleItemCount > 0) && (firstVisibleItem + visibleItemCount == totalItemCount) && !mPaging
+			if ((visibleItemCount > 0) && (firstVisibleItem + visibleItemCount == totalItemCount) 
+					&& mContinuationLoader == null
 					&& mEnabledPaging) {
-				mPaging = true;
 				Log.d(TAG, "-Last Scroll-");
 
 				String nextQuery = MyApplication.getDb().getNextQuery();
@@ -197,12 +208,28 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void endProgressDialog(int id, String result) {
-		mDownLoader = null;
+//		if (mDownLoader != null && id == mDownLoader.getId()) {
+//			mDownLoader = null;
+//		}
+		if (mContinuationLoader != null && id== mContinuationLoader.getId()) {
+			mContinuationLoader = null;
+		}
 
 		if (mProgressDialog != null) {
 			mProgressDialog.dismiss();
 			mProgressDialog = null;
 		}
+		
+		if (getAdapter() != null) {
+			getAdapter().notifyDataSetChanged();
+		}
+
+		if (!MyApplication.getDb().mMoreResultsAvailable) {
+			mHotelListView.removeFooterView(mFooterView);
+			mEnabledPaging = false;
+		}
+		
+		eventManager.fire(new HotelsListUpdated());
 	}
 
 	ProgressDialog mProgressDialog = null;
@@ -216,17 +243,29 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			mProgressDialog = null;
 		}
 
-		mDownLoader = null;
+//		if (mDownLoader != null && id == mDownLoader.getId()) {
+//			mDownLoader = null;
+//		}
+		if (mContinuationLoader != null && id== mContinuationLoader.getId()) {
+			mContinuationLoader = null;
+			
+			if (MyApplication.getDb() == null) {
+				
+			}
+			// error may be because too much time has passed - so cache will not work
+			MainActivity.clearExpediaCache();
+		}
 
+		
 	}
 
 	@Override
 	public void startProgressDialog(int id) {
 		if (id == R.string.HOTEL) {
-			if (mDownLoader == null) {
-				Log.w(TAG, "expected hotel downloader to run");
-				return;
-			}
+//			if (mDownLoader == null) {
+//				Log.w(TAG, "expected hotel downloader to run");
+//				return;
+//			}
 			mProgressDialog = ProgressDialog.show(getActivity(), "Getting Hotel Information",
 					"Contacting search server", true, false);
 		}
@@ -235,29 +274,20 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	@Override
 	public void updateProgress(int id, DownloaderStatus progress) {
 
-		Log.i(TAG, "Update progress");
-
-		if (id == R.string.HOTELS) {
-			if (mContinuationLoader == null) {
-				Log.w(TAG, "expected continuous downloader to run");
-			}
-			if (getAdapter() != null) {
-				getAdapter().notifyDataSetChanged();
-			} else {
-				return;
-			}
-	
-			if (!MyApplication.getDb().mMoreResultsAvailable) {
-				mHotelListView.removeFooterView(mFooterView);
-				mEnabledPaging = false;
+		Log.i(TAG, "Update progress "+progress);
+		if (mContinuationLoader != null && id == mContinuationLoader.getId()) {
+			switch (progress) {
+			case MadeSomeProgress:
+				if (mProgressDialog != null) {
+					mProgressDialog.dismiss();
+					mProgressDialog = null;
+				}
+				break;
+			
 			}
 			
-			eventManager.fire(new HotelsListUpdated());
+			
 		}
-	}
-
-	public void finishPaging() {
-		mPaging = false;
 	}
 
 	@Override
