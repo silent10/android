@@ -343,6 +343,7 @@ public class MainActivity extends EvaBaseActivity implements
 
 		@Override
 		public void onPageSelected(int arg0) {
+			lastShown = arg0;
 		}
 
 		@Override
@@ -351,16 +352,20 @@ public class MainActivity extends EvaBaseActivity implements
 			try {
 				mTabs.setAdapter(this);
 				mViewPager.setAdapter(this);
+				mViewPager.setCurrentItem(lastShown, true);
 			}
 			catch(IllegalStateException e) {
 				Log.w(TAG, "Illegal state exception while 'notifyDataSetChange'",e);
 			}
 			super.notifyDataSetChanged();
 		}
+		
+		int lastShown = -1;
 
 		// Internal helper function
 		public void showTab(int position) {
 			Log.d(TAG, "showTab "+position);
+			lastShown = position;
 			mViewPager.setCurrentItem(position, true);
 //			mTabs.onPageSelected(position);
 //			this.notifyDataSetChanged();
@@ -949,6 +954,7 @@ public class MainActivity extends EvaBaseActivity implements
 	}
 
 
+	static ChatItem currentHotelSearch = null;
 	static ChatItem lastHotelCompleted = null;
 	static ChatItem lastFlightCompleted = null;
 
@@ -961,6 +967,7 @@ public class MainActivity extends EvaBaseActivity implements
 			currentItem = chatItem;
 			this.switchToResult = switchToResult;
 		}
+		
 		@Override
 		public void endProgressDialog(int id, String result) {
 			Log.i(TAG, "End search for "+currentItem.getChat());
@@ -1038,23 +1045,53 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 	}
 
-	public static void clearExpediaCache() {
+	public void clearExpediaCache() {
 		if (lastHotelCompleted != null) {
 			
 			lastHotelCompleted.setStatus(Status.ToSearch);
+			
+			mViewPager.setAdapter(null);
+			mTabs.setAdapter(null);
+			
+			// clear the hotel, flights and map
+			int index = mTabTitles.indexOf(mHotelsTabName);
+			if (index != -1)
+				mTabTitles.remove(index);
+			index = mTabTitles.indexOf(mHotelTabName);
+			if (index != -1)
+				mTabTitles.remove(index);
+			index = mTabTitles.indexOf("MAP");
+			if (index != -1)
+				mTabTitles.remove(index);
+			
+			//mSwipeyAdapter.stuffChanged(mTabTitles.indexOf(mChatTabName));
+			
+			EvaXpediaDatabase evaDb = MyApplication.getDb();
+			if (evaDb != null) {
+				evaDb.mHotelData = null;
+				if (evaDb.mImagesMap != null) {
+					evaDb.mImagesMap.clear();
+					evaDb.mImagesMap = null;
+				}
+			}
 		}
 	}
 	
 	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem, boolean switchToResult) {
 //		chatItem.setActivated(true);
-		String sayIt = flow.getSayIt();
-		if (sayIt != null && !"".equals(sayIt) ) {
-			speak(sayIt);
+		
+		if (switchToResult && chatItem.sayitActivated == false) { 
+			String sayIt = flow.getSayIt();
+			if (sayIt != null && !"".equals(sayIt) ) {
+				speak(sayIt);
+				chatItem.sayitActivated = true;
+			}
 		}
 		
 		switch (flow.Type) {
 		case Hotel:
 			Log.d(TAG, "Running Hotel Search!");
+			currentHotelSearch = chatItem;
 			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 			mSearchExpediaTask.initialize(this, reply,  EvaSettingsAPI.getCurrencyCode(this)); // TODO: change to be based on flow element, // TODO: change to use currency
 			mSearchExpediaTask.attach(new DownloaderListener(chatItem, switchToResult));
@@ -1133,6 +1170,8 @@ public class MainActivity extends EvaBaseActivity implements
 				mChatListModel.add(lastItem);
 			}
 		}		
+		lastFlightCompleted = null;
+		lastHotelCompleted = null;
 
 		mViewPager.setAdapter(null);
 		mTabs.setAdapter(null);
@@ -1189,6 +1228,17 @@ public class MainActivity extends EvaBaseActivity implements
 		Log.i(TAG, "Chat Item clicked "+chatItem.getChat());
 		if (chatItem.getFlowElement() != null) {
 			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);
+		}
+	}
+
+	public void hotelsFragmentVisible() {
+		// ugly hack to trigger sayit...
+		if (currentHotelSearch != null && currentHotelSearch.sayitActivated == false) {
+			String sayIt = currentHotelSearch.getFlowElement().getSayIt();
+			if (sayIt != null && !"".equals(sayIt) ) {
+				speak(sayIt);
+				currentHotelSearch.sayitActivated = true;
+			}
 		}
 	}
 

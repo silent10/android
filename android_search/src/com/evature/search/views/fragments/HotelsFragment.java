@@ -58,11 +58,11 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	    if (this.isVisible()) {
 	        // If we are becoming invisible, then...
 	        if (!isVisibleToUser) {
-	            Log.i(TAG, "Not visible anymore.  Stopping audio.");
-	            // TODO stop audio playback
+	            Log.i(TAG, "Not visible anymore.");
 	        }
 	        else {
 	        	Log.i(TAG, "Becoming visible. Starting audio.");
+	        	((MainActivity)getActivity()).hotelsFragmentVisible();
 	        }
 	    }
 	    else {
@@ -253,7 +253,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 				
 			}
 			// error may be because too much time has passed - so cache will not work
-			MainActivity.clearExpediaCache();
+			((MainActivity) getActivity()).clearExpediaCache();
 		}
 
 		

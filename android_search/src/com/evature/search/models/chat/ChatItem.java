@@ -34,6 +34,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	private String mResults = null;
 	protected FlowElement flow;
 	protected EvaApiReply evaReply;
+	public boolean sayitActivated = false; 
 
 	public ChatItem(String chat) {
 		this(new SpannableString(chat));
