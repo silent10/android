@@ -14,6 +14,7 @@ import com.evature.search.R;
 
 public class DebugFragment extends RoboFragment {
 	static final String TAG = "DebugFragment";
+	private static final int MAX_LENGTH = 2500;
 	private TextView debugText = null;
 	private String debugTextEva = "No reply yet.";
 	private String debugTextVayant = "No reply yet.";
@@ -38,7 +39,7 @@ public class DebugFragment extends RoboFragment {
 				radioButtons.check(savedInstanceState.getInt("debugTab"));
 		}
 		
-		updateChecked();
+		//updateChecked();  removed for performance
 		
 		radioButtons.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			
@@ -80,7 +81,11 @@ public class DebugFragment extends RoboFragment {
 	}
 
 	
+	
 	public void setDebugText(String text) {
+		if (text.length() > MAX_LENGTH) {
+			text = text.substring(0, MAX_LENGTH);
+		}
 		if (debugText != null) {
 			debugText.setText(text);
 			debugTextEva = text;
@@ -91,6 +96,9 @@ public class DebugFragment extends RoboFragment {
 	}
 	
 	public void setVayantDebugText(String text) {
+		if (text.length() > MAX_LENGTH) {
+			text = text.substring(0, MAX_LENGTH);
+		}
 		if (debugText != null) {
 			debugText.setText(text);
 			debugTextVayant = text;
@@ -101,6 +109,9 @@ public class DebugFragment extends RoboFragment {
 	}
 
 	public void setExpediaDebugText(String text) {
+		if (text.length() > MAX_LENGTH) {
+			text = text.substring(0, MAX_LENGTH);
+		}
 		if (debugText != null) {
 			debugText.setText(text);
 			debugTextExpedia = text;

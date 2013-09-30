@@ -88,16 +88,19 @@
     </string-array>
     
     <string-array name="examples">
-        <!-- <item>Fly from London to NYC next Tuesday morning</item> -->
-        <!-- <item>Hotels in Arlington</item> -->
+        <item>Fly from London to NYC next Tuesday morning</item>
+        <item>Hotels in Arlington on Friday, 4 nights</item>
         <!-- <item>Hotel in NYC on Wednesday for 5 nights</item> -->
         <!-- <item>Fly from Minto to Heatherwood</item> -->
         <!-- <item>Hotels in Heatherwood</item> -->
         <item>Round trip flight from Istanbul to Nice France next Wednesday, stay in a 5 star hotel for one weeks</item>
-        <item>Flights from Los Angeles to Paris on November 20, return on November 23th</item>
+        <item>Flights from Los Angeles to Paris on November 20, return on November 23th, stay in hotel with pool</item>
         <item>Fly to NY next Sunday, stay 5 nights in Arlignton, return</item>
-        <item>3 Star hotels in NYC, on Wednesday for two nights, sorted by price descending</item>
-        <item>3 Star hotels in Miami FL, on Wednesday for two nights, sorted by price ascending</item>
+        <item>hotels in NYC, on Wednesday for two nights</item>
+        <item>Sorted by price</item>
+        <item>5 star hotels</item>
+        <item>3 star hotels</item>
+        <item>3 Star hotels in Miami FL, on Wednesday for two nights, sorted by price descending</item>
         <!-- <item>Fly to Madrid</item> -->
         <!-- <item>Train ride from NYC to Washington DC next Wednesday</item> -->
     </string-array>
