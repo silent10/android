@@ -64,7 +64,6 @@ import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaWarning;
 import com.evaapis.events.NewSessionStarted;
-import com.evaapis.flow.FlightFlowElement;
 import com.evaapis.flow.FlowElement;
 import com.evaapis.flow.FlowElement.TypeEnum;
 import com.evaapis.flow.QuestionElement;
@@ -362,9 +361,9 @@ public class MainActivity extends EvaBaseActivity implements
 		// Internal helper function
 		public void showTab(int position) {
 			Log.d(TAG, "showTab "+position);
-			this.notifyDataSetChanged();
-			//mTabs.onPageSelected(position);
 			mViewPager.setCurrentItem(position, true);
+//			mTabs.onPageSelected(position);
+//			this.notifyDataSetChanged();
 		}
 
 		public void addTab(String name) { // Dynamic tabs add to end
@@ -505,6 +504,7 @@ public class MainActivity extends EvaBaseActivity implements
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		mChatListModel.add(item);
 		invalidateChatFragment();
+		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 	}
 	
 	private void invalidateChatFragment() {
