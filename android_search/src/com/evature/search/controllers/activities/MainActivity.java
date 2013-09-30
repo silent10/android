@@ -198,6 +198,8 @@ public class MainActivity extends EvaBaseActivity implements
 			fatal_error(R.string.network_error);
 		}
 
+		setDebugData(DebugTextType.None, "");
+
 		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 
 		// patch for debug - bypass the speech recognition:
@@ -509,7 +511,7 @@ public class MainActivity extends EvaBaseActivity implements
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		mChatListModel.add(item);
 		invalidateChatFragment();
-		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 	}
 	
 	private void invalidateChatFragment() {
@@ -556,7 +558,6 @@ public class MainActivity extends EvaBaseActivity implements
 
 	public void setVayantReply(String response) {
 		setDebugData(DebugTextType.VayantDebug, response);
-		showTab(R.string.FLIGHTS);
 	}
 	
 	private int showTab(int tabNameId) {
@@ -955,6 +956,7 @@ public class MainActivity extends EvaBaseActivity implements
 
 
 	static ChatItem currentHotelSearch = null;
+	static ChatItem currentFlightSearch = null;
 	static ChatItem lastHotelCompleted = null;
 	static ChatItem lastFlightCompleted = null;
 
@@ -1105,6 +1107,7 @@ public class MainActivity extends EvaBaseActivity implements
 			break;
 		case Flight:
 			Log.d(TAG, "Running Vayant Search!");
+			currentFlightSearch = chatItem;
 			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
 			mSearchVayantTask.attach(new DownloaderListener(chatItem, switchToResult));
 			if (chatItem.getStatus() == Status.HasResults) {
@@ -1238,6 +1241,16 @@ public class MainActivity extends EvaBaseActivity implements
 			if (sayIt != null && !"".equals(sayIt) ) {
 				speak(sayIt);
 				currentHotelSearch.sayitActivated = true;
+			}
+		}
+	}
+
+	public void flightsFragmentVisible() {
+		if (currentFlightSearch != null && currentFlightSearch.sayitActivated == false) {
+			String sayIt = currentFlightSearch.getFlowElement().getSayIt();
+			if (sayIt != null && !"".equals(sayIt) ) {
+				speak(sayIt);
+				currentFlightSearch.sayitActivated = true;
 			}
 		}
 	}

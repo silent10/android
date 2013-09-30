@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
+import com.evature.search.controllers.activities.MainActivity;
 import com.evature.search.views.adapters.FlightListAdapter;
 
 public class FlightsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener {
@@ -27,6 +28,26 @@ public class FlightsFragment extends RoboFragment implements OnClickListener, On
 	private FlightListAdapter mAdapter;
 	private static final String TAG = "FlightsFragment";
 
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+	    super.setUserVisibleHint(isVisibleToUser);
+
+	    // Make sure that we are currently visible
+	    if (this.isVisible()) {
+	        // If we are becoming invisible, then...
+	        if (!isVisibleToUser) {
+	            Log.i(TAG, "Not visible anymore.");
+	        }
+	        else {
+	        	Log.i(TAG, "Becoming visible. Starting audio.");
+	        	((MainActivity)getActivity()).flightsFragmentVisible();
+	        }
+	    }
+	    else {
+	    	Log.w(TAG, "hint called while not visible?");
+	    }
+	}
+	
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, "onDestroy");

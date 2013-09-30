@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,9 +77,18 @@ public class SearchVayantTask extends EvaDownloaderTask {
 					}
 					obj.put("DepartureFrom", dateStr); //"2012-06-28");
 					obj.put("DepartureTo", dateStr); //"2012-06-28");
-					obj.put("LengthOfStay", 3);
+					JSONArray lengthOfStay = new JSONArray();
+					lengthOfStay.put(3);
+					lengthOfStay.put(4);
+					lengthOfStay.put(5);
+					lengthOfStay.put(6);
+					lengthOfStay.put(7);
+					lengthOfStay.put(8);
+					lengthOfStay.put(9);
+					lengthOfStay.put(14);
+					obj.put("LengthOfStay", lengthOfStay);
 					obj.put("Response", "json");
-					obj.put("MaxSolutions", 100);
+					obj.put("MaxSolutions", 30);
 				} catch (JSONException e) {
 					// This should not happen!
 					e.printStackTrace();
