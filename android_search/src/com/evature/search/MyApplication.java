@@ -36,7 +36,7 @@ public class MyApplication extends Application {
 
 		// if (!BuildConfig.DEBUG) // Not when in debug mode!
 		// The following line triggers the initialization of ACRA
-		//ACRA.init(this); AcraInitialized = true;
+		ACRA.init(this); AcraInitialized = true;
 		Log.d(TAG, "onCreate");
 
 		Resources resources = getResources();
