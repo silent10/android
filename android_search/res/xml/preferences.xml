@@ -29,6 +29,16 @@
 	
     
     <PreferenceCategory android:title="@string/advanced_menu" >
+        <EditTextPreference
+            android:key="eva_key"
+            android:summary="leave blank for default"
+            android:title="Eva API Key"
+         	/>
+        <EditTextPreference
+            android:key="eva_site_code"
+            android:summary="leave blank for default"
+            android:title="Site Code"
+         	/>    
         <CheckBoxPreference
             android:key="debug"
             android:summary="@string/summary_parent_preference"

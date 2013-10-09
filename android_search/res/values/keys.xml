@@ -3,8 +3,8 @@
 <!-- Use your own values here: -->
 
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="TypographyDashes">
-    <string name="EVA_API_KEY">thack-london-june-2012</string>
-    <string name="EVA_SITE_CODE">thack</string>
+    <string name="EVA_API_KEY">e7567517-0a1b-4a89-bd56-1b18915353f9</string>
+    <string name="EVA_SITE_CODE">androiddev</string>
     <string name="EXPEDIA_API_KEY">kg9fd64ndnfw4nggggp543e3</string> 
     <string name="EXPEDIA_SECRET">CfyYPjmE</string>   
     <string name="EXPEDIA_CLIENT_ID">352395</string>
