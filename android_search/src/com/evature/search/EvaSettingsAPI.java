@@ -2,6 +2,8 @@ package com.evature.search;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 
 public class EvaSettingsAPI {
@@ -33,5 +35,33 @@ public class EvaSettingsAPI {
 
 		return currencySymbol;
 	}
+	
+	public static final String EVA_KEY = "eva_key";
+	public static final String EVA_SITE_CODE = "eva_site_code";
 
+	public static String getEvaKey(Context context) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		String val= sp.getString(EVA_KEY, "");
+		if (val.equals("")) {
+			Resources resources = context.getResources();
+			val = resources.getString(R.string.EVA_API_KEY);
+			Editor edit = sp.edit();
+			edit.putString(EVA_KEY, val);
+			edit.commit();
+		}
+		return val;
+	}
+	
+	public static String getEvaSiteCode(Context context) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		String val = sp.getString(EVA_SITE_CODE, "");
+		if (val.equals("")) {
+			Resources resources = context.getResources();
+			val = resources.getString(R.string.EVA_SITE_CODE);
+			Editor edit = sp.edit();
+			edit.putString(EVA_SITE_CODE, val);
+			edit.commit();
+		}
+		return val;
+	}
 }

@@ -60,6 +60,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
 import com.evaapis.EvaBaseActivity;
 import com.evaapis.EvaWarning;
@@ -788,6 +789,12 @@ public class MainActivity extends EvaBaseActivity implements
 		super.onSharedPreferenceChanged(sharedPreferences, key);
 		if (DEBUG_PREF_KEY.equals(key)) {
 			ActivityCompat.invalidateOptionsMenu(this);
+		}
+		else if (EvaSettingsAPI.EVA_KEY.equals(key)) {
+			EvaAPIs.API_KEY = EvaSettingsAPI.getEvaKey(this);
+		}
+		else if (EvaSettingsAPI.EVA_SITE_CODE.equals(key)) {
+			EvaAPIs.SITE_CODE = EvaSettingsAPI.getEvaSiteCode(this);
 		}
 	}
 	

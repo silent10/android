@@ -27,8 +27,6 @@ public class MyApplication extends Application {
 	static String mExpediaClientId = null;
 	private static final String TAG = "MyApplication";
 	private static Context context; // http://stackoverflow.com/a/5114361/78234
-	private String mEvaSiteCode;
-	private String mEvaApiKey;
 	public static boolean AcraInitialized = false;
 
 	@Override
@@ -43,11 +41,9 @@ public class MyApplication extends Application {
 		mExpediaApiKey = resources.getString(R.string.EXPEDIA_API_KEY);
 		mExpediaSecret = resources.getString(R.string.EXPEDIA_SECRET);
 		mExpediaClientId = resources.getString(R.string.EXPEDIA_CLIENT_ID);
-		mEvaSiteCode = resources.getString(R.string.EVA_SITE_CODE);
-		mEvaApiKey = resources.getString(R.string.EVA_API_KEY);
 		
-		EvaAPIs.API_KEY = mEvaApiKey;
-		EvaAPIs.SITE_CODE = mEvaSiteCode; 
+		EvaAPIs.API_KEY = EvaSettingsAPI.getEvaKey(this);
+		EvaAPIs.SITE_CODE = EvaSettingsAPI.getEvaSiteCode(this); 
 		EvatureLocationUpdater.initContext(this);
 		
 		super.onCreate();
