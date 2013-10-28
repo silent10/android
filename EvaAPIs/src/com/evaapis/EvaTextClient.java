@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.evature.util.DownloadUrl;
 import com.evature.util.ExternalIpAddressGetter;
-import com.google.inject.Inject;
 
 
     //Uses AsyncTask to create a task away from the main UI thread. This task takes a
@@ -17,56 +19,53 @@ import com.google.inject.Inject;
 	// has been established, the AsyncTask downloads the contents of the webpage as
 	// an InputStream. Finally, the InputStream is converted into a string,
 	// which is displayed in the UI by the AsyncTask's onPostExecute method.
-	public class EvaCallerTask extends AsyncTask<Void, Integer, String> {
+	public class EvaTextClient extends AsyncTask<Void, Integer, String> {
 
 		private static final String TAG = "EvaCallerTask";
 		
-		@Inject DownloadUrl urlDownloader;
-
-		EvaSearchReplyListener mSearchReplyListener;
-		private String mSessionId = "1";
-		private String mLanguage;
-		//String mLanguage = "US";
-		private Object mCookie; // 
+		EvaComponent mEva;
+		private Object mCookie;  
 		private String mInputText;
 		int mResponseId;
+		private long startOfTextSearch;
 		
 		/****
 		 * 
-		 * @param searchReplyListener
-		 * @param languageCode
 		 * @param inputText - text to send to Eva,   ignored if null
 		 * @param responseId - response to send to Eva, ignored if -1
-		 * @param sessionId
 		 * @param cookie   - will be returned to the listener on callback
 		 */
-		public void initialize(EvaSearchReplyListener searchReplyListener, 
-								String sessionId,  
-								String languageCode,
+		public void initialize(EvaComponent eva,
 								String inputText, 
 								int responseId, 
 								Object cookie) {
-			mSearchReplyListener = searchReplyListener;
-			mSessionId = sessionId;
-			mLanguage = languageCode;
 			mResponseId = responseId;
+			mEva = eva;
 			mInputText = inputText;
 			mCookie = cookie;
 		}
 
 		@Override
 		protected String doInBackground(Void... non) {
-			String API_KEY = EvaAPIs.API_KEY;
-			String SITE_CODE = EvaAPIs.SITE_CODE;
-			String evatureUrl = EvaAPIs.API_ROOT + "/api/v1.0?";
-			evatureUrl += ("site_code=" + SITE_CODE);
-			evatureUrl += ("&api_key=" + API_KEY);
+			startOfTextSearch = System.nanoTime();
+			String evatureUrl = EvaComponent.API_ROOT + "/api/v1.0?";
+			evatureUrl += ("site_code=" + mEva.getSiteCode());
+			evatureUrl += ("&api_key=" + mEva.getApiKey());
 			//evatureUrl += ("&language=" + mLanguage);
-			evatureUrl += ("&session_id=" + mSessionId);
-			if (mLanguage != null && !"".equals(mLanguage)) {
-				evatureUrl += "&language="+mLanguage;
+			evatureUrl += ("&session_id=" + mEva.getSessionId());
+			String language = mEva.getPreferedLanguage();
+			if (language != null && !"".equals(language)) {
+				evatureUrl += "&language="+language;
 			}
-			evatureUrl += ("&locale="+EvaAPIs.locale);
+			if (mEva.getLocale() != null) {
+				evatureUrl += ("&locale="+ mEva.getLocale());
+			}
+			if (mEva.getDeviceId() != null) {
+				evatureUrl += "&uid="+mEva.getDeviceId();
+			}
+			if (mEva.getContext() != null) {
+				evatureUrl += "&context="+mEva.getContext();
+			}
 			if (mResponseId != -1) {
 				evatureUrl += ("&dialog_response="+mResponseId);
 			}
@@ -89,7 +88,7 @@ import com.google.inject.Inject;
 
 			Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
 			try {
-				return urlDownloader.get(evatureUrl);
+				return DownloadUrl.sget(evatureUrl);
 			} catch (IOException e) {
 				return "Unable to retrieve web page. URL may be invalid.";
 			}
@@ -100,8 +99,18 @@ import com.google.inject.Inject;
 		protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
 			EvaApiReply apiReply = new EvaApiReply(result);		
 			
-			mSearchReplyListener.onEvaReply(apiReply, mCookie);
-			
+			// coming from text search
+			if (mEva.isDebug()) {
+				JSONObject debugData = new JSONObject();
+				try {
+					debugData.put("Time in HTTP Execute", ((System.nanoTime() - startOfTextSearch)/1000000)+"ms");
+					apiReply.JSONReply.put("debug", debugData);
+				} catch (JSONException e) {
+					Log.e(TAG, "Failed setting debug data", e);
+				}
+			}
+						
+			mEva.onEvaReply(apiReply, mCookie);
 		}
 
 		

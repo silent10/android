@@ -36,8 +36,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
-import roboguice.util.Ln;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
@@ -50,9 +48,6 @@ public class EvaVoiceClient {
 
 	private static final String TAG = "EvaVoiceClient";
 
-	private String mSiteCode = "UNKNOWN";
-	private String mAppKey = "UNKNOWN";
-    private String mDeviceId = "0000";
 	private String LANGUAGE = "ENUS";
 	private String CODEC = "audio/x-flac;rate=16000";//"audio/x-speex;rate=16000";	//MP3
 	private String RESULTS_FORMAT = "text/plain";
@@ -62,12 +57,13 @@ public class EvaVoiceClient {
 	private static String HOSTNAME = "vproxy.evaws.com";
 
 	private String mEvaResponse;
-	private String mSessionId;
 
 	private SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 	HttpPost mHttpPost = null;
+	
+	private EvaComponent.EvaConfig mConfig;
 
 	// debug time measurements
 	public long timeSpentReadingResponse;
@@ -78,30 +74,23 @@ public class EvaVoiceClient {
 	
 	boolean hadError;
 
-	private String mLocale;
-	private String mLanguage;
-	private String mVrService;
-
 	private Context mContext;
 
 
 
-	public EvaVoiceClient(Context context,
-			String siteCode, String appKey, String deviceId, String sessionId, 
-			String locale, String language, String vrService, 
+	/****
+	 * 
+	 * @param context - android context
+	 * @param config 
+	 * @param speechAudioStreamer
+	 */
+	public EvaVoiceClient(Context context, EvaComponent.EvaConfig config,
 			SpeechAudioStreamer speechAudioStreamer) {
-		mSiteCode = siteCode;
-		mAppKey = appKey;
-		mDeviceId = deviceId;
-		mSessionId = sessionId;
-		mLocale = locale;
-		mLanguage = language;
+		mConfig = config;
 		mContext = context;
-		mVrService = "none".equals(vrService) ? null : vrService;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 	}
 
-	@SuppressWarnings("deprecation")
 	private HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyManagementException
 	{
 		HttpParams params = new BasicHttpParams();
@@ -134,10 +123,13 @@ public class EvaVoiceClient {
 	{
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 
-		qparams.add(new BasicNameValuePair("site_code", mSiteCode));
-		qparams.add(new BasicNameValuePair("api_key", mAppKey));
-		qparams.add(new BasicNameValuePair("uid",  mDeviceId));
-		qparams.add(new BasicNameValuePair("session_id", mSessionId));
+		qparams.add(new BasicNameValuePair("site_code", mConfig.siteCode));
+		qparams.add(new BasicNameValuePair("api_key", mConfig.appKey));
+		qparams.add(new BasicNameValuePair("uid",  mConfig.deviceId));
+		qparams.add(new BasicNameValuePair("session_id", mConfig.sessionId));
+		if (mConfig.context != null) {
+			qparams.add(new BasicNameValuePair("context", mConfig.context));
+		}
 		try {
 			double longitude = EvatureLocationUpdater.getLongitude();
 			double latitude = EvatureLocationUpdater.getLatitude();
@@ -149,16 +141,16 @@ public class EvaVoiceClient {
 			e1.printStackTrace();
 		}
 		
-		if (mVrService != null) {
-			qparams.add(new BasicNameValuePair("vr_service", mVrService));
+		if (mConfig.vrService != null && !"none".equals(mConfig.vrService)) {
+			qparams.add(new BasicNameValuePair("vr_service", mConfig.vrService));
 		}
 		
-		if (mLanguage != null) {
-			qparams.add(new BasicNameValuePair("language", mLanguage));
+		if (mConfig.language != null) {
+			qparams.add(new BasicNameValuePair("language", mConfig.language));
 		}
 		
-		if (mLocale != null) {
-			qparams.add(new BasicNameValuePair("locale", mLocale));
+		if (mConfig.locale != null) {
+			qparams.add(new BasicNameValuePair("locale", mConfig.locale));
 		}
 
 		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, "", URLEncodedUtils.format(qparams, "UTF-8"), null);
@@ -251,7 +243,7 @@ public class EvaVoiceClient {
 		InputStream is = resEntity.getContent();
 		Header contentEncoding = response.getFirstHeader("Content-Encoding");
 		if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-			Ln.d(TAG, "gzip encoded vproxy result");
+			Log.d(TAG, "gzip encoded vproxy result");
 			is = new GZIPInputStream(is);
 		}
 

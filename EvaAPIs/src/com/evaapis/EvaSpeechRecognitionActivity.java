@@ -1,14 +1,11 @@
 package com.evaapis;
 
-import roboguice.activity.RoboActivity;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,25 +14,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class EvaSpeechRecognitionActivity extends RoboActivity {
 
-	public static final String RESULT_TIME_ACTIVITY_CREATE = "TIME_CREATE";
-	public static final String RESULT_TIME_RECORDING = "TIME_RECORDING";
-	public static final String RESULT_TIME_SERVER = "TIME_SERVER";
-	public static final String RESULT_TIME_RESPONSE = "TIME_RESPONSE";
-	public static final String RESULT_TIME_EXECUTE = "TIME_EXECUTE";
-	
-	public static final String RESULT_EVA_REPLY = "EVA_REPLY";
+public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechComponent.SpeechRecognitionResultListener {
 
-	
 	private static final String TAG = EvaSpeechRecognitionActivity.class.getSimpleName();;
 
-	public static final int SAMPLE_RATE = 16000;
-	public static final int CHANNELS = 1;
-
-	
-	private SpeechAudioStreamer mSpeechAudioStreamer;
-	private EvaHttpDictationTask dictationTask;
+	EvaSpeechComponent speechRecognition;
 
 	private Button mStopButton;
 	private TextView mLevel;
@@ -46,102 +30,17 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 	
 	Handler mUpdateLevel;
 
-	EvaVoiceClient mVoiceClient = null;
 	private long mTimeActivityCreation;
-	private boolean mDebug;
 
 
-
-	private class EvaHttpDictationTask extends AsyncTask
-	{
-		public EvaSpeechRecognitionActivity mParent;
-		private EvaVoiceClient  mVoiceClient;
-		
-		EvaHttpDictationTask(EvaVoiceClient voiceClient, EvaSpeechRecognitionActivity parent) {
-			mVoiceClient = voiceClient;
-			mParent = parent;
-		}
-		
-
-		@Override
-		protected void onPostExecute(Object result) {
-			String evaJson = mVoiceClient.getEvaResponse();		
-
-			if(mParent==null) return;
-			
-			if((evaJson!=null) && (evaJson.length()!=0))
-			{
-				Intent intent = new Intent();
-
-				intent.putExtra(RESULT_EVA_REPLY, evaJson);
-				if (mDebug) {
-					intent.putExtra(RESULT_TIME_RECORDING, mSpeechAudioStreamer.totalTimeRecording);
-					intent.putExtra(RESULT_TIME_SERVER, mVoiceClient.timeWaitingForServer);
-					intent.putExtra(RESULT_TIME_RESPONSE, mVoiceClient.timeSpentReadingResponse);
-					intent.putExtra(RESULT_TIME_EXECUTE, mVoiceClient.timeSpentExecute);
-					intent.putExtra(RESULT_TIME_ACTIVITY_CREATE, mTimeActivityCreation);
-				}
-
-				setResult(RESULT_OK, intent);
-			}
-			else
-			{
- 				if (mVoiceClient.hadError) {
-					Toast.makeText(EvaSpeechRecognitionActivity.this, "There was an error contacting the server, please check your interenet connection or try again later", Toast.LENGTH_SHORT).show();
-				}
-				else {
-	  				Toast.makeText(EvaSpeechRecognitionActivity.this, "No result found", Toast.LENGTH_SHORT).show();
-				}
-				setResult(RESULT_CANCELED);
-			}
-			Log.i(TAG,"<<< Finish speech recognition activity");
-			
-			finish();
-			
-			super.onPostExecute(result);
-		}
-
-		@Override
-		protected Object doInBackground(Object... arg0) {
-			
-			if (mVoiceClient.getInTransaction()) {
-				Log.i(TAG, "<<< Waiting for previous transaction to complete");
-				int count = 0;
-				int MAX_WAIT_FOR_TRANSFER = 12 * 10; // 12 seconds max wait for finish of previous request
-			
-				while(mVoiceClient.getInTransaction()  && (count<MAX_WAIT_FOR_TRANSFER)) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					count++;
-				}
-			}
-
-			mVoiceClient.stopTransfer();
-
-			try {
-				mVoiceClient.startVoiceRequest();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-	}
-	
-
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		long t0 = System.nanoTime();
 		super.onCreate(savedInstanceState);
 		
 		Intent intent = getIntent();
-		String sessionId = intent.getStringExtra("SessionId");
-		mDebug = intent.getBooleanExtra("debug", false);
+		EvaComponent.EvaConfig config = (EvaComponent.EvaConfig)intent.getSerializableExtra("evaConfig");
+		speechRecognition = new EvaSpeechComponent(this, config);
 		
 		Log.i(TAG,"Creating speech recognition activity");
 
@@ -156,27 +55,28 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 
 			@Override
 			public void onClick(View arg0) {
-				mSpeechAudioStreamer.stop();
+				speechRecognition.stop();
 			}
 		});
 		
-		mUpdateLevel = new Handler() {
+		mUpdateLevel = new Handler()  {
 			@Override
 			public void handleMessage(Message msg) {
-				int level = mSpeechAudioStreamer.getSoundLevel();
+				SpeechAudioStreamer  speechAudioStreamer = speechRecognition.getSpeechAudioStreamer();
+				int level = speechAudioStreamer.getSoundLevel();
 				mLevel.setText(""+level);
-				if (mSpeechAudioStreamer.wasNoise) {
-					if (mSpeechAudioStreamer.getIsRecording() == false) {
+				if (speechAudioStreamer.wasNoise) {
+					if (speechAudioStreamer.getIsRecording() == false) {
 						mLevel.setText("");
 						mStatusText.setText("Processing...");
 						mProgressBar.setVisibility(View.VISIBLE);
 					}
 					else {
 						mSoundView.setSoundData(
-								mSpeechAudioStreamer.getSoundLevelBuffer(), 
-								mSpeechAudioStreamer.getBufferIndex(),
-								mSpeechAudioStreamer.getPeakLevel(),
-								mSpeechAudioStreamer.getMinSoundLevel()
+								speechAudioStreamer.getSoundLevelBuffer(), 
+								speechAudioStreamer.getBufferIndex(),
+								speechAudioStreamer.getPeakLevel(),
+								speechAudioStreamer.getMinSoundLevel()
 						);
 						mSoundView.invalidate();
 					}
@@ -186,54 +86,43 @@ public class EvaSpeechRecognitionActivity extends RoboActivity {
 			}
 		};
 		
-		String appKey = EvaAPIs.API_KEY;
-		String siteCode = EvaAPIs.SITE_CODE;
-		String locale = EvaAPIs.locale;
-		String language = intent.getStringExtra("language");
-		String vrService = intent.getStringExtra("vr_service");
-
-		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-		String deviceId=telephonyManager.getDeviceId();
-		if (deviceId==null) {
-			deviceId="none";
-		}
 		
-
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-		try {
-			mSpeechAudioStreamer = new SpeechAudioStreamer(this, SAMPLE_RATE);
-			mVoiceClient = new EvaVoiceClient(this, siteCode, appKey, deviceId, sessionId, locale, language, vrService, mSpeechAudioStreamer);
-			mSpeechAudioStreamer.initRecorder();
-			dictationTask = new EvaHttpDictationTask(mVoiceClient, this);
-			dictationTask.execute((Object[])null);
-			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
-		} catch (Exception e) {
-			setResult(RESULT_CANCELED);
-			finish();
-			e.printStackTrace();
-		}
+		speechRecognition.start(this, null);
+		mUpdateLevel.sendEmptyMessageDelayed(0, 100);
 		mTimeActivityCreation = (System.nanoTime() - t0)/1000000;
 	}
 	
 	@Override
 	protected void onStop() {
 		Log.i(TAG,"Stopping speech recognition activity");
-		mSpeechAudioStreamer.stop();
-		if (mVoiceClient.getInTransaction())
-		{
-			Thread tr = new Thread()
-			{
-				public void run()
-				{
-					mVoiceClient.stopTransfer();
-				}
-			};
-			tr.start();
-		}
+		speechRecognition.stop();
+		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 		mUpdateLevel.removeMessages(0);
-		dictationTask.mParent=null;
 		super.onDestroy();
+	}
+
+	@Override
+	public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
+		Intent intent = new Intent();
+
+		intent.putExtra(EvaSpeechComponent.RESULT_EVA_REPLY, evaJson);
+		intent.putExtras(debugData);
+		intent.putExtra(EvaSpeechComponent.RESULT_TIME_ACTIVITY_CREATE, mTimeActivityCreation);
+		
+		setResult(RESULT_OK, intent);		
+		Log.i(TAG,"<<< Finish speech recognition activity: OK");
+		finish();
+	}
+
+	@Override
+	public void speechResultError(String message, Object cookie) {
+		Intent intent = new Intent();
+		intent.putExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE, message);
+		setResult(RESULT_CANCELED, intent);
+		Log.i(TAG,"<<< Finish speech recognition activity - on error:  "+message);
+		finish();
 	}
 
 

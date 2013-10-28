@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.evaapis.EvaAPIs;
 import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.travelport.EvaTravelportDatabase;
@@ -42,8 +41,6 @@ public class MyApplication extends Application {
 		mExpediaSecret = resources.getString(R.string.EXPEDIA_SECRET);
 		mExpediaClientId = resources.getString(R.string.EXPEDIA_CLIENT_ID);
 		
-		EvaAPIs.API_KEY = EvaSettingsAPI.getEvaKey(this);
-		EvaAPIs.SITE_CODE = EvaSettingsAPI.getEvaSiteCode(this); 
 		EvatureLocationUpdater.initContext(this);
 		
 		super.onCreate();
