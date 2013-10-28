@@ -26,6 +26,7 @@ import org.acra.ACRA;
 import org.acra.ErrorReporter;
 import org.json.JSONException;
 
+import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
 import android.app.Activity;
@@ -34,12 +35,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
+import android.os.Handler;
+import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -58,13 +62,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.evaapis.EvaAPIs;
 import com.evaapis.EvaApiReply;
-import com.evaapis.EvaBaseActivity;
+import com.evaapis.EvaComponent;
+import com.evaapis.EvaSearchReplyListener;
+import com.evaapis.EvaSpeechComponent;
+import com.evaapis.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.EvaWarning;
-import com.evaapis.events.NewSessionStarted;
+import com.evaapis.SoundLevelView;
+import com.evaapis.SpeechAudioStreamer;
 import com.evaapis.flow.FlowElement;
 import com.evaapis.flow.FlowElement.TypeEnum;
 import com.evaapis.flow.QuestionElement;
@@ -102,8 +110,9 @@ import com.evature.search.views.fragments.TrainsFragment;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-public class MainActivity extends EvaBaseActivity implements 
-													TextToSpeech.OnInitListener, 
+public class MainActivity extends RoboFragmentActivity implements 
+													EvaSearchReplyListener,
+													OnSharedPreferenceChangeListener,
 													EvaDownloaderTaskInterface {
 
 	private static final String ITEMS_IN_SESSION = "items_in_session";
@@ -137,9 +146,42 @@ public class MainActivity extends EvaBaseActivity implements
 	static EvaHotelDownloaderTask mHotelDownloader = null;
 	
 
+	// public for unit tests
+	public EvaComponent eva;
+
+	EvaSpeechComponent speechSearch = null;
+
+	private View mStatusPanel;
+	private TextView mStatusText;
+	private ProgressBar mProgressBar;
+	private SoundLevelView mSoundView;
+
+
+	@Override
+	public void onDestroy() {
+		eva.onDestroy();
+
+		super.onDestroy();
+	}
+	
+	
+	
+	
+// Handle the results from the speech recognition activity
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		eva.onActivityResult(requestCode, resultCode, data);
+		
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+	
+
+	
+	
 	@Override 
 	public void onResume() {
 		Log.d(TAG, "onResume()");
+		eva.onResume();
 		super.onResume();
 		setDebugData(DebugTextType.None, "");
 	}
@@ -151,14 +193,29 @@ public class MainActivity extends EvaBaseActivity implements
 			mHotelDownloader.cancel(true);
 			mHotelDownloader = null;
 		}
+		eva.onPause();
 		super.onPause();
 	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
 		Log.d(TAG, "onCreate()");
+		eva = new EvaComponent(this, this);
+		eva.onCreate(savedInstanceState);
 		super.onCreate(savedInstanceState);
+		
+		speechSearch = new EvaSpeechComponent(MainActivity.this, MainActivity.this.eva);
 		setContentView(R.layout.new_main);
+		
+		eva.registerPreferenceListener();
+		
+		mStatusPanel = findViewById(R.id.status_panel);
+		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
+		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
+		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);
+		
+		eva.setApiKey(EvaSettingsAPI.getEvaKey(this));
+		eva.setSiteCode(EvaSettingsAPI.getEvaSiteCode(this));
 		
 		mChatTabName = getString(R.string.CHAT);
 		mExamplesTabName = getString(R.string.EXAMPLES);
@@ -261,7 +318,7 @@ public class MainActivity extends EvaBaseActivity implements
 						Log.d(TAG, "Running example: "+example);
 						MainActivity.this.addChatItem(new ChatItem(example));
 						mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
-						MainActivity.this.searchWithText(example);
+						MainActivity.this.eva.searchWithText(example);
 					}});
 				return fragment; 
 			}
@@ -273,7 +330,7 @@ public class MainActivity extends EvaBaseActivity implements
 					@Override
 					public void onClick(SpannableString dialogResponse, int responseIndex) {
 						MainActivity.this.addChatItem(new ChatItem(dialogResponse));
-						MainActivity.this.replyToDialog(responseIndex);
+						MainActivity.this.eva.replyToDialog(responseIndex);
 						//MainActivity.this.searchWithText(dialogResponse);
 					}
 				});
@@ -412,7 +469,7 @@ public class MainActivity extends EvaBaseActivity implements
 	
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
-		menu.getItem(2).setVisible(mDebug);
+		menu.getItem(2).setVisible(eva.isDebug());
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -429,9 +486,9 @@ public class MainActivity extends EvaBaseActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
 		Intent intent;
 		switch (item.getItemId()) {
-		case android.R.id.home:
-			mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
-			return true;
+//		case android.R.id.home:
+//			mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+//			return true;
 		case R.id.new_session:
 			startNewSession();
 			return true;
@@ -679,13 +736,80 @@ public class MainActivity extends EvaBaseActivity implements
 	public void updateProgress(int id, DownloaderStatus mProgress) {
 	}
 
+	
+	Handler mUpdateLevel;
+	
 	// search button click handler ("On Click property" of the button in the xml)
 	// http://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
 		case R.id.search_button:
-//		    MainActivity.this.searchWithText("3 star Hotels in NYC on July 5th to July 16th");
-			MainActivity.this.searchWithVoice();
+			// simplest method:  default 
+			// MainActivity.this.eva.searchWithVoice("voice");
+			
+			if (speechSearch.isInSpeechRecognition() == true) {
+				speechSearch.stop();
+				return;
+			}
+			
+			MainActivity.this.eva.speak("");
+			mStatusPanel.setVisibility(View.VISIBLE);
+			mStatusText.setText("Listening...");
+			
+			final View fView = view;
+			view.setBackgroundResource(R.drawable.custom_button_active);
+			mUpdateLevel = new Handler()  {
+				@Override
+				public void handleMessage(Message msg) {
+					SpeechAudioStreamer  speechAudioStreamer = speechSearch.getSpeechAudioStreamer();
+					
+					if (speechAudioStreamer.wasNoise) {
+						if (speechAudioStreamer.getIsRecording() == false) {
+							mStatusText.setText("Processing...");
+							fView.setBackgroundResource(R.drawable.custom_button_disabled);
+							mProgressBar.setVisibility(View.VISIBLE);
+						}
+						else {
+							mSoundView.setSoundData(
+									speechAudioStreamer.getSoundLevelBuffer(), 
+									speechAudioStreamer.getBufferIndex(),
+									speechAudioStreamer.getPeakLevel(),
+									speechAudioStreamer.getMinSoundLevel()
+							);
+							if (mSoundView.getVisibility() != View.VISIBLE)
+								mSoundView.setVisibility(View.VISIBLE);
+							mSoundView.invalidate();
+						}
+					}
+					
+					sendEmptyMessageDelayed(0, 200);
+					super.handleMessage(msg);
+				}
+			};
+			
+			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
+			
+			speechSearch.start(new SpeechRecognitionResultListener() {
+
+				private void finishSpeech() {
+					mUpdateLevel.removeMessages(0);
+					mSoundView.setVisibility(View.GONE);
+					mStatusPanel.setVisibility(View.GONE);
+					fView.setBackgroundResource(R.drawable.custom_button);
+				}
+				
+				@Override
+				public void speechResultError(String message, Object cookie) {
+					finishSpeech();
+					MainActivity.this.eva.speechResultError(message, cookie);
+				}
+
+				@Override
+				public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
+					finishSpeech();
+					MainActivity.this.eva.speechResultOK(evaJson, debugData, cookie);
+				}
+			}, "voice");
 			break;
 		}
 	}
@@ -738,7 +862,7 @@ public class MainActivity extends EvaBaseActivity implements
 		}
 
 		
-		if (false == mDebug) {
+		if (false == eva.isDebug()) {
 			if (mDebugTab != -1) {
 //				DebugFragment fragment = (DebugFragment) mSwipeyAdapter
 //						.instantiateItem(mViewPager, mDebugTab);
@@ -781,20 +905,19 @@ public class MainActivity extends EvaBaseActivity implements
 			fragment.setExpediaDebugText(lastExpediaReply);
 			break;
 		}
-		
 	}
 	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		super.onSharedPreferenceChanged(sharedPreferences, key);
-		if (DEBUG_PREF_KEY.equals(key)) {
+		eva.onSharedPreferenceChanged(sharedPreferences, key);
+		if (EvaComponent.DEBUG_PREF_KEY.equals(key)) {
 			ActivityCompat.invalidateOptionsMenu(this);
 		}
 		else if (EvaSettingsAPI.EVA_KEY.equals(key)) {
-			EvaAPIs.API_KEY = EvaSettingsAPI.getEvaKey(this);
+			eva.setApiKey(EvaSettingsAPI.getEvaKey(this));
 		}
 		else if (EvaSettingsAPI.EVA_SITE_CODE.equals(key)) {
-			EvaAPIs.SITE_CODE = EvaSettingsAPI.getEvaSiteCode(this);
+			eva.setSiteCode(EvaSettingsAPI.getEvaSiteCode(this));
 		}
 	}
 	
@@ -838,8 +961,6 @@ public class MainActivity extends EvaBaseActivity implements
 			if (chat != null)
 				addChatItem(new ChatItem(chat));
 		}
-		
-		super.onEvaReply(reply, cookie);
 		
 		try {
 			setDebugData(DebugTextType.EvaDebug, reply.JSONReply.toString(2));
@@ -1092,7 +1213,7 @@ public class MainActivity extends EvaBaseActivity implements
 		if (switchToResult && chatItem.sayitActivated == false) { 
 			String sayIt = flow.getSayIt();
 			if (sayIt != null && !"".equals(sayIt) ) {
-				speak(sayIt);
+				eva.speak(sayIt);
 				chatItem.sayitActivated = true;
 			}
 		}
@@ -1138,10 +1259,10 @@ public class MainActivity extends EvaBaseActivity implements
 //		if (isNewSession() == false) {
 			showTab(R.string.CHAT);
 			addChatItem(new ChatItem("Start new search"));
-			resetSession();
+			eva.resetSession();
 			String sessionText = "Starting a new search. How may I help you?";
 			addChatItem(new ChatItem(sessionText, null, null, ChatType.Eva));
-			speak(sessionText);
+			eva.speak(sessionText);
 
 //		}
 	}
@@ -1151,9 +1272,9 @@ public class MainActivity extends EvaBaseActivity implements
 	/****
 	 * handler for  "new session was started" event 
 	 * this is either in response to menu click or to a server side initiated new session
-	 * @param event
 	 */
-	protected void newSessionStart(@Observes NewSessionStarted event) {
+	@Override
+	public void newSessionStarted(boolean selfTriggered) {
 		if (MyApplication.AcraInitialized) {
 			ErrorReporter bugReporter = ACRA.getErrorReporter();
 			String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
@@ -1246,7 +1367,7 @@ public class MainActivity extends EvaBaseActivity implements
 		if (currentHotelSearch != null && currentHotelSearch.sayitActivated == false) {
 			String sayIt = currentHotelSearch.getFlowElement().getSayIt();
 			if (sayIt != null && !"".equals(sayIt) ) {
-				speak(sayIt);
+				eva.speak(sayIt);
 				currentHotelSearch.sayitActivated = true;
 			}
 		}
@@ -1256,11 +1377,13 @@ public class MainActivity extends EvaBaseActivity implements
 		if (currentFlightSearch != null && currentFlightSearch.sayitActivated == false) {
 			String sayIt = currentFlightSearch.getFlowElement().getSayIt();
 			if (sayIt != null && !"".equals(sayIt) ) {
-				speak(sayIt);
+				eva.speak(sayIt);
 				currentFlightSearch.sayitActivated = true;
 			}
 		}
 	}
+
+	
 
 	
 }

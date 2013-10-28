@@ -108,7 +108,7 @@ public class EvaURLTest {
 		slm.simulateLocation(loc);
 
 		
-		mActivity.searchWithText("!!Testing Eva search");
+		mActivity.eva.searchWithText("!!Testing Eva search");
 		
 		try {
 			verify(mockDownloader).get( Matchers.contains("longitude=12.34&latitude=56.78"));
@@ -129,7 +129,7 @@ public class EvaURLTest {
 			assertEquals("12.34.56.78", ExternalIpAddressGetter.getExternalIpAddr());
 			
 			when(mockDownloader.get(anyString())).thenReturn("{}");
-			mActivity.searchWithText("!!Testing Eva search");
+			mActivity.eva.searchWithText("!!Testing Eva search");
 			
 			verify(mockDownloader).get( Matchers.contains("ip_addr=12.34.56.78"));
 

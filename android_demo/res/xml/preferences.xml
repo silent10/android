@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://developer.android.com/resources/samples/ApiDemos/res/xml/preferences.html -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+	
+	
+    
+     <EditTextPreference
+         android:key="eva_key"
+         android:summary="Leave blank for default"
+         android:title="Eva API Key"
+      	/>
+     <EditTextPreference
+         android:key="eva_site_code"
+         android:summary="Leave blank for default"
+         android:title="Site Code"
+      	/>    
+     <PreferenceScreen android:title="Context"
+		android:summary="Travel services to consider in parsing"
+     >
+         <CheckBoxPreference android:key="eva_context_flights"  android:title="Flights" />
+         <CheckBoxPreference android:key="eva_context_hotels"   android:title="Hotels" />
+         <CheckBoxPreference android:key="eva_context_vacation" android:title="Vacation Packages" />
+         <CheckBoxPreference android:key="eva_context_car"      android:title="Car Rental" />
+         <CheckBoxPreference android:key="eva_context_cruise"   android:title="Cruise" />
+         <CheckBoxPreference android:key="eva_context_ski"      android:title="Ski" />
+         <CheckBoxPreference android:key="eva_context_explore"  android:title="Explore" />
+     </PreferenceScreen>
+
+</PreferenceScreen>

@@ -9,9 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -30,11 +27,8 @@ import android.util.Log;
 
 public class SpeechAudioStreamer {
 	public static final String TAG = "SpeechAudioStreamer";
-	private PipedInputStream pipedIn;
-	private PipedOutputStream pipedOut;
 
 	boolean mDebugSavePCM = true;
-	private static final String FILENAME = "recording" ;
 	
 	// debug - time measurments
 	public long totalTimeRecording;  // time from recording start to end (VAD detection)
@@ -60,13 +54,11 @@ public class SpeechAudioStreamer {
 	private float mPeakSoundLevel;
 	private float mMinSoundLevel;
 	
-	boolean wasNoise;
+	public boolean wasNoise;
 
 	private String fifoPath;
-	private RandomAccessFile encodedFifo = null;
 
-	public SpeechAudioStreamer(Context context, int sampleRate)
-			throws Exception {
+	public SpeechAudioStreamer(Context context, int sampleRate) {
 		fifoPath = context.getApplicationInfo().dataDir + "/flac_stream_fifo";
 
 		this.mEncoder = new FLACStreamEncoder();
@@ -326,7 +318,6 @@ public class SpeechAudioStreamer {
 	class Uploader implements Runnable {
 		boolean startedReading  = false;
 		InputStream encodedStream;
-		private long timeDoneUploading;
 		
 		@Override
 		public void run() {

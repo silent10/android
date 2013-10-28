@@ -17,7 +17,7 @@
             android:id="@+id/text_listeningStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Listening..." />
+            android:text="@string/listening_" />
 
         <ProgressBar
             android:id="@+id/progressBar1"
@@ -31,14 +31,15 @@
     <com.evaapis.SoundLevelView
         android:id="@+id/surfaceView_sound_wave"
         android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:layout_margin="20dp" />
+        android:layout_height="80dip"
+        android:layout_margin="20dip"
+         />
 
     <TextView
         android:id="@+id/text_recordLevel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Level" >
+        android:text="@string/level" >
     </TextView>
 
     <Button

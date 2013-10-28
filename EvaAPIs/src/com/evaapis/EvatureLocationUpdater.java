@@ -1,8 +1,5 @@
 package com.evaapis;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -11,14 +8,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-@Singleton
+
 public class EvatureLocationUpdater implements LocationListener {
 
 	private static final int UPDATE_DELAY = 5 * 60 * 1000; // Five minutes
 	private static final int UPDATE_DISTANCE = 5 * 1000; // Five kilometers
 	private static final String TAG = "EvatureLocationUpdater";
 	
-	@Inject private LocationManager locationManager;
+	private LocationManager locationManager;
 	private Location currentLocation = null;
 
 	private static EvatureLocationUpdater thisInstance = null;
@@ -27,10 +24,14 @@ public class EvatureLocationUpdater implements LocationListener {
 	public EvatureLocationUpdater() {
 		assert(thisInstance == null); // Guice should make sure only once instance exists
 		thisInstance = this;
+		if (appContext != null)
+			thisInstance.locationManager = (LocationManager) appContext.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	public static void initContext(Context context) {
 		appContext = context;
+		if (thisInstance != null)
+			thisInstance.locationManager = (LocationManager) appContext.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	public void stopGPS() {

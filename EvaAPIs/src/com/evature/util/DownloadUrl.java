@@ -19,17 +19,18 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 
-import com.google.inject.Singleton;
 
-@Singleton
 public class DownloadUrl {
 	
 	// Iftah: I changed this to be non-static method so that a unit test can inject a mock class and verify URL without trouble
 	//        but added @Singleton - which should make Guice reuse a single instance of this class for each instantiation
+	public String get(String myurl) throws IOException {
+		return DownloadUrl.sget(myurl);
+	}
 	
 	// Given a URL, establishes an HttpUrlConnection and retrieves
 	// the web page content as a InputStream, which it returns as a string.
-	public String get(String myurl) throws IOException {
+	public static String sget(String myurl) throws IOException {
 		HttpGet request = new HttpGet(myurl);
 		request.addHeader("Accept-Encoding","gzip");
 

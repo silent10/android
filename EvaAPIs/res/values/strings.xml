@@ -20,4 +20,6 @@
     <string name="HOTELS">HOTELS</string>
     <string name="HOTEL">HOTEL</string>
     <string name="button_stop">Stop</string>
+    <string name="listening_">Listening...</string>
+    <string name="level">Level</string>
 </resources>

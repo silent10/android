@@ -42,9 +42,9 @@ public class SoundLevelView extends View {
 				int delta = max - min;
 				// build points array
 				int qi = 0;
-				int height = (canvas.getHeight()-2)/2;
+				int height = (this.getHeight()-2)/2;
 				float prevY = height;
-				float width = canvas.getWidth()-2;
+				float width = this.getWidth()-2;
 				float xStep = width / soundBuff.length;
 				float prevX = (width - numOfPoints*xStep)/2;
 				
