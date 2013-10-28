@@ -148,7 +148,7 @@ public class EvaReplyTest {
 		
 			assertEquals(0, mChatListModel.size());
 		
-			mActivity.searchWithText("!!Testing Eva search");
+			mActivity.eva.searchWithText("!!Testing Eva search");
 			
 			verify(mockDownloader).get(anyString());
 			verify(mockProtocol, never()).getExpediaAnswer(notNull(EvaApiReply.class), anyString());
@@ -243,7 +243,7 @@ public class EvaReplyTest {
 		
 			assertEquals(0, mChatListModel.size());
 		
-			mActivity.searchWithText("!!Testing Eva search");
+			mActivity.eva.searchWithText("!!Testing Eva search");
 			
 			verify(mockDownloader).get(anyString());
 			verify(mockProtocol).getExpediaAnswer(notNull(EvaApiReply.class), anyString());

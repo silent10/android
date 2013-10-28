@@ -36,7 +36,7 @@ public class VoiceSearchTest {
 	
 	@Test
 	public void testStartRecordEva() {
-		mActivity.searchWithVoice();
+		mActivity.eva.searchWithVoice();
 		ShadowActivity shadowActivity = shadowOf(mActivity);
 		Intent startedIntent = shadowActivity.getNextStartedActivity();
 		assertEquals(EvaSpeechRecognitionActivity.class.getName(), startedIntent.getComponent().getClassName());

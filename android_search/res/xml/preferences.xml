@@ -4,20 +4,20 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 	<PreferenceCategory android:title="@string/internalization_title">
 	    <ListPreference 
-	        android:key="preference_currency"
+	        android:key="eva_preference_currency"
 	        android:title="@string/currency_pref_title"
 	        android:summary="@string/currency_summary"
 	        android:entries="@array/entries_currency_preference"
 	        android:entryValues="@array/entryvalues_currency_preference" />
 	    <ListPreference 
-	        android:key="preference_locale"
+	        android:key="eva_preference_locale"
 	        android:title="Locale"
 	        android:summary="How to parse dates, weekends"
 	        android:entries="@array/locales"
 	        android:entryValues="@array/locale_values"
 	        />
 	    <ListPreference 
-	        android:key="preference_language"
+	        android:key="eva_preference_language"
 	        android:title="Language"
 	        android:summary="Search and show results using this language"
 	        android:entries="@array/entries_languages"
@@ -40,11 +40,11 @@
             android:title="Site Code"
          	/>    
         <CheckBoxPreference
-            android:key="debug"
+            android:key="eva_debug"
             android:summary="@string/summary_parent_preference"
             android:title="@string/title_debug_parent_preference" />
         <ListPreference 
-            android:key="vr_service"
+            android:key="eva_vr_service"
             android:title="Preferred VProxy service"
             android:summary="Backend of Voice Recognition"
             android:entries="@array/entries_vr_service"
@@ -58,6 +58,17 @@
             android:key="save_encoded"
             android:summary="@string/save_encoded_file_flac_"
             android:title="@string/save_encoded" />
-        </PreferenceCategory>
+        
+        <PreferenceScreen android:title="Context" 
+            android:summary="Travel services to consider in parsing">
+         <CheckBoxPreference android:key="eva_context_flights"  android:title="Flights" />
+         <CheckBoxPreference android:key="eva_context_hotels"   android:title="Hotels" />
+         <CheckBoxPreference android:key="eva_context_vacation" android:title="Vacation Packages" />
+         <CheckBoxPreference android:key="eva_context_car"      android:title="Car Rental" />
+         <CheckBoxPreference android:key="eva_context_cruise"   android:title="Cruise" />
+         <CheckBoxPreference android:key="eva_context_ski"      android:title="Ski" />
+         <CheckBoxPreference android:key="eva_context_explore"  android:title="Explore" />
+       </PreferenceScreen>
+   </PreferenceCategory>
 
 </PreferenceScreen>
