@@ -1,6 +1,11 @@
-android
+Evature Android SDK
 =======
 
-Android EVA search
+Including:
+* EVA demo app
+* EVA Android example App
+* EVA APIs
 
-Release 1.0
+Release 1.1
+
+See EvaSDKDocumentation.pdf for documentation
