@@ -148,6 +148,14 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		responseText.setText("New session started");
 	}
 
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
+		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
+		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
+	}
+
 	
 
 }

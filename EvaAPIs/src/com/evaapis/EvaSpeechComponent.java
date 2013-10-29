@@ -29,15 +29,20 @@ public class EvaSpeechComponent {
 	EvaComponent.EvaConfig mConfig;
 	
 	Context mContext;
-	
+		
 	public EvaSpeechComponent(Context context, EvaComponent.EvaConfig config) {
 		mConfig = config;
 		mContext = context;
 	}
 	
-	public EvaSpeechComponent(Context context, EvaComponent eva) {
-		this(context, eva.mConfig);
+	public EvaSpeechComponent(EvaComponent eva) {
+		this(eva.activity, eva.mConfig);
 	}
+	
+	public EvaSpeechComponent(EvaBaseActivity evaActivity) {
+		this(evaActivity.eva);
+	}
+
 	
 	public interface SpeechRecognitionResultListener {
 		// Exactly one of the following methods will be called (for each Speech Recognition call)
