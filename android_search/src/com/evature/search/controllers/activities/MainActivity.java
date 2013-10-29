@@ -43,7 +43,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -204,7 +203,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		eva.onCreate(savedInstanceState);
 		super.onCreate(savedInstanceState);
 		
-		speechSearch = new EvaSpeechComponent(MainActivity.this, MainActivity.this.eva);
+		speechSearch = new EvaSpeechComponent(eva);
 		setContentView(R.layout.new_main);
 		
 		eva.registerPreferenceListener();
