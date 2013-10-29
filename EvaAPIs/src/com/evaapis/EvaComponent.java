@@ -63,7 +63,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private ExternalIpAddressGetter mExternalIpAddressGetter;
 	private EvatureLocationUpdater mLocationUpdater;
 	
-	private Activity activity;
+	Activity activity;
 	private EvaSearchReplyListener replyListener;
 	
 

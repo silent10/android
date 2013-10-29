@@ -55,6 +55,7 @@ public class EvaVoiceClient {
 
 	private static short PORT = (short) 443;
 	private static String HOSTNAME = "vproxy.evaws.com";
+	private static String API_VERSION = "v1.0";
 
 	private String mEvaResponse;
 
@@ -153,7 +154,7 @@ public class EvaVoiceClient {
 			qparams.add(new BasicNameValuePair("locale", mConfig.locale));
 		}
 
-		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, "", URLEncodedUtils.format(qparams, "UTF-8"), null);
+		URI uri = URIUtils.createURI("https", HOSTNAME, PORT, API_VERSION, URLEncodedUtils.format(qparams, "UTF-8"), null);
 		return uri;
 	}
 
