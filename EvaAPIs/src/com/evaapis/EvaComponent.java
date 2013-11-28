@@ -33,13 +33,15 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	private final String TAG = "EvaComponent";
 	
-	public static String API_ROOT = "http://freeapi.evature.com";
-
 
 	public static final String DEBUG_PREF_KEY  = "eva_debug";
 	public static final String LOCALE_PREF_KEY = "eva_preference_locale";
 	public static final String LANG_PREF_KEY   = "eva_preference_language";
 	public static final String VRSERV_PREF_KEY = "eva_vr_service";
+	
+	public static final String VPROXY_HOST_PREF_KEY = "eva_vproxy_host";
+	public static final String WEBSERV_HOST_PREF_KEY = "eva_web_service_host";
+	public static final String API_VER_PREF_KEY = "eva_api_ver";
 	
 	public static final String CONTEXT_FLIGHTS_PREF_KEY = "eva_context_flights"; 
 	public static final String CONTEXT_HOTELS_PREF_KEY = "eva_context_hotels";  
@@ -81,9 +83,16 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		public String deviceId;
 		public String context;// "h" for hotels, "f" for flights, etc... see docs
 		
+		public String vproxyHost;
+		public String webServiceHost;
+		public String apiVersion;
+		
 		public EvaConfig() {
 			sessionId = "1";
 			language = "en";
+			webServiceHost = "http://freeapi.evature.com";
+			vproxyHost = "vproxy.evaws.com";
+			apiVersion = "v1.0";
 		}
 	}
 		
@@ -93,7 +102,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		this.activity = activity;
 		this.replyListener = replyListener;
 		mLocationUpdater = new EvatureLocationUpdater();
-		mExternalIpAddressGetter = new ExternalIpAddressGetter(API_ROOT);
+		mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
 	}
 	
 	public EvaComponent(Activity activity, EvaSearchReplyListener replyListener, EvaConfig config) {
@@ -106,7 +115,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		this.activity = activity;
 		this.replyListener = replyListener;
 		mLocationUpdater = new EvatureLocationUpdater();
-		mExternalIpAddressGetter = new ExternalIpAddressGetter(API_ROOT);
+		mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
 	}
 	
 	public void speak(String sayIt) {
@@ -165,6 +174,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		setDebug(sharedPreferences.getBoolean(DEBUG_PREF_KEY, false));
 		setVrService(sharedPreferences.getString(VRSERV_PREF_KEY, "none"));
 		
+		mConfig.vproxyHost = sharedPreferences.getString(VPROXY_HOST_PREF_KEY, "vproxy.evaws.com");
+		mConfig.webServiceHost = sharedPreferences.getString(WEBSERV_HOST_PREF_KEY, "http://freeapi.evature.com");
+		mConfig.apiVersion =  sharedPreferences.getString(API_VER_PREF_KEY, "v1.0");
 
 		String _context="";
 		if (sharedPreferences.getBoolean(CONTEXT_FLIGHTS_PREF_KEY, false))   	_context += "f"; 

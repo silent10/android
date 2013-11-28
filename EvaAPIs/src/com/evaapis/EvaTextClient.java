@@ -48,7 +48,7 @@ import com.evature.util.ExternalIpAddressGetter;
 		@Override
 		protected String doInBackground(Void... non) {
 			startOfTextSearch = System.nanoTime();
-			String evatureUrl = EvaComponent.API_ROOT + "/api/v1.0?";
+			String evatureUrl = mEva.mConfig.webServiceHost + "/api/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());
 			evatureUrl += ("&api_key=" + mEva.getApiKey());
 			//evatureUrl += ("&language=" + mLanguage);

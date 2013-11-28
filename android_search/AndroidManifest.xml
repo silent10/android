@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.evature.search"
-    android:versionCode="32"
+    android:versionCode="34"
     android:versionName="Pre-alpha" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
@@ -45,7 +45,6 @@
         <activity android:name="com.evature.search.controllers.activities.MyPreferences"></activity>
         <uses-library android:name="com.google.android.maps"/>
         <activity android:name="com.evature.search.controllers.activities.HotelsMapActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.evaapis.EvaSpeechRecognitionActivity" android:screenOrientation="portrait"></activity>
         <activity android:name="com.evature.search.controllers.activities.EvaCheckoutActivity" android:screenOrientation="portrait"></activity>
         <activity
              android:name="com.evature.search.controllers.activities.BugReportDialog"

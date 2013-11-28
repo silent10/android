@@ -87,36 +87,54 @@ public class RoomDetails {
 	}
 	
 	public String buildTravelUrl(int hotelId, String checkin, String checkout, int adultsCount, String rateKey) {
+		/*
+			&targetId=AREA-572b0850-4e3f-469b-87b2-c17ed3ea049b|cities
+			
+			&SSgroup=control
+			&isNPRRoom=false
+			&selectedPrice=976.65
+			&pagename=ToStep1
+			&supplierType=E
+		 */
+
+		
+		
 		String url = "https://www.travelnow.com/templates/352395/hotels/";
 		url += hotelId + "/";
 		url += "book?lang=en";
 		url += "&currency=" + mRateInfo.mChargableRateInfo.mCurrencyCode;
 		url += "&secureUrlFromDataBridge=https%3A%2F%2Fwww.travelnow.com";
-		url += "&requestVersion=V2";
+		//url += "&requestVersion=V2";
+		url += "&standardCheckin=" + checkin;
+		url += "&standardCheckout=" + checkout;
+		url += "&isNPRRoom=false";
+		
 		url += "&checkin=" + checkin;
 		url += "&checkout=" + checkout;
-		url += "&rating=0";
+		
+		//url += "&rating=0";
 		url += "&roomsCount=1";
 		url += "&rooms[0].adultsCount=" + adultsCount;
 		url += "&rooms[0].childrenCount=0";
-		url += "&filter.sortedBy=traveler_hl";
-		url += "&filter.lowPrice=0";
-		url += "&filter.highPrice=2147483647";
-		url += "&filter.travelerOpinion=0";
-		url += "&filter.breakfastIncluded=false";
+		
+		//url += "&filter.sortedBy=traveler_hl";
+		//url += "&filter.lowPrice=0";
+		//url += "&filter.highPrice=2147483647";
+		//url += "&filter.travelerOpinion=0";
+		//url += "&filter.breakfastIncluded=false";
 		url += "&subscriptionInfo.termsConditionAgreement=false";
 		url += "&subscriptionInfo.wantNews=false";
 		url += "&subscriptionInfo.wantNewsletters=false";
-		url += "&asyncSearch=true";
+		//url += "&asyncSearch=true";
 		url += "&rateCode=" + mRateCode;
 		url += "&roomTypeCode=" + mRoomTypeCode;
-		url += "&hrnQuoteKey=" + rateKey;
+		//url += "&hrnQuoteKey=" + rateKey;
 		url += "&selectedPrice=" + mRateInfo.mChargableRateInfo.mTotal;//mAverageBaseRate;
-		url += "&linkId=HotSearch:Hot:ResultsList:Book";
+		//url += "&linkId=HotSearch:Hot:ResultsList:Book";
 		url += "&pagename=ToStep1";
-		if (mSupplierType.equals("E"))
-			url += "&supplierType=H";
-		else
+//		if (mSupplierType.equals("E"))
+//			url += "&supplierType=H";
+//		else
 			url += "&supplierType=" + mSupplierType;
 		Log.i(TAG, "Rate Code: "+mRateCode + "   room type: "+mRoomTypeCode+ "  selectedPrice: "+mRateInfo.mChargableRateInfo.mTotal);
 		return url;

@@ -13,7 +13,7 @@ There are two possible entry points to the voice-recognition
   this is the responsibility of the class "EvaSpeechRecognitionActivity".
 
 2. Activate voice recognition - without GUI
-  this is the responsibility of the class "green"
+  this is the responsibility of the class "EvaVoiceComponent"
   
   So EvaSpeechRecognitionActivity  uses  EvaVoiceComponent
   In addition, the "wavy green lines" logic is in "SoundLevelView" class, so the activity uses that as well.
