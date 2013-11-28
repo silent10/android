@@ -31,18 +31,37 @@
     <PreferenceCategory android:title="@string/advanced_menu" >
         <EditTextPreference
             android:key="eva_key"
-            android:summary="leave blank for default"
+            android:summary="Leave blank for default"
             android:title="Eva API Key"
          	/>
         <EditTextPreference
             android:key="eva_site_code"
-            android:summary="leave blank for default"
+            android:summary="Leave blank for default"
             android:title="Site Code"
          	/>    
         <CheckBoxPreference
             android:key="eva_debug"
             android:summary="@string/summary_parent_preference"
             android:title="@string/title_debug_parent_preference" />
+        
+        <EditTextPreference
+            android:key="eva_vproxy_host"
+            android:summary="Leave blank for default"
+            android:title="VProxy Host"
+         	/>
+        
+        <EditTextPreference
+            android:key="eva_webservice_host"
+            android:summary="Leave blank for default"
+            android:title="EVA WS Host"
+         	/>
+        
+        <EditTextPreference
+            android:key="eva_api_ver_host"
+            android:summary="Leave blank for default"
+            android:title="API Version"
+         	/>
+        
         <ListPreference 
             android:key="eva_vr_service"
             android:title="Preferred VProxy service"

@@ -15,6 +15,25 @@
          android:summary="Leave blank for default"
          android:title="Site Code"
       	/>    
+      	
+      	 <EditTextPreference
+            android:key="eva_vproxy_host"
+            android:summary="Leave blank for default"
+            android:title="VProxy Host"
+         	/>
+        
+        <EditTextPreference
+            android:key="eva_webservice_host"
+            android:summary="Leave blank for default"
+            android:title="EVA WS Host"
+         	/>
+        
+        <EditTextPreference
+            android:key="eva_api_ver_host"
+            android:summary="Leave blank for default"
+            android:title="API Version"
+         	/>
+         	
      <PreferenceScreen android:title="Context"
 		android:summary="Travel services to consider in parsing"
      >
