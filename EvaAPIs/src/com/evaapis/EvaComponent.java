@@ -2,6 +2,7 @@ package com.evaapis;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import org.json.JSONException;
@@ -14,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.telephony.TelephonyManager;
@@ -30,6 +32,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 									EvaSearchReplyListener, OnInitListener{ 
 
 	private static final int VOICE_RECOGNITION_REQUEST_CODE_EVA = 0xBABE;
+	private static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
 	
 	private final String TAG = "EvaComponent";
 	
@@ -67,7 +70,10 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	Activity activity;
 	private EvaSearchReplyListener replyListener;
-	
+
+	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
+	private static final String DefaultEvaWSHost = "http://freeapi.evature.com";
+	private static final String DefaultApiVersion = "v1.0";
 
 	/*****
 	 * This class simplifies passing all the needed parameters down the levels of abstraction
@@ -90,9 +96,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		public EvaConfig() {
 			sessionId = "1";
 			language = "en";
-			webServiceHost = "http://freeapi.evature.com";
-			vproxyHost = "vproxy.evaws.com";
-			apiVersion = "v1.0";
+			webServiceHost = DefaultEvaWSHost;
+			vproxyHost = DefaultVProxyHost;
+			apiVersion = DefaultApiVersion;
 		}
 	}
 		
@@ -174,9 +180,21 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		setDebug(sharedPreferences.getBoolean(DEBUG_PREF_KEY, false));
 		setVrService(sharedPreferences.getString(VRSERV_PREF_KEY, "none"));
 		
-		mConfig.vproxyHost = sharedPreferences.getString(VPROXY_HOST_PREF_KEY, "vproxy.evaws.com");
-		mConfig.webServiceHost = sharedPreferences.getString(WEBSERV_HOST_PREF_KEY, "http://freeapi.evature.com");
-		mConfig.apiVersion =  sharedPreferences.getString(API_VER_PREF_KEY, "v1.0");
+		mConfig.vproxyHost = sharedPreferences.getString(VPROXY_HOST_PREF_KEY, "");
+		if (mConfig.vproxyHost.equals("")) {
+			Log.d(TAG, "Setting VProxy host to default");
+			mConfig.vproxyHost =  DefaultVProxyHost;
+		}
+		mConfig.webServiceHost = sharedPreferences.getString(WEBSERV_HOST_PREF_KEY, "");
+		if (mConfig.webServiceHost.equals("")) {
+			Log.d(TAG, "Setting WebService host to default");
+			mConfig.webServiceHost = DefaultEvaWSHost;
+		}
+		mConfig.apiVersion =  sharedPreferences.getString(API_VER_PREF_KEY, "");
+		if (mConfig.apiVersion.equals("")) {
+			Log.d(TAG, "Setting API Version host to default");
+			mConfig.apiVersion = DefaultApiVersion;
+		}
 
 		String _context="";
 		if (sharedPreferences.getBoolean(CONTEXT_FLIGHTS_PREF_KEY, false))   	_context += "f"; 
@@ -229,18 +247,27 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	// Handle the results from the speech recognition activity
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == VOICE_RECOGNITION_REQUEST_CODE_EVA) {
-			if (resultCode == Activity.RESULT_OK) {
-				Log.i(TAG, "speech recognition activity result "+resultCode);
+		switch(requestCode) {
+			case VOICE_RECOGNITION_REQUEST_CODE_EVA:
+				if (resultCode == Activity.RESULT_OK) {
+					Log.i(TAG, "speech recognition activity result "+resultCode);
+					Bundle bundle = data.getExtras();
+					String evaJson = bundle.getString(EvaSpeechComponent.RESULT_EVA_REPLY);
+					speechResultOK(evaJson, bundle, voiceActivityCookie);
+				}
+				else if (resultCode == Activity.RESULT_CANCELED) {
+					String message = data.getStringExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE);
+					speechResultError(message, voiceActivityCookie);
+				}
+				voiceActivityCookie = null;
+				break;
+				
+			case VOICE_RECOGNITION_REQUEST_CODE_GOOGLE:
+				// send the N-Best to VProxy for choice
 				Bundle bundle = data.getExtras();
-				String evaJson = bundle.getString(EvaSpeechComponent.RESULT_EVA_REPLY);
-				speechResultOK(evaJson, bundle, voiceActivityCookie);
-			}
-			else if (resultCode == Activity.RESULT_CANCELED) {
-				String message = data.getStringExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE);
-				speechResultError(message, voiceActivityCookie);
-			}
-			voiceActivityCookie = null;
+				ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
+				searchWithMultipleText(matches, "google voice");
+				break;
 		}
 	}
 	
@@ -333,6 +360,24 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
 	}
 	
+	public void searchWithLocalVoiceRecognition(int nbest) {
+		// Fire an intent to start the speech recognition activity.
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		// Specify the calling package to identify your application (optional step)
+		intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+		// Display an hint to the user about what he should say.
+		intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Travel Search Query");
+		// Given an hint to the recognizer about what the user is going to say
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+		// Specify how many results you want to receive. The results will be sorted
+		// where the first result is the one with higher confidence.
+		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, nbest);
+		// Specify the recognition language. This parameter has to be specified only if the
+		// recognition has to be done in a specific language and not the default one (i.e., the system locale).
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, getPreferedLanguage());
+		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_GOOGLE);
+	}
+	
 	public void searchWithText(String searchString) {
 		searchWithText(searchString, null);
 	}
@@ -341,7 +386,15 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		mLastLanguageUsed = getPreferedLanguage();
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		EvaTextClient callerTask = new EvaTextClient();
-		callerTask.initialize(this, searchString, -1, null);
+		callerTask.initialize(this, searchString, -1, cookie);
+		callerTask.execute();
+	}
+	
+	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie) {
+		mLastLanguageUsed = getPreferedLanguage();
+		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
+		EvaTextClient callerTask = new EvaTextClient();
+		callerTask.initialize(this, nBestTexts, cookie);
 		callerTask.execute();
 	}
 	
@@ -352,7 +405,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void replyToDialog(int replyIndex, Object cookie) {
 		Log.i(TAG, "replying to dialog: "+replyIndex);
 		EvaTextClient callerTask = new EvaTextClient();
-		callerTask.initialize(this, null, replyIndex, null);
+		callerTask.initialize(this, null, replyIndex, cookie);
 		callerTask.execute();
 	}
 	

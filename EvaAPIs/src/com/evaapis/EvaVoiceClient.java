@@ -152,9 +152,10 @@ public class EvaVoiceClient {
 			qparams.add(new BasicNameValuePair("locale", mConfig.locale));
 		}
 		
-		
+		String host = mConfig.vproxyHost.toLowerCase();
+		host = host.replaceFirst("^http[s]?://", "");
 
-		URI uri = URIUtils.createURI("https", mConfig.vproxyHost, PORT, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
+		URI uri = URIUtils.createURI("https", host, PORT, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
 		return uri;
 	}
 

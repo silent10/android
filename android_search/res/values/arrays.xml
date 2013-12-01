@@ -68,12 +68,14 @@
     <string-array name="entries_vr_service">
         <item>None</item>
         <item>Ginger</item>
-        <item>Google</item>
+        <item>Google Web</item>
+        <item>Google Phone</item>
     </string-array>
     <string-array name="entryvalues_vr_service">
         <item>none</item>
         <item>ginger_streaming</item>
         <item>google_streaming</item>
+        <item>google_local</item>
     </string-array>
    
    <string-array name="locales">

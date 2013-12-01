@@ -746,6 +746,11 @@ public class MainActivity extends RoboFragmentActivity implements
 			// simplest method:  default 
 			// MainActivity.this.eva.searchWithVoice("voice");
 			
+			if ("google_local".equals(MainActivity.this.eva.getVrService())) {
+				MainActivity.this.eva.searchWithLocalVoiceRecognition(4);
+				return;
+			}
+			
 			if (speechSearch.isInSpeechRecognition() == true) {
 				speechSearch.stop();
 				return;
@@ -961,10 +966,12 @@ public class MainActivity extends RoboFragmentActivity implements
 				addChatItem(new ChatItem(chat));
 		}
 		
-		try {
-			setDebugData(DebugTextType.EvaDebug, reply.JSONReply.toString(2));
-		} catch (JSONException e) {
-			e.printStackTrace();
+		if (reply.JSONReply != null) {
+			try {
+				setDebugData(DebugTextType.EvaDebug, reply.JSONReply.toString(2));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		if (reply.flow != null ) {
