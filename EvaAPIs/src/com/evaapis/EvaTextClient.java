@@ -3,7 +3,9 @@ package com.evaapis;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,6 +28,7 @@ import com.evature.util.ExternalIpAddressGetter;
 		EvaComponent mEva;
 		private Object mCookie;  
 		private String mInputText;
+		private ArrayList<String> mNBest;
 		int mResponseId;
 		private long startOfTextSearch;
 		
@@ -42,13 +45,34 @@ import com.evature.util.ExternalIpAddressGetter;
 			mResponseId = responseId;
 			mEva = eva;
 			mInputText = inputText;
+			mNBest = null;
+			mCookie = cookie;
+		}
+		
+		/****
+		 * 
+		 * @param nBestText - the N best results from voice recognition - passing all of them for Eva to choose the best one
+		 * @param responseId - response to send to Eva, ignored if -1
+		 * @param cookie   - will be returned to the listener on callback
+		 */
+		public void initialize(EvaComponent eva,
+								ArrayList<String> nBestText, 
+								Object cookie) {
+			mResponseId = -1;
+			mEva = eva;
+			mNBest = nBestText;
+			mInputText = null;
 			mCookie = cookie;
 		}
 
 		@Override
 		protected String doInBackground(Void... non) {
 			startOfTextSearch = System.nanoTime();
-			String evatureUrl = mEva.mConfig.webServiceHost + "/api/"+mEva.mConfig.apiVersion+"?";
+			String evatureUrl = mEva.mConfig.webServiceHost;
+			if (mNBest != null) {
+				evatureUrl = mEva.mConfig.vproxyHost;
+			}
+			evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());
 			evatureUrl += ("&api_key=" + mEva.getApiKey());
 			//evatureUrl += ("&language=" + mLanguage);
@@ -68,6 +92,15 @@ import com.evature.util.ExternalIpAddressGetter;
 			}
 			if (mResponseId != -1) {
 				evatureUrl += ("&dialog_response="+mResponseId);
+			}
+			if (mNBest != null) {
+				for (String input: mNBest) {
+					try {
+						evatureUrl += ("&input_text=" + URLEncoder.encode(input, "UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace(); 
+					}
+				}
 			}
 			if (mInputText != null) {
 				try {
@@ -103,8 +136,10 @@ import com.evature.util.ExternalIpAddressGetter;
 			if (mEva.isDebug()) {
 				JSONObject debugData = new JSONObject();
 				try {
-					debugData.put("Time in HTTP Execute", ((System.nanoTime() - startOfTextSearch)/1000000)+"ms");
-					apiReply.JSONReply.put("debug", debugData);
+					if (apiReply.JSONReply != null) {
+						debugData.put("Time in HTTP Execute", ((System.nanoTime() - startOfTextSearch)/1000000)+"ms");
+						apiReply.JSONReply.put("debug", debugData);
+					}
 				} catch (JSONException e) {
 					Log.e(TAG, "Failed setting debug data", e);
 				}

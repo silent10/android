@@ -46,7 +46,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 
 		setContentView(R.layout.listening);
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
-		mLevel=(TextView)findViewById(R.id.text_recordLevel);
+		mLevel = (TextView)findViewById(R.id.text_recordLevel);
 		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
 		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);

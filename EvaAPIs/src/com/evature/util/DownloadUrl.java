@@ -3,21 +3,25 @@ package com.evature.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 
 
 public class DownloadUrl {
@@ -35,12 +39,36 @@ public class DownloadUrl {
 		request.addHeader("Accept-Encoding","gzip");
 
 		HttpParams params = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(params, 4000);
-		HttpConnectionParams.setSoTimeout(params, 4000);
+		HttpProtocolParams.setContentCharset(params, "UTF-8");
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		HttpProtocolParams.setUseExpectContinue(params, false);
+		HttpConnectionParams.setConnectionTimeout(params, 10000); // wait 10 seconds to establish connection
+		HttpConnectionParams.setSoTimeout(params, 1000); // wait 10 seconds to get first byte in response
 
-		DefaultHttpClient client = new DefaultHttpClient();
-		client.setParams(params);
-		HttpResponse response = client.execute(request);
+		// Initialize the HTTP client
+		HttpClient httpclient = new DefaultHttpClient(params);
+
+		if (myurl.toLowerCase().startsWith("https:")) {
+			SSLSocketFactory sf=null;
+			try {
+				sf = new EvatureSSLSocketFactory(null);
+			} catch (UnrecoverableKeyException e) {
+				e.printStackTrace();
+			} catch (KeyStoreException e) {
+				e.printStackTrace();
+			} catch (KeyManagementException e) {
+				e.printStackTrace();
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+			Scheme sch = new Scheme("https", sf, 443);
+			httpclient.getConnectionManager().getSchemeRegistry().register(sch);
+		}
+
+		
+		
+		HttpResponse response = httpclient.execute(request);
 		
 		HttpEntity entity = response.getEntity();
 		InputStream inputStream = entity.getContent();
