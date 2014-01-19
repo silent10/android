@@ -28,8 +28,10 @@ public class RoomDetails {
 	String mRateDescription;
 	public String mRoomTypeDescription;
 	public String mDeepLink;
-	public String mSupplierType;
+	//public String mSupplierType;
 
+	
+	
 	public RoomDetails(JSONObject jsonObject) {
 		
 		mRoomTypeDescription =	EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeDescription");
@@ -48,7 +50,7 @@ public class RoomDetails {
 		//mRateKey =  EvaDatabase.getSafeString(jsonObject, "rateKey");
 		mRateDescription = EvaXpediaDatabase.getSafeString(jsonObject, "rateDescription");
 		mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
-		mSupplierType = EvaXpediaDatabase.getSafeString(jsonObject, "supplierType");
+		
 		
 		try {
 			JSONObject jRateInfos = jsonObject.getJSONObject("RateInfos");
@@ -86,7 +88,7 @@ public class RoomDetails {
 		}
 	}
 	
-	public String buildTravelUrl(int hotelId, String checkin, String checkout, int adultsCount, String rateKey) {
+	public String buildTravelUrl(int hotelId, String supplierType, String checkin, String checkout, int adultsCount, String rateKey) {
 		/*
 			&targetId=AREA-572b0850-4e3f-469b-87b2-c17ed3ea049b|cities
 			
@@ -135,7 +137,7 @@ public class RoomDetails {
 //		if (mSupplierType.equals("E"))
 //			url += "&supplierType=H";
 //		else
-			url += "&supplierType=" + mSupplierType;
+			url += "&supplierType=" + supplierType;
 		Log.i(TAG, "Rate Code: "+mRateCode + "   room type: "+mRoomTypeCode+ "  selectedPrice: "+mRateInfo.mChargableRateInfo.mTotal);
 		return url;
 	}

@@ -62,6 +62,12 @@ public class ExternalIpAddressGetter {
 	}
 	public static void setExternalIpAddr(String ipaddr) {
 		IpAddress = ipaddr;
+		if (IpAddress != null) {
+			IpAddress = IpAddress.trim();
+		}
+		if (IpAddress.length() == 0) {
+			IpAddress = null;
+		}
 	}
 
 
@@ -97,7 +103,7 @@ public class ExternalIpAddressGetter {
 		protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
 			if (result != null) {
 				Log.d(TAG, "External IP address = " + result);
-				IpAddress = result;
+				setExternalIpAddr(result);
 			} else {
 				Log.d(TAG, "My external IP resolver returned null!");
 			}

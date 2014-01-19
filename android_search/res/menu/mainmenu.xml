@@ -9,11 +9,17 @@
         <!-- android:showAsAction="ifRoom|withText" -->
         <!-- android:showAsAction="always" -->
     </item>
-     
+    
+    <item
+        android:id="@+id/faq"
+        android:title="@string/faq">
+    </item>
+    
     <item
         android:id="@+id/settings"
         android:title="@string/settings">
     </item>
+    
     <item
         android:id="@+id/bug_report"
         android:visible="false"

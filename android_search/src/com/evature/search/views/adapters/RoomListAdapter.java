@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.R;
 import com.evature.search.models.expedia.HotelData;
+import com.evature.search.models.expedia.RoomDetails;
 
 public class RoomListAdapter extends BaseAdapter {
 
@@ -69,31 +70,34 @@ public class RoomListAdapter extends BaseAdapter {
 		 
 		 holder.roomIndex = position;
 		 
-		 Spanned spannedName = Html.fromHtml(mHotel.mSummary.roomDetails[position].mRoomTypeDescription);
-		 
-		 String name = spannedName.toString();
-		  
+		 RoomDetails roomDetails = mHotel.mSummary.roomDetails[position];
+		 if (roomDetails.mRoomTypeDescription != null) {
+			 Spanned spannedName = Html.fromHtml(roomDetails.mRoomTypeDescription);
+			 
+			 String name = spannedName.toString();
+			  
+	
+			 /* Now we can retrieve all display-related infos */
+	//		 Display display = ((WindowManager) mParent.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+	//		 int width = display.getWidth();
+	//		 int height = display.getHeight();		 
+	//		 
+	//		 int maxNameLength = width/12-3;
+	//		 
+	//		 if(name.length()>maxNameLength)
+	//		 {
+	//			 name = (name.subSequence(0, maxNameLength)).toString();
+	//			 name+="...";
+	//		 }
+	//		 		 		 		 
+			 holder.promo.setText(name);
+		 }
 
-		 /* Now we can retrieve all display-related infos */
-//		 Display display = ((WindowManager) mParent.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-//		 int width = display.getWidth();
-//		 int height = display.getHeight();		 
-//		 
-//		 int maxNameLength = width/12-3;
-//		 
-//		 if(name.length()>maxNameLength)
-//		 {
-//			 name = (name.subSequence(0, maxNameLength)).toString();
-//			 name+="...";
-//		 }
-//		 		 		 		 
-		 holder.promo.setText(name);
-
 		 
-		 if(mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo!=null)
+		 if(roomDetails.mRateInfo!=null)
 		 {
-			 double fullRate = mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo.mChargableRateInfo.mAverageBaseRate;
-			 double promoRate = mHotel.mSummary.roomDetails[holder.roomIndex].mRateInfo.mChargableRateInfo.mAverageRate;
+			 double fullRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageBaseRate;
+			 double promoRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageRate;
 			 String fullRateStr = formatter.format(fullRate);
 			 String promoRateStr = formatter.format(promoRate);
 			 
@@ -117,7 +121,7 @@ public class RoomListAdapter extends BaseAdapter {
 			 holder.promo_rate.setText("NA");
 		 }
 		 
-		 holder.details.setText(mHotel.mSummary.roomDetails[holder.roomIndex].mPromoDescription);
+		 holder.details.setText(roomDetails.mPromoDescription);
 		
 		 return convertView;
 	}

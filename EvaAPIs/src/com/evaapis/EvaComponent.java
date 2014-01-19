@@ -74,6 +74,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
 	private static final String DefaultEvaWSHost = "http://freeapi.evature.com";
 	private static final String DefaultApiVersion = "v1.0";
+	public static final String SDK_VERSION = "android_1.36";
 
 	/*****
 	 * This class simplifies passing all the needed parameters down the levels of abstraction
@@ -88,6 +89,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		public String vrService;// voice recognition service
 		public String deviceId;
 		public String context;// "h" for hotels, "f" for flights, etc... see docs
+		public String scope; // same values as context
 		
 		public String vproxyHost;
 		public String webServiceHost;
@@ -264,9 +266,11 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 				
 			case VOICE_RECOGNITION_REQUEST_CODE_GOOGLE:
 				// send the N-Best to VProxy for choice
-				Bundle bundle = data.getExtras();
-				ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
-				searchWithMultipleText(matches, "google voice");
+				if (data != null && data.getExtras() != null) {
+					Bundle bundle = data.getExtras();
+					ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
+					searchWithMultipleText(matches, "google voice");
+				}
 				break;
 		}
 	}
@@ -484,7 +488,15 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		return mConfig.context;
 	}
 	
+	public String getScope() {
+		return mConfig.scope;
+	}
+	
 	public void setContext(String context) {
 		mConfig.context = context;
+	}
+	
+	public void setScope(String scope) {
+		mConfig.scope = scope;
 	}
 }

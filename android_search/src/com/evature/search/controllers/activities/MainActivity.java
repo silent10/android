@@ -40,6 +40,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,6 +49,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
@@ -106,6 +108,7 @@ import com.evature.search.views.fragments.HotelFragment;
 import com.evature.search.views.fragments.HotelsFragment;
 import com.evature.search.views.fragments.HotelsMapFragment;
 import com.evature.search.views.fragments.TrainsFragment;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -175,6 +178,17 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 	
 
+	@Override
+	public void onStart() {
+		super.onStart();
+	    EasyTracker.getInstance(this).activityStart(this);
+	}
+	
+	@Override
+	public void onStop() {
+	    super.onStop();
+	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+	}
 	
 	
 	@Override 
@@ -207,6 +221,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		setContentView(R.layout.new_main);
 		
 		eva.registerPreferenceListener();
+		eva.setScope("h");
 		
 		mStatusPanel = findViewById(R.id.status_panel);
 		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
@@ -500,6 +515,28 @@ public class MainActivity extends RoboFragmentActivity implements
 			intent.putExtras(a_bundle);
 			startActivity(intent);
 			return true;
+		case R.id.faq:
+			String faqUrl = "http://www.travelnow.com/templates/352395/faq";
+			Uri uri = Uri.parse(Html.fromHtml(faqUrl).toString());
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			i.setData(uri);
+			Log.i(TAG, "Setting Browser to url:  "+uri);
+			startActivity(i);
+			return true;
+//		case R.id.help:
+//			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//			builder.setTitle(getString(R.string.app_name));
+//			final TextView helpMessage = new TextView(this);
+//			String helpText = this.getText(R.string.help_text).toString();
+//			helpMessage.setText(helpText);
+//			helpMessage.setMovementMethod(LinkMovementMethod.getInstance());
+//			helpMessage.setPadding(10, 10, 10, 10);
+//			builder.setView(helpMessage);
+//			builder.setPositiveButton(getString(R.string.ok_button), null);
+//			builder.setCancelable(false); // Can you just press back and dismiss it?
+//			builder.create().show();
+//			return true;
+//			
 		case R.id.bug_report:
 			// Then set the activity class that needs to be launched/started.
 			intent = new Intent(this, BugReportDialog.class);
@@ -941,7 +978,9 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			items++;
 			bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
-			bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
+			if (reply.JSONReply != null) {
+				bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
+			}
 		}
 		if ("voice".equals(cookie)) {
 			SpannableString chat = null;

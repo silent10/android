@@ -253,7 +253,7 @@ public class SpeechAudioStreamer {
 					if (readSize == 0) {
 						try {
 							Log.i(TAG, "Waiting for microphone to produce data");
-							this.wait(10);
+							Thread.sleep(10);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

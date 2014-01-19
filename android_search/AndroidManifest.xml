@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.evature.search"
-    android:versionCode="36"
+    android:versionCode="37"
     android:versionName="Pre-alpha" >
 
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="17"/>
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
     <permission
         android:name="com.evature.permission.MAPS_RECEIVE"
         android:protectionLevel="signature"/>
@@ -56,6 +56,9 @@
         <meta-data
 		   android:name="com.google.android.maps.v2.API_KEY"
 		   android:value="AIzaSyC-iQUsbK6o0M3NaApFisKhi4JOHcdJqEw"/>
+        <meta-data
+		    android:name="com.google.android.gms.version"
+		    android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

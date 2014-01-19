@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -47,6 +48,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 	private View mView;
 	private ImageView mHotelImage;
 	private TextView mHotelName;
+	private TextView mNoticeText;
 	private TextView mLocation;
 	private RatingBar mStarRatingBar;
 	private HotelData mHotelData;
@@ -104,6 +106,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 			mHotelImage = (ImageView)mView.findViewById(R.id.hotelThumbnail);
 
 			mHotelName = (TextView)mView.findViewById(R.id.hotelName);
+			mNoticeText = (TextView)mView.findViewById(R.id.noticeText);
 
 			mLocation = (TextView)mView.findViewById(R.id.location);
 
@@ -119,7 +122,6 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 			if (db != null && db.mHotelData != null &&  mHotelIndex < db.mHotelData.length) {
 				mHotelData = db.mHotelData[mHotelIndex];
 				
-
 				Bitmap hotelBitmap = db.mImagesMap.get(mHotelData.mSummary.mThumbNailUrl);
 				if(hotelBitmap!=null)
 				{
@@ -147,6 +149,20 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				mHotelName.setText(name);
 	
 				mLocation.setText(mHotelData.mSummary.mCity+","+mHotelData.mSummary.mCountryCode);
+				
+				if (mHotelData.mSummary.mSupplierType != null && mHotelData.mSummary.mSupplierType.equals("E")) {
+					mNoticeText.setMovementMethod(LinkMovementMethod.getInstance());
+					mNoticeText.setText(R.string.room_price_disclaimer);
+				}
+				else {
+					// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
+					String disclaimer = "Highest single night rate during the dates selected without taxes or fees.";
+					if (db.mNumberOfAdultsParam > 2) {
+						disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
+										"accommodate your entire party.";
+					}
+					mNoticeText.setText(disclaimer);
+				}
 	
 				mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
 	
@@ -185,6 +201,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 			String newUrl = mHotelData.mSummary.roomDetails[arg2].buildTravelUrl(mHotelData.mSummary.mHotelId, 
+					mHotelData.mSummary.mSupplierType,
 					mHotelData.mSummary.mCurrentRoomDetails.mArrivalDate, 
 					mHotelData.mSummary.mCurrentRoomDetails.mDepartureDate, 
 					MyApplication.getDb().mNumberOfAdultsParam,
