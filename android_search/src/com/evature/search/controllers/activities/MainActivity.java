@@ -109,6 +109,8 @@ import com.evature.search.views.fragments.HotelsFragment;
 import com.evature.search.views.fragments.HotelsMapFragment;
 import com.evature.search.views.fragments.TrainsFragment;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -181,6 +183,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	@Override
 	public void onStart() {
 		super.onStart();
+		Tracker t1 = GoogleAnalytics.getInstance(this).getTracker("UA-47284954-1");
 	    EasyTracker.getInstance(this).activityStart(this);
 	}
 	
@@ -542,34 +545,34 @@ public class MainActivity extends RoboFragmentActivity implements
 			intent = new Intent(this, BugReportDialog.class);
 			startActivity(intent);
 			return true;
-		case R.id.about: // Did the user select "About us"?
-			// Links in alertDialog:
-			// http://stackoverflow.com/questions/1997328/android-clickable-hyperlinks-in-alertdialog
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle(getString(R.string.app_name));
-			final TextView message = new TextView(this);
-			String text = this.getText(R.string.lots_of_text).toString();
-			
-			try {
-				int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-				text += "\n\nVersion: "+version;
-				if (!MyApplication.AcraInitialized) {
-					text += "\n\n  --->  ACRA not initalized!";
-				}
-			} catch (NameNotFoundException e) {
-				Log.w(TAG, "Name not found getting version", e);
-			}
-			
-			final SpannableString s = new SpannableString(text);
-			Linkify.addLinks(s, Linkify.WEB_URLS);
-			message.setText(s);
-			message.setMovementMethod(LinkMovementMethod.getInstance());
-			message.setPadding(10, 10, 10, 10);
-			builder.setView(message);
-			builder.setPositiveButton(getString(R.string.ok_button), null);
-			builder.setCancelable(false); // Can you just press back and dismiss it?
-			builder.create().show();
-			return true;
+//		case R.id.about: // Did the user select "About us"?
+//			// Links in alertDialog:
+//			// http://stackoverflow.com/questions/1997328/android-clickable-hyperlinks-in-alertdialog
+//			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//			builder.setTitle(getString(R.string.app_name));
+//			final TextView message = new TextView(this);
+//			String text = this.getText(R.string.lots_of_text).toString();
+//			
+//			try {
+//				int version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+//				text += "\n\nVersion: "+version;
+//				if (!MyApplication.AcraInitialized) {
+//					text += "\n\n  --->  ACRA not initalized!";
+//				}
+//			} catch (NameNotFoundException e) {
+//				Log.w(TAG, "Name not found getting version", e);
+//			}
+//			
+//			final SpannableString s = new SpannableString(text);
+//			Linkify.addLinks(s, Linkify.WEB_URLS);
+//			message.setText(s);
+//			message.setMovementMethod(LinkMovementMethod.getInstance());
+//			message.setPadding(10, 10, 10, 10);
+//			builder.setView(message);
+//			builder.setPositiveButton(getString(R.string.ok_button), null);
+//			builder.setCancelable(false); // Can you just press back and dismiss it?
+//			builder.create().show();
+//			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

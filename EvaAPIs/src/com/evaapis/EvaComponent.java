@@ -74,7 +74,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
 	private static final String DefaultEvaWSHost = "http://freeapi.evature.com";
 	private static final String DefaultApiVersion = "v1.0";
-	public static final String SDK_VERSION = "android_1.36";
+	public static final String SDK_VERSION = "android_1.37";
 
 	/*****
 	 * This class simplifies passing all the needed parameters down the levels of abstraction
