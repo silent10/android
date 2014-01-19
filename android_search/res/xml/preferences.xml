@@ -3,12 +3,12 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 	<PreferenceCategory android:title="@string/internalization_title">
-	    <ListPreference 
+	    <!-- <ListPreference 
 	        android:key="eva_preference_currency"
 	        android:title="@string/currency_pref_title"
 	        android:summary="@string/currency_summary"
 	        android:entries="@array/entries_currency_preference"
-	        android:entryValues="@array/entryvalues_currency_preference" />
+	        android:entryValues="@array/entryvalues_currency_preference" /> -->
 	    <ListPreference 
 	        android:key="eva_preference_locale"
 	        android:title="Locale"
@@ -16,14 +16,14 @@
 	        android:entries="@array/locales"
 	        android:entryValues="@array/locale_values"
 	        />
-	    <ListPreference 
+	    <!-- <ListPreference 
 	        android:key="eva_preference_language"
 	        android:title="Language"
 	        android:summary="Search and show results using this language"
 	        android:entries="@array/entries_languages"
 	        android:entryValues="@array/entryvalues_languages"
 	        />
-	    
+	     -->
 	</PreferenceCategory>
 	
 	

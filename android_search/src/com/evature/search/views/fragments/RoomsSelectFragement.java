@@ -33,6 +33,10 @@ import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.RoomListAdapter;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
 
 @SuppressLint("ValidFragment")
 public class RoomsSelectFragement extends RoboFragment implements OnItemClickListener {
@@ -101,6 +105,15 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
 
+			Context context = RoomsSelectFragement.this.getActivity();
+			Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+			defaultTracker.send(MapBuilder
+				    .createAppView()
+				    .set(Fields.SCREEN_NAME, "Rooms display")
+				    .build()
+				);
+
+			
 			mView = inflater.inflate(R.layout.select_hotel,container,false);
 
 			mHotelImage = (ImageView)mView.findViewById(R.id.hotelThumbnail);
@@ -156,7 +169,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				}
 				else {
 					// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
-					String disclaimer = "Highest single night rate during the dates selected without taxes or fees.";
+					String disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString(); 
 					if (db.mNumberOfAdultsParam > 2) {
 						disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
 										"accommodate your entire party.";
@@ -200,6 +213,15 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+			Context context = RoomsSelectFragement.this.getActivity();
+			Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+			defaultTracker.send(MapBuilder
+				    .createAppView()
+				    .set(Fields.SCREEN_NAME, "Booking Screen")
+				    .build()
+				);
+
+			
 			String newUrl = mHotelData.mSummary.roomDetails[arg2].buildTravelUrl(mHotelData.mSummary.mHotelId, 
 					mHotelData.mSummary.mSupplierType,
 					mHotelData.mSummary.mCurrentRoomDetails.mArrivalDate, 

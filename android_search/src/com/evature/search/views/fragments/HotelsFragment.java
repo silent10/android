@@ -3,6 +3,7 @@ package com.evature.search.views.fragments;
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -27,6 +28,10 @@ import com.evature.search.controllers.events.HotelsListUpdated;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaListContinuationDownloaderTask;
 import com.evature.search.views.adapters.HotelListAdapter;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 
 // From Arik's app
@@ -109,9 +114,16 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-
-		
 		super.onCreate(savedInstanceState);
+		
+		Context context = getActivity();
+		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+		defaultTracker.send(MapBuilder
+			    .createAppView()
+			    .set(Fields.SCREEN_NAME, "Hotels Screen")
+			    .build()
+			);
+
 	}
 
 	@Override

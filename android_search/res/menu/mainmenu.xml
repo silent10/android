@@ -25,9 +25,9 @@
         android:visible="false"
         android:title="@string/report_a_bug">
     </item>
-    <item
+   <!--  <item
         android:id="@+id/about"
         android:title="@string/about">
-    </item>
+    </item> -->
 
 </menu>
