@@ -17,7 +17,7 @@ public class HotelSummary {
 	String mPostalCode;
 	public String mCountryCode;
 	String mAirportCode;
-	String mSupplierType;
+	public String mSupplierType;
 	int mPropertyCategory;
 	public double mHotelRating;
 	double mConfidenceRating;

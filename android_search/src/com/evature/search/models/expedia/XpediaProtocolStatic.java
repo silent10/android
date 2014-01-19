@@ -253,6 +253,7 @@ public class XpediaProtocolStatic {
 
 			// Return result from buffered stream
 			String result = new String(content.toByteArray());
+			Log.i(TAG, "Result is "+result);
 			return result;
 		}
 		catch(IOException e) {

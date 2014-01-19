@@ -77,6 +77,7 @@ import com.evature.util.ExternalIpAddressGetter;
 			evatureUrl += ("&api_key=" + mEva.getApiKey());
 			//evatureUrl += ("&language=" + mLanguage);
 			evatureUrl += ("&session_id=" + mEva.getSessionId());
+			evatureUrl += ("&sdk_version="+EvaComponent.SDK_VERSION);
 			String language = mEva.getPreferedLanguage();
 			if (language != null && !"".equals(language)) {
 				evatureUrl += "&language="+language;
@@ -89,6 +90,9 @@ import com.evature.util.ExternalIpAddressGetter;
 			}
 			if (mEva.getContext() != null) {
 				evatureUrl += "&context="+mEva.getContext();
+			}
+			if (mEva.getScope() != null) {
+				evatureUrl += "&scope="+mEva.getScope();
 			}
 			if (mResponseId != -1) {
 				evatureUrl += ("&dialog_response="+mResponseId);
@@ -110,7 +114,7 @@ import com.evature.util.ExternalIpAddressGetter;
 				}
 			}
 			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
-			if (externalIpAddress != null && (externalIpAddress.length()>0) && (externalIpAddress.trim().length()>0)) {
+			if (externalIpAddress != null) {
 				evatureUrl += ("&ip_addr=" + externalIpAddress);
 			}
 			double longitude = EvatureLocationUpdater.getLongitude();
