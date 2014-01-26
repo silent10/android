@@ -72,7 +72,7 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
-		String hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, mCurrencyCode);
+		String hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, MyApplication.getDb(), mCurrencyCode);
 		if (hotelListResponse == null) {
 			Log.d(TAG, "null hotelist response!");
 		}
@@ -99,7 +99,7 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "arrivalDate"));
 			MyApplication.getDb().setDepartueDate(apiReply.ean.get("departureDate"));
 			// XpediaProtocolStatic.getParamFromEvatureResponse(mSearchQuery, "departureDate"));
-			MyApplication.getDb().setNumberOfAdults(1);
+			//MyApplication.getDb().setNumberOfAdults(1);
 			Log.i(TAG, "doInBackground: end");
 		}	
 		super.onPostExecute(result);

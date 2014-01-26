@@ -32,6 +32,7 @@ import com.evaapis.EvaApiReply;
 import com.evaapis.EvatureLocationUpdater;
 import com.evaapis.RequestAttributes.SortOrderEnum;
 import com.evature.search.MyApplication;
+import com.evature.util.ExternalIpAddressGetter;
 
 public class XpediaProtocolStatic {
 
@@ -50,8 +51,8 @@ public class XpediaProtocolStatic {
 	private final static String HOTEL_INFO_URL = EXPEDIA_URL + "info?";
 	private final static String HOTEL_AVAILABILITY_URL = EXPEDIA_URL + "avail?";
 	private static final String CONSTANT_HTTP_PARAMS = "locale=en_US&"
-			+ "customerUserAgent=Mozilla%2F5.0+%28Windows+NT+5.1%29+AppleWebKit%2F534.24+%28KHTML%2C+like+Gecko%29+Chrome%2F11.0.696.71+Safari%2F534.24"
-			+ "&customerIpAddress=127.0.0.1" + "&minorRev=" + minorRev;
+			//+ "customerUserAgent=Mozilla%2F5.0+%28Windows+NT+5.1%29+AppleWebKit%2F534.24+%28KHTML%2C+like+Gecko%29+Chrome%2F11.0.696.71+Safari%2F534.24"
+			+ "&minorRev=" + minorRev;
 
 	// protected synchronized String getUrlContent(String url, List<NameValuePair> nameValuePairs){
 	// Create client and set our specific user-agent string
@@ -115,12 +116,21 @@ public class XpediaProtocolStatic {
 		}
 		return sig;
 	}
+	
+	private static String getContantHttpParams() {
+		String urlString = "apiKey=" + getApiKey() + "&sig=" + getSignature();
+		urlString += "&cid=" + getClientId() + "&";
+		urlString += CONSTANT_HTTP_PARAMS;
+		String ipAddr = ExternalIpAddressGetter.getExternalIpAddr();
+		if (ipAddr != null) {
+			urlString += "&customerIpAddress="+ipAddr;
+		}
+		return urlString;
+	}
 
 	static public String getExpediaHotelInformation(int hotelId, String currencyCode) {
 		String urlString = HOTEL_INFO_URL;
-		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
-		urlString += "&cid=" + getClientId() + "&";
-		urlString += CONSTANT_HTTP_PARAMS;
+		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
 		urlString += "&hotelId=" + hotelId;
 		//urlString += "&options=0";
@@ -128,7 +138,7 @@ public class XpediaProtocolStatic {
 		return executeWithTimeout(urlString);
 	}
 
-	public static String getExpediaAnswer(EvaApiReply apiReply, String currencyCode) {
+	public static String getExpediaAnswer(EvaApiReply apiReply, EvaXpediaDatabase db, String currencyCode) {
 		Log.i(TAG, "getExpediaAnswer()");
 		if (apiReply == null)
 			return null;
@@ -200,10 +210,21 @@ public class XpediaProtocolStatic {
 
 		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
-		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
-		urlString += "&cid=" + getClientId() + "&";
-		urlString += CONSTANT_HTTP_PARAMS + "&currencyCode=" + currencyCode;
+		urlString += getContantHttpParams();
+		urlString += "&currencyCode=" + currencyCode;
 		urlString += params;
+		
+		urlString += "&room1="+db.mNumberOfAdultsParam;
+		int numOfChildren = db.getNumberOfChildrenParam();
+		if (numOfChildren > 0) {
+			urlString += ","+db.getAgeChild1();
+			if (numOfChildren > 1) {
+				urlString += ","+db.getAgeChild2();
+				if (numOfChildren > 2) {
+					urlString += ","+db.getAgeChild3();
+				}
+			}
+		}
 		
 		return executeWithTimeout(urlString);
 	}
@@ -262,15 +283,27 @@ public class XpediaProtocolStatic {
 		} 
 	}
 
-	public static String getRoomInformationForHotel(int hotelId, String arrivalDateParam, String departureDateParam,
-			String currencyCode, int numOfAdults) {
+	public static String getRoomInformationForHotel(int hotelId, EvaXpediaDatabase db,
+			String currencyCode) {
+		String arrivalDateParam = db.mArrivalDateParam;
+		String departureDateParam = db.mDepartureDateParam;
+		int numOfAdults = db.mNumberOfAdultsParam;
 		String urlString = HOTEL_AVAILABILITY_URL;
-		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
-		urlString += "&cid=" + getClientId() + "&";
-		urlString += CONSTANT_HTTP_PARAMS;
+		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
 		urlString += "&hotelId=" + hotelId;
-		urlString += "&" + arrivalDateParam + "&" + departureDateParam + "&room1=" + numOfAdults;
+		urlString += "&arrivalDate=" + arrivalDateParam + "&departureDate=" + departureDateParam;
+		urlString += "&room1="+numOfAdults;
+		int numOfChildren = db.getNumberOfChildrenParam();
+		if (numOfChildren > 0) {
+			urlString += ","+db.getAgeChild1();
+			if (numOfChildren > 1) {
+				urlString += ","+db.getAgeChild2();
+				if (numOfChildren > 2) {
+					urlString += ","+db.getAgeChild3();
+				}
+			}
+		}
 		urlString += "&options=0";
 
 		// LayoutInflater li = this.getLayoutInflater();
@@ -284,9 +317,7 @@ public class XpediaProtocolStatic {
 	public static String getExpediaNext(String mQueryString, String currencyCode) {
 		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
-		urlString += "apiKey=" + getApiKey() + "&sig=" + getSignature();
-		urlString += "&cid=" + getClientId() + "&";
-		urlString += CONSTANT_HTTP_PARAMS + "&currencyCode=" + currencyCode;
+		urlString += getContantHttpParams() + "&currencyCode=" + currencyCode;
 		urlString += mQueryString;
 
 		return executeWithTimeout(urlString);

@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 
 import com.evature.search.R;
 import com.evature.search.views.fragments.CalendarFragment;
+import com.evature.search.views.fragments.ChildAgeFragment;
 import com.evature.search.views.fragments.RoomsSelectFragement;
 
 public class EvaCheckoutActivity extends RoboFragmentActivity{
@@ -16,7 +17,7 @@ public class EvaCheckoutActivity extends RoboFragmentActivity{
 
 	private static final String ACTIVITY_STATE = "ActivityState";
 	
-	CalendarFragment mCalendarFragment = null;
+	ChildAgeFragment mChildAgeFragment = null;
 	
 	private int mHotelIndex;
 	
@@ -42,8 +43,8 @@ public class EvaCheckoutActivity extends RoboFragmentActivity{
 		if (savedInstanceState == null) 
 		{
 			// First-time init; create fragment to embed in activity.
-			mCalendarFragment =  CalendarFragment.newInstance(this);
-			Fragment newFragment =(Fragment)mCalendarFragment;
+			mChildAgeFragment =  ChildAgeFragment.newInstance(this);
+			Fragment newFragment =(Fragment)mChildAgeFragment;
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 			ft.add(R.id.hotelList, newFragment);	
 			ft.commit();
