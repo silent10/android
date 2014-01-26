@@ -88,7 +88,9 @@ public class RoomDetails {
 		}
 	}
 	
-	public String buildTravelUrl(int hotelId, String supplierType, String checkin, String checkout, int adultsCount, String rateKey) {
+	public String buildTravelUrl(int hotelId, String supplierType, String checkin, String checkout, int adultsCount, 
+			int childNum, int ageChild1, int ageChild2, int ageChild3,
+			String rateKey) {
 		/*
 			&targetId=AREA-572b0850-4e3f-469b-87b2-c17ed3ea049b|cities
 			
@@ -117,7 +119,22 @@ public class RoomDetails {
 		//url += "&rating=0";
 		url += "&roomsCount=1";
 		url += "&rooms[0].adultsCount=" + adultsCount;
-		url += "&rooms[0].childrenCount=0";
+		if (childNum > 3) {
+			childNum = 3;
+		}
+		if (childNum < 0) {
+			childNum = 0;
+		}
+		url += "&rooms[0].childrenCount="+childNum;
+		if (childNum > 0) {
+			url += "&rooms[0].children[0].age="+ageChild1;
+			if (childNum > 1) {
+				url += "&rooms[0].children[1].age="+ageChild2;
+				if (childNum > 2) {
+					url += "&rooms[0].children[2].age="+ageChild3;
+				}
+			}
+		}
 		
 		//url += "&filter.sortedBy=traveler_hl";
 		//url += "&filter.lowPrice=0";

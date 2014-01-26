@@ -182,15 +182,20 @@ public class HotelFragment extends RoboFragment {
 
 		Log.i(TAG, "1)mHotelData.mSummary.mName:" + mHotelData.mSummary.mName);
 		
+		String description = "";
 		if(mHotelData.mDetails!=null)
 		{
 			Log.i(TAG, "2)mHotelData.mDetails.propertyDescription:" + mHotelData.mDetails.propertyDescription);
-
-			Spanned marked_up = Html.fromHtml("<html><body>" + mHotelData.mDetails.propertyDescription + "</body></html>");
-
-			mPropertyDescription
-				.loadData("<font color=\"black\">" + marked_up.toString() + "</font>", "text/html", "utf-8");
+			description += mHotelData.mDetails.propertyDescription;
 		}
+
+		description += "<br>\n <br>\n Note: It is the responsibility of the hotel chain and/or the"
+			+ " individual property to ensure the accuracy of the photos displayed. \"Eva Travel Search\" is"
+			+ " not responsible for any inaccuracies in the photos.";
+		Spanned marked_up = Html.fromHtml("<html><body>" + description + "</body></html>");
+
+		mPropertyDescription
+			.loadData("<font color=\"black\">" + marked_up.toString() + "</font>", "text/html", "utf-8");
 		
 		mPropertyDescription.setBackgroundColor(Color.rgb(0xe3, 0xe3, 0xe3));
 
@@ -245,6 +250,9 @@ public class HotelFragment extends RoboFragment {
 		ImageAdapter amenitiesImageAdapter = new ImageAdapter(getActivity(), thumbIds);
 
 		mAmenitiesGridView.setAdapter(amenitiesImageAdapter);
+		if (count == 0) {
+			mAmenitiesGridView.setVisibility(View.GONE);
+		}
 
 		mBookButton = (Button) mView.findViewById(R.id.selectButton);
 

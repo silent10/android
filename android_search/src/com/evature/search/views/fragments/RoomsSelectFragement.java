@@ -221,12 +221,21 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				    .build()
 				);
 
+			if (mHotelData == null || mHotelData.mSummary == null || mHotelData.mSummary.mHotelId == -1) {
+				Toast.makeText(getActivity(), "Oops, there was an error - please start over", Toast.LENGTH_LONG).show();
+				return;
+			}
 			
+			EvaXpediaDatabase db = MyApplication.getDb();
 			String newUrl = mHotelData.mSummary.roomDetails[arg2].buildTravelUrl(mHotelData.mSummary.mHotelId, 
 					mHotelData.mSummary.mSupplierType,
 					mHotelData.mSummary.mCurrentRoomDetails.mArrivalDate, 
 					mHotelData.mSummary.mCurrentRoomDetails.mDepartureDate, 
-					MyApplication.getDb().mNumberOfAdultsParam,
+					db.mNumberOfAdultsParam,
+					db.getNumberOfChildrenParam(),
+					db.getAgeChild1(),
+					db.getAgeChild2(),
+					db.getAgeChild3(),
 					mHotelData.mSummary.mCurrentRoomDetails.mRateKey);
 			//String url = mHotelData.mSummary.roomDetails[arg2].mDeepLink;
 			Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());

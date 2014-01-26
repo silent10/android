@@ -10,7 +10,7 @@ import android.util.Log;
 public class HotelSummary {
 	
 	private static final String TAG = "HotelSummary";
-	public int mHotelId;
+	public int mHotelId = -1;
 	public String mName;
 	String mAddress1;
 	public String mCity;

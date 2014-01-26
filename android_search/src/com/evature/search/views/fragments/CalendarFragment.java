@@ -102,7 +102,8 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 				db.setDepartueDate(dateDeparture);
 				db.setNumberOfAdults(intNumAdults);
 
-				mRoomsUpdater = new EvaRoomsUpdaterTask(CalendarFragment.this, mEvaCheckoutActivity.getHotelIndex());
+				mRoomsUpdater = new EvaRoomsUpdaterTask(CalendarFragment.this, CalendarFragment.this.getActivity(),
+						mEvaCheckoutActivity.getHotelIndex());
 				mRoomsUpdater.execute();
 
 			}

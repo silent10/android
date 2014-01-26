@@ -21,13 +21,13 @@ public class XpediaProtocol {
 		return XpediaProtocolStatic.getExpediaHotelInformation(hotelId, currencyCode);
 	}
 
-	public String getExpediaAnswer(EvaApiReply apiReply, String currencyCode) {
-		return XpediaProtocolStatic.getExpediaAnswer(apiReply, currencyCode);
+	public String getExpediaAnswer(EvaApiReply apiReply, EvaXpediaDatabase db,String currencyCode) {
+		return XpediaProtocolStatic.getExpediaAnswer(apiReply, db, currencyCode);
 	}
 
-	public String getRoomInformationForHotel(int hotelId, String arrivalDateParam, String departureDateParam,
-			String currencyCode, int numOfAdults) {
-		return XpediaProtocolStatic.getRoomInformationForHotel(hotelId, arrivalDateParam, departureDateParam, currencyCode, numOfAdults);
+	public String getRoomInformationForHotel(int hotelId, EvaXpediaDatabase db,
+			String currencyCode) {
+		return XpediaProtocolStatic.getRoomInformationForHotel(hotelId, db, currencyCode);
 	}
 
 	public String getExpediaNext(String mQueryString, String currencyCode) {
