@@ -21,6 +21,7 @@ import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaRoomsUpdaterTask;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
+import com.evature.search.models.expedia.ExpediaRequestParameters;
 
 public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskInterface{
 
@@ -97,12 +98,12 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 				}
 				int intNumAdults = Integer.parseInt(mNumAdults.getText().toString());
 
-				EvaXpediaDatabase db = MyApplication.getDb();
+				ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
 				db.setArrivalDate(dateArrival);
 				db.setDepartueDate(dateDeparture);
 				db.setNumberOfAdults(intNumAdults);
 
-				mRoomsUpdater = new EvaRoomsUpdaterTask(CalendarFragment.this, CalendarFragment.this.getActivity(),
+				mRoomsUpdater = new EvaRoomsUpdaterTask(CalendarFragment.this.getActivity(),
 						mEvaCheckoutActivity.getHotelIndex());
 				mRoomsUpdater.execute();
 
@@ -116,10 +117,11 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 		mCalendar.setSelectedDate(from, to);
 		mNumAdults.setText("2");
 
-		if (MyApplication.getDb().mArrivalDateParam != null && MyApplication.getDb().mDepartureDateParam != null)
+		ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
+		if (db.mArrivalDateParam != null && db.mDepartureDateParam != null)
 		{
-			String arrival = MyApplication.getDb().mArrivalDateParam.replace("arrivalDate=", "");
-			String departure = MyApplication.getDb().mDepartureDateParam.replace("departureDate=", "");
+			String arrival = db.mArrivalDateParam.replace("arrivalDate=", "");
+			String departure = db.mDepartureDateParam.replace("departureDate=", "");
 			mCalendar.setSelectedDate(arrival, departure);
 		}
 		if(mRoomsUpdater!=null)

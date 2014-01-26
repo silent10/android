@@ -138,7 +138,7 @@ public class XpediaProtocolStatic {
 		return executeWithTimeout(urlString);
 	}
 
-	public static String getExpediaAnswer(EvaApiReply apiReply, EvaXpediaDatabase db, String currencyCode) {
+	public static String getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
 		Log.i(TAG, "getExpediaAnswer()");
 		if (apiReply == null)
 			return null;
@@ -283,7 +283,7 @@ public class XpediaProtocolStatic {
 		} 
 	}
 
-	public static String getRoomInformationForHotel(int hotelId, EvaXpediaDatabase db,
+	public static String getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
 			String currencyCode) {
 		String arrivalDateParam = db.mArrivalDateParam;
 		String departureDateParam = db.mDepartureDateParam;

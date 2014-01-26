@@ -18,6 +18,8 @@ Check us out at\n
 	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".
 	</string>
     <string name="ok_button">OK, got it.</string>
+    <string name="_ok">OK</string>
+    <string name="cancel">Cancel</string>
     <string name="fatal_error">Fatal Error</string>
     <string name="microphone_button">Microphone Button</string>
     <string name="chat_icon_description">chat icon</string>
@@ -74,4 +76,5 @@ Check us out at\n
 	<string name="faq">FAQ</string>
 	<string name="help">help</string>
 	<string name="children_per_room_">Children per room (3 max):</string>
+	<string name="guest_num">Number of Guests in room:</string>
 </resources>

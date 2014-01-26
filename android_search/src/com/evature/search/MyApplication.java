@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
+import com.evature.search.models.expedia.ExpediaRequestParameters;
 import com.evature.search.models.travelport.EvaTravelportDatabase;
 import com.evature.search.models.vayant.EvaVayantDatabase;
 
@@ -20,6 +21,7 @@ import com.evature.search.models.vayant.EvaVayantDatabase;
 public class MyApplication extends Application {
 
 	static EvaXpediaDatabase mEvaDb = null;
+	static ExpediaRequestParameters  requestParams = new ExpediaRequestParameters();
 	static EvaVayantDatabase mVayantDb = null;
 	static String mExpediaSecret = null;
 	static String mExpediaApiKey = null;
@@ -53,6 +55,10 @@ public class MyApplication extends Application {
 	
 	public static void setDb(EvaXpediaDatabase db) {
 		mEvaDb = db;
+	}
+	
+	public static ExpediaRequestParameters getExpediaRequestParams() {
+		return requestParams;
 	}
 
 	public static String getExpediaApiKey() {

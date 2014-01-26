@@ -7,8 +7,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 
 import com.evature.search.R;
+import com.evature.search.controllers.web_services.EvaRoomsUpdaterTask;
 import com.evature.search.views.fragments.CalendarFragment;
-import com.evature.search.views.fragments.ChildAgeFragment;
 import com.evature.search.views.fragments.RoomsSelectFragement;
 
 public class EvaCheckoutActivity extends RoboFragmentActivity{
@@ -17,7 +17,7 @@ public class EvaCheckoutActivity extends RoboFragmentActivity{
 
 	private static final String ACTIVITY_STATE = "ActivityState";
 	
-	ChildAgeFragment mChildAgeFragment = null;
+	CalendarFragment mCalendarFragment = null;
 	
 	private int mHotelIndex;
 	
@@ -42,9 +42,11 @@ public class EvaCheckoutActivity extends RoboFragmentActivity{
 			
 		if (savedInstanceState == null) 
 		{
+			EvaRoomsUpdaterTask roomsList = new EvaRoomsUpdaterTask(this, getHotelIndex());
+			
 			// First-time init; create fragment to embed in activity.
-			mChildAgeFragment =  ChildAgeFragment.newInstance(this);
-			Fragment newFragment =(Fragment)mChildAgeFragment;
+			mCalendarFragment =  CalendarFragment.newInstance(null);//roomsList);
+			Fragment newFragment =(Fragment)mCalendarFragment;
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 			ft.add(R.id.hotelList, newFragment);	
 			ft.commit();
@@ -64,7 +66,7 @@ public class EvaCheckoutActivity extends RoboFragmentActivity{
 			ft.remove(mRoomSelectFragement);
 		}
 		
-		mRoomSelectFragement =  RoomsSelectFragement.newInstance(this,getHotelIndex());
+		mRoomSelectFragement =  RoomsSelectFragement.newInstance(getHotelIndex());
 		
 		ft.replace(R.id.hotelList, mRoomSelectFragement);	
 //		ft.addToBackStack(null);

@@ -45,6 +45,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -100,6 +101,8 @@ import com.evature.search.views.adapters.SwipeyTabsAdapter;
 import com.evature.search.views.adapters.TrainListAdapter;
 import com.evature.search.views.fragments.ChatFragment;
 import com.evature.search.views.fragments.ChatFragment.DialogClickHandler;
+import com.evature.search.views.fragments.ChildAgeDialogFragment;
+import com.evature.search.views.fragments.ChildAgeDialogFragment.ChildAgeDialogListener;
 import com.evature.search.views.fragments.DebugFragment;
 import com.evature.search.views.fragments.ExamplesFragment;
 import com.evature.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
@@ -370,7 +373,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			
 			if (mTabTitles.get(position).equals(mHotelTabName)) { // Single hotel
-				int hotelIndex = MyApplication.getDb().getHotelId();
+				int hotelIndex = MyApplication.getExpediaRequestParams().getHotelId();
 				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
 				return HotelFragment.newInstance(hotelIndex);
 			}
@@ -728,7 +731,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		if (id == R.string.HOTEL && mHotelDownloader != null) {
 			int hotelIndex = mHotelDownloader.getHotelIndex();
 			Log.d(TAG, "endProgressDialog() Hotel # " + hotelIndex);
-			MyApplication.getDb().setHotelId(hotelIndex);
+			MyApplication.getExpediaRequestParams().setHotelId(hotelIndex);
 			
 			// remove hotel tab and add it again
 			String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
@@ -1270,16 +1273,33 @@ public class MainActivity extends RoboFragmentActivity implements
 		case Hotel:
 			Log.d(TAG, "Running Hotel Search!");
 			currentHotelSearch = chatItem;
-			mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-			mSearchExpediaTask.initialize(this, reply,  EvaSettingsAPI.getCurrencyCode(this)); // TODO: change to be based on flow element, // TODO: change to use currency
-			mSearchExpediaTask.attach(new DownloaderListener(chatItem, switchToResult));
-			if (chatItem.getStatus() == Status.HasResults) {
-				// this chat item was already activated and has results - bypass the cloud service and fake results
-				mSearchExpediaTask.setCachedResults(chatItem.getSearchResult());
-			}
-			else {
-				mSearchExpediaTask.execute();
-			}
+
+			final ChatItem _chatItem = chatItem; 
+			final EvaApiReply _reply = reply;
+			final boolean _switchToResult = switchToResult;
+			ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
+			dialog.setListener(new ChildAgeDialogListener() {
+				
+				@Override
+				public void onDialogPositiveClick(ChildAgeDialogFragment dialog) {
+					mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
+					mSearchExpediaTask.initialize(MainActivity.this, _reply,  EvaSettingsAPI.getCurrencyCode(MainActivity.this)); // TODO: change to be based on flow element, // TODO: change to use currency
+					mSearchExpediaTask.attach(new DownloaderListener(_chatItem, _switchToResult));
+					if (currentHotelSearch.getStatus() == Status.HasResults) {
+						// this chat item was already activated and has results - bypass the cloud service and fake results
+						mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
+					}
+					else {
+						mSearchExpediaTask.execute();
+					}
+				}
+				
+				@Override
+				public void onDialogNegativeClick(ChildAgeDialogFragment dialog) {
+				}
+			});
+	        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
+			
 			break;
 		case Flight:
 			Log.d(TAG, "Running Vayant Search!");

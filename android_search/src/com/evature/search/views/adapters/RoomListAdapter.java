@@ -36,6 +36,9 @@ public class RoomListAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {		
+		if (mHotel.mSummary.roomDetails == null) {
+			return 0;
+		}
 		return mHotel.mSummary.roomDetails.length;
 	}
 
