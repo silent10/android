@@ -148,7 +148,9 @@ public class RoomDetails {
 		url += "&rateCode=" + mRateCode;
 		url += "&roomTypeCode=" + mRoomTypeCode;
 		//url += "&hrnQuoteKey=" + rateKey;
-		url += "&selectedPrice=" + mRateInfo.mChargableRateInfo.mTotal;//mAverageBaseRate;
+		if (mRateInfo.mChargableRateInfo.mTotal > 0) {
+			url += "&selectedPrice=" + mRateInfo.mChargableRateInfo.mTotal;//mAverageBaseRate;
+		}
 		//url += "&linkId=HotSearch:Hot:ResultsList:Book";
 		url += "&pagename=ToStep1";
 //		if (mSupplierType.equals("E"))

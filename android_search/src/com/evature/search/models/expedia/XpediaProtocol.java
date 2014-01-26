@@ -21,11 +21,11 @@ public class XpediaProtocol {
 		return XpediaProtocolStatic.getExpediaHotelInformation(hotelId, currencyCode);
 	}
 
-	public String getExpediaAnswer(EvaApiReply apiReply, EvaXpediaDatabase db,String currencyCode) {
+	public String getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db,String currencyCode) {
 		return XpediaProtocolStatic.getExpediaAnswer(apiReply, db, currencyCode);
 	}
 
-	public String getRoomInformationForHotel(int hotelId, EvaXpediaDatabase db,
+	public String getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
 			String currencyCode) {
 		return XpediaProtocolStatic.getRoomInformationForHotel(hotelId, db, currencyCode);
 	}

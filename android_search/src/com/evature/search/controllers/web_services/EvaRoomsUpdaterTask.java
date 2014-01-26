@@ -14,10 +14,9 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	private HotelData mHotelData;
 	private Context mContext;
 
-	public EvaRoomsUpdaterTask(EvaDownloaderTaskInterface calendarFragment, Context context, int hotelIndex) {
+	public EvaRoomsUpdaterTask(Context context, int hotelIndex) {
 		super(-1);
 		mHotelData =MyApplication.getDb().mHotelData[hotelIndex];			
-		attach(calendarFragment);	
 		mContext= context;
 	}
 	
@@ -31,7 +30,7 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	@Override
 	protected String doInBackground(Void... params) {
 		String str= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
-				MyApplication.getDb(),
+				MyApplication.getExpediaRequestParams(),
 				EvaSettingsAPI.getCurrencyCode(mContext));
 
 		mHotelData.mSummary.updateRoomDetails(str);

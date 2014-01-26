@@ -28,8 +28,8 @@ import android.widget.Toast;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
+import com.evature.search.models.expedia.ExpediaRequestParameters;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.RoomListAdapter;
@@ -169,8 +169,9 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				}
 				else {
 					// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
-					String disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString(); 
-					if (db.mNumberOfAdultsParam > 2) {
+					String disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString();
+					ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+					if (rp.mNumberOfAdultsParam > 2 || rp.getNumberOfChildrenParam() > 0) {
 						disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
 										"accommodate your entire party.";
 					}
@@ -199,16 +200,14 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 			return mView;
 		}
 
-		EvaCheckoutActivity mEvaCheckoutActivity;
 		private int mHotelIndex;
 
-		public RoomsSelectFragement(EvaCheckoutActivity eca, int hotelIndex) {
-			mEvaCheckoutActivity = eca;
+		public RoomsSelectFragement(int hotelIndex) {
 			mHotelIndex = hotelIndex;
 		}
 
-		public static RoomsSelectFragement newInstance(EvaCheckoutActivity eca,int hotelIndex) {		
-			return new RoomsSelectFragement(eca,hotelIndex);
+		public static RoomsSelectFragement newInstance(int hotelIndex) {		
+			return new RoomsSelectFragement(hotelIndex);
 		}
 
 		@Override
@@ -226,7 +225,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				return;
 			}
 			
-			EvaXpediaDatabase db = MyApplication.getDb();
+			ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
 			String newUrl = mHotelData.mSummary.roomDetails[arg2].buildTravelUrl(mHotelData.mSummary.mHotelId, 
 					mHotelData.mSummary.mSupplierType,
 					mHotelData.mSummary.mCurrentRoomDetails.mArrivalDate, 
