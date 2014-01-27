@@ -28,6 +28,8 @@ public class RoomDetails {
 	String mRateDescription;
 	public String mRoomTypeDescription;
 	public String mDeepLink;
+	public boolean mNonRefundable;
+	public String mCancelllationPolicy;
 	//public String mSupplierType;
 
 	
@@ -50,6 +52,8 @@ public class RoomDetails {
 		//mRateKey =  EvaDatabase.getSafeString(jsonObject, "rateKey");
 		mRateDescription = EvaXpediaDatabase.getSafeString(jsonObject, "rateDescription");
 		mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
+		mNonRefundable = EvaXpediaDatabase.getSafeBool(jsonObject, "nonRefundable");
+		mCancelllationPolicy = EvaXpediaDatabase.getSafeString(jsonObject, "cancellationPolicy");
 		
 		
 		try {

@@ -7,6 +7,32 @@
      >
      
     <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"           
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/people_per_room"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/numAdults"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:digits="0123456789"
+            android:width="60dip" />
+    
+      </LinearLayout>
+    
+    <LinearLayout
         android:id="@+id/linearLayoutChildNum"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"           
@@ -109,31 +135,7 @@
     
       </LinearLayout>
      
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"           
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        >
-
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/people_per_room"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <EditText
-            android:id="@+id/numAdults"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="phone"
-            android:digits="0123456789"
-            android:width="60dip" />
     
-      </LinearLayout>
 
        
     

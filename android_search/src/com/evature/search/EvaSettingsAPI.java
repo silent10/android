@@ -10,7 +10,7 @@ public class EvaSettingsAPI {
 	// WTF WTF WTF???
 	public static String getCurrencyCode(Context context) {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		int currencyIndex = Integer.parseInt(sp.getString("preference_currency", "0"));
+		int currencyIndex = Integer.parseInt(sp.getString("eva_preference_currency", "0"));
 		String[] entries = context.getResources().getStringArray(R.array.entries_currency_preference);
 
 		String currencyCode;
@@ -24,7 +24,7 @@ public class EvaSettingsAPI {
 
 	public static String getCurrencySymbol(Context context) {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		int currencyIndex = Integer.parseInt(sp.getString("preference_currency", "0"));
+		int currencyIndex = Integer.parseInt(sp.getString("eva_preference_currency", "0"));
 		String[] signs = context.getResources().getStringArray(R.array.currency_signs);
 
 		String currencySymbol;

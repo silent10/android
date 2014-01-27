@@ -22,7 +22,7 @@
     
     <item
         android:id="@+id/bug_report"
-        android:visible="false"
+        
         android:title="@string/report_a_bug">
     </item>
    <!--  <item

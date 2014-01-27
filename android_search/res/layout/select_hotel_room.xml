@@ -4,23 +4,25 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@drawable/search_background"
+    android:minHeight="96dp"
     android:orientation="vertical" >
 
     <RelativeLayout
         android:id="@+id/relativeLayout2"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_gravity="top" >
 
         <ImageView
             android:id="@+id/hotelThumbnail"
-            android:layout_width="128dip"
+            android:layout_width="128dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:padding="4dip"
-            android:src="@drawable/eva_hotel_icon_small" >
-        </ImageView>
-
+            android:minHeight="64dp"
+            android:src="@drawable/eva_hotel_icon_small" />
+        
         <TextView
             android:id="@+id/hotelName"
             android:layout_width="wrap_content"
@@ -59,14 +61,17 @@
             android:layout_alignLeft="@id/starRating"
             android:text="@string/star_rating" >
         </TextView>
+        
+            <TextView
+                android:id="@+id/noticeText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:maxHeight="45dp"
+                android:scrollbars="vertical"
+            	android:layout_below="@+id/hotelThumbnail"
+                android:text="Pitchfork Bushwick pickled umami. Etsy try-hard fap aesthetic Intelligentsia, farm-to-table mustache Helvetica 8-bit asymmetrical Odd Future gastropub sartorial sustainable. Mlkshk chia American Apparel, squid twee Brooklyn next level food truck shabby chic leggings ugh. Irony kogi craft beer, High Life authentic ennui Banksy. Craft beer butcher selvage lomo Marfa. Letterpress direct trade squid, ethnic Truffaut small batch try-hard food truck literally wayfarers cornhole skateboard cray quinoa. Yr cray food truck, Shoreditch Pinterest DIY semiotics vegan."/>
 
-        <TextView
-            android:id="@+id/noticeText"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/hotelThumbnail"
-            android:text="" >
-        </TextView>
+        
     </RelativeLayout>
 
     <ImageView
@@ -81,15 +86,11 @@
         android:id="@+id/roomListView"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_gravity="fill_vertical"
         android:cacheColorHint="#00000000"
         android:divider="@drawable/divider" >
+
     </ListView>
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2"
-        android:src="@drawable/room_select_bottom" />
 
 </LinearLayout>

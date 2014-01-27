@@ -67,7 +67,7 @@ public class HotelSummary {
 		mProximityUnit = EvaXpediaDatabase.getSafeString(jHotel,"proximityUnit");
 		mHotelInDestination = EvaXpediaDatabase.getSafeBool(jHotel, "hotelInDestination");
 
-		mDeepLink = EvaXpediaDatabase.getSafeString(jHotel,"deepLink");
+		//mDeepLink = EvaXpediaDatabase.getSafeString(jHotel,"deepLink");
 
 
 		JSONObject jRoomDetailsList;
@@ -128,6 +128,7 @@ public class HotelSummary {
 			mCurrentRoomDetails.mRateKey = EvaXpediaDatabase.getSafeString(jServerResponseData, "rateKey");
 			mCurrentRoomDetails.mArrivalDate = EvaXpediaDatabase.getSafeString(jServerResponseData, "arrivalDate");
 			mCurrentRoomDetails.mDepartureDate = EvaXpediaDatabase.getSafeString(jServerResponseData, "departureDate");
+			mCurrentRoomDetails.mCheckInInstructions =EvaXpediaDatabase.getSafeString(jServerResponseData, "checkInInstructions"); 
 			
 			int size = EvaXpediaDatabase.getSafeInt(jServerResponseData,"@size");
 
@@ -164,6 +165,7 @@ public class HotelSummary {
 		public String mRateKey;
 		public String mArrivalDate;
 		public String mDepartureDate;
+		public String mCheckInInstructions;
 	}
 }
 

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
   xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/roomListItem"
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
-  android:background="@color/white"
+  android:background="@drawable/hotel_background"
   android:descendantFocusability="blocksDescendants">
 
     <RelativeLayout
@@ -19,7 +20,7 @@
             android:layout_alignParentLeft="true"
             android:text="Room Name"
             android:textColor="#FF000000"
-            android:textSize="16dip"
+            android:textSize="16sp"
             android:ellipsize="marquee"
         	android:focusable="true"
         	android:focusableInTouchMode="true"
