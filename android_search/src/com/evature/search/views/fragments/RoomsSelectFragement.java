@@ -12,6 +12,7 @@ import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import com.evature.search.R;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.ExpediaRequestParameters;
 import com.evature.search.models.expedia.HotelData;
+import com.evature.search.models.expedia.RoomDetails;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.RoomListAdapter;
 import com.google.analytics.tracking.android.Fields;
@@ -114,12 +116,13 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				);
 
 			
-			mView = inflater.inflate(R.layout.select_hotel,container,false);
+			mView = inflater.inflate(R.layout.select_hotel_room,container,false);
 
 			mHotelImage = (ImageView)mView.findViewById(R.id.hotelThumbnail);
 
 			mHotelName = (TextView)mView.findViewById(R.id.hotelName);
 			mNoticeText = (TextView)mView.findViewById(R.id.noticeText);
+			mNoticeText.setMovementMethod(ScrollingMovementMethod.getInstance());
 
 			mLocation = (TextView)mView.findViewById(R.id.location);
 
@@ -160,23 +163,35 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 				//		}
 	
 				mHotelName.setText(name);
-	
+				
+				
 				mLocation.setText(mHotelData.mSummary.mCity+","+mHotelData.mSummary.mCountryCode);
 				
+				String disclaimer = "";
 				if (mHotelData.mSummary.mSupplierType != null && mHotelData.mSummary.mSupplierType.equals("E")) {
+					disclaimer = getText(R.string.room_price_disclaimer).toString();
 					mNoticeText.setMovementMethod(LinkMovementMethod.getInstance());
-					mNoticeText.setText(R.string.room_price_disclaimer);
 				}
 				else {
 					// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
-					String disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString();
+					disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString();
 					ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
 					if (rp.mNumberOfAdultsParam > 2 || rp.getNumberOfChildrenParam() > 0) {
 						disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
 										"accommodate your entire party.";
 					}
-					mNoticeText.setText(disclaimer);
 				}
+				if (mHotelData.mSummary.roomDetails != null) {
+					for (RoomDetails room : mHotelData.mSummary.roomDetails) {
+						if (room.mNonRefundable) {
+							disclaimer = "Note: Highlighted rooms are Non Refundable\n"+disclaimer;
+							break;
+						}
+					}
+				}
+	
+				
+				mNoticeText.setText(disclaimer);
 	
 				mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
 	

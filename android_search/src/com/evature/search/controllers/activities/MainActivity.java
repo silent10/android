@@ -489,7 +489,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
-		menu.getItem(2).setVisible(eva.isDebug());
+		//menu.getItem(2).setVisible(eva.isDebug());
 		return super.onPrepareOptionsMenu(menu);
 	}
 

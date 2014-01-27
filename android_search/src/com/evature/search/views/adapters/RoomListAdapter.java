@@ -3,6 +3,7 @@ package com.evature.search.views.adapters;
 import java.text.DecimalFormat;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Paint;
 import android.text.Html;
 import android.text.Spanned;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import com.evature.search.EvaSettingsAPI;
 import com.evature.search.R;
+import com.evature.search.R.color;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.RoomDetails;
 
@@ -22,7 +24,7 @@ public class RoomListAdapter extends BaseAdapter {
 	HotelData mHotel;
 	private LayoutInflater mInflater;
 	private Context mParent;
-	
+	private static int nonRefundableColor = -1;
 	static final DecimalFormat formatter = new DecimalFormat("#.##");
 		
 	public RoomListAdapter(Context context, HotelData hotel)
@@ -30,6 +32,10 @@ public class RoomListAdapter extends BaseAdapter {
 		mInflater = LayoutInflater.from(context);
 	    mParent = context;
 		mHotel = hotel;
+		if (nonRefundableColor == -1) {
+			Resources resources = context.getResources();
+			nonRefundableColor = resources.getColor(R.color.non_refundable);
+		}
 	}
 	
 	
@@ -57,7 +63,7 @@ public class RoomListAdapter extends BaseAdapter {
 		 ViewHolder holder;
 		 if (convertView == null) 
 		 {
-			 convertView = mInflater.inflate(R.layout.room, null);
+			 convertView = mInflater.inflate(R.layout.room_list_item, null);
 			 holder = new ViewHolder();
 			 
 			 holder.promo = (TextView)convertView.findViewById(R.id.promo);
@@ -66,6 +72,7 @@ public class RoomListAdapter extends BaseAdapter {
 			 holder.full_rate.setPaintFlags(holder.full_rate.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 			 holder.promo_rate = (TextView)convertView.findViewById(R.id.promo_rate);
 			 holder.details = (TextView)convertView.findViewById(R.id.details);
+			 holder.container = convertView.findViewById(R.id.roomListItem);
 			 convertView.setTag(holder);				 						 				 				 
 		 } else {
 			 holder = (ViewHolder) convertView.getTag();
@@ -99,6 +106,9 @@ public class RoomListAdapter extends BaseAdapter {
 		 
 		 if(roomDetails.mRateInfo!=null)
 		 {
+			 if (roomDetails.mNonRefundable) {
+				 holder.container.setBackgroundColor(nonRefundableColor);
+			 }
 			 double fullRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageBaseRate;
 			 double promoRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageRate;
 			 String fullRateStr = formatter.format(fullRate);
@@ -138,6 +148,7 @@ public class RoomListAdapter extends BaseAdapter {
 		TextView full_rate;
 		TextView promo_rate;
 		TextView details;
+		View container;
 		int roomIndex;
 	}
 
