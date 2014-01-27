@@ -190,10 +190,10 @@ public class HotelFragment extends RoboFragment {
 			Log.i(TAG, "2)mHotelData.mDetails.propertyDescription:" + mHotelData.mDetails.propertyDescription);
 			description += mHotelData.mDetails.propertyDescription;
 		}
-
-		description += "<br>\n <br>\n Note: It is the responsibility of the hotel chain and/or the"
+		
+		description += "&lt;p&gt;\n&lt;b&gt;Note:&lt;/b&gt; It is the responsibility of the hotel chain and/or the"
 			+ " individual property to ensure the accuracy of the photos displayed. \"Eva Travel Search\" is"
-			+ " not responsible for any inaccuracies in the photos.";
+			+ " not responsible for any inaccuracies in the photos. &lt;/p&gt;";
 		Spanned marked_up = Html.fromHtml("<html><body>" + description + "</body></html>");
 
 		mPropertyDescription

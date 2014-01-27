@@ -61,7 +61,31 @@
         android:layout_below="@id/hotelName" />
 
     
-    <RelativeLayout
+   
+    
+    <ImageView
+        android:id="@+id/dividerElement"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/hotelGallery"        
+        android:src="@drawable/divider" >
+    </ImageView>
+    
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dividerElement" >
+
+        <LinearLayout
+            android:id="@+id/detailsLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical" >
+
+            <RelativeLayout
         android:id="@+id/relativeLayout0"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -126,29 +150,7 @@
             </RatingBar>
         </LinearLayout>
     </RelativeLayout>
-    
-    <ImageView
-        android:id="@+id/dividerElement"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/relativeLayout0"        
-        android:src="@drawable/divider" >
-    </ImageView>
-    
-
-    <ScrollView
-        android:id="@+id/scrollView1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/dividerElement" >
-
-        <LinearLayout
-            android:id="@+id/detailsLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:orientation="vertical" >
-
+            
             <GridView
                 android:id="@+id/amenitiesGridview"
                 android:layout_width="fill_parent"
