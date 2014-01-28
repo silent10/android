@@ -16,8 +16,8 @@ public class ChargeableRateInfo {
 	public double mAverageRate;
 	private double mMaxNightlyRate;
 	public String mCurrencyCode;	
-	private NightlyRate[] mNightlyRatesPerRoom;
-	private Surcharge[] mSurcharges;
+	public NightlyRate[] mNightlyRatesPerRoom;
+	public Surcharge[] mSurcharges;
 
 	public ChargeableRateInfo(JSONObject jChargeableRateInfo) {
 		mCommissionableUsdTotal= EvaXpediaDatabase.getSafeDouble(jChargeableRateInfo,"@commissionableUsdTotal");

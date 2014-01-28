@@ -24,14 +24,20 @@ public class RoomDetails {
 	private int mExpediaPropertyId;
 	private String mRateKey;
 	public RateInfo mRateInfo;
-	private ValueAdd[] mValueAdds;
+	public ValueAdd[] mValueAdds;
 	String mRateDescription;
 	public String mRoomTypeDescription;
-	public String mDeepLink;
+	//public String mDeepLink;
 	public boolean mNonRefundable;
 	public String mCancelllationPolicy;
 	//public String mSupplierType;
-
+	public String mSmoking;
+	public boolean mImmediateChargeRequired;
+	public boolean mGuaranteeRequired;
+	public boolean mDepositRequired;
+	public String mOtherInformation;
+	public String mPolicy;
+	public String mCheckInInstructions;
 	
 	
 	public RoomDetails(JSONObject jsonObject) {
@@ -51,10 +57,30 @@ public class RoomDetails {
 		mExpediaPropertyId = EvaXpediaDatabase.getSafeInt(jsonObject, "expediaPropertyId");
 		//mRateKey =  EvaDatabase.getSafeString(jsonObject, "rateKey");
 		mRateDescription = EvaXpediaDatabase.getSafeString(jsonObject, "rateDescription");
-		mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
+		//mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
 		mNonRefundable = EvaXpediaDatabase.getSafeBool(jsonObject, "nonRefundable");
 		mCancelllationPolicy = EvaXpediaDatabase.getSafeString(jsonObject, "cancellationPolicy");
 		
+		mPolicy =  EvaXpediaDatabase.getSafeString(jsonObject, "policy");
+		mOtherInformation =  EvaXpediaDatabase.getSafeString(jsonObject, "otherInformation");
+		mCheckInInstructions =  EvaXpediaDatabase.getSafeString(jsonObject, "checkInInstructions");
+		
+		mImmediateChargeRequired = EvaXpediaDatabase.getSafeBool(jsonObject, "immediateChargeRequired");
+		mGuaranteeRequired = EvaXpediaDatabase.getSafeBool(jsonObject, "guaranteeRequired");
+		mDepositRequired = EvaXpediaDatabase.getSafeBool(jsonObject, "depositRequired");
+		mSmoking = EvaXpediaDatabase.getSafeString(jsonObject, "smokingPreferences");
+		if (mSmoking == null) {
+			mSmoking = "?";
+		}
+		if (mSmoking.equals("NS")) {
+			mSmoking = "Non-Smoking";
+		}
+		else if (mSmoking.equals("S")) {
+			mSmoking = "Smoking";
+		}
+		else if (mSmoking.equals("E")) {
+			mSmoking = "Either";
+		}
 		
 		try {
 			JSONObject jRateInfos = jsonObject.getJSONObject("RateInfos");
@@ -86,6 +112,8 @@ public class RoomDetails {
 					}
 				}
 			}
+		
+			
 		} catch (JSONException e) {	
 			if (EvaXpediaDatabase.PRINT_STACKTRACE)
 				e.printStackTrace();
@@ -164,5 +192,6 @@ public class RoomDetails {
 		Log.i(TAG, "Rate Code: "+mRateCode + "   room type: "+mRoomTypeCode+ "  selectedPrice: "+mRateInfo.mChargableRateInfo.mTotal);
 		return url;
 	}
+
 
 }
