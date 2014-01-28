@@ -17,10 +17,13 @@ import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RatingBar;
@@ -41,7 +44,7 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 
 @SuppressLint("ValidFragment")
-public class RoomsSelectFragement extends RoboFragment implements OnItemClickListener {
+public class RoomsSelectFragement extends RoboFragment {//implements OnItemClickListener {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
@@ -58,7 +61,7 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 	private TextView mLocation;
 	private RatingBar mStarRatingBar;
 	private HotelData mHotelData;
-	private ListView mRoomListView;
+	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
 	private Bitmap mEvaBmp = null;
 
@@ -195,14 +198,14 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 	
 				mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
 	
-				mRoomListView = (ListView)mView.findViewById(R.id.roomListView);
+				mRoomListView = (ExpandableListView)mView.findViewById(R.id.roomListView);
 	
 				mAdapter = new RoomListAdapter(getActivity(),mHotelData);
 				mRoomListView.setAdapter( mAdapter );
 	
-				mRoomListView.setOnItemClickListener(this);
+				//mRoomListView.setOnItemClickListener(this);
 	
-				if(mAdapter.getCount()==0)
+				if(mAdapter.getGroupCount()==0)
 				{
 					Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
 				}
@@ -225,40 +228,6 @@ public class RoomsSelectFragement extends RoboFragment implements OnItemClickLis
 			return new RoomsSelectFragement(hotelIndex);
 		}
 
-		@Override
-		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-			Context context = RoomsSelectFragement.this.getActivity();
-			Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-			defaultTracker.send(MapBuilder
-				    .createAppView()
-				    .set(Fields.SCREEN_NAME, "Booking Screen")
-				    .build()
-				);
-
-			if (mHotelData == null || mHotelData.mSummary == null || mHotelData.mSummary.mHotelId == -1) {
-				Toast.makeText(getActivity(), "Oops, there was an error - please start over", Toast.LENGTH_LONG).show();
-				return;
-			}
-			
-			ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
-			String newUrl = mHotelData.mSummary.roomDetails[arg2].buildTravelUrl(mHotelData.mSummary.mHotelId, 
-					mHotelData.mSummary.mSupplierType,
-					mHotelData.mSummary.mCurrentRoomDetails.mArrivalDate, 
-					mHotelData.mSummary.mCurrentRoomDetails.mDepartureDate, 
-					db.mNumberOfAdultsParam,
-					db.getNumberOfChildrenParam(),
-					db.getAgeChild1(),
-					db.getAgeChild2(),
-					db.getAgeChild3(),
-					mHotelData.mSummary.mCurrentRoomDetails.mRateKey);
-			//String url = mHotelData.mSummary.roomDetails[arg2].mDeepLink;
-			Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());
-			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(uri);
-			Log.i(TAG, "Setting Browser to url:  "+uri);
-			startActivity(i);
-
-		}
 
 
 }

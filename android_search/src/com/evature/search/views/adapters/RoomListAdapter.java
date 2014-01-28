@@ -3,29 +3,42 @@ package com.evature.search.views.adapters;
 import java.text.DecimalFormat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.webkit.WebView;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.evature.search.EvaSettingsAPI;
+import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.R.color;
+import com.evature.search.models.expedia.ExpediaRequestParameters;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.RoomDetails;
+import com.evature.search.models.expedia.Surcharge;
+import com.evature.search.models.expedia.ValueAdd;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
 
-public class RoomListAdapter extends BaseAdapter {
+public class RoomListAdapter extends BaseExpandableListAdapter {
 
 	HotelData mHotel;
 	private LayoutInflater mInflater;
 	private Context mParent;
 	private static int nonRefundableColor = -1;
 	static final DecimalFormat formatter = new DecimalFormat("#.##");
+	protected static final String TAG = "RoomListAdapter";
 		
 	public RoomListAdapter(Context context, HotelData hotel)
 	{	
@@ -40,26 +53,9 @@ public class RoomListAdapter extends BaseAdapter {
 	
 	
 
+	
 	@Override
-	public int getCount() {		
-		if (mHotel.mSummary.roomDetails == null) {
-			return 0;
-		}
-		return mHotel.mSummary.roomDetails.length;
-	}
-
-	@Override
-	public Object getItem(int position) {		
-		return mHotel.mSummary.roomDetails[position];
-	}
-
-	@Override
-	public long getItemId(int position) {
-		return position;
-	}
-
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getGroupView(int position, boolean isExpanded, View convertView, ViewGroup parent) {
 		 ViewHolder holder;
 		 if (convertView == null) 
 		 {
@@ -151,5 +147,170 @@ public class RoomListAdapter extends BaseAdapter {
 		View container;
 		int roomIndex;
 	}
+
+
+
+	@Override
+	public Object getChild(int groupPosition, int childPosition) {
+		return mHotel.mSummary.roomDetails[groupPosition];
+	}
+
+
+
+	@Override
+	public long getChildId(int groupPosition, int childPosition) {
+		return groupPosition;
+	}
+
+
+
+	@Override
+	public View getChildView(int groupPosition, int childPosition,
+			boolean isLastChild, View convertView, ViewGroup parent) {
+		if (convertView == null) 
+		{
+			convertView = mInflater.inflate(R.layout.room_list_item_expanded, null);
+		}
+		Button bookButton = (Button) convertView.findViewById(R.id.buttonChooseRoom);
+		WebView desc = (WebView) convertView.findViewById(R.id.roomDescription);
+		final RoomDetails room = mHotel.mSummary.roomDetails[groupPosition];
+		StringBuilder text  = new StringBuilder("<html><body>");
+		if (room.mValueAdds != null && room.mValueAdds.length > 0) {
+			text.append("&lt;b&gt;You also get:&lt;/b&gt; &lt;ul&gt;");
+			for (ValueAdd va: room.mValueAdds) {
+				text.append("&lt;li&gt;")
+					.append(va.mDescription)
+					.append("&lt;/li&gt;");
+			}
+			text.append("&lt;/ul&gt;");
+		}
+		if (room.mRateInfo != null && room.mRateInfo.mChargableRateInfo != null  &&
+				room.mRateInfo.mChargableRateInfo.mSurcharges != null && room.mRateInfo.mChargableRateInfo.mSurcharges.length > 0) {
+			text.append("&lt;b&gt;Surcharges&lt;/b&gt; &lt;ul&gt;");
+			for (Surcharge surcharge: room.mRateInfo.mChargableRateInfo.mSurcharges) {
+				text.append("&lt;li&gt;")
+					.append(surcharge.mType)
+					.append(": ")
+					.append(surcharge.mAmount)
+					.append("&lt;/li&gt;");
+			}
+			text.append("&lt;/ul&gt;");
+		}
+		if (room.mCheckInInstructions != null && room.mCheckInInstructions.equals("") == false) {
+			text.append("&lt;p&gt; &lt;b&gt;Check In Instructions &lt;/b&gt; &lt;br&gt;")
+				.append(room.mCheckInInstructions)
+				.append("&lt;/p&gt;");
+		}
+		if (room.mCancelllationPolicy != null && room.mCancelllationPolicy.equals("") == false) {
+			text.append("&lt;p&gt; &lt;b&gt;Cancelation Policy&lt;/b&gt; &lt;br&gt;")
+				.append(room.mCancelllationPolicy)
+				.append("&lt;/p&gt;");
+		}
+		if (room.mPolicy != null && room.mPolicy.equals("") == false) {
+			text.append("&lt;p&gt; &lt;b&gt;Policy&lt;/b&gt; &lt;br&gt;")
+				.append(room.mPolicy)
+				.append("&lt;/p&gt;");
+		}
+		text.append("&lt;p&gt; &lt;b&gt;Other Information&lt;/b&gt; &lt;br&gt;");
+		if (room.mOtherInformation != null && room.mOtherInformation.equals("") == false) {
+				text.append(room.mPolicy)
+				.append("&lt;br&gt;");
+		}
+		text.append("&lt;p&gt; &lt;b&gt; Refundable: &lt;/b&gt; ").append(room.mNonRefundable ? "No" : "Yes").append("&lt;br&gt;");
+		text.append("&lt;p&gt; &lt;b&gt; Smoking Policy: &lt;/b&gt; ").append(room.mSmoking).append("&lt;br&gt;");
+		text.append("&lt;p&gt; &lt;b&gt; Immediate Charge Required: &lt;/b&gt; ").append(room.mImmediateChargeRequired ? "Yes" : "No").append("&lt;br&gt;");
+		text.append("&lt;p&gt; &lt;b&gt; Guarantee Required: &lt;/b&gt; ").append(room.mGuaranteeRequired ? "Yes" : "No").append("&lt;br&gt;");
+		text.append("&lt;p&gt; &lt;b&gt; Deposit Required: &lt;/b&gt; ").append(room.mDepositRequired ? "Yes" : "No").append("&lt;br&gt;");
+		text.append("&lt;/p&gt;");
+		
+		text.append("</body></html>");
+		
+		Spanned marked_up = Html.fromHtml(text.toString());
+
+		desc.loadData("<font color=\"black\">" + marked_up.toString() + "</font>", "text/html", "utf-8");
+		
+		
+		bookButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Context context  = mParent;
+				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+				defaultTracker.send(MapBuilder
+					    .createAppView()
+					    .set(Fields.SCREEN_NAME, "Booking Screen")
+					    .build()
+					);
+				
+				ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
+				String newUrl = room.buildTravelUrl(mHotel.mSummary.mHotelId, 
+						mHotel.mSummary.mSupplierType,
+						mHotel.mSummary.mCurrentRoomDetails.mArrivalDate, 
+						mHotel.mSummary.mCurrentRoomDetails.mDepartureDate, 
+						db.mNumberOfAdultsParam,
+						db.getNumberOfChildrenParam(),
+						db.getAgeChild1(),
+						db.getAgeChild2(),
+						db.getAgeChild3(),
+						mHotel.mSummary.mCurrentRoomDetails.mRateKey);
+				//String url = mHotel.mSummary.roomDetails[arg2].mDeepLink;
+				Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setData(uri);
+				Log.i(TAG, "Setting Browser to url:  "+uri);
+				context.startActivity(i);
+			}
+		});
+		
+		return convertView;
+	}
+
+
+
+	@Override
+	public int getChildrenCount(int groupPosition) {
+		return 1;
+	}
+
+	
+
+
+
+	@Override
+	public boolean hasStableIds() {
+		return true;
+	}
+
+
+
+	@Override
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		return true;
+	}
+	
+
+
+	@Override
+	public Object getGroup(int groupPosition) {
+		return mHotel.mSummary.roomDetails[groupPosition];
+	}
+
+
+
+	@Override
+	public int getGroupCount() {
+		if (mHotel.mSummary.roomDetails == null) {
+			return 0;
+		}
+		return mHotel.mSummary.roomDetails.length;
+	}
+
+
+
+	@Override
+	public long getGroupId(int groupPosition) {
+		return groupPosition;
+	}
+
 
 }

@@ -6,9 +6,9 @@ import org.json.JSONObject;
 
 public class NightlyRate {
 
-	private boolean mPromo;
-	private double mRate;
-	private double mBaseRate;
+	public boolean mPromo;
+	public double mRate;
+	public double mBaseRate;
 
 	public NightlyRate(JSONObject jRate) {
 		mPromo = EvaXpediaDatabase.getSafeBool(jRate, "@promo");

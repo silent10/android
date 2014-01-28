@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/roomListItem"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent"
+  android:orientation="vertical"
+  android:background="@drawable/hotel_background"
+  android:descendantFocusability="blocksDescendants">
+
+
+     
+     <!-- <TextView
+         android:id="@+id/roomDescription"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:background="#fff"
+         android:textColor="#000"
+         android:maxHeight="40dp"
+         android:scrollbars="vertical"
+         android:text=""
+          />
+      -->
+     <WebView
+          android:id="@+id/roomDescription"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content" >
+      </WebView>
+
+     <Button
+         android:id="@+id/buttonChooseRoom"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center_horizontal"
+         android:textColor="@color/black"
+         android:text="Book this room" />
+            
+
+</LinearLayout>
