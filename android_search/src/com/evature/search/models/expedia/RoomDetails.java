@@ -12,62 +12,48 @@ public class RoomDetails {
 	private static final String TAG = "RoomDetails";
 	private String mRoomTypeCode;
 	private String mRateCode;
-	private int mMaxRoomOccupancy;
-	private int mQuotedRoomOccupancy;
-	private int mMinGuestAge;
+//	private int mMaxRoomOccupancy;
+//	private int mQuotedRoomOccupancy;
+//	private int mMinGuestAge;
 	public String mRoomDescription;
-	private int mPromoId;
-	public String mPromoDescription;
-	private int mCurrentAllotment;
-	private boolean mPropertyAvailable;
-	private boolean mPropertyRestricted;
-	private int mExpediaPropertyId;
+//	private int mCurrentAllotment;
+//	private boolean mPropertyAvailable;
+//	private boolean mPropertyRestricted;
+//	private int mExpediaPropertyId;
 	private String mRateKey;
 	public RateInfo mRateInfo;
 	public ValueAdd[] mValueAdds;
 	String mRateDescription;
 	public String mRoomTypeDescription;
 	//public String mDeepLink;
-	public boolean mNonRefundable;
-	public String mCancelllationPolicy;
 	//public String mSupplierType;
 	public String mSmoking;
-	public boolean mImmediateChargeRequired;
-	public boolean mGuaranteeRequired;
-	public boolean mDepositRequired;
 	public String mOtherInformation;
 	public String mPolicy;
 	public String mCheckInInstructions;
+
 	
 	
 	public RoomDetails(JSONObject jsonObject) {
-		
 		mRoomTypeDescription =	EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeDescription");
 		mRoomTypeCode = EvaXpediaDatabase.getSafeString(jsonObject, "roomTypeCode");
 		mRateCode = EvaXpediaDatabase.getSafeString(jsonObject, "rateCode");
-		mMaxRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "maxRoomOccupancy");
-		mQuotedRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "quotedRoomOccupancy");
-		mMinGuestAge = EvaXpediaDatabase.getSafeInt(jsonObject, "minGuestAge");
+//		mMaxRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "maxRoomOccupancy");
+//		mQuotedRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "quotedRoomOccupancy");
+//		mMinGuestAge = EvaXpediaDatabase.getSafeInt(jsonObject, "minGuestAge");
 		mRoomDescription  = EvaXpediaDatabase.getSafeString(jsonObject, "roomDescription");
-		mPromoId = EvaXpediaDatabase.getSafeInt(jsonObject, "promoId");
-		mPromoDescription = EvaXpediaDatabase.getSafeString(jsonObject, "promoDescription");
-		mCurrentAllotment = EvaXpediaDatabase.getSafeInt(jsonObject, "currentAllotment");
-		mPropertyAvailable = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyAvailable");
-		mPropertyRestricted = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyRestricted");
-		mExpediaPropertyId = EvaXpediaDatabase.getSafeInt(jsonObject, "expediaPropertyId");
-		//mRateKey =  EvaDatabase.getSafeString(jsonObject, "rateKey");
+//		mCurrentAllotment = EvaXpediaDatabase.getSafeInt(jsonObject, "currentAllotment");
+//		mPropertyAvailable = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyAvailable");
+//		mPropertyRestricted = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyRestricted");
+//		mExpediaPropertyId = EvaXpediaDatabase.getSafeInt(jsonObject, "expediaPropertyId");
+		mRateKey =  EvaXpediaDatabase.getSafeString(jsonObject, "rateKey");
 		mRateDescription = EvaXpediaDatabase.getSafeString(jsonObject, "rateDescription");
 		//mDeepLink = EvaXpediaDatabase.getSafeString(jsonObject, "deepLink");
-		mNonRefundable = EvaXpediaDatabase.getSafeBool(jsonObject, "nonRefundable");
-		mCancelllationPolicy = EvaXpediaDatabase.getSafeString(jsonObject, "cancellationPolicy");
 		
 		mPolicy =  EvaXpediaDatabase.getSafeString(jsonObject, "policy");
 		mOtherInformation =  EvaXpediaDatabase.getSafeString(jsonObject, "otherInformation");
 		mCheckInInstructions =  EvaXpediaDatabase.getSafeString(jsonObject, "checkInInstructions");
 		
-		mImmediateChargeRequired = EvaXpediaDatabase.getSafeBool(jsonObject, "immediateChargeRequired");
-		mGuaranteeRequired = EvaXpediaDatabase.getSafeBool(jsonObject, "guaranteeRequired");
-		mDepositRequired = EvaXpediaDatabase.getSafeBool(jsonObject, "depositRequired");
 		mSmoking = EvaXpediaDatabase.getSafeString(jsonObject, "smokingPreferences");
 		if (mSmoking == null) {
 			mSmoking = "?";
@@ -121,8 +107,7 @@ public class RoomDetails {
 	}
 	
 	public String buildTravelUrl(int hotelId, String supplierType, String checkin, String checkout, int adultsCount, 
-			int childNum, int ageChild1, int ageChild2, int ageChild3,
-			String rateKey) {
+			int childNum, int ageChild1, int ageChild2, int ageChild3) {
 		/*
 			&targetId=AREA-572b0850-4e3f-469b-87b2-c17ed3ea049b|cities
 			
@@ -179,6 +164,9 @@ public class RoomDetails {
 		//url += "&asyncSearch=true";
 		url += "&rateCode=" + mRateCode;
 		url += "&roomTypeCode=" + mRoomTypeCode;
+		if (mRateKey != null) {
+			url += "&rateKey="+mRateKey;
+		}
 		//url += "&hrnQuoteKey=" + rateKey;
 		if (mRateInfo.mChargableRateInfo.mTotal > 0) {
 			url += "&selectedPrice=" + mRateInfo.mChargableRateInfo.mTotal;//mAverageBaseRate;

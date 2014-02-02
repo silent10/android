@@ -34,6 +34,30 @@
             android:title="API Version"
          	/>
          	
+        
+        <EditTextPreference
+            android:key="eva_api_ver_host"
+            android:summary="Leave blank for default"
+            android:title="API Version"
+         	/>
+        
+        <ListPreference 
+            android:key="eva_vr_service"
+            android:title="Preferred VProxy service"
+            android:summary="Backend of Voice Recognition"
+            android:entries="@array/entries_vr_service"
+            android:entryValues="@array/entryvalues_vr_service"
+            />
+        <CheckBoxPreference
+            android:key="save_pcm"
+            android:summary="@string/save_recording_pcm_file_wav_"
+            android:title="Save PCM" />
+        <CheckBoxPreference
+            android:key="save_encoded"
+            android:summary="@string/save_encoded_file_flac_"
+            android:title="@string/save_encoded" />
+        
+        
      <PreferenceScreen android:title="Context"
 		android:summary="Travel services to consider in parsing"
      >

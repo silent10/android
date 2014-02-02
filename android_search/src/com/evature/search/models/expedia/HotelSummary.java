@@ -106,14 +106,11 @@ public class HotelSummary {
 		}
 	}
 
-	public void updateRoomDetails(String str) {
+	public void updateRoomDetails(JSONObject jServerResponse) {
 
-		JSONObject jServerResponse;
 		try {
 			
-			if(str==null) return;			
-			
-			jServerResponse = new JSONObject(str);
+			if(jServerResponse==null) return;			
 						
 			JSONObject jServerResponseData = jServerResponse.getJSONObject("HotelRoomAvailabilityResponse");
 
@@ -125,7 +122,6 @@ public class HotelSummary {
 			
 			mCurrentRoomDetails = new CurrentRoomDetails();
 			
-			mCurrentRoomDetails.mRateKey = EvaXpediaDatabase.getSafeString(jServerResponseData, "rateKey");
 			mCurrentRoomDetails.mArrivalDate = EvaXpediaDatabase.getSafeString(jServerResponseData, "arrivalDate");
 			mCurrentRoomDetails.mDepartureDate = EvaXpediaDatabase.getSafeString(jServerResponseData, "departureDate");
 			mCurrentRoomDetails.mCheckInInstructions =EvaXpediaDatabase.getSafeString(jServerResponseData, "checkInInstructions"); 
@@ -162,7 +158,6 @@ public class HotelSummary {
 	}
 	
 	public class CurrentRoomDetails {
-		public String mRateKey;
 		public String mArrivalDate;
 		public String mDepartureDate;
 		public String mCheckInInstructions;

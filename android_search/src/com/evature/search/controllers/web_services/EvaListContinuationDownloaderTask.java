@@ -30,7 +30,7 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(JSONObject result) {
 
 		if (hotelFragment == null)
 			return;
@@ -39,14 +39,12 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected String doInBackground(Void... params) {
+	protected JSONObject doInBackground(Void... params) {
 		Log.i(TAG, "Do in background");
 
-		String hotelListResponse = XpediaProtocolStatic.getExpediaNext(mNextQuery, mCurrencyCode);
+		JSONObject hotelListResponse = XpediaProtocolStatic.getExpediaNext(mNextQuery, mCurrencyCode);
 		if (hotelListResponse == null)
 			Log.e(TAG, "Response for next null");
-		else
-			Log.i(TAG, "Next: " + hotelListResponse);
 		mProgress = DownloaderStatus.MadeSomeProgress;
 		onProgressUpdate();
 		
@@ -59,13 +57,11 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 		return hotelListResponse;
 	}
 
-	boolean addHotelData(String hotelListResponse) {
+	boolean addHotelData(JSONObject hotelListResponseJSON) {
 
 		Log.i(TAG, "Add Hotel Data");
 
-		JSONObject hotelListResponseJSON;
 		try {
-			hotelListResponseJSON = new JSONObject(hotelListResponse);
 //			MyApplication.getDb().EvaDatabaseUpdateExpedia(hotelListResponseJSON);
 			EvaXpediaDatabase db = new EvaXpediaDatabase(hotelListResponseJSON);
 			if (db.unrecoverableError) {
@@ -78,9 +74,6 @@ public class EvaListContinuationDownloaderTask extends EvaDownloaderTask {
 				MyApplication.getDb().addData(db);
 			}
 			return true;
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return false;
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 			return false;

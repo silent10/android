@@ -145,6 +145,7 @@ public class EvaXpediaDatabase {
 				if ("UNRECOVERABLE".equals(errorHandling)) {
 					unrecoverableError = true;
 					Log.w(TAG, "Unrecoverable error returned from Xpedia Web service");
+					mHotelData = new HotelData[0];
 					return;
 				}
 			}
@@ -153,11 +154,11 @@ public class EvaXpediaDatabase {
 			mMoreResultsAvailable = getSafeBool(responseObject,"moreResultsAvailable");
 			mCacheKey= getSafeString(responseObject, "cacheKey");
 			mCacheLocation= getSafeString( responseObject, "cacheLocation");
+			Log.i(TAG, "Setting mCacheKey = "+mCacheKey+ "  mCacheLocation="+mCacheLocation+ "  mMoreResultsAvailable="+mMoreResultsAvailable);
 
 			responseObject = responseObject.getJSONObject("HotelList");
 
 			int size = getSafeInt(responseObject, "@size");
-			Ln.d("Hotel List Response:  size=%s  cacheKey=%s  moreAvail=%s  location=%s", size, mCacheKey, mMoreResultsAvailable, mCacheLocation);
 
 			if(size==-1)
 			{
@@ -200,6 +201,7 @@ public class EvaXpediaDatabase {
 	
 
 	public String getNextQuery() {
+		Log.i(TAG, "Using mCacheKey = "+mCacheKey+ "  mCacheLocation="+mCacheLocation+ "   mMoreResultsAvailable="+mMoreResultsAvailable);
 		return "&" + "cacheKey=" + mCacheKey + "&" + "cacheLocation=" + mCacheLocation;
 	}
 
@@ -210,6 +212,7 @@ public class EvaXpediaDatabase {
 			mCacheKey = db.mCacheKey;
 			mCacheLocation = db.mCacheLocation;
 			mMoreResultsAvailable = db.isMoreResultsAvailable();
+			Log.i(TAG, "Updating mCacheKey = "+mCacheKey+ "  mCacheLocation="+mCacheLocation+ "  mMoreResultsAvailable="+mMoreResultsAvailable);
 			
 			HotelData[] newHotelData = new HotelData[mHotelData.length + db.mHotelData.length];
 			int i=0;
