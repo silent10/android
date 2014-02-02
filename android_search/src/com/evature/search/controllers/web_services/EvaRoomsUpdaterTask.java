@@ -1,5 +1,7 @@
 package com.evature.search.controllers.web_services;
 
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.support.v4.app.Fragment;
 
@@ -22,20 +24,20 @@ public class EvaRoomsUpdaterTask extends EvaDownloaderTask {
 	
 	
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(JSONObject result) {
 		mProgress = DownloaderStatus.Finished;
 		super.onPostExecute(result);
 	}
 
 	@Override
-	protected String doInBackground(Void... params) {
-		String str= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
+	protected JSONObject doInBackground(Void... params) {
+		JSONObject result= XpediaProtocolStatic.getRoomInformationForHotel(mHotelData.mSummary.mHotelId,
 				MyApplication.getExpediaRequestParams(),
 				EvaSettingsAPI.getCurrencyCode(mContext));
 
-		mHotelData.mSummary.updateRoomDetails(str);
+		mHotelData.mSummary.updateRoomDetails(result);
 
-		return str;
+		return result;
 	}
 
 	

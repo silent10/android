@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -158,8 +160,18 @@ public class EvaVoiceClient {
 		
 		String host = mConfig.vproxyHost.toLowerCase();
 		host = host.replaceFirst("^http[s]?://", "");
+		int port = -1;
+		try {
+			URL aURL = new URL("https://"+host);
+			port = aURL.getPort();
+			host = aURL.getHost();
+		}catch (MalformedURLException e) {
+		}
+		if (port == -1) {
+			port = PORT;
+		}
 
-		URI uri = URIUtils.createURI("https", host, PORT, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
+		URI uri = URIUtils.createURI("https", host, port, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
 		return uri;
 	}
 

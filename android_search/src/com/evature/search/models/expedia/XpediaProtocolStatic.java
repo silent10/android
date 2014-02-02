@@ -1,6 +1,7 @@
 package com.evature.search.models.expedia;
 
 import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -23,6 +24,8 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,7 +40,7 @@ import com.evature.util.ExternalIpAddressGetter;
 public class XpediaProtocolStatic {
 
 	private final static String TAG = XpediaProtocolStatic.class.getSimpleName();
-	private static String minorRev = "16";
+	private static String minorRev = "26";
 
 	/**
 	 * {@link StatusLine} HTTP status code when no server error has occurred.
@@ -51,8 +54,10 @@ public class XpediaProtocolStatic {
 	private final static String HOTEL_INFO_URL = EXPEDIA_URL + "info?";
 	private final static String HOTEL_AVAILABILITY_URL = EXPEDIA_URL + "avail?";
 	private static final String CONSTANT_HTTP_PARAMS = "locale=en_US&"
-			//+ "customerUserAgent=Mozilla%2F5.0+%28Windows+NT+5.1%29+AppleWebKit%2F534.24+%28KHTML%2C+like+Gecko%29+Chrome%2F11.0.696.71+Safari%2F534.24"
+			+ "customerUserAgent=MOBILE_APP"
 			+ "&minorRev=" + minorRev;
+	
+	public static String sessionId=null;
 
 	// protected synchronized String getUrlContent(String url, List<NameValuePair> nameValuePairs){
 	// Create client and set our specific user-agent string
@@ -125,10 +130,14 @@ public class XpediaProtocolStatic {
 		if (ipAddr != null) {
 			urlString += "&customerIpAddress="+ipAddr;
 		}
+		if (sessionId == null) {
+			sessionId = UUID.randomUUID().toString(); 
+		}
+		urlString += "&customerSessionId="+sessionId;
 		return urlString;
 	}
 
-	static public String getExpediaHotelInformation(int hotelId, String currencyCode) {
+	static public JSONObject getExpediaHotelInformation(int hotelId, String currencyCode) {
 		String urlString = HOTEL_INFO_URL;
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
@@ -138,7 +147,7 @@ public class XpediaProtocolStatic {
 		return executeWithTimeout(urlString);
 	}
 
-	public static String getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
+	public static JSONObject getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
 		Log.i(TAG, "getExpediaAnswer()");
 		if (apiReply == null)
 			return null;
@@ -207,6 +216,8 @@ public class XpediaProtocolStatic {
 
 		}
 
+		// will create a new sessionId
+		sessionId = null;
 
 		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
@@ -229,7 +240,7 @@ public class XpediaProtocolStatic {
 		return executeWithTimeout(urlString);
 	}
 
-	private static String executeWithTimeout(String url) {
+	private static JSONObject executeWithTimeout(String url) {
 		
 		Log.d(TAG, "Fetching "+url);
 		
@@ -275,7 +286,20 @@ public class XpediaProtocolStatic {
 			// Return result from buffered stream
 			String result = new String(content.toByteArray());
 			Log.i(TAG, "Result is "+result);
-			return result;
+			JSONObject jResult;
+			try {
+				jResult = new JSONObject(result);
+				sessionId = jResult.optString("customerSessionId", null);
+				if (jResult.has("EanWSError")) {
+					Log.w(TAG, "Error from expedia: "+jResult.getJSONObject("EanWSError").toString(2));
+				}
+			}catch(JSONException e) {
+				Log.e(TAG, "Error parsing json of expedia result", e);
+				jResult = null;
+				sessionId = null;
+			}
+			
+			return jResult;
 		}
 		catch(IOException e) {
 			Log.e(TAG, "Problem communicating with API", e);
@@ -283,7 +307,7 @@ public class XpediaProtocolStatic {
 		} 
 	}
 
-	public static String getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
+	public static JSONObject getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
 			String currencyCode) {
 		String arrivalDateParam = db.mArrivalDateParam;
 		String departureDateParam = db.mDepartureDateParam;
@@ -314,7 +338,7 @@ public class XpediaProtocolStatic {
 		return executeWithTimeout(urlString);
 	}
 
-	public static String getExpediaNext(String mQueryString, String currencyCode) {
+	public static JSONObject getExpediaNext(String mQueryString, String currencyCode) {
 		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
 		urlString += getContantHttpParams() + "&currencyCode=" + currencyCode;

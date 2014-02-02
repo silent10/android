@@ -3,6 +3,8 @@ package com.evature.search.views.fragments;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import org.json.JSONObject;
+
 import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -140,7 +142,7 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 	ProgressDialog mProgressDialog;
 
 	@Override
-	public void endProgressDialog(int id, String result) {
+	public void endProgressDialog(int id, JSONObject result) {
 		if(mProgressDialog!=null)
 		{
 			mProgressDialog.dismiss();
@@ -161,7 +163,7 @@ public class CalendarFragment extends RoboFragment implements EvaDownloaderTaskI
 	}
 
 	@Override
-	public void endProgressDialogWithError(int id, String result) {
+	public void endProgressDialogWithError(int id, JSONObject result) {
 		mRoomsUpdater = null;		
 
 		if(mProgressDialog!=null)

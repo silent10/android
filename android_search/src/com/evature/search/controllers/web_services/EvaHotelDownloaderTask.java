@@ -39,7 +39,7 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected String doInBackground(Void... params) {
+	protected JSONObject doInBackground(Void... params) {
 		Log.d(TAG, "doInBackground()");
 
 		EvaXpediaDatabase db = MyApplication.getDb();
@@ -47,17 +47,15 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 
 		publishProgress();
 
-		String hotelInfo = XpediaProtocolStatic.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
+		JSONObject jHotel = XpediaProtocolStatic.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
 				EvaSettingsAPI.getCurrencyCode(mContext));
 
-		if (hotelInfo == null) {
+		if (jHotel == null) {
 			mProgress = DownloaderStatus.FinishedWithError;
 			return null;
 		}
 		
-		JSONObject jHotel = null;
 		try {
-			jHotel = new JSONObject(hotelInfo);
 
 			JSONObject jHotelInfo = jHotel.getJSONObject("HotelInformationResponse");
 
@@ -73,14 +71,12 @@ public class EvaHotelDownloaderTask extends EvaDownloaderTask {
 //			}
 			mProgress = DownloaderStatus.Finished;
 
-			lastResponse = jHotel.toString(2);
 			
-			return lastResponse;
+			return jHotel;
 
 		} catch (JSONException e) {
 			Log.e(TAG, "JSON exception getting hotel details", e);
-			Log.i(TAG, "Hotel Info: "+hotelInfo);
-			return hotelInfo;
+			return jHotel;
 		}
 	}
 

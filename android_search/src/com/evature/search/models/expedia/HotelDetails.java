@@ -22,37 +22,37 @@ public class HotelDetails {
 			
 			propertyDescription = jHotelDetails.getString("propertyDescription");
 			
-			if (jHotelDetails.has("drivingDirections")) {
+			if (jHotelDetails.optString("drivingDirections", "").trim().equals("") == false) {
 				propertyDescription += "&lt;p&gt; &lt;b&gt;Driving Directions &lt;/b&gt; &lt;br /&gt;";
 				propertyDescription += jHotelDetails.getString("drivingDirections");
 				propertyDescription += "&lt;/p&gt;";
 			}
 			
-			if (jHotelDetails.optString("hotelPolicy", "").equals("") == false) {
+			if (jHotelDetails.optString("hotelPolicy", "").trim().equals("") == false) {
 				propertyDescription += "&lt;p&gt; &lt;b&gt;Hotel Policy &lt;/b&gt; &lt;br /&gt;";
 				propertyDescription += jHotelDetails.getString("hotelPolicy");
 				propertyDescription += "&lt;/p&gt;";
 			}
 			
-			if (jHotelDetails.optString("checkInInstructions", "").equals("") == false) {
+			if (jHotelDetails.optString("checkInInstructions", "").trim().equals("") == false) {
 				propertyDescription += "&lt;p&gt; &lt;b&gt;Check In Instructions &lt;/b&gt; &lt;br /&gt;";
 				propertyDescription += jHotelDetails.getString("checkInInstructions");
 				propertyDescription += "&lt;/p&gt;";
 			}
 			
-			if (jHotelDetails.optString("roomInformation", "").equals("") == false) {
+			if (jHotelDetails.optString("roomInformation", "").trim().equals("") == false) {
 				propertyDescription += "&lt;p&gt; &lt;b&gt;Room Information &lt;/b&gt; &lt;br /&gt;";
 				propertyDescription += jHotelDetails.getString("roomInformation");
 				propertyDescription += "&lt;/p&gt;";
 			}
 			
-			if (jHotelDetails.optString("propertyInformation", "").equals("") == false) {
+			if (jHotelDetails.optString("propertyInformation", "").trim().equals("") == false) {
 				propertyDescription += "&lt;p&gt; &lt;b&gt;Property Information &lt;/b&gt; &lt;br /&gt;";
 				propertyDescription += jHotelDetails.getString("propertyInformation");
 				propertyDescription += "&lt;/p&gt;";
 			}
 			
-			if (jHotelDetails.optString("areaInformation", "").equals("") == false) {
+			if (jHotelDetails.optString("areaInformation", "").trim().equals("") == false) {
 				propertyDescription += "&lt;p&gt; &lt;b&gt;Area Information &lt;/b&gt; &lt;br /&gt;";
 				propertyDescription += jHotelDetails.getString("areaInformation");
 				propertyDescription += "&lt;/p&gt;";

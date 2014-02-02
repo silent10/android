@@ -1,5 +1,7 @@
 package com.evature.search.views.fragments;
 
+import org.json.JSONObject;
+
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
@@ -219,7 +221,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	};
 
 	@Override
-	public void endProgressDialog(int id, String result) {
+	public void endProgressDialog(int id, JSONObject result) {
 //		if (mDownLoader != null && id == mDownLoader.getId()) {
 //			mDownLoader = null;
 //		}
@@ -247,7 +249,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	ProgressDialog mProgressDialog = null;
 
 	@Override
-	public void endProgressDialogWithError(int id, String result) {
+	public void endProgressDialogWithError(int id, JSONObject result) {
 		Toast.makeText(getActivity(), "Error getting hotel information, please try again", Toast.LENGTH_LONG).show();
 
 		if (mProgressDialog != null) {

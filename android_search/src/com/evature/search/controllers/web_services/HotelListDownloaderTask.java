@@ -34,14 +34,12 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 		mCurrencyCode = currencyCode;
 	}
 
-	String createHotelData(String hotelListResponse) {
+	void createHotelData(JSONObject hotelListResponseJSON) {
 
-		if (hotelListResponse == null) {
-			return null;
+		if (hotelListResponseJSON == null) {
+			return;
 		}
-		JSONObject hotelListResponseJSON;
 		try {
-			hotelListResponseJSON = new JSONObject(hotelListResponse);
 //			MyApplication.getDb().EvaDatabaseUpdateExpedia(hotelListResponseJSON);
 			EvaXpediaDatabase db = new EvaXpediaDatabase(hotelListResponseJSON);
 			MyApplication.setDb(db);
@@ -53,31 +51,23 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 //			else {
 //				 MyApplication.setDb(db);
 //			}
-			return hotelListResponseJSON.toString(2);
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return null;
 		} catch (NullPointerException e) {
 			e.printStackTrace();
-			return null;
 		}
 
 	}
 
 	@Override
-	protected String doInBackground(Void... params) {
+	protected JSONObject doInBackground(Void... params) {
 
 		Log.i(TAG, "doInBackground: start");
 		// String searchQuery = EvaProtocol.getEvatureResponse(mQueryString);
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
-		String hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, MyApplication.getExpediaRequestParams(), mCurrencyCode);
+		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, MyApplication.getExpediaRequestParams(), mCurrencyCode);
 		if (hotelListResponse == null) {
 			Log.d(TAG, "null hotelist response!");
-		}
-		else {
-			Log.d(TAG, hotelListResponse);
 		}
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
 		
@@ -85,13 +75,13 @@ public class HotelListDownloaderTask extends EvaDownloaderTask {
 	}
 	
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(JSONObject result) {
 		if (result == null) {
 			Log.i(TAG, "doInBackground: Error in Expedia response");
 			mProgress = DownloaderStatus.FinishedWithError;
 		}
 		else {
-			result = createHotelData(result);
+			createHotelData(result);
 			
 			Log.i(TAG, "doInBackground: All OK");
 			mProgress = DownloaderStatus.Finished;

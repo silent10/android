@@ -1,5 +1,7 @@
 package com.evature.search.models.expedia;
 
+import org.json.JSONObject;
+
 import android.graphics.Bitmap;
 
 import com.evaapis.EvaApiReply;
@@ -17,20 +19,20 @@ public class XpediaProtocol {
 		return XpediaProtocolStatic.download_Image(path);
 	}
 
-	public String getExpediaHotelInformation(int hotelId, String currencyCode) {
+	public JSONObject getExpediaHotelInformation(int hotelId, String currencyCode) {
 		return XpediaProtocolStatic.getExpediaHotelInformation(hotelId, currencyCode);
 	}
 
-	public String getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db,String currencyCode) {
+	public JSONObject getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db,String currencyCode) {
 		return XpediaProtocolStatic.getExpediaAnswer(apiReply, db, currencyCode);
 	}
 
-	public String getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
+	public JSONObject getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
 			String currencyCode) {
 		return XpediaProtocolStatic.getRoomInformationForHotel(hotelId, db, currencyCode);
 	}
 
-	public String getExpediaNext(String mQueryString, String currencyCode) {
+	public JSONObject getExpediaNext(String mQueryString, String currencyCode) {
 		return XpediaProtocolStatic.getExpediaNext(mQueryString, currencyCode);
 	}
 

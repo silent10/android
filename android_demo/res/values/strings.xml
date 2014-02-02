@@ -9,4 +9,9 @@
     <string name="response_placeholder">Eva response will show here</string>
     <string name="use_text">Use Text</string>
 
+    <string name="save_encoded_file_flac_">Save encoded file (.flac)</string>
+    <string name="save_encoded">Save Encoded</string>
+    <string name="save_recording_pcm_file_wav_">Save raw recording (.wav file)</string>
+    <string name="save_encoded_recording_file_flac_">Save encoded recording (.flac file)</string>
+    
 </resources>

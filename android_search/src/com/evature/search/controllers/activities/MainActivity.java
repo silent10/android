@@ -25,6 +25,7 @@ import java.util.List;
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
@@ -202,7 +203,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		Log.d(TAG, "onResume()");
 		eva.onResume();
 		super.onResume();
-		setDebugData(DebugTextType.None, "");
+		setDebugData(DebugTextType.None, null);
 	}
 	
 	@Override
@@ -276,7 +277,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			fatal_error(R.string.network_error);
 		}
 
-		setDebugData(DebugTextType.None, "");
+		setDebugData(DebugTextType.None, null);
 
 		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 
@@ -656,7 +657,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 
 
-	public void setVayantReply(String response) {
+	public void setVayantReply(JSONObject response) {
 		setDebugData(DebugTextType.VayantDebug, response);
 	}
 	
@@ -723,7 +724,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 
 	@Override
-	public void endProgressDialog(int id, String result) { // we got the hotels list or hotel details reply successfully
+	public void endProgressDialog(int id, JSONObject result) { // we got the hotels list or hotel details reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
 
 		setDebugData(DebugTextType.ExpediaDebug, result);
@@ -770,7 +771,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 
 	@Override
-	public void endProgressDialogWithError(int id, String result) {
+	public void endProgressDialogWithError(int id, JSONObject result) {
 		setDebugData(DebugTextType.ExpediaDebug, result);
 	}
 
@@ -895,7 +896,20 @@ public class MainActivity extends RoboFragmentActivity implements
 		ExpediaDebug
 	}
 	
-	private void setDebugData(DebugTextType debugType, String txt) {
+	private void setDebugData(DebugTextType debugType, JSONObject jTxt) {
+		String txt;
+		try {
+			if (jTxt == null) {
+				txt = "null !!!";
+			}
+			else {
+				txt = jTxt.toString(2);
+			}
+		} catch (JSONException e1) {
+			txt = "Exception "+e1;
+			e1.printStackTrace();
+			
+		}
 		switch (debugType) {
 		case EvaDebug:
 			lastEvaReply = txt;
@@ -1012,11 +1026,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		
 		if (reply.JSONReply != null) {
-			try {
-				setDebugData(DebugTextType.EvaDebug, reply.JSONReply.toString(2));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			setDebugData(DebugTextType.EvaDebug, reply.JSONReply);
 		}
 		
 		if (reply.flow != null ) {
@@ -1150,7 +1160,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		
 		@Override
-		public void endProgressDialog(int id, String result) {
+		public void endProgressDialog(int id, JSONObject result) {
 			Log.i(TAG, "End search for "+currentItem.getChat());
 			currentItem.setSearchResults(result);
 			currentItem.setStatus(Status.HasResults);
@@ -1208,7 +1218,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 
 		@Override
-		public void endProgressDialogWithError(int id, String result) {
+		public void endProgressDialogWithError(int id, JSONObject result) {
 			Log.i(TAG, "End search with ERROR for "+currentItem.getChat());
 			currentItem.setStatus(Status.ToSearch);
 			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
@@ -1285,13 +1295,13 @@ public class MainActivity extends RoboFragmentActivity implements
 					mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 					mSearchExpediaTask.initialize(MainActivity.this, _reply,  EvaSettingsAPI.getCurrencyCode(MainActivity.this)); // TODO: change to be based on flow element, // TODO: change to use currency
 					mSearchExpediaTask.attach(new DownloaderListener(_chatItem, _switchToResult));
-					if (currentHotelSearch.getStatus() == Status.HasResults) {
-						// this chat item was already activated and has results - bypass the cloud service and fake results
-						mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
-					}
-					else {
+//					if (currentHotelSearch.getStatus() == Status.HasResults) {
+//						// this chat item was already activated and has results - bypass the cloud service and fake results
+//						mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
+//					}
+//					else {
 						mSearchExpediaTask.execute();
-					}
+//					}
 				}
 				
 				@Override
@@ -1306,13 +1316,13 @@ public class MainActivity extends RoboFragmentActivity implements
 			currentFlightSearch = chatItem;
 			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
 			mSearchVayantTask.attach(new DownloaderListener(chatItem, switchToResult));
-			if (chatItem.getStatus() == Status.HasResults) {
-				// this chat item was already activated and has results - bypass the cloud service and fake results
-				mSearchVayantTask.setCachedResults(chatItem.getSearchResult());
-			}
-			else {
+//			if (chatItem.getStatus() == Status.HasResults) {
+//				// this chat item was already activated and has results - bypass the cloud service and fake results
+//				mSearchVayantTask.setCachedResults(chatItem.getSearchResult());
+//			}
+//			else {
 				mSearchVayantTask.execute();
-			}
+//			}
 			break;
 		case Question:
 			break;

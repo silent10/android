@@ -1,5 +1,7 @@
 package com.evature.search.models.chat;
 
+import org.json.JSONObject;
+
 import android.text.SpannableString;
 
 import com.evaapis.EvaApiReply;
@@ -31,7 +33,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	
 	private Status status;
 	
-	private String mResults = null;
+	private JSONObject mResults = null;
 	protected FlowElement flow;
 	protected EvaApiReply evaReply;
 	public boolean sayitActivated = false; 
@@ -134,11 +136,11 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 		}
 	}
 
-	public void setSearchResults(String result) {
+	public void setSearchResults(JSONObject result) {
 		mResults = result;
 	}
 
-	public String getSearchResult() {
+	public JSONObject getSearchResult() {
 		return mResults;
 	}
 

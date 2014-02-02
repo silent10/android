@@ -39,7 +39,7 @@ public class SearchVayantTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected String doInBackground(Void... unusedParams) {
+	protected JSONObject doInBackground(Void... unusedParams) {
 		String airport_code0 = null;
 		String airport_code1 = null;
 		if (mApiReply.locations.length >= 2) {
@@ -93,7 +93,6 @@ public class SearchVayantTask extends EvaDownloaderTask {
 					// This should not happen!
 					e.printStackTrace();
 				}
-				String json_dump = obj.toString();
 				try {
 					Log.d(TAG, "Vayant query: "+obj.toString(2));
 				} catch (JSONException e1) {
@@ -101,18 +100,21 @@ public class SearchVayantTask extends EvaDownloaderTask {
 					e1.printStackTrace();
 				}
 				try {
-					return callApi(json_dump);
+					String result = callApi(obj);
+					return new JSONObject(result);
+				} catch (JSONException e) {
+					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return "";
+		return null;
 	}
 
 	// Call the Vayant API, sending the JSON request and receiving the JSON reply.
 	// Tips on posting a JSON object: http://mycenes.wordpress.com/tag/json/
-	private String callApi(String data) throws IOException {
+	private String callApi(JSONObject data) throws IOException {
 		final String vayant_url = "http://fs-json.demo.vayant.com:80"; //7081";
 		URL url = new URL(vayant_url);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -125,7 +127,7 @@ public class SearchVayantTask extends EvaDownloaderTask {
 		conn.setRequestProperty("Accept", "application/json");
 		conn.addRequestProperty("Accept-Encoding","gzip");
 		conn.setRequestProperty("Content-Length", Integer.toString(data.length()));
-		conn.getOutputStream().write(data.getBytes());
+		conn.getOutputStream().write(data.toString().getBytes());
 		conn.getOutputStream().flush();
 		// Starts the query
 		conn.connect();
@@ -148,13 +150,10 @@ public class SearchVayantTask extends EvaDownloaderTask {
 	}
 
 	@Override
-	protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
-		if (result != null) {
-			JSONObject vayantReply;
+	protected void onPostExecute(JSONObject vayantReply) { // onPostExecute displays the results of the AsyncTask.
+		if (vayantReply != null) {
 			VayantJourneys journeys = null;
 			try {
-				vayantReply = new JSONObject(result);
-				result = vayantReply.toString(2);
 				journeys = new VayantJourneys(vayantReply.getJSONArray("Journeys"));
 				MyApplication.getJourneyDb().mJourneys = journeys;
 				Log.d(TAG, "JSON parsed");
@@ -164,14 +163,14 @@ public class SearchVayantTask extends EvaDownloaderTask {
 			
 			Log.d(TAG, "Got Vayant Response!");
 			if (mMainActivity != null) {
-				mMainActivity.setVayantReply(result);
+				mMainActivity.setVayantReply(vayantReply);
 			}
 			mProgress = DownloaderStatus.Finished;
 		} else {
 			Log.e(TAG, "Error getting Vayant Response!");
 			mProgress = DownloaderStatus.FinishedWithError;
 		}
-		super.onPostExecute(result);
+		super.onPostExecute(vayantReply);
 		
 	}
 }

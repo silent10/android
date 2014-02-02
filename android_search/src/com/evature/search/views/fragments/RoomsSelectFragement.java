@@ -186,7 +186,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 				}
 				if (mHotelData.mSummary.roomDetails != null) {
 					for (RoomDetails room : mHotelData.mSummary.roomDetails) {
-						if (room.mNonRefundable) {
+						if (room.mRateInfo != null && room.mRateInfo.mNonRefundable) {
 							disclaimer = "Note: Highlighted rooms are Non Refundable\n"+disclaimer;
 							break;
 						}

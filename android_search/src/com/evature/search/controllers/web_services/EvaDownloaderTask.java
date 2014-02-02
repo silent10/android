@@ -2,12 +2,14 @@ package com.evature.search.controllers.web_services;
 
 import java.util.ArrayList;
 
+import org.json.JSONObject;
+
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface.DownloaderStatus;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String> {
+abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, JSONObject> {
 
 	static private final String TAG = EvaDownloaderTask.class.getSimpleName();
 	
@@ -33,20 +35,20 @@ abstract public class EvaDownloaderTask extends AsyncTask<Void, Integer, String>
 	}
 
 	@Override
-	protected String doInBackground(Void... params) {
+	protected JSONObject doInBackground(Void... params) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 
-	public void setCachedResults(String cachedResult) {
-		Log.i(TAG, "Using cached Result");
-		onPostExecute(cachedResult);
-	}
+//	public void setCachedResults(String cachedResult) {
+//		Log.i(TAG, "Using cached Result");
+//		onPostExecute(cachedResult);
+//	}
 	
 
 	@Override
-	protected void onPostExecute(String result) {
+	protected void onPostExecute(JSONObject result) {
 
 		Log.d(TAG, "onPostExecute");
 

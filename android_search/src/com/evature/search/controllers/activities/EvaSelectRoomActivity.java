@@ -1,5 +1,7 @@
 package com.evature.search.controllers.activities;
 
+import org.json.JSONObject;
+
 import roboguice.activity.RoboFragmentActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -56,7 +58,7 @@ public class EvaSelectRoomActivity extends RoboFragmentActivity implements EvaDo
 	ProgressDialog mProgressDialog;
 
 	@Override
-	public void endProgressDialog(int id, String result) {
+	public void endProgressDialog(int id, JSONObject result) {
 		if(mProgressDialog!=null)
 		{
 			mProgressDialog.dismiss();
@@ -84,7 +86,7 @@ public class EvaSelectRoomActivity extends RoboFragmentActivity implements EvaDo
 	}
 
 	@Override
-	public void endProgressDialogWithError(int id, String result) {
+	public void endProgressDialogWithError(int id, JSONObject result) {
 		mRoomUpdater = null;		
 
 		if(mProgressDialog!=null)
