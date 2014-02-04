@@ -146,9 +146,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				case Hotel:
 					img.setImageResource(R.drawable.hotel_small);
 					break;
-				case Flight:
-					img.setImageResource(R.drawable.airplane_small);
-					break;
+//				case Flight:
+//					img.setImageResource(R.drawable.airplane_small);
+//					break;
 				case Question:
 					img.setImageResource(R.drawable.eva_head);
 				}

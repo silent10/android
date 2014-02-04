@@ -29,10 +29,8 @@ import android.widget.TextView;
 
 import com.evature.search.MyApplication;
 import com.evature.search.R;
-import com.evature.search.controllers.activities.EvaCheckoutActivity;
 import com.evature.search.controllers.activities.EvaSelectRoomActivity;
 import com.evature.search.controllers.activities.HotelMapActivity;
-import com.evature.search.controllers.web_services.EvaRoomsUpdaterTask;
 import com.evature.search.models.expedia.HotelData;
 import com.evature.search.models.expedia.XpediaProtocolStatic;
 import com.evature.search.views.adapters.HotelGalleryAdapter;

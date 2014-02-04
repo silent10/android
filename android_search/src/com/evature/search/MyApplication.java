@@ -14,15 +14,13 @@ import android.util.Log;
 import com.evaapis.EvatureLocationUpdater;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.models.expedia.ExpediaRequestParameters;
-import com.evature.search.models.travelport.EvaTravelportDatabase;
-import com.evature.search.models.vayant.EvaVayantDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {
 
 	static EvaXpediaDatabase mEvaDb = null;
 	static ExpediaRequestParameters  requestParams = new ExpediaRequestParameters();
-	static EvaVayantDatabase mVayantDb = null;
+	//static EvaVayantDatabase mVayantDb = null;
 	static String mExpediaSecret = null;
 	static String mExpediaApiKey = null;
 	static String mExpediaClientId = null;
@@ -93,16 +91,16 @@ public class MyApplication extends Application {
 		return MyApplication.context;
 	}
 
-	public static EvaTravelportDatabase getFlightsDb() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public static EvaVayantDatabase getJourneyDb() {
-		if (mVayantDb == null) {
-			mVayantDb = new EvaVayantDatabase();
-		}
-		return mVayantDb;
-	}
+//	public static EvaTravelportDatabase getFlightsDb() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//	
+//	public static EvaVayantDatabase getJourneyDb() {
+//		if (mVayantDb == null) {
+//			mVayantDb = new EvaVayantDatabase();
+//		}
+//		return mVayantDb;
+//	}
 
 }
