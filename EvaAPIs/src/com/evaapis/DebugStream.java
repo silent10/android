@@ -65,13 +65,16 @@ public class DebugStream extends InputStream {
 				}
 			}
     	}
-    	else if (mDebugSave) {
-			try {
-				dos.write(result);
-			} catch (IOException e) {
-				Log.w(TAG, "Exception writing debug file",e ); 
+    	else {
+    		//Log.i(TAG, "<<< Read "+result+" bytes");
+    		if (mDebugSave) {
+				try {
+					dos.write(result);
+				} catch (IOException e) {
+					Log.w(TAG, "Exception writing debug file",e ); 
+				}
 			}
-		}
+    	}
     	return result;
     }
 
@@ -89,11 +92,14 @@ public class DebugStream extends InputStream {
 				}
 			}
         }
-        else if (mDebugSave) {
-			try {
-				dos.write(buffer);
-			} catch (IOException e) {
-				Log.w(TAG, "Exception writing debug file",e ); 
+        else {
+        	//Log.i(TAG, "<<< Read "+result+" bytes");
+			if (mDebugSave) {
+				try {
+					dos.write(buffer);
+				} catch (IOException e) {
+					Log.w(TAG, "Exception writing debug file", e);
+				}
 			}
 		}
         return result;
@@ -105,13 +111,16 @@ public class DebugStream extends InputStream {
     		timeOfLastBuffer = System.nanoTime();
     		Log.i(TAG, "<<< Input Stream ended");
     	}
-    	else if (mDebugSave) {
-			try {
-				dos.write(buffer, offset, length);
-			} catch (IOException e) {
-				Log.w(TAG, "Exception writing debug file",e ); 
+    	else {
+    		//Log.i(TAG, "<<< Read "+result+" bytes");
+			if (mDebugSave) {
+				try {
+					dos.write(buffer, offset, length);
+				} catch (IOException e) {
+					Log.w(TAG, "Exception writing debug file",e ); 
+				}
 			}
-		}
+    	}
     	return result;
     }
 

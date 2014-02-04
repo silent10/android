@@ -37,7 +37,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -46,17 +45,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -88,8 +84,6 @@ import com.evature.search.controllers.events.HotelsListUpdated;
 import com.evature.search.controllers.web_services.EvaDownloaderTaskInterface;
 import com.evature.search.controllers.web_services.EvaHotelDownloaderTask;
 import com.evature.search.controllers.web_services.HotelListDownloaderTask;
-import com.evature.search.controllers.web_services.SearchTravelportTask;
-import com.evature.search.controllers.web_services.SearchVayantTask;
 import com.evature.search.models.chat.ChatItem;
 import com.evature.search.models.chat.ChatItem.ChatType;
 import com.evature.search.models.chat.ChatItem.Status;
@@ -99,19 +93,14 @@ import com.evature.search.models.chat.DialogQuestionChatItem;
 import com.evature.search.models.expedia.EvaXpediaDatabase;
 import com.evature.search.views.SwipeyTabs;
 import com.evature.search.views.adapters.SwipeyTabsAdapter;
-import com.evature.search.views.adapters.TrainListAdapter;
 import com.evature.search.views.fragments.ChatFragment;
 import com.evature.search.views.fragments.ChatFragment.DialogClickHandler;
 import com.evature.search.views.fragments.ChildAgeDialogFragment;
-import com.evature.search.views.fragments.ChildAgeDialogFragment.ChildAgeDialogListener;
-import com.evature.search.views.fragments.DebugFragment;
 import com.evature.search.views.fragments.ExamplesFragment;
 import com.evature.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
-import com.evature.search.views.fragments.FlightsFragment;
 import com.evature.search.views.fragments.HotelFragment;
 import com.evature.search.views.fragments.HotelsFragment;
 import com.evature.search.views.fragments.HotelsMapFragment;
-import com.evature.search.views.fragments.TrainsFragment;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.Tracker;
@@ -136,8 +125,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	@InjectView(R.id.viewpager) private MyViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
 	@InjectView(R.id.swipeytabs) private SwipeyTabs mTabs; // The main swipey tabs element and the main view pager element:
-	SearchVayantTask mSearchVayantTask;
-	SearchTravelportTask mSearchTravelportTask;
+	//SearchVayantTask mSearchVayantTask;
+	//SearchTravelportTask mSearchTravelportTask;
 	SwipeyTabsPagerAdapter mSwipeyAdapter;
 	HotelListDownloaderTask mSearchExpediaTask;
 		
@@ -203,7 +192,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		Log.d(TAG, "onResume()");
 		eva.onResume();
 		super.onResume();
-		setDebugData(DebugTextType.None, null);
+//		setDebugData(DebugTextType.None, null);
 	}
 	
 	@Override
@@ -277,7 +266,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			fatal_error(R.string.network_error);
 		}
 
-		setDebugData(DebugTextType.None, null);
+//		setDebugData(DebugTextType.None, null);
 
 		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 
@@ -324,11 +313,11 @@ public class MainActivity extends RoboFragmentActivity implements
 				Log.e(TAG, "No fragment made for Position "+position);
 				return null;
 			}
-			if (mTabTitles.get(position).equals(mDebugTabName)) { // debug window
-				Log.d(TAG, "Debug Fragment");
-				DebugFragment fragment = injector.getInstance(DebugFragment.class);
-				return fragment;
-			}
+//			if (mTabTitles.get(position).equals(mDebugTabName)) { // debug window
+//				Log.d(TAG, "Debug Fragment");
+//				DebugFragment fragment = injector.getInstance(DebugFragment.class);
+//				return fragment;
+//			}
 			
 			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
 				Log.d(TAG, "Example Fragment");
@@ -368,20 +357,20 @@ public class MainActivity extends RoboFragmentActivity implements
 				return fragment;
 			}
 			
-			if (mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
-				Log.i(TAG, "Flights Fragment");
-				return injector.getInstance(FlightsFragment.class);
-			}
+//			if (mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
+//				Log.i(TAG, "Flights Fragment");
+//				return injector.getInstance(FlightsFragment.class);
+//			}
 			
 			if (mTabTitles.get(position).equals(mHotelTabName)) { // Single hotel
 				int hotelIndex = MyApplication.getExpediaRequestParams().getHotelId();
 				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
 				return HotelFragment.newInstance(hotelIndex);
 			}
-			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
-				Log.i(TAG, "Trains Fragment");
-				return injector.getInstance(TrainsFragment.class);
-			}
+//			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
+//				Log.i(TAG, "Trains Fragment");
+//				return injector.getInstance(TrainsFragment.class);
+//			}
 
 			Log.e(TAG, "No fragment made for Position "+position+(position< size ? " titled "+mTabTitles.get(position) : ""));
 			return null;
@@ -657,9 +646,9 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 
 
-	public void setVayantReply(JSONObject response) {
-		setDebugData(DebugTextType.VayantDebug, response);
-	}
+//	public void setVayantReply(JSONObject response) {
+//		setDebugData(DebugTextType.VayantDebug, response);
+//	}
 	
 	private int showTab(int tabNameId) {
 		String tabName = getString(tabNameId);
@@ -672,41 +661,41 @@ public class MainActivity extends RoboFragmentActivity implements
 		return index;
 	}
 
-	public void setTravelportReply(boolean train) {
-		// get the fragment: http://stackoverflow.com/a/7393477/78234
-		int string_id = train ? R.string.TRAINS : R.string.FLIGHTS;
-		int index = showTab(string_id);
-		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
-		if (train) {
-			TrainsFragment fragment = (TrainsFragment) getSupportFragmentManager().findFragmentByTag(tag);
-			if (fragment != null) // could be null if not instantiated yet
-			{
-				TrainListAdapter adapter = fragment.getAdapter();
-				if (adapter != null) {
-					adapter.notifyDataSetChanged();
-					Log.d(TAG, "TrainListAdapter notifyDataSetChanged()");
-				}
-				// fragment.updateDisplay();
-			} else {
-				Log.e(TAG, "Trains fragment == null!?!");
-			}
-		} else {
-			FlightsFragment fragment = (FlightsFragment) getSupportFragmentManager().findFragmentByTag(tag);
-			if (fragment != null) // could be null if not instantiated yet
-			{
-				// fragment.updateDisplay();
-//				FlightListAdapterTP adapter = fragment.getAdapter();
+//	public void setTravelportReply(boolean train) {
+//		// get the fragment: http://stackoverflow.com/a/7393477/78234
+//		int string_id = train ? R.string.TRAINS : R.string.FLIGHTS;
+//		int index = showTab(string_id);
+//		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
+//		if (train) {
+//			TrainsFragment fragment = (TrainsFragment) getSupportFragmentManager().findFragmentByTag(tag);
+//			if (fragment != null) // could be null if not instantiated yet
+//			{
+//				TrainListAdapter adapter = fragment.getAdapter();
 //				if (adapter != null) {
 //					adapter.notifyDataSetChanged();
-//					Log.d(TAG, "Flights fragment adapter notifyDataSetChanged()");
-//				} else {
-//					Log.e(TAG, "Flights fragment adapter == null!?!");
+//					Log.d(TAG, "TrainListAdapter notifyDataSetChanged()");
 //				}
-			} else {
-				Log.e(TAG, "Flights fragment == null!?!");
-			}
-		}
-	}
+//				// fragment.updateDisplay();
+//			} else {
+//				Log.e(TAG, "Trains fragment == null!?!");
+//			}
+//		} else {
+//			FlightsFragment fragment = (FlightsFragment) getSupportFragmentManager().findFragmentByTag(tag);
+//			if (fragment != null) // could be null if not instantiated yet
+//			{
+//				// fragment.updateDisplay();
+////				FlightListAdapterTP adapter = fragment.getAdapter();
+////				if (adapter != null) {
+////					adapter.notifyDataSetChanged();
+////					Log.d(TAG, "Flights fragment adapter notifyDataSetChanged()");
+////				} else {
+////					Log.e(TAG, "Flights fragment adapter == null!?!");
+////				}
+//			} else {
+//				Log.e(TAG, "Flights fragment == null!?!");
+//			}
+//		}
+//	}
 
 	
 	private void fatal_error(final int string_id) {
@@ -727,7 +716,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void endProgressDialog(int id, JSONObject result) { // we got the hotels list or hotel details reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
 
-		setDebugData(DebugTextType.ExpediaDebug, result);
+//		setDebugData(DebugTextType.ExpediaDebug, result);
 		
 		if (id == R.string.HOTEL && mHotelDownloader != null) {
 			int hotelIndex = mHotelDownloader.getHotelIndex();
@@ -772,7 +761,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	@Override
 	public void endProgressDialogWithError(int id, JSONObject result) {
-		setDebugData(DebugTextType.ExpediaDebug, result);
+//		setDebugData(DebugTextType.ExpediaDebug, result);
 	}
 
 	@Override
@@ -885,88 +874,81 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	}
 
-	int mDebugTab = -1;
-	private String lastEvaReply;
-	private String lastVayantReply;
-	private String lastExpediaReply;
-	enum DebugTextType {
-		None,
-		EvaDebug,
-		VayantDebug,
-		ExpediaDebug
-	}
+//	int mDebugTab = -1;
+//	private String lastEvaReply;
+//	private String lastVayantReply;
+//	private String lastExpediaReply;
+//	enum DebugTextType {
+//		None,
+//		EvaDebug,
+//		VayantDebug,
+//		ExpediaDebug
+//	}
 	
-	private void setDebugData(DebugTextType debugType, JSONObject jTxt) {
-		String txt;
-		try {
-			if (jTxt == null) {
-				txt = "null !!!";
-			}
-			else {
-				txt = jTxt.toString(2);
-			}
-		} catch (JSONException e1) {
-			txt = "Exception "+e1;
-			e1.printStackTrace();
-			
-		}
-		switch (debugType) {
-		case EvaDebug:
-			lastEvaReply = txt;
-			break;
-		case VayantDebug:
-			lastVayantReply = txt;
-			break;
-		case ExpediaDebug:
-			lastExpediaReply = txt;
-			break;
-		}
-
-		
-		if (false == eva.isDebug()) {
-			if (mDebugTab != -1) {
-//				DebugFragment fragment = (DebugFragment) mSwipeyAdapter
-//						.instantiateItem(mViewPager, mDebugTab);
-//				if (fragment != null) {
-//					FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//					ft.hide(fragment);
-//					ft.commit();
+//	private void setDebugData(DebugTextType debugType, JSONObject jTxt) {
+//		String txt;
+//		try {
+//			if (jTxt == null) {
+//				txt = "null !!!";
+//			}
+//			else {
+//				txt = jTxt.toString(2);
+//			}
+//		} catch (JSONException e1) {
+//			txt = "Exception "+e1;
+//			e1.printStackTrace();
+//			
+//		}
+//		switch (debugType) {
+//		case EvaDebug:
+//			lastEvaReply = txt;
+//			break;
+//		case VayantDebug:
+//			lastVayantReply = txt;
+//			break;
+//		case ExpediaDebug:
+//			lastExpediaReply = txt;
+//			break;
+//		}
+//
+//		
+//		if (false == eva.isDebug()) {
+//			if (mDebugTab != -1) {
+//				mSwipeyAdapter.removeTab(mDebugTab);
+//				mDebugTab = -1;
+//			}
+//			return;
+//		}
+//		
+//		if (mDebugTab == -1) {
+//			mDebugTab = mTabTitles.indexOf(mDebugTabName);
+//			if (mDebugTab == -1) {
+//				try {
+//					mSwipeyAdapter.addTab(mDebugTabName, 1);
+//				} catch (IllegalStateException e) {
+//					Log.e(TAG, "Exception of IllegalStateException while adding debug tab",e);
 //				}
-				mSwipeyAdapter.removeTab(mDebugTab);
-				mDebugTab = -1;
-			}
-			return;
-		}
-		
-		if (mDebugTab == -1) {
-			mDebugTab = mTabTitles.indexOf(mDebugTabName);
-			if (mDebugTab == -1) {
-				try {
-					mSwipeyAdapter.addTab(mDebugTabName, 1);
-				} catch (IllegalStateException e) {
-					Log.e(TAG, "Exception of IllegalStateException while adding debug tab",e);
-				}
-				mDebugTab = 1; // mTabTitles.size() - 1;
-			}
-		}
-		DebugFragment fragment = (DebugFragment) mSwipeyAdapter
-				.instantiateItem(mViewPager, mDebugTab);
-		if (fragment == null) {
-			Log.e(TAG, "No debug fragment");
-			return;
-		}
-		switch (debugType) {
-		case EvaDebug:
-			fragment.setDebugText(lastEvaReply);
-			break;
-		case VayantDebug:
-			fragment.setVayantDebugText(lastVayantReply);
-			break;
-		case ExpediaDebug:
-			fragment.setExpediaDebugText(lastExpediaReply);
-			break;
-		}
-	}
+//				mDebugTab = 1; // mTabTitles.size() - 1;
+//			}
+//		}
+//		DebugFragment fragment = (DebugFragment) mSwipeyAdapter
+//				.instantiateItem(mViewPager, mDebugTab);
+//		if (fragment == null) {
+//			Log.e(TAG, "No debug fragment");
+//			return;
+//		}
+//		switch (debugType) {
+//		case EvaDebug:
+//			fragment.setDebugText(lastEvaReply);
+//			break;
+//		case VayantDebug:
+//			fragment.setVayantDebugText(lastVayantReply);
+//			break;
+//		case ExpediaDebug:
+//			fragment.setExpediaDebugText(lastExpediaReply);
+//			break;
+//		}
+//	}
 	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -1025,10 +1007,10 @@ public class MainActivity extends RoboFragmentActivity implements
 				addChatItem(new ChatItem(chat));
 		}
 		
-		if (reply.JSONReply != null) {
-			setDebugData(DebugTextType.EvaDebug, reply.JSONReply);
-		}
-		
+//		if (reply.JSONReply != null) {
+//			setDebugData(DebugTextType.EvaDebug, reply.JSONReply);
+//		}
+//		
 		if (reply.flow != null ) {
 			handleFlow(reply);
 		}
@@ -1288,7 +1270,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			final EvaApiReply _reply = reply;
 			final boolean _switchToResult = switchToResult;
 			ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
-			dialog.setListener(new ChildAgeDialogListener() {
+			dialog.setListener(new ChildAgeDialogFragment.ChildAgeDialogListener() {
 				
 				@Override
 				public void onDialogPositiveClick(ChildAgeDialogFragment dialog) {
@@ -1311,19 +1293,19 @@ public class MainActivity extends RoboFragmentActivity implements
 	        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
 			
 			break;
-		case Flight:
-			Log.d(TAG, "Running Vayant Search!");
-			currentFlightSearch = chatItem;
-			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
-			mSearchVayantTask.attach(new DownloaderListener(chatItem, switchToResult));
-//			if (chatItem.getStatus() == Status.HasResults) {
-//				// this chat item was already activated and has results - bypass the cloud service and fake results
-//				mSearchVayantTask.setCachedResults(chatItem.getSearchResult());
-//			}
-//			else {
-				mSearchVayantTask.execute();
-//			}
-			break;
+//		case Flight:
+//			Log.d(TAG, "Running Vayant Search!");
+//			currentFlightSearch = chatItem;
+//			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
+//			mSearchVayantTask.attach(new DownloaderListener(chatItem, switchToResult));
+////			if (chatItem.getStatus() == Status.HasResults) {
+////				// this chat item was already activated and has results - bypass the cloud service and fake results
+////				mSearchVayantTask.setCachedResults(chatItem.getSearchResult());
+////			}
+////			else {
+//				mSearchVayantTask.execute();
+////			}
+//			break;
 		case Question:
 			break;
 		
