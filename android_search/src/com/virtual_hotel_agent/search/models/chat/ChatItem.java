@@ -3,6 +3,7 @@ package com.virtual_hotel_agent.search.models.chat;
 import org.json.JSONObject;
 
 import android.text.SpannableString;
+import android.view.View.OnClickListener;
 
 import com.evaapis.EvaApiReply;
 import com.evaapis.flow.FlowElement;
@@ -13,7 +14,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	public enum ChatType {
 		Me,
 		VirtualAgent,
-		VirtualAgentSearch,
+		VirtualAgentContinued,
 		DialogQuestion,
 		DialogAnswer
 	}
@@ -36,7 +37,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	private JSONObject mResults = null;
 	protected FlowElement flow;
 	protected EvaApiReply evaReply;
-	public boolean sayitActivated = false; 
+	public boolean sayitActivated = false;
 
 	public ChatItem(String chat) {
 		this(new SpannableString(chat));
@@ -143,5 +144,4 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	public JSONObject getSearchResult() {
 		return mResults;
 	}
-
 }

@@ -53,14 +53,14 @@
             android:progressDrawable="@drawable/rating_layers" >
         </RatingBar>
 
-        <TextView
+        <!-- <TextView
             android:id="@+id/startRatingTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@id/starRating"
             android:layout_alignLeft="@id/starRating"
             android:text="@string/star_rating" >
-        </TextView>
+        </TextView> -->
         
             <TextView
                 android:id="@+id/noticeText"

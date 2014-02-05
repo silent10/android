@@ -48,9 +48,7 @@ Check us out at\n
     <string name="internalization_title">Internalization</string>
     <string name="currency_summary">Show results using this currency</string>
     <string name="search_icon">Search</string>
-    <string name="save_encoded_file_flac_">Save encoded file (.flac)</string>
     <string name="save_encoded">Save Encoded</string>
-    <string name="airline_logo">Airline Logo</string>
     <string name="room_price_disclaimer">The room rates listed are for double occupancy per room unless 
         otherwise stated and exclude tax recovery charges and service fees. See 
         	<a href='http://www.travelnow.com/templates/352395/faq#9'>FAQs</a> for more details.</string>
@@ -66,4 +64,7 @@ Check us out at\n
 	<string name="help">help</string>
 	<string name="children_per_room_">Children per room (3 max):</string>
 	<string name="guest_num">Number of Guests in room:</string>
+	
+	<string name="greeting">Hello, I am your hotel agent, you can tell me what you would like to find using voice.</string>
+	<string name="examples_greetings">You can try me by clicking on the microphone and saying any of these examples:</string>
 </resources>

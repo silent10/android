@@ -1,5 +1,7 @@
 package com.virtual_hotel_agent.search;
 
+import com.evaapis.EvaComponent;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -10,7 +12,13 @@ public class SettingsAPI {
 	// WTF WTF WTF???
 	public static String getCurrencyCode(Context context) {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		int currencyIndex = Integer.parseInt(sp.getString("vha_preference_currency", "0"));
+		int currencyIndex = Integer.parseInt(sp.getString("vha_preference_currency", "-1"));
+		if (currencyIndex == -1) {
+			Editor edit = sp.edit();
+			edit.putString("vha_preference_currency", "0");
+			currencyIndex = 0;
+			edit.commit();
+		}
 		String[] entries = context.getResources().getStringArray(R.array.entries_currency_preference);
 
 		String currencyCode;
@@ -24,7 +32,13 @@ public class SettingsAPI {
 
 	public static String getCurrencySymbol(Context context) {
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-		int currencyIndex = Integer.parseInt(sp.getString("vha_preference_currency", "0"));
+		int currencyIndex = Integer.parseInt(sp.getString("vha_preference_currency", "-1"));
+		if (currencyIndex == -1) {
+			Editor edit = sp.edit();
+			edit.putString("vha_preference_currency", "0");
+			currencyIndex = 0;
+			edit.commit();
+		}
 		String[] signs = context.getResources().getStringArray(R.array.currency_signs);
 
 		String currencySymbol;
@@ -34,6 +48,18 @@ public class SettingsAPI {
 			currencySymbol = signs[0];
 
 		return currencySymbol;
+	}
+	
+	public static String getLocale(Context context) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		String locale = sp.getString(EvaComponent.LOCALE_PREF_KEY, "");
+		if (locale.equals("")) {
+			Editor edit = sp.edit();
+			edit.putString(EvaComponent.LOCALE_PREF_KEY, "US");
+			edit.commit();
+			locale = "US";
+		}
+		return locale;
 	}
 	
 	public static final String EVA_KEY = "eva_key";
@@ -63,5 +89,18 @@ public class SettingsAPI {
 //			edit.commit();
 //		}
 		return val;
+	}
+	
+	public static boolean getShowIntroTips(Context context) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		boolean showIntro = sp.getBoolean("vha_show_intro", true);
+		return showIntro;
+	}
+	
+	public static void setShowIntroTips(Context context, boolean val) {
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+		Editor edit = sp.edit();
+		edit.putBoolean("vha_show_intro", val);
+		edit.commit();
 	}
 }
