@@ -17,11 +17,11 @@ import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
 import android.os.AsyncTask;
 
-import com.evature.search.controllers.web_services.HotelListDownloaderTask;
-import com.evature.search.models.expedia.XpediaProtocol;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
+import com.virtual_hotel_agent.search.models.expedia.XpediaProtocol;
 
 @RunWith(RobolectricTestRunner.class)
 public class XpediaResultTest {

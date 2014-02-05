@@ -18,11 +18,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.evature.search.R;
-import com.evature.search.models.chat.ChatItem;
-import com.evature.search.models.chat.ChatItem.ChatType;
-import com.evature.search.models.chat.ChatItemList;
-import com.evature.search.views.adapters.ChatAdapter;
+import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.models.chat.ChatItemList;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.views.adapters.ChatAdapter;
 
 @RunWith(RobolectricTestRunner.class)
 public class ChatAdapterTest {
@@ -42,7 +42,7 @@ public class ChatAdapterTest {
 	public void testView() {
         assertEquals(0, mChatListModel.size());
 		
-		mAdapter.add(new ChatItem("TEST 111", null, null, ChatType.Eva));
+		mAdapter.add(new ChatItem("TEST 111", null, null, ChatType.VirtualAgent));
 		assertEquals(1, mChatListModel.size());
 		
 		mAdapter.add(new ChatItem("222 TEST"));
@@ -51,7 +51,7 @@ public class ChatAdapterTest {
         View child0 = mAdapter.getView(0, null, new LinearLayout(new Activity()));
  		ImageView chatRowIcon = (ImageView) child0.findViewById(R.id.icon);
  		ShadowDrawable shadowChatDrawable = Robolectric.shadowOf(chatRowIcon.getDrawable());
- 		assertThat(shadowChatDrawable.getCreatedFromResId(), equalTo(R.drawable.eva_head));
+ 		assertThat(shadowChatDrawable.getCreatedFromResId(), equalTo(R.drawable.vja_head));
  		assertEquals("TEST 111", ((TextView)child0.findViewById(R.id.label)).getText()); 		
  		
  		View child1 = mAdapter.getView(1, null, new LinearLayout(new Activity()));

@@ -23,6 +23,9 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
+import com.evature.util.DownloadUrl;
+import com.evature.util.EvatureSSLSocketFactory;
+
 
 public class DownloadUrl {
 	

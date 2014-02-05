@@ -27,13 +27,13 @@ import android.location.Location;
 import android.location.LocationManager;
 
 import com.evaapis.EvatureLocationUpdater;
-import com.evature.search.controllers.activities.MainActivity;
 import com.evature.util.DownloadUrl;
 import com.evature.util.ExternalIpAddressGetter;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 @RunWith(RobolectricTestRunner.class)
 public class EvaURLTest {

@@ -18,14 +18,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 
-import com.evature.search.R;
-import com.evature.search.controllers.activities.MainActivity;
-import com.evature.search.controllers.activities.MainActivity.SwipeyTabsPagerAdapter;
-import com.evature.search.models.chat.ChatItem;
-import com.evature.search.models.chat.ChatItem.ChatType;
-import com.evature.search.models.chat.ChatItemList;
-import com.evature.search.views.fragments.ChatFragment;
 import com.google.inject.Inject;
+import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity.SwipeyTabsPagerAdapter;
+import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.models.chat.ChatItemList;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
 @RunWith(RobolectricTestRunner.class)
 public class ChatFragmentTest {
@@ -70,10 +70,10 @@ public class ChatFragmentTest {
 	public void testChatList() {
 		assertEquals(0, mChatListModel.size());
 
-		mChatListModel.add(new ChatItem("Test 1", null, null, ChatType.Eva));
+		mChatListModel.add(new ChatItem("Test 1", null, null, ChatType.VirtualAgent));
 		
 		assertEquals(1, mChatListModel.size());
 		assertEquals("Test 1", mChatListModel.get(0).getChat());
-		assertEquals(true, mChatListModel.get(0).getType() == ChatType.Eva);
+		assertEquals(true, mChatListModel.get(0).getType() == ChatType.VirtualAgent);
 	}
 }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.evature.search"
+    package="com.virtual_hotel_agent.search"
     android:versionCode="41"
     android:versionName="Pre-alpha" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
     <permission
-        android:name="com.evature.permission.MAPS_RECEIVE"
+        android:name="com.virtual_hotel_agent.permission.MAPS_RECEIVE"
         android:protectionLevel="signature"/>
-    <uses-permission android:name="com.evature.permission.MAPS_RECEIVE"/>
+    <uses-permission android:name="com.virtual_hotel_agent.permission.MAPS_RECEIVE"/>
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -26,9 +26,9 @@
     
     <application
         android:icon="@drawable/eva_icon"
-        android:label="@string/app_name" android:name="com.evature.search.MyApplication">
+        android:label="@string/app_name" android:name="com.virtual_hotel_agent.search.MyApplication">
         <activity
-            android:name="com.evature.search.controllers.activities.MainActivity"
+            android:name="com.virtual_hotel_agent.search.controllers.activities.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" > <!-- android:theme="@android:style/Theme.Black"-->
             <intent-filter>
@@ -39,15 +39,15 @@
         </activity>
         
         <activity
-   			android:name="com.evature.search.controllers.activities.HotelMapActivity"
+   			android:name="com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity"
             android:label="Hotel Area" 
             />
-        <activity android:name="com.evature.search.controllers.activities.MyPreferences"></activity>
+        <activity android:name="com.virtual_hotel_agent.search.controllers.activities.MyPreferences"></activity>
         <uses-library android:name="com.google.android.maps"/>
-        <activity android:name="com.evature.search.controllers.activities.HotelsMapActivity" android:screenOrientation="portrait"></activity>
-        <activity android:name="com.evature.search.controllers.activities.EvaSelectRoomActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.virtual_hotel_agent.search.controllers.activities.HotelsMapActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity" android:screenOrientation="portrait"></activity>
         <activity
-             android:name="com.evature.search.controllers.activities.BugReportDialog"
+             android:name="com.virtual_hotel_agent.search.controllers.activities.BugReportDialog"
              android:excludeFromRecents="true"
              android:finishOnTaskLaunch="true"
              android:launchMode="singleInstance"

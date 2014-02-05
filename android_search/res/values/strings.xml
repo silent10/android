@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="app_name">Eva Travel Search</string>
-    <string name="advanced_menu">Advanced Menu</string>
-    <string name="summary_parent_preference">Enable various debug features</string>
-    <string name="title_debug_parent_preference">Debug</string>
+    <string name="app_name">Virtual Hotel Agent</string>
     <string name="lots_of_text">
 This is a cool Travel Search application for which we did not write the about text yet.\n
 We will, someday.\n
@@ -25,10 +22,7 @@ Check us out at\n
     <string name="chat_icon_description">chat icon</string>
     <string name="network_error">Network Error - Sorry!</string>
     <string name="error_tts_init">Could not initialize text-to-speech</string>
-    <string name="DEBUG">DEBUG</string>
     <string name="CHAT">CHAT</string>
-    <string name="TRAINS">TRAINS</string>
-    <string name="FLIGHTS">FLIGHTS</string>
     <string name="HOTELS">HOTELS</string>
     <string name="HOTELS_MAP">MAP</string>
     <string name="HOTEL">HOTEL</string>
@@ -41,7 +35,6 @@ Check us out at\n
     <string name="per_night">/night</string>
     <string name="trip_advisor_icon">Trip Advisor Icon</string>
     <string name="distance">Distance</string>
-    <string name="eva_icon">></string>
     <string name="_new">New</string>
     <string name="settings">Settings</string>
     <string name="report_a_bug">Report a bug</string>
@@ -51,13 +44,8 @@ Check us out at\n
     <string name="bugreport_dialog_title">Bug Report</string>
     <string name="bugreport_dialog_comment_prompt">Comment:</string>
     <string name="bugreport_dialog_ok_toast">Thank you !</string>
-    <string name="save_recording_pcm_file_wav_">Save raw recording (.wav file)</string>
-    <string name="save_encoded_recording_file_flac_">Save encoded recording (.flac file)</string>
     <string name="currency_pref_title">Default Currency</string>
     <string name="internalization_title">Internalization</string>
-    <string name="debug_eva">Eva</string>
-    <string name="debug_vayant">Vayant</string>
-    <string name="debug_expedia">Expedia</string>
     <string name="currency_summary">Show results using this currency</string>
     <string name="search_icon">Search</string>
     <string name="save_encoded_file_flac_">Save encoded file (.flac)</string>

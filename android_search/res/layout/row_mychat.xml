@@ -24,7 +24,6 @@
         android:textStyle="bold"
         android:gravity="center_vertical"
         android:typeface="monospace"
-        android:text="@string/eva_icon"
         android:textColor="@color/my_chat_in_session_text"
         android:textSize="20sp"/>
  
