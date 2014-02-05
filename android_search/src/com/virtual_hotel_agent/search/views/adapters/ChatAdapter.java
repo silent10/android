@@ -90,6 +90,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			case VirtualAgent:
 				row = mInflater.inflate(R.layout.row_eva_chat, parent, false);
 				break;
+			case VirtualAgentContinued:
 			case DialogAnswer:
 				row = mInflater.inflate(R.layout.row_eva_dialog, parent, false);
 				break;
@@ -105,6 +106,13 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		
 		// some row types require more than label setting...
 		switch (viewType) {
+		case VirtualAgentContinued:
+			TextView _respInd = (TextView)row.findViewById(R.id.response_index);
+			_respInd.setText( "" );
+			label.setTextColor(vhaChatInSessionText);
+			label.setTypeface(null, Typeface.NORMAL);
+			break;
+			
 		case DialogAnswer:
 			DialogAnswerChatItem dialogItem = (DialogAnswerChatItem)chatItem;
 			TextView respInd = (TextView)row.findViewById(R.id.response_index);
@@ -116,6 +124,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				label.setTypeface(null, Typeface.NORMAL);
 			}
 			break;
+			
 			
 		case Me:
 			TextView icon = (TextView)row.findViewById(R.id.icon);
@@ -130,6 +139,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				icon.setTextColor(myChatNoSessionText);
 			}
 			break;
+			
 			
 		default:
 			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);

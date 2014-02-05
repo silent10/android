@@ -69,6 +69,7 @@ public class HotelMapActivity extends RoboFragmentActivity {
       mMap.addMarker(new MarkerOptions()
 		            .position(point)
 		            .title(name)
+		            //.snippet("The most populous city in Australia.")
 		            .icon(hotelIcon));
       
       CameraPosition position = new CameraPosition.Builder().target(point)

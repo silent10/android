@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.evaapis.EvaTravelers;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTask;
@@ -34,9 +35,14 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 	private EditText mAgeChild1;
 	private EditText mAgeChild2;
 	private EditText mAgeChild3;
-	static protected DownloaderTask mPostGuestsDownloader;
 	private ChildAgeDialogListener mListener;
 	
+	private EvaTravelers travelers;
+	
+	public void setTravelers(EvaTravelers travelers) {
+		this.travelers = travelers;
+	}
+
 	private static int toInt(EditText editText) {
 		String text = editText.getText().toString();
 		if (text.equals("")) {
@@ -156,11 +162,17 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 			mAgeChild3.setText(Integer.toString(savedInstanceState.getInt("age_child_3", 12)));
 		}
 		else {
-			mNumAdults.setText("2");
-			mNumChildren.setText("0");
-			mAgeChild1.setText("4");
-			mAgeChild2.setText("7");
-			mAgeChild3.setText("12");
+			if (travelers != null) {
+				mNumAdults.setText(Integer.toString(travelers.allAdults()));
+				mNumChildren.setText(Integer.toString(travelers.allChildren()));
+			}
+			else {
+				mNumAdults.setText("2");
+				mNumChildren.setText("0");
+				mAgeChild1.setText("4");
+				mAgeChild2.setText("7");
+				mAgeChild3.setText("12");
+			}
 		}
 		
 		childrenTextChanged.onTextChanged(null, 0, -1, -2);

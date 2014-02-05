@@ -52,6 +52,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.SpannableString;
+import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -101,12 +102,12 @@ import com.virtual_hotel_agent.search.views.SwipeyTabs;
 import com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
-import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
+//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
-import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
+//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 
 public class MainActivity extends RoboFragmentActivity implements 
 													EvaSearchReplyListener,
@@ -135,10 +136,8 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	private String mChatTabName;
 
-	private String mExamplesTabName;
-	private String mDebugTabName;
+//	private String mExamplesTabName;
 	private String mHotelsTabName;
-
 	private String mHotelTabName;
 
 	static HotelDownloaderTask mHotelDownloader = null;
@@ -210,6 +209,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
 		Ln.d("onCreate()");
+		SettingsAPI.getLocale(this);
 		eva = new EvaComponent(this, this);
 		eva.onCreate(savedInstanceState);
 		super.onCreate(savedInstanceState);
@@ -229,8 +229,8 @@ public class MainActivity extends RoboFragmentActivity implements
 		eva.setSiteCode(SettingsAPI.getEvaSiteCode(this));
 		
 		mChatTabName = getString(R.string.CHAT);
-		mExamplesTabName = getString(R.string.EXAMPLES);
-		mDebugTabName = getString(R.string.DEBUG);
+//		mExamplesTabName = getString(R.string.EXAMPLES);
+		//mDebugTabName = getString(R.string.DEBUG);
 		mHotelsTabName = getString(R.string.HOTELS);
 		mHotelTabName = getString(R.string.HOTEL);
 
@@ -241,7 +241,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
 		} else {
 			Ln.d("no saved instance state");
-			mTabTitles = new ArrayList<String>(Arrays.asList(mExamplesTabName, mChatTabName));
+			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ mChatTabName));
 		}
 		
 		
@@ -279,7 +279,45 @@ public class MainActivity extends RoboFragmentActivity implements
 		// a_bundle.putStringArrayList(RecognizerIntent.EXTRA_RESULTS, sentences);
 		// data.putExtras(a_bundle);
 		// onActivityResult(VOICE_RECOGNITION_REQUEST_CODE, RESULT_OK, data);
+		
+		showIntro();
+	}
+	
+	private boolean shownExamples = false;
+	private void showExamples() {
+		if (shownExamples) {
+			return;
+		}
+		shownExamples = true;
+		String[] examples = {
+				"  Hotel tonight", 
+				"  Hotel in Paris", 
+				"  Hotel near the Eiffel tower",
+				"  3 star hotel near the Eiffel tower",
+				"  Sort by price"
+			};
+		String greeting = getResources().getString(R.string.examples_greetings);
+		ChatItem chatItem = new ChatItem(greeting,null, null, ChatType.VirtualAgentContinued);
+		MainActivity.this.addChatItem(chatItem);
+		
+		for (String example : examples) {
+			SpannableString exampleFormatted = new SpannableString(example);
+			exampleFormatted.setSpan( new StyleSpan(Typeface.ITALIC), 0, exampleFormatted.length(), 0);
+			chatItem = new ChatItem(exampleFormatted,null, null, ChatType.VirtualAgentContinued);
+			MainActivity.this.addChatItem(chatItem);
+		}
+	}
 
+	private void showIntro() {
+		String greeting = getResources().getString(R.string.greeting);
+		final ChatItem chat = new ChatItem(greeting,null, null, ChatType.VirtualAgent);
+		MainActivity.this.addChatItem(chat);
+		
+		if (SettingsAPI.getShowIntroTips(this)) {
+			showExamples();
+		}
+		
+		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 	}
 
 	// Using FragmentStatePagerAdapter to overcome bug: http://code.google.com/p/android/issues/detail?id=19001
@@ -320,19 +358,19 @@ public class MainActivity extends RoboFragmentActivity implements
 //				return fragment;
 //			}
 			
-			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
-				Ln.d("Example Fragment");
-				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
-				fragment.setHandler(new ExampleClickedHandler() {
-					@Override
-					public void onClick(String example) {
-						Ln.d("Running example: "+example);
-						MainActivity.this.addChatItem(new ChatItem(example));
-						mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
-						MainActivity.this.eva.searchWithText(example);
-					}});
-				return fragment; 
-			}
+//			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
+//				Ln.d("Example Fragment");
+//				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
+//				fragment.setHandler(new ExampleClickedHandler() {
+//					@Override
+//					public void onClick(String example) {
+//						Ln.d("Running example: "+example);
+//						MainActivity.this.addChatItem(new ChatItem(example));
+//						mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+//						MainActivity.this.eva.searchWithText(example);
+//					}});
+//				return fragment; 
+//			}
 			if (mTabTitles.get(position).equals(mChatTabName)) { // Main Chat window
 				Ln.d("Chat Fragment");
 				ChatFragment chatFragment = injector.getInstance(ChatFragment.class);
@@ -1251,6 +1289,25 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 	}
 	
+	private void searchHotels(final ChatItem _chatItem,
+			final EvaApiReply _reply,
+			final boolean _switchToResult) {
+		
+		// reached hotel search - no need showing tips & examples next time
+		SettingsAPI.setShowIntroTips(this, false);
+		
+		mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
+		mSearchExpediaTask.initialize(MainActivity.this, _reply,  SettingsAPI.getCurrencyCode(MainActivity.this)); // TODO: change to be based on flow element, // TODO: change to use currency
+		mSearchExpediaTask.attach(new DownloaderListener(_chatItem, _switchToResult));
+//		if (currentHotelSearch.getStatus() == Status.HasResults) {
+//			// this chat item was already activated and has results - bypass the cloud service and fake results
+//			mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
+//		}
+//		else {
+			mSearchExpediaTask.execute();
+//		}
+	}
+	
 	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem, boolean switchToResult) {
 //		chatItem.setActivated(true);
 		
@@ -1264,35 +1321,37 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		switch (flow.Type) {
 		case Hotel:
-			Ln.d("Running Hotel Search!");
 			currentHotelSearch = chatItem;
-
 			final ChatItem _chatItem = chatItem; 
 			final EvaApiReply _reply = reply;
 			final boolean _switchToResult = switchToResult;
-			ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
-			dialog.setListener(new ChildAgeDialogFragment.ChildAgeDialogListener() {
+			if (reply.travelers != null && (reply.travelers.child > 0 || reply.travelers.infant > 0)) {
+				Ln.d("Guests dialog");
+				ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
+				dialog.setTravelers(reply.travelers);
 				
-				@Override
-				public void onDialogPositiveClick(ChildAgeDialogFragment dialog) {
-					mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-					mSearchExpediaTask.initialize(MainActivity.this, _reply,  SettingsAPI.getCurrencyCode(MainActivity.this)); // TODO: change to be based on flow element, // TODO: change to use currency
-					mSearchExpediaTask.attach(new DownloaderListener(_chatItem, _switchToResult));
-//					if (currentHotelSearch.getStatus() == Status.HasResults) {
-//						// this chat item was already activated and has results - bypass the cloud service and fake results
-//						mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
-//					}
-//					else {
-						mSearchExpediaTask.execute();
-//					}
-				}
+				dialog.setListener(new ChildAgeDialogFragment.ChildAgeDialogListener() {
+					
+					@Override
+					public void onDialogPositiveClick(ChildAgeDialogFragment dialog) {
+						searchHotels(_chatItem, _reply, _switchToResult);
+					}
+
+					
+					
+					@Override
+					public void onDialogNegativeClick(ChildAgeDialogFragment dialog) {
+					}
+				});
+		        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
 				
-				@Override
-				public void onDialogNegativeClick(ChildAgeDialogFragment dialog) {
-				}
-			});
-	        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
-			
+			}
+			else {
+				 Ln.d("Running Hotel Search!");
+				 
+				 searchHotels(_chatItem, _reply, _switchToResult);
+			}
+
 			break;
 //		case Flight:
 //			Ln.d("Running Vayant Search!");
@@ -1418,6 +1477,10 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void onChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
 		Log.i(TAG, "Chat Item clicked "+chatItem.getChat());
+		if (chatItem.getType() == ChatType.VirtualAgent) {
+			showExamples();
+		}
+		
 		if (chatItem.getFlowElement() != null) {
 			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);
 		}
