@@ -16,7 +16,7 @@ import roboguice.inject.RoboInjector;
 import android.content.Intent;
 
 import com.evaapis.EvaSpeechRecognitionActivity;
-import com.evature.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 @RunWith(RobolectricTestRunner.class)
 public class VoiceSearchTest {

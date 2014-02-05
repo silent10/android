@@ -3,11 +3,11 @@ package com.evature.util;
 
 public class Log {
 	public static void d(String tag, String txt) {
-		android.util.Log.d(tag, txt);
+		//android.util.Log.d(tag, txt);
 	}
 	
 	public static void d(String tag, String txt, Throwable e) {
-		android.util.Log.d(tag, txt, e);
+		//android.util.Log.d(tag, txt, e);
 	}
 	
 	public static void e(String tag, String txt) {

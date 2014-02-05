@@ -2,12 +2,12 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/the_main_layout"
-    xmlns:swipeytabs="http://schemas.android.com/apk/res/com.evature.search"
+    xmlns:swipeytabs="http://schemas.android.com/apk/res/com.virtual_hotel_agent.search"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <com.evature.search.views.SwipeyTabs
+    <com.virtual_hotel_agent.search.views.SwipeyTabs
         android:id="@+id/swipeytabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -16,7 +16,7 @@
         swipeytabs:tabIndicatorHeight="3dip"
         android:background="#ff3b3b3b"/>
 
-    <com.evature.components.MyViewPager
+    <com.virtual_hotel_agent.components.MyViewPager
         android:id="@+id/viewpager"
         android:layout_width="fill_parent"
         android:layout_below="@id/swipeytabs"

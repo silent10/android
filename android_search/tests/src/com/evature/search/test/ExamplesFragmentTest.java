@@ -25,17 +25,17 @@ import roboguice.inject.RoboInjector;
 import android.support.v4.view.ViewPager;
 import android.widget.ListView;
 
-import com.evature.search.R;
-import com.evature.search.controllers.activities.MainActivity;
-import com.evature.search.controllers.activities.MainActivity.SwipeyTabsPagerAdapter;
-import com.evature.search.models.chat.ChatItem.ChatType;
-import com.evature.search.models.chat.ChatItemList;
-import com.evature.search.views.fragments.ExamplesFragment;
 import com.evature.util.DownloadUrl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity.SwipeyTabsPagerAdapter;
+import com.virtual_hotel_agent.search.models.chat.ChatItemList;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
 
 @RunWith(RobolectricTestRunner.class)
 public class ExamplesFragmentTest {
