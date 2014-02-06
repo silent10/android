@@ -34,7 +34,7 @@
          android:layout_height="wrap_content"
          android:layout_gravity="center_horizontal"
          android:textColor="@color/black"
-         android:text="Book this room" />
+         android:text="@string/checkout" />
             
 
 </LinearLayout>

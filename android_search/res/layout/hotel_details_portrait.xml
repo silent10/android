@@ -11,63 +11,88 @@
         android:background="@drawable/vha_background"
         android:padding="4dp" >
 
-        <ImageView
+        <TextView
+            android:id="@+id/hotelName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="..."
+            android:textColor="#fff"
+            android:textSize="24dip"
+            android:textStyle="bold" >
+
+	    </TextView>
+    
+        <!-- <ImageView
             android:id="@+id/imageView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:src="@drawable/top_logo" />
-
-        <Button
-            android:id="@+id/selectButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/button"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="Select"
-            android:textColor="#FFFFFFFF"
-            android:textSize="14dp" />
-         <Button
-            android:id="@+id/mapButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/selectButton"
-            android:background="@drawable/button"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="Map"
-            android:textColor="#FFFFFFFF"
-            android:textSize="14dp" />
+            android:src="@drawable/top_logo" /> -->
+        
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/hotelName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/titleLayout"
-        android:text="..."
-        android:textColor="#ff038fd7"
-        android:textSize="24dip"
-        android:textStyle="bold" >
-    </TextView>
+    
 
     <Gallery
         android:id="@+id/hotelGallery"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@id/hotelName" />
+        android:layout_below="@id/titleLayout" />
 
     
-   
+   <RelativeLayout
+       android:id="@+id/hotelButtonBar"
+       android:layout_width="fill_parent"
+       android:layout_height="42dp"
+       android:layout_below="@id/hotelGallery">
+        
+	   <Button
+	            android:id="@+id/selectButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="36sp"
+	            android:layout_centerVertical="true"
+	            android:layout_alignParentRight="true"
+	            android:layout_marginRight="10dp"
+	            android:background="@drawable/button"
+	            android:gravity="center"
+	            android:text="Select"
+	            android:textColor="#FFFFFFFF"
+	            android:textSize="16dp" />
+
+	        <Button
+	            android:id="@+id/mapButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="30sp"
+	            android:layout_centerVertical="true"
+	            android:layout_toLeftOf="@id/selectButton"
+	            android:background="@drawable/button"
+	            android:gravity="center"
+	            android:layout_marginRight="10dp"
+	            android:text="Map"
+	            android:textColor="#FFFFFFFF"
+	            android:textSize="12sp" />
+         
+    <RatingBar
+        android:id="@+id/ratingBarStar"
+        android:layout_width="118dp"
+        android:layout_height="32dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:isIndicator="true"
+        android:paddingLeft="10dp"
+        android:progressDrawable="@drawable/rating_layers" >
+
+     </RatingBar>
+    
+    </RelativeLayout>
     
     <ImageView
         android:id="@+id/dividerElement"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/hotelGallery"        
+        android:layout_below="@id/hotelButtonBar"        
         android:src="@drawable/divider" >
     </ImageView>
     
@@ -93,24 +118,9 @@
         android:layout_weight="1"
          >
 
-        <LinearLayout
-            android:id="@+id/starRatingLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:orientation="vertical" >
+     
 
-            <RatingBar
-                android:id="@+id/ratingBarStar"
-                android:layout_width="118dp"
-                android:layout_height="32dp"
-                android:isIndicator="true"
-                android:paddingLeft="10dp"
-                android:progressDrawable="@drawable/rating_layers" >
-            </RatingBar>
-        </LinearLayout>
-
-        <LinearLayout
+        <!-- <LinearLayout
             android:id="@+id/tripAdvisoLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -139,7 +149,7 @@
 
             </RatingBar>
         </LinearLayout>
-    </RelativeLayout>
+ -->    </RelativeLayout>
             
             <GridView
                 android:id="@+id/amenitiesGridview"
