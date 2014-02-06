@@ -240,8 +240,13 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			}
 		}
 		else {
-			// no session support - every reply starts a new session
-			resetSession();
+			if (reply.errorMessage != null) {
+				Log.w(TAG, "Error from Eva: "+reply.errorMessage);
+			}
+			else {
+				// no session support - every reply starts a new session
+				resetSession();
+			}
 		}
 		
 		replyListener.onEvaReply(reply, cookie);

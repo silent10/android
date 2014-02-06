@@ -63,7 +63,7 @@ public class HotelFragment extends RoboFragment {
 
 	private TextView mHotelName;
 	private WebView mPropertyDescription;
-	private RatingBar mTripAdvisorRatingBar;
+//	private RatingBar mTripAdvisorRatingBar;
 	private RatingBar mStarRatingBar;
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
@@ -110,7 +110,7 @@ public class HotelFragment extends RoboFragment {
 
 		mPropertyDescription = (WebView) mView.findViewById(R.id.propertyDescription);
 
-		mTripAdvisorRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarTripAdvisor);
+//		mTripAdvisorRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarTripAdvisor);
 		mStarRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarStar);
 
 		mAmenitiesGridView = (GridView) mView.findViewById(R.id.amenitiesGridview);
@@ -152,7 +152,7 @@ public class HotelFragment extends RoboFragment {
 
 		mPropertyDescription = (WebView) mView.findViewById(R.id.propertyDescription);
 
-		mTripAdvisorRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarTripAdvisor);
+//		mTripAdvisorRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarTripAdvisor);
 		mStarRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarStar);
 
 		mAmenitiesGridView = (GridView) mView.findViewById(R.id.amenitiesGridview);
@@ -199,7 +199,7 @@ public class HotelFragment extends RoboFragment {
 		
 		mPropertyDescription.setBackgroundColor(Color.rgb(0xe3, 0xe3, 0xe3));
 
-		mTripAdvisorRatingBar.setRating((float) mHotelData.mSummary.mTripAdvisorRating);
+		//mTripAdvisorRatingBar.setRating((float) mHotelData.mSummary.mTripAdvisorRating);
 
 		mStarRatingBar.setRating((float) mHotelData.mSummary.mHotelRating);
 

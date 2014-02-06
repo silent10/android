@@ -97,6 +97,7 @@ import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.SwipeyTabs;
 import com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter;
@@ -280,6 +281,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		// data.putExtras(a_bundle);
 		// onActivityResult(VOICE_RECOGNITION_REQUEST_CODE, RESULT_OK, data);
 		
+		// if starting from empty 
 		showIntro();
 	}
 	
@@ -1325,7 +1327,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			final ChatItem _chatItem = chatItem; 
 			final EvaApiReply _reply = reply;
 			final boolean _switchToResult = switchToResult;
-			if (reply.travelers != null && (reply.travelers.child > 0 || reply.travelers.infant > 0)) {
+			if (reply.travelers != null && reply.travelers.allChildren() > 0) {
 				Ln.d("Guests dialog");
 				ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
 				dialog.setTravelers(reply.travelers);
@@ -1348,6 +1350,16 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			else {
 				 Ln.d("Running Hotel Search!");
+				 ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
+				 if (reply.travelers != null) {
+					 db.setNumberOfAdults(reply.travelers.allAdults());
+ 					 db.setNumberOfChildrenParam(reply.travelers.allChildren());
+				 }
+				 else {
+					 // default 2 adults
+					 db.setNumberOfAdults(2);
+					 db.setNumberOfChildrenParam(0);
+				 }
 				 
 				 searchHotels(_chatItem, _reply, _switchToResult);
 			}
