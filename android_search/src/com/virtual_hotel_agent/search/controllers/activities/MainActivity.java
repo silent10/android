@@ -24,7 +24,6 @@ import java.util.List;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import roboguice.activity.RoboFragmentActivity;
@@ -52,7 +51,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.SpannableString;
-import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -83,32 +81,32 @@ import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.virtual_hotel_agent.components.MyViewPager;
-import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
-import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
-import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.SwipeyTabs;
 import com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
+import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
+//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
-import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
-//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 
 public class MainActivity extends RoboFragmentActivity implements 
 													EvaSearchReplyListener,
@@ -153,6 +151,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	private TextView mStatusText;
 	private ProgressBar mProgressBar;
 	private SoundLevelView mSoundView;
+	private View mSearchButton;
 
 
 	@Override
@@ -225,6 +224,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
 		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);
+		mSearchButton = findViewById(R.id.search_button);
 		
 		eva.setApiKey(SettingsAPI.getEvaKey(this));
 		eva.setSiteCode(SettingsAPI.getEvaSiteCode(this));
@@ -1327,7 +1327,10 @@ public class MainActivity extends RoboFragmentActivity implements
 			final ChatItem _chatItem = chatItem; 
 			final EvaApiReply _reply = reply;
 			final boolean _switchToResult = switchToResult;
-			if (reply.travelers != null && reply.travelers.allChildren() > 0) {
+			// if children travelers specified but EAN does not include the ages - ask for ages  
+			if (reply.travelers != null && reply.travelers.allChildren() > 0
+				&& 	reply.ean.get("room1").matches("\\d")
+					) {
 				Ln.d("Guests dialog");
 				ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
 				dialog.setTravelers(reply.travelers);
@@ -1492,6 +1495,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		if (chatItem.getType() == ChatType.VirtualAgent) {
 			showExamples();
 		}
+		
 		
 		if (chatItem.getFlowElement() != null) {
 			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);
