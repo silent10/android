@@ -110,6 +110,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 //			item.setEditMode();
 //			mChatAdapter.notifyDataSetChanged();
 //			break;
+		case VirtualAgentContinued:
 		case VirtualAgent:
 			Log.i(TAG, "Eva item clicked: "+item.getChat());
 			eventManager.fire(new ChatItemClicked(item) );
