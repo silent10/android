@@ -1,12 +1,12 @@
 package com.virtual_hotel_agent.search;
 
-import com.evaapis.EvaComponent;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
+
+import com.evaapis.android.EvaComponent;
 
 public class SettingsAPI {
 	// WTF WTF WTF???

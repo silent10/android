@@ -9,17 +9,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
 
-import com.evaapis.EvaTravelers;
+import com.evaapis.crossplatform.EvaTravelers;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTask;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 
 public class ChildAgeDialogFragment extends RoboDialogFragment {

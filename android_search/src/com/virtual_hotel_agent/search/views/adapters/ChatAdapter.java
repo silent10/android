@@ -13,12 +13,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.evaapis.flow.FlowElement;
+import com.evaapis.crossplatform.flow.FlowElement;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
-import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 
 public class ChatAdapter extends ArrayAdapter<ChatItem> {
 

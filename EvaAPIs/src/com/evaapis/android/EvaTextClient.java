@@ -1,17 +1,17 @@
-package com.evaapis;
+package com.evaapis.android;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;
 import com.evature.util.ExternalIpAddressGetter;
 

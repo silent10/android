@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 
-import com.evaapis.EvaApiReply;
+import com.evaapis.crossplatform.EvaApiReply;
 import com.google.inject.Singleton;
 
 
