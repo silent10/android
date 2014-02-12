@@ -26,7 +26,7 @@ import android.app.Application;
 import android.location.Location;
 import android.location.LocationManager;
 
-import com.evaapis.EvatureLocationUpdater;
+import com.evaapis.android.EvatureLocationUpdater;
 import com.evature.util.DownloadUrl;
 import com.evature.util.ExternalIpAddressGetter;
 import com.google.inject.AbstractModule;

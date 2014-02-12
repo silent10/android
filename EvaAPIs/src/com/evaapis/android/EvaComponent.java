@@ -1,4 +1,4 @@
-package com.evaapis;
+package com.evaapis.android;
 
 
 import java.io.Serializable;
@@ -22,7 +22,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.evaapis.EvaSpeechComponent.SpeechRecognitionResultListener;
+import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
+import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.ExternalIpAddressGetter;
 
 

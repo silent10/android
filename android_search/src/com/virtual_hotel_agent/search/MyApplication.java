@@ -12,9 +12,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.evaapis.EvatureLocationUpdater;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
+import com.evaapis.android.EvatureLocationUpdater;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {

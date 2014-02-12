@@ -1,4 +1,6 @@
-package com.evaapis;
+package com.evaapis.android;
+
+import com.evaapis.crossplatform.EvaApiReply;
 
 public interface EvaSearchReplyListener {
 	void onEvaReply(EvaApiReply reply, Object cookie);

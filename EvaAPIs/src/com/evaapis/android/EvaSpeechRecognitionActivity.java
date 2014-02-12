@@ -1,4 +1,8 @@
-package com.evaapis;
+package com.evaapis.android;
+
+import com.evaapis.R;
+import com.evaapis.R.id;
+import com.evaapis.R.layout;
 
 import android.app.Activity;
 import android.content.Intent;

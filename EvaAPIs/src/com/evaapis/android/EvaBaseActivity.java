@@ -1,4 +1,4 @@
-package com.evaapis;
+package com.evaapis.android;
 
 
 

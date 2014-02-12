@@ -22,9 +22,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.evaapis.EvaApiReply;
-import com.evaapis.EvaBaseActivity;
-import com.evaapis.EvaWarning;
+import com.evaapis.android.EvaBaseActivity;
+import com.evaapis.crossplatform.EvaApiReply;
+import com.evaapis.crossplatform.EvaWarning;
 
 public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	

@@ -1,7 +1,7 @@
 /*
  	Wraps a voice streamer in a http post request to Eva server
  */
-package com.evaapis;
+package com.evaapis.android;
 
 import java.io.BufferedReader;
 import java.io.IOException;

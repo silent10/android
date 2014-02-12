@@ -3,10 +3,9 @@ package com.virtual_hotel_agent.search.models.chat;
 import org.json.JSONObject;
 
 import android.text.SpannableString;
-import android.view.View.OnClickListener;
 
-import com.evaapis.EvaApiReply;
-import com.evaapis.flow.FlowElement;
+import com.evaapis.crossplatform.EvaApiReply;
+import com.evaapis.crossplatform.flow.FlowElement;
 
 
 public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/2141166/78234

@@ -3,8 +3,8 @@ package com.virtual_hotel_agent.search.models.chat;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.evaapis.EvaApiReply;
-import com.evaapis.flow.FlowElement;
+import com.evaapis.crossplatform.EvaApiReply;
+import com.evaapis.crossplatform.flow.FlowElement;
 
 
 

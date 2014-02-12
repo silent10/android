@@ -5,11 +5,10 @@ import org.json.JSONObject;
 import roboguice.util.Ln;
 import android.util.Log;
 
-import com.evaapis.EvaApiReply;
+import com.evaapis.crossplatform.EvaApiReply;
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocol;

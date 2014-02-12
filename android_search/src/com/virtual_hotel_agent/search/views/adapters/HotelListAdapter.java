@@ -17,13 +17,13 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.evaapis.EvatureLocationUpdater;
+import com.evaapis.android.EvatureLocationUpdater;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
-import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
+import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
 
 public class HotelListAdapter extends BaseAdapter {

@@ -32,9 +32,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.evaapis.EvaApiReply;
-import com.evaapis.EvatureLocationUpdater;
-import com.evaapis.RequestAttributes.SortOrderEnum;
+import com.evaapis.android.EvatureLocationUpdater;
+import com.evaapis.crossplatform.EvaApiReply;
+import com.evaapis.crossplatform.RequestAttributes.SortOrderEnum;
 import com.evature.util.ExternalIpAddressGetter;
 import com.virtual_hotel_agent.search.MyApplication;
 

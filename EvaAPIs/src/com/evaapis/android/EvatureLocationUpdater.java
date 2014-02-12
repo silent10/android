@@ -1,4 +1,4 @@
-package com.evaapis;
+package com.evaapis.android;
 
 import android.content.Context;
 import android.location.Location;

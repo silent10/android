@@ -7,7 +7,7 @@
  * $Id$
  **/
 
-package com.evaapis;
+package com.evaapis.android;
 
 import java.nio.ByteBuffer;
 
