@@ -1,22 +1,12 @@
 LOCAL_PATH := $(call my-dir)
 
-# First build libogg statically
-#
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := audioboo-ogg
+LOCAL_MODULE    := audio-flac
+
 LOCAL_SRC_FILES := \
 	ogg/src/bitwise.c \
-	ogg/src/framing.c
-
-include $(BUILD_STATIC_LIBRARY)
-
-# Then build flac statically
-#
-include $(CLEAR_VARS)
-
-LOCAL_MODULE    := audioboo-flac
-LOCAL_SRC_FILES := \
+	ogg/src/framing.c \
 	flac/src/libFLAC/bitmath.c \
 	flac/src/libFLAC/bitreader.c \
 	flac/src/libFLAC/cpu.c \
@@ -45,13 +35,11 @@ include $(BUILD_STATIC_LIBRARY)
 #
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := audioboo-native
+LOCAL_MODULE    := audio-native
 LOCAL_SRC_FILES := \
-	jni/FLACStreamEncoder.cpp \
-	jni/FLACStreamDecoder.cpp \
-	jni/util.cpp
+	jni/FLACStreamEncoder.cpp
 LOCAL_LDLIBS := -llog
 
-LOCAL_STATIC_LIBRARIES := audioboo-ogg audioboo-flac
+LOCAL_STATIC_LIBRARIES := audio-flac
 
 include $(BUILD_SHARED_LIBRARY)

@@ -1,21 +1,17 @@
-/**
- * This file is part of Audioboo, an android program for audio blogging.
- * Copyright (C) 2011 Audioboo Ltd. All rights reserved.
- *
- * Author: Jens Finkhaeuser <jens@finkhaeuser.de>
- *
- * $Id$
- **/
+
 
 package com.evaapis.android;
 
 import java.nio.ByteBuffer;
 
+/***
+ * When moving this file - remember to fix FLACStreamEncoder.cpp
+ * 1) Function names: eg. Java_com_evaapis_android_FLACStreamEncoder_init
+ * 2) Class name const:  eg. FLACStreamEncoder_classname 
+ * And rebuild NDK:
+ * ~/devel/android-ndk-r8e/ndk-build  from EvaAPIs
+ */
 
-/**
- * This is *not* a full JNI wrapper for the FLAC codec, but merely exports
- * the minimum of functions necessary for the purposes of the Audioboo client.
- **/
 public class FLACStreamEncoder
 {
   /***************************************************************************
@@ -101,6 +97,6 @@ public class FLACStreamEncoder
 
   // Load native library
   static {
-    System.loadLibrary("audioboo-native");
+    System.loadLibrary("audio-native");
   }
 }

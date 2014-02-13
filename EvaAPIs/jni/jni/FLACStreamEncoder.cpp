@@ -1,11 +1,4 @@
-/**
- * This file is part of AudioBoo, an android program for audio blogging.
- * Copyright (C) 2011 Audioboo Ltd. All rights reserved.
- *
- * Author: Jens Finkhaeuser <jens@finkhaeuser.de>
- *
- * $Id$
- **/
+
 
 // Define __STDINT_LIMITS to get INT8_MAX and INT16_MAX.
 #define __STDINT_LIMITS 1
@@ -25,15 +18,81 @@
 
 #include <jni.h>
 
-namespace aj = audioboo::jni;
+#include <android/log.h>
+
+/*****************************************************************************
+ * Very simple traits for int8_t/int16_t
+ **/
+template <typename intT>
+struct type_traits
+{
+};
+
+
+template <>
+struct type_traits<int8_t>
+{
+  enum {
+    MAX = INT8_MAX,
+  };
+};
+
+
+template <>
+struct type_traits<int16_t>
+{
+  enum {
+    MAX = INT16_MAX,
+  };
+};
 
 namespace {
+
+
+/**
+ * Convert a jstring to a UTF-8 char pointer. Ownership of the pointer goes
+ * to the caller.
+ **/
+char * convert_jstring_path(JNIEnv * env, jstring input)
+{
+  char buf[PATH_MAX];
+
+  jboolean copy = false;
+  char const * str = env->GetStringUTFChars(input, &copy);
+  if (NULL == str) {
+    // OutOfMemoryError has already been thrown here.
+    return NULL;
+  }
+
+  char * ret = strdup(str);
+  env->ReleaseStringUTFChars(input, str);
+  return ret;
+}
+
+
+/**
+ * Throws the given exception/message
+ **/
+void throwByName(JNIEnv * env, const char * name, const char * msg)
+{
+  jclass cls = env->FindClass(name);
+
+  // If cls is NULL, an exception has already been thrown
+  if (NULL != cls) {
+    env->ThrowNew(cls, msg);
+    // Ignore return value of ThrowNew... all we could reasonably do is try and
+    // throw another exception, after all.
+  }
+
+  env->DeleteLocalRef(cls);
+}
+
 
 /*****************************************************************************
  * Constants
  **/
 static char const * const FLACStreamEncoder_classname =
-		"com.evaapis.FLACStreamEncoder";
+		"com.evaapis.android.FLACStreamEncoder";
 static char const * const FLACStreamEncoder_mObject = "mObject";
 
 static char const * const IllegalArgumentException_classname =
@@ -221,7 +280,7 @@ public:
 	 * Flushes internal buffers to disk.
 	 **/
 	int flush() {
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "flush() called.");
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "flush() called.");
 		flush_to_fifo();
 
 		// Signal writer to wake up.
@@ -233,12 +292,12 @@ public:
 	 * bytes actually written.
 	 **/
 	int write(char * buffer, int bufsize) {
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "Asked to write buffer of size %d", bufsize);
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Asked to write buffer of size %d", bufsize);
 
 		// We have 8 or 16 bit pcm in the buffer, but FLAC expects 32 bit samples,
 		// where some of the 32 bits are unused.
 		int bufsize32 = bufsize / (m_bits_per_sample / 8);
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "Required size: %d", bufsize32);
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Required size: %d", bufsize32);
 
 		// Protect from overly large buffers on the JNI side.
 		if (bufsize32 > m_write_buffer_size) {
@@ -263,7 +322,7 @@ public:
 		// got, push it onto the write FIFO and create a new buffer.
 		if (m_write_buffer
 				&& m_write_buffer_offset + bufsize32 > m_write_buffer_size) {
-			aj::log(ANDROID_LOG_DEBUG, LTAG,
+			__android_log_print(ANDROID_LOG_DEBUG, LTAG,
 					"JNI buffer is full, pushing to FIFO");
 			flush_to_fifo();
 
@@ -273,7 +332,7 @@ public:
 
 		// If we need to create a new buffer, do so now.
 		if (!m_write_buffer) {
-			//aj::log(ANDROID_LOG_DEBUG, LTAG, "Need new buffer.");
+			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Need new buffer.");
 			m_write_buffer = new FLAC__int32[m_write_buffer_size];
 			m_write_buffer_offset = 0;
 		}
@@ -291,9 +350,9 @@ public:
 		// Loop while m_kill_writer is false.
 		pthread_mutex_lock(&m_fifo_mutex);
 		do {
-			//aj::log(ANDROID_LOG_DEBUG, LTAG, "Going to sleep...");
+			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Going to sleep...");
 			pthread_cond_wait(&m_writer_condition, &m_fifo_mutex);
-			//aj::log(ANDROID_LOG_DEBUG, LTAG, "Wakeup: should I die after this? %s", (m_kill_writer ? "yes" : "no"));
+			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Wakeup: should I die after this? %s", (m_kill_writer ? "yes" : "no"));
 
 			// Grab ownership over the current FIFO, and release the lock again.
 			write_fifo_t * fifo = (write_fifo_t *) m_fifo;
@@ -311,7 +370,7 @@ public:
 					__android_log_print(ANDROID_LOG_VERBOSE, LTAG,
 							"<<< Writer encoding size %d",
 							current->m_buffer_fill_size);
-					//aj::log(ANDROID_LOG_DEBUG, LTAG, "Encoding current entry %p, buffer %p, size %d",
+					//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Encoding current entry %p, buffer %p, size %d",
 					//    current, current->m_buffer, current->m_buffer_fill_size);
 
 					// Encode!
@@ -324,12 +383,12 @@ public:
 						// We don't really know how much was written, we have to assume it was
 						// nothing.
 						if (++retry > 3) {
-							aj::log(ANDROID_LOG_ERROR, LTAG,
+							__android_log_print(ANDROID_LOG_ERROR, LTAG,
 									"Giving up on writing current FIFO!");
 							break;
 						} else {
 							// Sleep a little before retrying.
-							aj::log(ANDROID_LOG_ERROR, LTAG,
+							__android_log_print(ANDROID_LOG_ERROR, LTAG,
 									"Writing FIFO entry %p failed; retrying...");
 							usleep(5000); // 5msec
 						}
@@ -345,19 +404,19 @@ public:
 				fifo = (write_fifo_t *) m_fifo;
 			}
 
-			//aj::log(ANDROID_LOG_DEBUG, LTAG, "End of wakeup, or should I die? %s", (m_kill_writer ? "yes" : "no"));
+			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "End of wakeup, or should I die? %s", (m_kill_writer ? "yes" : "no"));
 		} while (!m_kill_writer);
 
 		pthread_mutex_unlock(&m_fifo_mutex);
 
 		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer sleeping");
 
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "Writer thread dies.");
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writer thread dies.");
 		for (long i = 0; i < 50; i++) {
 			usleep(5000);
 		}
 		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer slept");
-//    aj::log(ANDROID_LOG_DEBUG, LTAG, "slept.");
+//    __android_log_print(ANDROID_LOG_DEBUG, LTAG, "slept.");
 		return NULL;
 	}
 
@@ -383,7 +442,7 @@ private:
 			return;
 		}
 
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "Flushing to FIFO.");
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Flushing to FIFO.");
 
 		write_fifo_t * next = new write_fifo_t(m_write_buffer,
 				m_write_buffer_offset);
@@ -396,7 +455,7 @@ private:
 		} else {
 			m_fifo = next;
 		}
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "FIFO: %p, new entry: %p", m_fifo, next);
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "FIFO: %p, new entry: %p", m_fifo, next);
 		pthread_mutex_unlock(&m_fifo_mutex);
 	}
 
@@ -407,7 +466,7 @@ private:
 	inline int copyBuffer(char * buffer, int bufsize, int bufsize32) {
 		FLAC__int32 * buf = m_write_buffer + m_write_buffer_offset;
 
-		//aj::log(ANDROID_LOG_DEBUG, LTAG, "Writing at %p[%d] = %p", m_write_buffer, m_write_buffer_offset, buf);
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writing at %p[%d] = %p", m_write_buffer, m_write_buffer_offset, buf);
 		if (8 == m_bits_per_sample) {
 			copyBuffer<int8_t>(buf, buffer, bufsize);
 			m_write_buffer_offset += bufsize32;
@@ -444,7 +503,7 @@ private:
 				cur = -(cur + 1);
 			}
 			float amp = static_cast<float>(cur)
-					/ aj::type_traits<sized_sampleT>::MAX;
+					/ type_traits<sized_sampleT>::MAX;
 
 			// Store max amplitude
 			if (amp > m_max_amplitude) {
@@ -549,40 +608,40 @@ char * fifo_filename = 0;
 extern "C" {
 
 JNIEXPORT
-void Java_com_evaapis_FLACStreamEncoder_initFifo(JNIEnv * env,
+void Java_com_evaapis_android_FLACStreamEncoder_initFifo(JNIEnv * env,
 		jobject obj, jstring outfile) {
 	/*
 	 Iftah:  I added the mkfifo part to allow streaming the data to Java...
 	 */
-	char * filename = aj::convert_jstring_path(env, outfile);
-	aj::log(ANDROID_LOG_INFO, LTAG, "unlinking %s", filename);
+	char * filename = convert_jstring_path(env, outfile);
+	__android_log_print(ANDROID_LOG_INFO, LTAG, "unlinking %s", filename);
 	int res = unlink(filename);
-	aj::log(ANDROID_LOG_INFO, LTAG, "making fifo %s", filename);
+	__android_log_print(ANDROID_LOG_INFO, LTAG, "making fifo %s", filename);
 	res = mkfifo(filename, 0777);
 	fifo_filename = filename;
 }
 
 JNIEXPORT
-void Java_com_evaapis_FLACStreamEncoder_deinitFifo(JNIEnv * env,
+void Java_com_evaapis_android_FLACStreamEncoder_deinitFifo(JNIEnv * env,
 		jobject obj, jstring outfile) {
-	unlink(aj::convert_jstring_path(env, outfile));
+	unlink(convert_jstring_path(env, outfile));
 }
 
 JNIEXPORT
-void Java_com_evaapis_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
+void Java_com_evaapis_android_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 		jstring outfile, jint sample_rate, jint channels,
 		jint bits_per_sample) {
 	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
 
 	FLACStreamEncoder * encoder = new FLACStreamEncoder(
-			aj::convert_jstring_path(env, outfile), sample_rate, channels,
+			convert_jstring_path(env, outfile), sample_rate, channels,
 			bits_per_sample);
 
 	char const * const error = encoder->init();
 	if (NULL != error) {
 		delete encoder;
 
-		aj::throwByName(env, IllegalArgumentException_classname, error);
+		throwByName(env, IllegalArgumentException_classname, error);
 		return;
 	}
 
@@ -590,32 +649,32 @@ void Java_com_evaapis_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT
-void Java_com_evaapis_FLACStreamEncoder_deinit(JNIEnv * env,
+void Java_com_evaapis_android_FLACStreamEncoder_deinit(JNIEnv * env,
 		jobject obj) {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 	delete encoder;
 	set_encoder(env, obj, NULL);
 	if (fifo_filename) {
-		aj::log(ANDROID_LOG_INFO, LTAG, "unlinking %s", fifo_filename);
+		__android_log_print(ANDROID_LOG_INFO, LTAG, "unlinking %s", fifo_filename);
 		unlink(fifo_filename);
 		fifo_filename = 0;
 	}
 }
 
 JNIEXPORT jint
-Java_com_evaapis_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
+Java_com_evaapis_android_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
 		jobject buffer, jint bufsize)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
 	if (NULL == encoder) {
-		aj::throwByName(env, IllegalArgumentException_classname,
+		throwByName(env, IllegalArgumentException_classname,
 				"Called without a valid encoder instance!");
 		return 0;
 	}
 
 	if (bufsize > env->GetDirectBufferCapacity(buffer)) {
-		aj::throwByName(env, IllegalArgumentException_classname,
+		throwByName(env, IllegalArgumentException_classname,
 				"Asked to read more from a buffer than the buffer's capacity!");
 	}
 
@@ -624,12 +683,12 @@ Java_com_evaapis_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
 }
 
 JNIEXPORT
-void Java_com_evaapis_FLACStreamEncoder_flush(JNIEnv * env,
+void Java_com_evaapis_android_FLACStreamEncoder_flush(JNIEnv * env,
 		jobject obj) {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
 	if (NULL == encoder) {
-		aj::throwByName(env, IllegalArgumentException_classname,
+		throwByName(env, IllegalArgumentException_classname,
 				"Called without a valid encoder instance!");
 		return;
 	}
@@ -638,12 +697,12 @@ void Java_com_evaapis_FLACStreamEncoder_flush(JNIEnv * env,
 }
 
 JNIEXPORT jfloat
-Java_com_evaapis_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
+Java_com_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
 	if (NULL == encoder) {
-		aj::throwByName(env, IllegalArgumentException_classname,
+		throwByName(env, IllegalArgumentException_classname,
 				"Called without a valid encoder instance!");
 		return 0;
 	}
@@ -652,12 +711,12 @@ Java_com_evaapis_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
 }
 
 JNIEXPORT jfloat
-Java_com_evaapis_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
+Java_com_evaapis_android_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
 	if (NULL == encoder) {
-		aj::throwByName(env, IllegalArgumentException_classname,
+		throwByName(env, IllegalArgumentException_classname,
 				"Called without a valid encoder instance!");
 		return 0;
 	}
