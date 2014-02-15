@@ -173,7 +173,6 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 				String disclaimer = "";
 				if (mHotelData.mSummary.mSupplierType != null && mHotelData.mSummary.mSupplierType.equals("E")) {
 					disclaimer = getText(R.string.room_price_disclaimer).toString();
-					mNoticeText.setMovementMethod(LinkMovementMethod.getInstance());
 				}
 				else {
 					// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
@@ -184,23 +183,34 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 										"accommodate your entire party.";
 					}
 				}
+				
+				boolean hasNoRefund = false;
 				if (mHotelData.mSummary.roomDetails != null) {
 					for (RoomDetails room : mHotelData.mSummary.roomDetails) {
 						if (room.mRateInfo != null && room.mRateInfo.mNonRefundable) {
-							disclaimer = "Note: Highlighted rooms are Non Refundable\n"+disclaimer;
+							hasNoRefund = true;
 							break;
 						}
 					}
 				}
+				if (hasNoRefund) {
+					mNoticeText.setText("Note: Highlighted rooms are Non Refundable");
+					mNoticeText.setVisibility(View.VISIBLE);
+				}
+				else {
+					mNoticeText.setText("");
+					mNoticeText.setVisibility(View.GONE);
+				}
 	
 				
-				mNoticeText.setText(disclaimer);
 	
 				mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
 	
 				mRoomListView = (ExpandableListView)mView.findViewById(R.id.roomListView);
 	
 				mAdapter = new RoomListAdapter(getActivity(),mHotelData);
+				mAdapter.setDisclaimer(disclaimer);
+
 				mRoomListView.setAdapter( mAdapter );
 	
 				//mRoomListView.setOnItemClickListener(this);

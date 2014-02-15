@@ -10,7 +10,7 @@
         android:id="@+id/hotelImage"
         android:layout_width="72dip"
         android:layout_height="72dip"
-        android:src="@drawable/hotel_icon"
+        android:src="@drawable/hotel72"
         android:padding="2dp"
          android:contentDescription="@string/hotel_image">
     </ImageView>

@@ -38,6 +38,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	private Context mParent;
 	private static int nonRefundableColor = -1;
 	static final DecimalFormat formatter = new DecimalFormat("#.##");
+	private String disclaimer;
 	protected static final String TAG = "RoomListAdapter";
 		
 	public RoomListAdapter(Context context, HotelData hotel)
@@ -49,9 +50,12 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			Resources resources = context.getResources();
 			nonRefundableColor = resources.getColor(R.color.non_refundable);
 		}
+		disclaimer = "";
 	}
 	
-	
+	public void setDisclaimer(String disclaimer) {
+		this.disclaimer = disclaimer;
+	}
 
 	
 	@Override
@@ -177,11 +181,12 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		{
 			convertView = mInflater.inflate(R.layout.room_list_item_expanded, null);
 		}
-		Button bookButton = (Button) convertView.findViewById(R.id.buttonChooseRoom);
 		WebView desc = (WebView) convertView.findViewById(R.id.roomDescription);
 		final RoomDetails room = mHotel.mSummary.roomDetails[groupPosition];
 		StringBuilder text  = new StringBuilder("&lt;html&gt;&lt;head&gt;&lt;meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"&gt;"
 				+ "&lt;meta charset=\"UTF-8\"&gt;&lt;/head&gt;&lt;body&gt;&lt;font color=\"black\"&gt;");
+		if (disclaimer.equals("") == false)
+			text.append("&lt;p&gt;"+disclaimer+"&lt;/p&gt;");
 		if (room.mRateInfo != null && room.mRateInfo.mPromoDetailText != null) {
 			text.append("&lt;p&gt; "+room.mRateInfo.mPromoDetailText + "&lt;/p&gt; ");
 		}
@@ -243,7 +248,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 		desc.loadData(marked_up.toString(), "text/html; charset=UTF-8", "utf-8");
 		
-		
+		Button bookButton = (Button) convertView.findViewById(R.id.buttonChooseRoom);
 		bookButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override

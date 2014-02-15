@@ -159,17 +159,21 @@ public class XpediaProtocolStatic {
 		latitude = EvatureLocationUpdater.getLatitude();
 		
 		if (longitude == -1) {
-			longitude = 10000;
-			latitude = 10000;
-		}
 
 		String params = "";
 
-		if ((apiReply.ean == null) || !apiReply.ean.containsKey("latitude") || !apiReply.ean.containsKey("longitude")) {
-			if (apiReply.ean == null)
-				apiReply.ean = new HashMap<String, String>();
-			apiReply.ean.put("latitude", String.valueOf(latitude));
-			apiReply.ean.put("longitude", String.valueOf(longitude));
+		if (apiReply.ean == null)
+			apiReply.ean = new HashMap<String, String>();
+		
+		if ((!apiReply.ean.containsKey("latitude") || !apiReply.ean.containsKey("longitude")) &&
+				!apiReply.ean.containsKey("city") && !!apiReply.ean.containsKey("destinationId") &&
+				!apiReply.ean.containsKey("destinationString") 
+				) {
+			// no location returned - use the one from the phone
+			if (longitude != -1) {
+				apiReply.ean.put("latitude", String.valueOf(latitude));
+				apiReply.ean.put("longitude", String.valueOf(longitude));
+			}
 		}
 
 		for (Map.Entry<String, String> entry : apiReply.ean.entrySet()) {
@@ -180,7 +184,8 @@ public class XpediaProtocolStatic {
 
 		params += "&maxRatePlanCount=2";
 		
-		if (apiReply.requestAttributes != null && apiReply.requestAttributes.sortBy != null) {
+		if (apiReply.requestAttributes != null && apiReply.requestAttributes.sortBy != null &&
+				params.contains("&sort=") == false) {
 			switch (apiReply.requestAttributes.sortBy) {
 			case price:
 			case price_per_person:

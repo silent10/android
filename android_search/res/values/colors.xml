@@ -153,7 +153,7 @@
     <color name="my_chat_no_session_bg">#ff4d5059</color>
     <color name="my_chat_no_session_text">#40cf40</color>
     <color name="eva_chat_no_session_bg">#dddddd</color>
-    <color name="eva_chat_no_session_text">#606060</color>
+    <color name="eva_chat_no_session_text">#909090</color>
     <color name="eva_chat_in_session_bg">#f4f4f4</color>
     <color name="eva_chat_in_session_text">#404040</color>
     <color name="white">#fff</color>
