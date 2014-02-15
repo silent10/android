@@ -158,8 +158,6 @@ public class XpediaProtocolStatic {
 		longitude = EvatureLocationUpdater.getLongitude();
 		latitude = EvatureLocationUpdater.getLatitude();
 		
-		if (longitude == -1) {
-
 		String params = "";
 
 		if (apiReply.ean == null)
@@ -187,39 +185,38 @@ public class XpediaProtocolStatic {
 		if (apiReply.requestAttributes != null && apiReply.requestAttributes.sortBy != null &&
 				params.contains("&sort=") == false) {
 			switch (apiReply.requestAttributes.sortBy) {
-			case price:
-			case price_per_person:
-				if (apiReply.requestAttributes.sortOrder == SortOrderEnum.descending ||
+				case price:
+				case price_per_person:
+					if (apiReply.requestAttributes.sortOrder == SortOrderEnum.descending ||
+						apiReply.requestAttributes.sortOrder == SortOrderEnum.reverse) {
+						params += "&sort=PRICE_REVERSE";
+					}
+					else {
+						params += "&sort=PRICE";
+					}
+					break;
+				case stars:
+				case rating:
+				case popularity:
+				case guest_rating:
+				case recommendations:
+					if (apiReply.requestAttributes.sortOrder == SortOrderEnum.descending ||
 					apiReply.requestAttributes.sortOrder == SortOrderEnum.reverse) {
-					params += "&sort=PRICE_REVERSE";
-				}
-				else {
-					params += "&sort=PRICE";
-				}
-				break;
-			case stars:
-			case rating:
-			case popularity:
-			case guest_rating:
-			case recommendations:
-				if (apiReply.requestAttributes.sortOrder == SortOrderEnum.descending ||
-				apiReply.requestAttributes.sortOrder == SortOrderEnum.reverse) {
-					params += "&sort=QUALITY_REVERSE";
-				}
-				else {
-					params += "&sort=QUALITY";
-				}
-				break;
-			case name:
-				params += "&sort=ALPHA";
-				break;
-			case distance:
-				if (apiReply.ean.containsKey("latitude")) {
-					params += "&sort=PROXIMITY";
-				}
-				break;
+						params += "&sort=QUALITY_REVERSE";
+					}
+					else {
+						params += "&sort=QUALITY";
+					}
+					break;
+				case name:
+					params += "&sort=ALPHA";
+					break;
+				case distance:
+					if (apiReply.ean.containsKey("latitude")) {
+						params += "&sort=PROXIMITY";
+					}
+					break;
 			}
-
 		}
 
 		// will create a new sessionId
