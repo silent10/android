@@ -32,13 +32,13 @@ public class HotelListAdapter extends BaseAdapter {
 	private static final double DISTANCE_DELTA = 200;
 	private LayoutInflater mInflater;
 	private HotelsFragment mParent;
-	static Drawable mEvaHotelIcon;
+	static Drawable mHotelIcon;
 
 	public HotelListAdapter(HotelsFragment parent) {
 
 		mInflater = LayoutInflater.from(parent.getActivity());
 		mParent = parent;
-		mEvaHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.hotel_icon);
+		mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.hotel72);
 	}
 	
 	private XpediaDatabase getDb() {
@@ -152,7 +152,7 @@ public class HotelListAdapter extends BaseAdapter {
 		holder.rating.setRating((float) holder.hotel.mSummary.mHotelRating);
 
 		S3DrawableBackgroundLoader.getInstance().loadDrawable(
-				"http://images.travelnow.com" + holder.hotel.mSummary.mThumbNailUrl, holder.image, mEvaHotelIcon);
+				"http://images.travelnow.com" + holder.hotel.mSummary.mThumbNailUrl, holder.image, mHotelIcon);
 
 		double trRating = holder.hotel.mSummary.mTripAdvisorRating;
 

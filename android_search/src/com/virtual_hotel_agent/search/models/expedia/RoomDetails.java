@@ -58,14 +58,27 @@ public class RoomDetails {
 		if (mSmoking == null) {
 			mSmoking = "?";
 		}
-		if (mSmoking.equals("NS")) {
-			mSmoking = "Non-Smoking";
+		String result = null;
+		for (String token : mSmoking.split(",")) {
+			String tokenStr = token;
+			if (token.equals("NS")) {
+				tokenStr = "Non-Smoking";
+			}
+			else if (token.equals("S")) {
+				tokenStr = "Smoking";
+			}
+			else if (token.equals("E")) {
+				tokenStr = "Either";
+			}
+			if (result == null) {
+				result = tokenStr;
+			}
+			else {
+				result += ", "+tokenStr;
+			}
 		}
-		else if (mSmoking.equals("S")) {
-			mSmoking = "Smoking";
-		}
-		else if (mSmoking.equals("E")) {
-			mSmoking = "Either";
+		if (result != null) {
+			mSmoking = result;
 		}
 		
 		try {

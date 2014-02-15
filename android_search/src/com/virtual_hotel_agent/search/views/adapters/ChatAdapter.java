@@ -127,16 +127,16 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			
 			
 		case Me:
-			TextView icon = (TextView)row.findViewById(R.id.icon);
+//			TextView icon = (TextView)row.findViewById(R.id.icon);
 			if (chatItem.isInSession()) {
 				row.setBackgroundColor(myChatInSessionBg);
 				label.setTextColor(myChatInSessionText);
-				icon.setTextColor(myChatInSessionText);
+//				icon.setTextColor(myChatInSessionText);
 			}
 			else {
 				row.setBackgroundColor(myChatNoSessionBg);
 				label.setTextColor(myChatNoSessionText);
-				icon.setTextColor(myChatNoSessionText);
+//				icon.setTextColor(myChatNoSessionText);
 			}
 			break;
 			

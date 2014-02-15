@@ -80,36 +80,7 @@
             android:text="Details" 
             android:textColor="#222222"/>
 
-        <LinearLayout
-            android:id="@+id/roomDescrptionLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/details"
-            android:background="#ffe3e3e3"
-            android:visibility="gone"
-            android:orientation="vertical"
-            android:padding="3dp" >
-            
-            <TextView
-                android:id="@+id/roomDescription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#fff"
-                android:textColor="#000"
-                android:maxHeight="40dp"
-                android:scrollbars="vertical"
-                android:text="Lorem ipsum badsfg asdfg dsfg asdf aserfqw "
-                 />
-
-            <Button
-                android:id="@+id/buttonChooseRoom"
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/checkout" />
-            
-         </LinearLayout>
+        
     </RelativeLayout>
 
 </LinearLayout>

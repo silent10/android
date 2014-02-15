@@ -25,7 +25,7 @@
         android:required="true"/>
     
     <application
-        android:icon="@drawable/eva_icon"
+        android:icon="@drawable/hotel72"
         android:label="@string/app_name" android:name="com.virtual_hotel_agent.search.MyApplication">
         <activity
             android:name="com.virtual_hotel_agent.search.controllers.activities.MainActivity"

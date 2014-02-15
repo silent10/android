@@ -21,14 +21,14 @@
             android:layout_alignParentTop="true"
             android:padding="4dip"
             android:minHeight="64dp"
-            android:src="@drawable/eva_hotel_icon_small" />
+            android:src="@drawable/hotel72" />
         
         <TextView
             android:id="@+id/hotelName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/hotelThumbnail"
-            android:text=""
+            android:text="Name name"
             android:textColor="@color/black"
             android:textSize="24sp" >
         </TextView>
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_alignLeft="@id/hotelName"
             android:layout_below="@id/hotelName"
-            android:text=""
+            android:text="location location"
             android:textSize="12sp" >
         </TextView>
 
@@ -61,7 +61,8 @@
             android:layout_alignLeft="@id/starRating"
             android:text="@string/star_rating" >
         </TextView> -->
-        
+    </RelativeLayout> 
+       
             <TextView
                 android:id="@+id/noticeText"
                 android:layout_width="fill_parent"
@@ -69,10 +70,10 @@
                 android:maxHeight="45dp"
                 android:scrollbars="vertical"
             	android:layout_below="@+id/hotelThumbnail"
-                android:text="Pitchfork Bushwick pickled umami. Etsy try-hard fap aesthetic Intelligentsia, farm-to-table mustache Helvetica 8-bit asymmetrical Odd Future gastropub sartorial sustainable. Mlkshk chia American Apparel, squid twee Brooklyn next level food truck shabby chic leggings ugh. Irony kogi craft beer, High Life authentic ennui Banksy. Craft beer butcher selvage lomo Marfa. Letterpress direct trade squid, ethnic Truffaut small batch try-hard food truck literally wayfarers cornhole skateboard cray quinoa. Yr cray food truck, Shoreditch Pinterest DIY semiotics vegan."/>
+                android:text=""/>
 
         
-    </RelativeLayout>
+    
 
     <ImageView
         android:id="@+id/searchDivider"

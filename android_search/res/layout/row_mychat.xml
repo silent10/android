@@ -5,13 +5,13 @@
     android:background="@color/my_chat_in_session_bg"
     android:orientation="horizontal" >
 
-    <!-- ImageView
+    <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="2dip"
-        android:src="@drawable/my_chat" 
-        android:contentDescription="@string/chat_icon_description"/> -->
+        android:src="@drawable/chat_icon" 
+        android:contentDescription="@string/chat_icon_description"/>
  
      <TextView
         android:id="@+id/icon"

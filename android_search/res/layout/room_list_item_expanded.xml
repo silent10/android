@@ -8,7 +8,16 @@
   android:background="@drawable/hotel_background"
   android:descendantFocusability="blocksDescendants">
 
-
+    <Button
+         android:id="@+id/buttonChooseRoom"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center_horizontal"
+         android:textColor="@color/white"
+         android:background="@drawable/button"
+         android:padding="15dp"
+         android:textSize="16sp"
+         android:text="@string/checkout" />
      
      <!-- <TextView
          android:id="@+id/roomDescription"
@@ -26,15 +35,6 @@
           android:layout_width="fill_parent"
           android:layout_height="wrap_content" >
       </WebView>
-
-     <Button
-         android:id="@+id/buttonChooseRoom"
-         style="?android:attr/buttonStyleSmall"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_gravity="center_horizontal"
-         android:textColor="@color/black"
-         android:text="@string/checkout" />
             
 
 </LinearLayout>

@@ -51,6 +51,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.SpannableString;
+import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -301,7 +302,6 @@ public class MainActivity extends RoboFragmentActivity implements
 		String greeting = getResources().getString(R.string.examples_greetings);
 		ChatItem chatItem = new ChatItem(greeting,null, null, ChatType.VirtualAgentContinued);
 		MainActivity.this.addChatItem(chatItem);
-		
 		for (String example : examples) {
 			SpannableString exampleFormatted = new SpannableString(example);
 			exampleFormatted.setSpan( new StyleSpan(Typeface.ITALIC), 0, exampleFormatted.length(), 0);
@@ -311,12 +311,22 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 
 	private void showIntro() {
-		String greeting = getResources().getString(R.string.greeting);
-		final ChatItem chat = new ChatItem(greeting,null, null, ChatType.VirtualAgent);
-		MainActivity.this.addChatItem(chat);
-		
+		String greeting =  getResources().getString(R.string.greeting);
 		if (SettingsAPI.getShowIntroTips(this)) {
+			ChatItem chat = new ChatItem(greeting,null, null, ChatType.VirtualAgent);
+			MainActivity.this.addChatItem(chat);
 			showExamples();
+		}
+		else {
+			int pos = greeting.length();
+			String seeExamples = "\nClick here to see some examples.";
+			greeting += new SpannedString(seeExamples);
+			SpannableString sgreet = new SpannableString(greeting);
+			int col = getResources().getColor(R.color.eva_chat_no_session_text);
+			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
+			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
+			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgent);
+			MainActivity.this.addChatItem(chat);
 		}
 		
 		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
@@ -1329,7 +1339,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			final boolean _switchToResult = switchToResult;
 			// if children travelers specified but EAN does not include the ages - ask for ages  
 			if (reply.travelers != null && reply.travelers.allChildren() > 0
-				&& 	reply.ean.get("room1").matches("\\d")
+				&& reply.ean.containsKey("room1") && reply.ean.get("room1").matches("\\d")
 					) {
 				Ln.d("Guests dialog");
 				ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
