@@ -6,7 +6,6 @@ package com.virtual_hotel_agent.search;
 import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 
-import roboguice.util.Ln;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
@@ -35,7 +34,7 @@ public class MyApplication extends Application {
 		// if (!BuildConfig.DEBUG) // Not when in debug mode!
 		// The following line triggers the initialization of ACRA
 		ACRA.init(this); AcraInitialized = true;
-		Ln.d("onCreate");
+		Log.d(TAG, "onCreate");
 
 		Resources resources = getResources();
 		mExpediaApiKey = resources.getString(R.string.EXPEDIA_API_KEY);
@@ -80,7 +79,7 @@ public class MyApplication extends Application {
 
 	@Override
 	public void onTerminate() {
-		Ln.d("OnTerminate");
+		Log.d(TAG, "OnTerminate");
 		super.onTerminate();
 	}
 

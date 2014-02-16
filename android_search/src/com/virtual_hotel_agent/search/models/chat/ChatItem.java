@@ -12,6 +12,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	
 	public enum ChatType {
 		Me,
+		VirtualAgentWelcome,
 		VirtualAgent,
 		VirtualAgentContinued,
 		DialogQuestion,

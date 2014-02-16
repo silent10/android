@@ -2,7 +2,6 @@ package com.virtual_hotel_agent.search.models.expedia;
 
 import org.json.JSONObject;
 
-import roboguice.util.Ln;
 
 public class HotelData {
 

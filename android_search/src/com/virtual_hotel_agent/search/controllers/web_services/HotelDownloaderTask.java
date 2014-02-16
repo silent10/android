@@ -3,7 +3,6 @@ package com.virtual_hotel_agent.search.controllers.web_services;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import roboguice.util.Ln;
 import android.content.Context;
 
 import com.evature.util.Log;
@@ -33,7 +32,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 	public HotelDownloaderTask(DownloaderTaskInterface listener, int hotelndex) {
 		super( R.string.HOTEL);
-		Ln.d("CTOR");
+		Log.d(TAG, "CTOR");
 		attach(listener);
 		mContext = (Context) listener;
 		mHotelIndex = hotelndex;
@@ -41,7 +40,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 	@Override
 	protected JSONObject doInBackground(Void... params) {
-		Ln.d("doInBackground()");
+		Log.d(TAG, "doInBackground()");
 
 		XpediaDatabase db = MyApplication.getDb();
 		HotelData hotelData = db.mHotelData[mHotelIndex];

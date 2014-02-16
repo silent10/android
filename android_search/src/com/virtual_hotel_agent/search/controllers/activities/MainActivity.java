@@ -29,7 +29,6 @@ import org.json.JSONObject;
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
-import roboguice.util.Ln;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -44,6 +43,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.renderscript.Sampler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -63,6 +63,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
@@ -190,7 +191,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	@Override 
 	public void onResume() {
-		Ln.d("onResume()");
+		Log.d(TAG, "onResume()");
 		eva.onResume();
 		super.onResume();
 //		setDebugData(DebugTextType.None, null);
@@ -198,7 +199,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	@Override
 	public void onPause() {
-		Ln.d("onPause()");
+		Log.d(TAG, "onPause()");
 		if (mHotelDownloader != null) {
 			mHotelDownloader.cancel(true);
 			mHotelDownloader = null;
@@ -209,7 +210,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
-		Ln.d("onCreate()");
+		Log.d(TAG, "onCreate()");
 		SettingsAPI.getLocale(this);
 		eva = new EvaComponent(this, this);
 		eva.onCreate(savedInstanceState);
@@ -239,10 +240,10 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		if (savedInstanceState != null) { // Restore state
 			// Same code as onRestoreInstanceState() ?
-			Ln.d("restoring saved instance state");
+			Log.d(TAG, "restoring saved instance state");
 			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
 		} else {
-			Ln.d("no saved instance state");
+			Log.d(TAG, "no saved instance state");
 			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ mChatTabName));
 		}
 		
@@ -260,7 +261,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 		if (networkInfo != null && networkInfo.isConnected()) {
-			Ln.d("Progress: We are connected to the network");
+			Log.d(TAG, "Progress: We are connected to the network");
 			mIsNetworkingOk = true;
 			// fetch data
 			// new GetExternalIpAddress().execute();
@@ -325,7 +326,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			int col = getResources().getColor(R.color.eva_chat_no_session_text);
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
-			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgent);
+			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);
 			MainActivity.this.addChatItem(chat);
 		}
 		
@@ -358,25 +359,25 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		@Override
 		public Fragment getItem(int position) {// Asks for the main fragment
-			Ln.d("getItem " + String.valueOf(position));
+			Log.d(TAG, "getItem " + String.valueOf(position));
 			int size = mTabTitles.size();
 			if (position >= size) {
 				Log.e(TAG, "No fragment made for Position "+position);
 				return null;
 			}
 //			if (mTabTitles.get(position).equals(mDebugTabName)) { // debug window
-//				Ln.d("Debug Fragment");
+//				Log.d(TAG, "Debug Fragment");
 //				DebugFragment fragment = injector.getInstance(DebugFragment.class);
 //				return fragment;
 //			}
 			
 //			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
-//				Ln.d("Example Fragment");
+//				Log.d(TAG, "Example Fragment");
 //				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
 //				fragment.setHandler(new ExampleClickedHandler() {
 //					@Override
 //					public void onClick(String example) {
-//						Ln.d("Running example: "+example);
+//						Log.d(TAG, "Running example: "+example);
 //						MainActivity.this.addChatItem(new ChatItem(example));
 //						mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 //						MainActivity.this.eva.searchWithText(example);
@@ -384,7 +385,7 @@ public class MainActivity extends RoboFragmentActivity implements
 //				return fragment; 
 //			}
 			if (mTabTitles.get(position).equals(mChatTabName)) { // Main Chat window
-				Ln.d("Chat Fragment");
+				Log.d(TAG, "Chat Fragment");
 				ChatFragment chatFragment = injector.getInstance(ChatFragment.class);
 				chatFragment.setDialogHandler(new DialogClickHandler() {
 					
@@ -485,7 +486,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		// Internal helper function
 		public void showTab(int position) {
-			Ln.d("showTab "+position);
+			Log.d(TAG, "showTab "+position);
 			lastShown = position;
 			mViewPager.setCurrentItem(position, true);
 //			mTabs.onPageSelected(position);
@@ -493,7 +494,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 
 		public void addTab(String name) { // Dynamic tabs add to end
-			Ln.d("addTab "+name);
+			Log.d(TAG, "addTab "+name);
 			mTabs.setAdapter(null);
 			mViewPager.setAdapter(null);
 			mTabTitles.add(name);
@@ -501,7 +502,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		
 		public void addTab(String name, int position) { // Dynamic tabs add to certain position
-			Ln.d("addTab "+name);
+			Log.d(TAG, "addTab "+name);
 			mTabs.setAdapter(null);
 			mViewPager.setAdapter(null);
 			mTabTitles.add(position, name);
@@ -518,7 +519,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		public void removeTab(int tabIndex)
 		{
-			Ln.d("removeTab "+tabIndex);
+			Log.d(TAG, "removeTab "+tabIndex);
 			mTabs.setAdapter(null);
 			mViewPager.setAdapter(null);
 			mTabTitles.remove(tabIndex);
@@ -550,9 +551,6 @@ public class MainActivity extends RoboFragmentActivity implements
 //		case android.R.id.home:
 //			mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
 //			return true;
-		case R.id.new_session:
-			startNewSession();
-			return true;
 		case R.id.settings: // Did the user select "settings"?
 			intent = new Intent();
 			// Then set the activity class that needs to be launched/started.
@@ -649,7 +647,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 	
 	private void addChatItem(ChatItem item) {
-		Ln.d("Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
+		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		mChatListModel.add(item);
 		invalidateChatFragment();
 		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
@@ -724,7 +722,7 @@ public class MainActivity extends RoboFragmentActivity implements
 //				TrainListAdapter adapter = fragment.getAdapter();
 //				if (adapter != null) {
 //					adapter.notifyDataSetChanged();
-//					Ln.d("TrainListAdapter notifyDataSetChanged()");
+//					Log.d(TAG, "TrainListAdapter notifyDataSetChanged()");
 //				}
 //				// fragment.updateDisplay();
 //			} else {
@@ -738,7 +736,7 @@ public class MainActivity extends RoboFragmentActivity implements
 ////				FlightListAdapterTP adapter = fragment.getAdapter();
 ////				if (adapter != null) {
 ////					adapter.notifyDataSetChanged();
-////					Ln.d("Flights fragment adapter notifyDataSetChanged()");
+////					Log.d(TAG, "Flights fragment adapter notifyDataSetChanged()");
 ////				} else {
 ////					Log.e(TAG, "Flights fragment adapter == null!?!");
 ////				}
@@ -765,13 +763,13 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	@Override
 	public void endProgressDialog(int id, JSONObject result) { // we got the hotels list or hotel details reply successfully
-		Ln.d("endProgressDialog() for id " + id);
+		Log.d(TAG, "endProgressDialog() for id " + id);
 
 //		setDebugData(DebugTextType.ExpediaDebug, result);
 		
 		if (id == R.string.HOTEL && mHotelDownloader != null) {
 			int hotelIndex = mHotelDownloader.getHotelIndex();
-			Ln.d("endProgressDialog() Hotel # " + hotelIndex);
+			Log.d(TAG, "endProgressDialog() Hotel # " + hotelIndex);
 			MyApplication.getExpediaRequestParams().setHotelId(hotelIndex);
 			
 			// remove hotel tab and add it again
@@ -826,6 +824,10 @@ public class MainActivity extends RoboFragmentActivity implements
 	// http://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
+		case R.id.restart_button:
+			startNewSession();
+			return;
+
 		case R.id.search_button:
 			// simplest method:  default 
 			// MainActivity.this.eva.searchWithVoice("voice");
@@ -906,7 +908,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 
 	public void showHotelDetails(int hotelIndex) {
-		Ln.d("showHotelDetails()");
+		Log.d(TAG, "showHotelDetails()");
 		if (MyApplication.getDb() == null) {
 			Log.w(TAG, "MyApplication.getDb() == null");
 			return;
@@ -914,7 +916,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		if (mHotelDownloader != null) {
 			if (false == mHotelDownloader.cancel(true)) {
-				Ln.d("false == mHotelDownloader.cancel(true)");
+				Log.d(TAG, "false == mHotelDownloader.cancel(true)");
 				// return;
 			}
 		}
@@ -1102,18 +1104,18 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			
 			if (reply.ean != null && !"".equals(reply.ean)) {  //isHotelSearch()) {
-				Ln.d("Running Hotel Search!");
+				Log.d(TAG, "Running Hotel Search!");
 				mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 				mSearchExpediaTask.initialize(this, reply, "$");
 				mSearchExpediaTask.execute();
 			}
 			if (reply.isFlightSearch()) {
-				Ln.d("Running Vayant Search!");
+				Log.d(TAG, "Running Vayant Search!");
 				mSearchVayantTask = new SearchVayantTask(this, reply, null);
 				mSearchVayantTask.execute();
 			}
 //			if (reply.isTrainSearch()) {
-//				Ln.d("Running Travelport Search!");
+//				Log.d(TAG, "Running Travelport Search!");
 //				mSearchTravelportTask = new SearchTravelportTask(this, reply);
 //				mSearchTravelportTask.execute();
 //			}
@@ -1334,14 +1336,18 @@ public class MainActivity extends RoboFragmentActivity implements
 		switch (flow.Type) {
 		case Hotel:
 			currentHotelSearch = chatItem;
-			final ChatItem _chatItem = chatItem; 
 			final EvaApiReply _reply = reply;
 			final boolean _switchToResult = switchToResult;
 			// if children travelers specified but EAN does not include the ages - ask for ages  
 			if (reply.travelers != null && reply.travelers.allChildren() > 0
-				&& reply.ean.containsKey("room1") && reply.ean.get("room1").matches("\\d")
+				&& (reply.ean.containsKey("room1") == false || reply.ean.get("room1").matches("\\d"))
 					) {
-				Ln.d("Guests dialog");
+				Log.d(TAG,"Guests dialog");
+				chatItem.sayitActivated = false;
+				final ChatItem _chatItem = chatItem; 
+				final FlowElement _flow = flow;
+				eva.speak("Please enter the age of the children");
+
 				ChildAgeDialogFragment dialog = new ChildAgeDialogFragment();
 				dialog.setTravelers(reply.travelers);
 				
@@ -1349,20 +1355,24 @@ public class MainActivity extends RoboFragmentActivity implements
 					
 					@Override
 					public void onDialogPositiveClick(ChildAgeDialogFragment dialog) {
+						String sayIt = _flow.getSayIt();
+						if (sayIt != null && !"".equals(sayIt) ) {
+							eva.speak(sayIt);
+							_chatItem.sayitActivated = true;
+						}
 						searchHotels(_chatItem, _reply, _switchToResult);
 					}
-
-					
 					
 					@Override
 					public void onDialogNegativeClick(ChildAgeDialogFragment dialog) {
+						Toast.makeText(MainActivity.this, "Children ages are required for searching hotels", Toast.LENGTH_LONG).show();
 					}
 				});
 		        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
 				
 			}
 			else {
-				 Ln.d("Running Hotel Search!");
+				 Log.d(TAG, "Running Hotel Search!");
 				 ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
 				 if (reply.travelers != null) {
 					 db.setNumberOfAdults(reply.travelers.allAdults());
@@ -1374,12 +1384,12 @@ public class MainActivity extends RoboFragmentActivity implements
 					 db.setNumberOfChildrenParam(0);
 				 }
 				 
-				 searchHotels(_chatItem, _reply, _switchToResult);
+				 searchHotels(chatItem, _reply, _switchToResult);
 			}
 
 			break;
 //		case Flight:
-//			Ln.d("Running Vayant Search!");
+//			Log.d(TAG, "Running Vayant Search!");
 //			currentFlightSearch = chatItem;
 //			mSearchVayantTask = new SearchVayantTask(this, reply, flow);
 //			mSearchVayantTask.attach(new DownloaderListener(chatItem, switchToResult));
@@ -1405,9 +1415,19 @@ public class MainActivity extends RoboFragmentActivity implements
 			showTab(R.string.CHAT);
 			addChatItem(new ChatItem("Start new search"));
 			eva.resetSession();
-			String sessionText = "Starting a new search. How may I help you?";
-			addChatItem(new ChatItem(sessionText, null, null, ChatType.VirtualAgent));
-			eva.speak(sessionText);
+			String greeting = "Starting a new search. How may I help you?";
+			
+			shownExamples = false;
+			
+			int pos = greeting.length();
+			String seeExamples = "\nClick here to see some examples.";
+			SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
+			int col = getResources().getColor(R.color.eva_chat_no_session_text);
+			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
+			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
+			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);
+			MainActivity.this.addChatItem(chat);
+			eva.speak(greeting);
 
 //		}
 	}
@@ -1502,7 +1522,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void onChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
 		Log.i(TAG, "Chat Item clicked "+chatItem.getChat());
-		if (chatItem.getType() == ChatType.VirtualAgent) {
+		if (chatItem.getType() == ChatType.VirtualAgentWelcome ) {
 			showExamples();
 		}
 		

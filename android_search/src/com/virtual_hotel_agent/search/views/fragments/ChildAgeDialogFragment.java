@@ -42,14 +42,14 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 	private static int toInt(EditText editText) {
 		String text = editText.getText().toString();
 		if (text.equals("")) {
-			text = "0";
+			text = "-1";
 		}
-		int num = 0;
+		int num = -1;
 		try {
 			num = Integer.parseInt(text);
 		}
 		catch (NumberFormatException e) {
-			num = 0;
+			num = -1;
 		}
 		return num;
 	}
@@ -87,10 +87,24 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 								ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
 								db.setNumberOfAdults(intNumAdults);
 
-								db.setNumberOfChildrenParam(toInt(mNumChildren));
-								db.setAgeChild1(toInt(mAgeChild1));
-								db.setAgeChild2(toInt(mAgeChild2));
-								db.setAgeChild3(toInt(mAgeChild3));
+								int numChildren = toInt(mNumChildren);
+								int child1 = toInt(mAgeChild1);
+								int child2 = toInt(mAgeChild2);
+								int child3 = toInt(mAgeChild3);
+								if ((numChildren > 0 && child1 < 0) ||
+									(numChildren > 1 && child2 < 0) ||
+									(numChildren > 2 && child3 < 0)) {
+									
+									// values weren't input - same as cancel
+									mListener
+									.onDialogNegativeClick(ChildAgeDialogFragment.this);
+									return;
+								}
+								
+								db.setNumberOfChildrenParam(numChildren);
+								db.setAgeChild1(child1);
+								db.setAgeChild2(child2);
+								db.setAgeChild3(child3);
 
 								// Send the positive button event back to the
 								// host activity

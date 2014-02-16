@@ -1,7 +1,6 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
 import roboguice.fragment.RoboFragment;
-import roboguice.util.Ln;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
 
 public class ExamplesFragment extends RoboFragment { // TODO: change to ListFragment ?
@@ -33,7 +33,7 @@ public class ExamplesFragment extends RoboFragment { // TODO: change to ListFrag
 	// private ImageButton travel_search_button;	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		Ln.d("onCreateView");
+		Log.d(TAG, "onCreateView");
 		
 		try {
 			mExamples = getResources().getStringArray(R.array.examples);
