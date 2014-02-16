@@ -5,15 +5,15 @@ import org.json.JSONObject;
 
 import roboguice.util.Ln;
 import android.content.Context;
-import android.util.Log;
 
-import com.virtual_hotel_agent.search.SettingsAPI;
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
 
 public class HotelDownloaderTask extends DownloaderTask {

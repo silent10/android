@@ -13,7 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
-import android.util.Log;
+import com.evature.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;

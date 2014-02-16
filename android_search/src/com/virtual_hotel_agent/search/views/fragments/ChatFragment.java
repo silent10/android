@@ -5,7 +5,7 @@ import roboguice.fragment.RoboFragment;
 import roboguice.util.Ln;
 import android.os.Bundle;
 import android.text.SpannableString;
-import android.util.Log;
+import com.evature.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

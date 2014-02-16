@@ -6,10 +6,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import roboguice.util.Ln;
 
 import android.graphics.Bitmap;
-import android.util.Log;
+import com.evature.util.Log;
 
 
 
@@ -78,7 +77,6 @@ public class XpediaDatabase {
 		}
 		else {
 			Log.w(TAG, "Expedia Json parse error: "+name+ " not found");
-			Ln.d("");
 		}
 		return retVal;
 	}

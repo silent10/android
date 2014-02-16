@@ -7,7 +7,6 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.util.Log;
 
 public class ExternalIpAddressGetter {
 

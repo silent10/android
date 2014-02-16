@@ -23,3 +23,138 @@
 -keep class * extends java.util.ListResourceBundle {
     protected Object[][] getContents();
 }
+
+# JNI 
+-keep class com.evaapis.android.FLACStreamEncoder  {
+    *;
+}
+
+# http://stackoverflow.com/questions/5582383/problem-with-proguard-and-roboguice-with-inject-annotations
+
+
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.preference.Preference
+
+-keepclassmembers class * {
+void *(roboguice.activity.event.*);
+}
+
+# Needed for RoboGuice, etc
+-keepattributes SourceFile,LineNumberTable,RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,RuntimeVisibleFieldAnnotations
+-keep public class com.google.inject.Inject
+-keep,allowobfuscation public class com.google.inject.name.Named
+-keep,allowobfuscation public class * implements com.google.inject.Provider
+-keep,allowobfuscation @com.google.inject.Provides class *
+-keep,allowobfuscation @com.google.inject.Provides class *
+-keep,allowobfuscation @com.google.inject.ProvidedBy class * 
+-keep,allowobfuscation @com.google.inject.Singleton class *
+-keep,allowobfuscation @com.google.inject.BindingAnnotation class *
+-keep,allowobfuscation @com.google.inject.ScopeAnnotation class *
+
+
+-keep class com.google.inject.Binder
+
+-keep class android.support.**
+
+
+-keepclassmembers class * {
+    @com.google.inject.Inject <init>(...);
+}
+
+-keepclassmembers class com.google.inject.Inject {
+    public boolean optional();
+}
+
+-keepclassmembers class android.support.v4.view.ViewPager {
+	private android.widget.Scroller mScroller;
+}
+
+-keepclassmembers class * implements java.lang.annotation.Annotation { 
+    ** *(); 
+}
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+    public void set*(...);
+}
+
+-keep class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator *;
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class roboguice.**
+
+
+# safe to ignore testing classes, when proguard not being run against an instrumentation testing app
+-dontwarn roboguice.test.**
+
+
+-keep class com.google.inject.** { *; } 
+-keepclassmembers class * {
+    @com.google.inject.Inject <fields>;
+    @com.google.inject.Inject <init>(...);
+}
+-keep class javax.inject.** { *; } 
+-keep class javax.annotation.** { *; }
+
+-dontwarn javax.inject.Singleton
+-dontwarn org.apache.**
+-keep class org.apache.** {*; }
+
+-keepclassmembers class roboguice.event.** { *; }
+
+
+#ACRA specifics
+# Restore some Source file names and restore approximate line numbers in the stack traces,
+# otherwise the stack traces are pretty useless
+-keepattributes SourceFile,LineNumberTable
+
+# ACRA needs "annotations" so add this... 
+# This already  defined 
+
+# keep this class so that logging will show 'ACRA' and not a obfuscated name like 'a'.
+# Note: if you are removing log messages elsewhere in this file then this isn't necessary
+-keep class org.acra.ACRA {
+    *;
+}
+
+# keep this around for some enums that ACRA needs
+-keep class org.acra.ReportingInteractionMode {
+    *;
+}
+
+-keepnames class org.acra.sender.HttpSender$** {
+    *;
+}
+
+-keepnames class org.acra.ReportField {
+    *;
+}
+
+# keep this otherwise it is removed by ProGuard
+-keep public class org.acra.ErrorReporter
+{
+    public void addCustomData(java.lang.String,java.lang.String);
+    public void putCustomData(java.lang.String,java.lang.String);
+    public void removeCustomData(java.lang.String);
+}
+
+# keep this otherwise it is removed by ProGuard
+-keep public class org.acra.ErrorReporter
+{
+    public void handleSilentException(java.lang.Throwable);
+}
