@@ -5,9 +5,10 @@ import java.lang.reflect.Field;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
+
+import com.evature.util.Log;
 
 public class MyViewPager extends ViewPager   // see http://stackoverflow.com/a/15549865/519995   bug fix for smooth scrolling
 {

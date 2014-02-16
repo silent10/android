@@ -1,11 +1,8 @@
 package com.virtual_hotel_agent.search.controllers.web_services;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-import android.widget.Toast;
-
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;

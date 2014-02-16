@@ -2,10 +2,8 @@ package com.virtual_hotel_agent.search.controllers.web_services;
 
 import org.json.JSONObject;
 
-import roboguice.util.Ln;
-import android.util.Log;
-
 import com.evaapis.crossplatform.EvaApiReply;
+import com.evature.util.Log;
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
@@ -67,7 +65,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
 		Log.i(TAG, "doInBackground: Calling Expedia");
 		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, MyApplication.getExpediaRequestParams(), mCurrencyCode);
 		if (hotelListResponse == null) {
-			Ln.d("null hotelist response!");
+			Log.d(TAG, "null hotelist response!");
 		}
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_CREATE_HOTEL_DATA;
 		

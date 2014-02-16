@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import roboguice.util.Ln;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
+import com.evature.util.Log;
 
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evaapis.crossplatform.EvaApiReply;

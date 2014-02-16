@@ -4,7 +4,6 @@ import roboguice.activity.RoboFragmentActivity;
 import roboguice.util.Ln;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;

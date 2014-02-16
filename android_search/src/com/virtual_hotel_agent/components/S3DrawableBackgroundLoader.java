@@ -16,8 +16,9 @@ import java.util.concurrent.ExecutorService;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.widget.ImageView;
+
+import com.evature.util.Log;
 
 public class S3DrawableBackgroundLoader {
 	private final Map<String, SoftReference<Drawable>> mCache = new HashMap<String, SoftReference<Drawable>>();
