@@ -4,7 +4,6 @@ import org.json.JSONObject;
 
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
-import roboguice.util.Ln;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -54,7 +53,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void onDestroyView() {
-		Ln.d("onDestroyView");
+		Log.d(TAG, "onDestroyView");
 		super.onDestroyView();
 	}
 	
@@ -80,7 +79,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void onPause() {
-		Ln.d("onPause");
+		Log.d(TAG, "onPause");
 
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
@@ -93,19 +92,19 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void onResume() {
-		Ln.d("onResume");
+		Log.d(TAG, "onResume");
 		super.onResume();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		Ln.d("onSaveInstanceState");
+		Log.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onStart() {
-		Ln.d("onStart");
+		Log.d(TAG, "onStart");
 		super.onStart();
 	}
 
@@ -182,7 +181,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View v, int arg2, long arg3) {
-		Ln.d("onItemClick");
+		Log.d(TAG, "onItemClick");
 
 		HotelListAdapter.ViewHolder holder = (HotelListAdapter.ViewHolder) v.getTag();
 
@@ -192,7 +191,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		}
 
 		((MainActivity) getActivity()).showHotelDetails(holder.getHotelIndex());
-		Ln.d("running showHotelDetails()");
+		Log.d(TAG, "running showHotelDetails()");
 
 	}
 
@@ -211,7 +210,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			if ((visibleItemCount > 0) && (firstVisibleItem + visibleItemCount == totalItemCount) 
 					&& mContinuationLoader == null
 					&& mEnabledPaging) {
-				Ln.d("-Last Scroll-");
+				Log.d(TAG, "-Last Scroll-");
 
 				String nextQuery = MyApplication.getDb().getNextQuery();
 				mContinuationLoader = new ListContinuationDownloaderTask(HotelsFragment.this, nextQuery,

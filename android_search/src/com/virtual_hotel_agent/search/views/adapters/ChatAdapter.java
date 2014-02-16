@@ -88,6 +88,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				break;
 			case DialogQuestion:
 			case VirtualAgent:
+			case VirtualAgentWelcome:
 				row = mInflater.inflate(R.layout.row_eva_chat, parent, false);
 				break;
 			case VirtualAgentContinued:

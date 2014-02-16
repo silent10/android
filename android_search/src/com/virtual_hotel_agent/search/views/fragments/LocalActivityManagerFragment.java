@@ -16,8 +16,9 @@
 
 package com.virtual_hotel_agent.search.views.fragments;
 
+import com.evature.util.Log;
+
 import roboguice.fragment.RoboFragment;
-import roboguice.util.Ln;
 import android.app.LocalActivityManager;
 import android.os.Bundle;
 
@@ -39,7 +40,7 @@ public class LocalActivityManagerFragment extends RoboFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Ln.d("onCreate(): " + getClass().getSimpleName());
+        Log.d(TAG, "onCreate(): " + getClass().getSimpleName());
         
         Bundle state = null;
         if(savedInstanceState != null) {
@@ -59,28 +60,28 @@ public class LocalActivityManagerFragment extends RoboFragment {
     @Override
     public void onResume() {
         super.onResume();
-        Ln.d("onResume(): " + getClass().getSimpleName());
+        Log.d(TAG, "onResume(): " + getClass().getSimpleName());
         mLocalActivityManager.dispatchResume();
     }
     
     @Override
     public void onPause() {
         super.onPause();
-        Ln.d("onPause(): " + getClass().getSimpleName());
+        Log.d(TAG, "onPause(): " + getClass().getSimpleName());
         mLocalActivityManager.dispatchPause(getActivity().isFinishing());
     }    
     
     @Override
     public void onStop() {
         super.onStop();
-        Ln.d("onStop(): " + getClass().getSimpleName());
+        Log.d(TAG, "onStop(): " + getClass().getSimpleName());
         mLocalActivityManager.dispatchStop();
     }
     
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Ln.d("onDestroy(): " + getClass().getSimpleName());
+        Log.d(TAG, "onDestroy(): " + getClass().getSimpleName());
         mLocalActivityManager.dispatchDestroy(getActivity().isFinishing());
     }
 }

@@ -27,7 +27,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import roboguice.util.Ln;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.evature.util.Log;
@@ -245,7 +244,7 @@ public class XpediaProtocolStatic {
 
 	private static JSONObject executeWithTimeout(String url) {
 		
-		Ln.d("Fetching "+url);
+		Log.d(TAG, "Fetching "+url);
 		
 		HttpGet request = new HttpGet(url);
 		request.addHeader("Accept-Encoding","gzip");

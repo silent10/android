@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import org.json.JSONObject;
 
-import roboguice.util.Ln;
 import android.os.AsyncTask;
 
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
 
 abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject> {
@@ -50,7 +50,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 	@Override
 	protected void onPostExecute(JSONObject result) {
 
-		Ln.d("onPostExecute");
+		Log.d(TAG, "onPostExecute");
 
 
 		for (DownloaderTaskInterface listener : mListeners) {
@@ -65,7 +65,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 
 	@Override
 	protected void onPreExecute() {
-		Ln.d("onPreExecute");
+		Log.d(TAG, "onPreExecute");
 
 		mProgress = DownloaderStatus.Started;
 		for (DownloaderTaskInterface listener : mListeners) {
@@ -78,7 +78,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 	@Override
 	protected void onProgressUpdate(Integer... values) {
 
-		Ln.d("onProgressUpdate:" + mProgress);
+		Log.d(TAG, "onProgressUpdate:" + mProgress);
 
 		for (DownloaderTaskInterface listener : mListeners) {
 			listener.updateProgress(getId(), mProgress);

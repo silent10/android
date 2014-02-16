@@ -1,10 +1,10 @@
 package com.virtual_hotel_agent.search.controllers.activities;
 
 import roboguice.activity.RoboFragmentActivity;
-import roboguice.util.Ln;
 import android.app.Dialog;
 import android.os.Bundle;
 
+import com.evature.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -65,7 +65,7 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
 	
 	
 	public void onHotelsListUpdated() {
-		Ln.d("Updating map because hotels list was updated");
+		Log.d(TAG, "Updating map because hotels list was updated");
 		mMap = null;
 		setUpMapIfNeeded();
 	}
@@ -105,11 +105,11 @@ public class HotelsMapActivity extends RoboFragmentActivity  {
         try{
         	//This line will cause the exception first times when map is still not "inflated"
         	mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-        	Ln.d("Camera moved successfully");
+        	Log.d(TAG, "Camera moved successfully");
         } catch(IllegalStateException e) {
-        	Ln.e(e, "Camera move exception");
+        	Log.e(TAG, "Camera move exception", e);
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,400,400,10));
-            Ln.d("Camera moved to hardcoded width height");
+            Log.d(TAG, "Camera moved to hardcoded width height");
         }
 	}
 

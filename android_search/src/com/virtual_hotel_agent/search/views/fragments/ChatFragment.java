@@ -2,7 +2,6 @@ package com.virtual_hotel_agent.search.views.fragments;
 
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
-import roboguice.util.Ln;
 import android.os.Bundle;
 import android.text.SpannableString;
 import com.evature.util.Log;
@@ -51,7 +50,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	// private ImageButton travel_search_button;	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		Ln.d("onCreateView");
+		Log.d(TAG, "onCreateView");
 		
 		ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_chat, null);
 		ListView chatListView = (ListView) root.findViewById(R.id.chat_list);
@@ -67,7 +66,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {
-		Ln.d("onSaveInstanceState");
+		Log.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(instanceState);
 		
 //		mChatListModel.saveInstanceState(instanceState);
@@ -111,6 +110,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 //			mChatAdapter.notifyDataSetChanged();
 //			break;
 		case VirtualAgentContinued:
+		case VirtualAgentWelcome:
 		case VirtualAgent:
 			Log.i(TAG, "Eva item clicked: "+item.getChat());
 			eventManager.fire(new ChatItemClicked(item) );
