@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.virtual_hotel_agent.search"
-    android:versionCode="41"
-    android:versionName="Pre-alpha" >
+    android:versionCode="42"
+    android:versionName="1.0.0" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19"/>
     <permission
@@ -55,7 +55,7 @@
 
         <meta-data
 		   android:name="com.google.android.maps.v2.API_KEY"
-		   android:value="AIzaSyBPnkaWt4r_z86YQihDfDHH3armRZNTnrs"/>
+		   android:value="AIzaSyAy9PYM3qzNSfg9vv-d4C_c1OD6ULAA-Yc"/>
         <meta-data
 		    android:name="com.google.android.gms.version"
 		    android:value="@integer/google_play_services_version" />
