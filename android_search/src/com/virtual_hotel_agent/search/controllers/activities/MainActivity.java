@@ -29,6 +29,7 @@ import org.json.JSONObject;
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -37,13 +38,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.renderscript.Sampler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -61,6 +63,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -153,7 +156,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	private TextView mStatusText;
 	private ProgressBar mProgressBar;
 	private SoundLevelView mSoundView;
-	private View mSearchButton;
+	private ImageButton mSearchButton;
 
 
 	@Override
@@ -226,7 +229,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
 		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);
-		mSearchButton = findViewById(R.id.search_button);
+		mSearchButton = (ImageButton) findViewById(R.id.search_button);
 		
 		eva.setApiKey(SettingsAPI.getEvaKey(this));
 		eva.setSiteCode(SettingsAPI.getEvaSiteCode(this));
@@ -331,6 +334,18 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		
 		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+	}
+	
+	@Override
+	public void onBackPressed() {
+	   Log.d(TAG, "onBackPressed Called");
+	   int chatInd = mTabTitles.indexOf(mChatTabName);
+	   if (mSwipeyAdapter.lastShown == chatInd) {
+		   super.onBackPressed();
+	   }
+	   else {
+		   mSwipeyAdapter.showTab(chatInd);
+	   }
 	}
 
 	// Using FragmentStatePagerAdapter to overcome bug: http://code.google.com/p/android/issues/detail?id=19001
@@ -710,41 +725,6 @@ public class MainActivity extends RoboFragmentActivity implements
 		return index;
 	}
 
-//	public void setTravelportReply(boolean train) {
-//		// get the fragment: http://stackoverflow.com/a/7393477/78234
-//		int string_id = train ? R.string.TRAINS : R.string.FLIGHTS;
-//		int index = showTab(string_id);
-//		String tag = "android:switcher:" + R.id.viewpager + ":" + index; // wtf...
-//		if (train) {
-//			TrainsFragment fragment = (TrainsFragment) getSupportFragmentManager().findFragmentByTag(tag);
-//			if (fragment != null) // could be null if not instantiated yet
-//			{
-//				TrainListAdapter adapter = fragment.getAdapter();
-//				if (adapter != null) {
-//					adapter.notifyDataSetChanged();
-//					Log.d(TAG, "TrainListAdapter notifyDataSetChanged()");
-//				}
-//				// fragment.updateDisplay();
-//			} else {
-//				Log.e(TAG, "Trains fragment == null!?!");
-//			}
-//		} else {
-//			FlightsFragment fragment = (FlightsFragment) getSupportFragmentManager().findFragmentByTag(tag);
-//			if (fragment != null) // could be null if not instantiated yet
-//			{
-//				// fragment.updateDisplay();
-////				FlightListAdapterTP adapter = fragment.getAdapter();
-////				if (adapter != null) {
-////					adapter.notifyDataSetChanged();
-////					Log.d(TAG, "Flights fragment adapter notifyDataSetChanged()");
-////				} else {
-////					Log.e(TAG, "Flights fragment adapter == null!?!");
-////				}
-//			} else {
-//				Log.e(TAG, "Flights fragment == null!?!");
-//			}
-//		}
-//	}
 
 	
 	private void fatal_error(final int string_id) {
@@ -817,6 +797,122 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void updateProgress(int id, DownloaderStatus mProgress) {
 	}
 
+	final int padding = 24;
+	private void activateSearchButton() {
+		Log.d(TAG, "activate search button");
+		mSearchButton.post(new Runnable() {
+		    @Override
+		    public void run() {
+				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
+				mSearchButton.setPadding(padding, padding, padding, padding);
+				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				drawable.startTransition(100);
+		    }
+		});
+	}
+	
+	private void flashSearchButton(final int times) {
+		if (times <= 0) {
+			return;
+		}
+		if (times == 1) {
+			Log.d(TAG, "flash search button");
+		}
+		mSearchButton.post(new Runnable() {
+		    @Override
+		    public void run() {
+				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
+				mSearchButton.setPadding(padding, padding, padding, padding);
+				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				drawable.startTransition(250);
+				mSearchButton.postDelayed(new Runnable() {
+				    @Override
+				    public void run() {
+				      // reverse the transition after it completes
+				    	mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
+						mSearchButton.setPadding(padding, padding, padding, padding);
+				    	TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				    	drawable.reverseTransition(250);
+				    	
+				    	mSearchButton.postDelayed(new Runnable() {
+						    @Override
+						    public void run() {
+						    	flashSearchButton(times-1);
+						    }
+				    	}, 260);
+				    }
+				}, 260);
+		    }
+		});
+	}
+	
+	private void disableSearchButton() {
+		Log.d(TAG, "disable search button");
+		mSearchButton.post(new Runnable() {
+			@Override
+			public void run() {
+				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
+				mSearchButton.setPadding(padding, padding, padding, padding);
+				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				drawable.reverseTransition(50);
+				mSearchButton.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						mSearchButton.setBackgroundResource(R.drawable.transition_button_dectivate);
+						mSearchButton.setPadding(padding, padding, padding, padding);
+						TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+						drawable.startTransition(50);
+					}
+				}, 60);
+			}
+		});
+	}
+	
+	private void deactivateSearchButton() {
+		Log.d(TAG, "deactivate search button");
+		mSearchButton.post(new Runnable() {
+		    @Override
+		    public void run() {
+				mSearchButton.setBackgroundResource(R.drawable.transition_button_dectivate);
+				mSearchButton.setPadding(padding, padding, padding, padding);
+				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				drawable.startTransition(100);
+		    }
+		});
+	}
+	
+	
+	private void flashBadSearchButton(final int times) {
+		if (times <= 0) {
+			return;
+		}
+		if (times == 1) {
+			Log.d(TAG, "flash bad search button");
+		}
+				
+		mSearchButton.post(new Runnable() {
+		    @Override
+		    public void run() {
+				mSearchButton.setBackgroundResource(R.drawable.transition_button_bad);
+				mSearchButton.setPadding(padding, padding, padding, padding);
+				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				drawable.startTransition(100);
+				mSearchButton.postDelayed(new Runnable() {
+				    @Override
+				    public void run() {
+						mSearchButton.setBackgroundResource(R.drawable.transition_button_bad);
+						mSearchButton.setPadding(padding, padding, padding, padding);
+						TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+						drawable.reverseTransition(150);
+						// repeat
+						mSearchButton.postDelayed(new Runnable() { 
+							public void run() {		flashBadSearchButton(times-1); }
+						}, 110);
+				    }
+				}, 110);
+		    }
+		});
+	}
 	
 	Handler mUpdateLevel;
 	
@@ -846,18 +942,22 @@ public class MainActivity extends RoboFragmentActivity implements
 			mStatusPanel.setVisibility(View.VISIBLE);
 			mStatusText.setText("Listening...");
 			
-			final View fView = view;
-			view.setBackgroundResource(R.drawable.custom_button_active);
+			activateSearchButton();
+			//view.setBackgroundResource(R.drawable.custom_button_active);
 			mUpdateLevel = new Handler()  {
+				private boolean processing = false;
 				@Override
 				public void handleMessage(Message msg) {
 					SpeechAudioStreamer  speechAudioStreamer = speechSearch.getSpeechAudioStreamer();
 					
 					if (speechAudioStreamer.wasNoise) {
 						if (speechAudioStreamer.getIsRecording() == false) {
-							mStatusText.setText("Processing...");
-							fView.setBackgroundResource(R.drawable.custom_button_disabled);
-							mProgressBar.setVisibility(View.VISIBLE);
+							if (!processing) {
+								processing = true;
+								mStatusText.setText("Processing...");
+								disableSearchButton();							
+								mProgressBar.setVisibility(View.VISIBLE);
+							}
 						}
 						else {
 							mSoundView.setSoundData(
@@ -885,13 +985,13 @@ public class MainActivity extends RoboFragmentActivity implements
 					mUpdateLevel.removeMessages(0);
 					mSoundView.setVisibility(View.GONE);
 					mStatusPanel.setVisibility(View.GONE);
-					fView.setBackgroundResource(R.drawable.custom_button);
 				}
 				
 				@Override
 				public void speechResultError(String message, Object cookie) {
 					finishSpeech();
 					MainActivity.this.eva.speechResultError(message, cookie);
+					flashBadSearchButton(2);
 				}
 
 				@Override
@@ -1033,11 +1133,20 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			items++;
 			bugReporter.putCustomData(ITEMS_IN_SESSION, ""+items);
-			if (reply.JSONReply != null) {
+			if (reply.sessionId != null && reply.sessionId.equals("") == false && reply.sessionId.equals("1") == false) {
+				bugReporter.putCustomData("eva_session_"+items, reply.sessionId );
+			}
+			else if (reply.JSONReply != null) {
 				bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 			}
 		}
 		if ("voice".equals(cookie)) {
+			if (reply.errorMessage != null) {
+				flashBadSearchButton(2);
+			}
+			else {
+				activateSearchButton();
+			}
 			SpannableString chat = null;
 			if (reply.originalInputText != null) {
 				chat = new SpannableString(reply.originalInputText);
@@ -1352,6 +1461,15 @@ public class MainActivity extends RoboFragmentActivity implements
 ////			}
 //			break;
 		case Question:
+			// flash the microphone button
+			Log.d(TAG, "Question asked");
+			// give some delay to the flashing - to happen while question is asked 
+			mSearchButton.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					flashSearchButton(3);
+				}
+			}, 2000);
 			break;
 		
 		}
