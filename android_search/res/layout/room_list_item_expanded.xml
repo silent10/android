@@ -12,9 +12,11 @@
          android:id="@+id/buttonChooseRoom"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
+         android:layout_marginTop="4dip"
+         android:layout_marginBottom="4dip"
          android:layout_gravity="center_horizontal"
          android:textColor="@color/white"
-         android:background="@drawable/button"
+         android:background="@drawable/custom_button_active"
          android:padding="15dp"
          android:textSize="16sp"
          android:text="@string/checkout" />
