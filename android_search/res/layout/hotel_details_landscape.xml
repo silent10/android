@@ -18,16 +18,6 @@
             android:layout_alignParentLeft="true"             
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Star Rating"
-                android:textStyle="bold" 
-                android:paddingLeft="10dp"
-                android:textColor="#ff000000" >
-            </TextView>
-
             <RatingBar
                 android:id="@+id/ratingBarStar"
                 android:layout_width="118dp"
@@ -37,55 +27,34 @@
                 android:progressDrawable="@drawable/rating_layers" >
             </RatingBar>
         </LinearLayout>
-        
-        <LinearLayout
-            android:id="@+id/tripAdvisorRatingLayout"
-            android:layout_width="118dp"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/starRatingLayout"           
-            android:orientation="vertical"
-            android:paddingLeft="10dip" >
+    
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TripAdvisor"
-                android:textStyle="bold"
-                android:textColor="#ff000000"
-                android:paddingRight="20dp" >
-            </TextView>
-
-            <RatingBar
-                android:id="@+id/ratingBarTripAdvisor"
-                android:layout_width="138dp"
-                android:layout_height="32dp"
-                android:isIndicator="true"
-                android:paddingRight="10dp"
-                android:progressDrawable="@drawable/trip_advisor_rating_layers" >
-            </RatingBar>
-        </LinearLayout>
-                
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/tripAdvisorRatingLayout"
-            android:paddingLeft="40dp"
-            android:src="@drawable/top_logo" />
-
+       
         <Button
-            android:id="@+id/selectButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/button"
-            android:gravity="center"
-            android:padding="8dp"
-            android:text="Select"
-            android:textColor="#FFFFFFFF"
-            android:textSize="14dp" />
+	            android:id="@+id/selectButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="36sp"
+	            android:layout_centerVertical="true"
+	            android:layout_alignParentRight="true"
+	            android:layout_marginRight="10dp"
+	            android:background="@drawable/custom_button_active"
+	            android:gravity="center"
+	            android:text="Select"
+	            android:textColor="#FFFFFFFF"
+	            android:textSize="16dp" />
+
+	        <Button
+	            android:id="@+id/mapButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="30sp"
+	            android:layout_centerVertical="true"
+	            android:layout_toLeftOf="@id/selectButton"
+	            android:background="@drawable/custom_button"
+	            android:gravity="center"
+	            android:layout_marginRight="10dp"
+	            android:text="Map"
+	            android:textColor="#FFFFFFFF"
+	            android:textSize="12sp" />
     </RelativeLayout>
     
     <ImageView
