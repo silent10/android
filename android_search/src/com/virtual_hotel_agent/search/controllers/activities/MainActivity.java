@@ -323,7 +323,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			String seeExamples = "\nClick here to see some examples.";
 			greeting += new SpannedString(seeExamples);
 			SpannableString sgreet = new SpannableString(greeting);
-			int col = getResources().getColor(R.color.eva_chat_no_session_text);
+			int col = getResources().getColor(R.color.vha_chat_no_session_text);
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);
@@ -685,10 +685,10 @@ public class MainActivity extends RoboFragmentActivity implements
 				return "Why, Hello there!";
 			}
 			if (apiReply.chat.who != null && apiReply.chat.who) {
-				return "I'm Eva, your travel search assistant";
+				return "I'm your virtual hotel agent";
 			}
 			if (apiReply.chat.meaningOfLife != null && apiReply.chat.meaningOfLife) {
-				return "Disrupting travel search, of course!";
+				return "Staying in awesome hotels, of course!";
 			}
 		}
 		return null;
@@ -1072,56 +1072,6 @@ public class MainActivity extends RoboFragmentActivity implements
 //		}		
 	}
 
-	
-/*
-	private void handleNonFlow(EvaApiReply reply) {
-		String sayIt = handleChat(reply);
-		if (sayIt != null) {
-			addChatItem(new ChatItem(sayIt, reply, null, ChatType.Eva));
-		}
-		else if (reply.dialog != null) {
-			sayIt = reply.dialog.sayIt;
-			speak(sayIt);
-			DialogQuestionChatItem chatItem = new DialogQuestionChatItem(sayIt, reply, null);
-			addChatItem(chatItem);
-			
-			if (reply.dialog.elements != null && reply.dialog.elements.length > 0) {
-				DialogElement dialogElement = reply.dialog.elements[0];
-				if ("Question".equals(dialogElement.Type) && "Multiple Choice".equals(dialogElement.SubType)) {
-					for (int index=0; index < dialogElement.Choices.length; index++) {
-						addChatItem(new DialogAnswerChatItem(chatItem, index, dialogElement.Choices[index]));
-					}
-				}
-			}
-
-		}
-		else {
-			sayIt = reply.sayIt;
-			if (sayIt != null && !"".equals(sayIt.trim())) {
-				// say_it = "Searching for a " + say_it; Need to create an international version of this...
-				addChatItem(new ChatItem(sayIt, reply,  null, ChatType.Eva));
-				speak(sayIt);
-			}
-			
-			if (reply.ean != null && !"".equals(reply.ean)) {  //isHotelSearch()) {
-				Log.d(TAG, "Running Hotel Search!");
-				mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-				mSearchExpediaTask.initialize(this, reply, "$");
-				mSearchExpediaTask.execute();
-			}
-			if (reply.isFlightSearch()) {
-				Log.d(TAG, "Running Vayant Search!");
-				mSearchVayantTask = new SearchVayantTask(this, reply, null);
-				mSearchVayantTask.execute();
-			}
-//			if (reply.isTrainSearch()) {
-//				Log.d(TAG, "Running Travelport Search!");
-//				mSearchTravelportTask = new SearchTravelportTask(this, reply);
-//				mSearchTravelportTask.execute();
-//			}
-		}
-	}*/
-
 	/****
 	 * Display chat items for each flow element - 
 	 * execute the first question element or, if no question element, execute the first flow element
@@ -1422,7 +1372,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			int pos = greeting.length();
 			String seeExamples = "\nClick here to see some examples.";
 			SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-			int col = getResources().getColor(R.color.eva_chat_no_session_text);
+			int col = getResources().getColor(R.color.vha_chat_no_session_text);
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);

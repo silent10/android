@@ -57,7 +57,7 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 		
 		// Connect the data of the chat history to the view:
 //		mChatListModel.loadInstanceState(savedInstanceState);
-		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row_eva_chat, R.id.label, mChatListModel);
+		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row_vha_chat, R.id.label, mChatListModel);
 		chatListView.setAdapter(mChatAdapter);
 		
 		chatListView.setOnItemClickListener(this);

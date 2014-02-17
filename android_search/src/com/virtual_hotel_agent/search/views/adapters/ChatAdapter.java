@@ -42,10 +42,10 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		myChatInSessionText = resources.getColor(R.color.my_chat_in_session_text);
 		myChatNoSessionBg = resources.getColor(R.color.my_chat_no_session_bg);
 		myChatNoSessionText = resources.getColor(R.color.my_chat_no_session_text);
-		vhaChatInSessionBg = resources.getColor(R.color.eva_chat_in_session_bg);
-		vhaChatInSessionText = resources.getColor(R.color.eva_chat_in_session_text);
-		vhaChatNoSessionBg = resources.getColor(R.color.eva_chat_no_session_bg);
-		vhaChatNoSessionText = resources.getColor(R.color.eva_chat_no_session_text);
+		vhaChatInSessionBg = resources.getColor(R.color.vha_chat_in_session_bg);
+		vhaChatInSessionText = resources.getColor(R.color.vha_chat_in_session_text);
+		vhaChatNoSessionBg = resources.getColor(R.color.vha_chat_no_session_bg);
+		vhaChatNoSessionText = resources.getColor(R.color.vha_chat_no_session_text);
 	}
 	
 	@Override
@@ -89,11 +89,11 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			case DialogQuestion:
 			case VirtualAgent:
 			case VirtualAgentWelcome:
-				row = mInflater.inflate(R.layout.row_eva_chat, parent, false);
+				row = mInflater.inflate(R.layout.row_vha_chat, parent, false);
 				break;
 			case VirtualAgentContinued:
 			case DialogAnswer:
-				row = mInflater.inflate(R.layout.row_eva_dialog, parent, false);
+				row = mInflater.inflate(R.layout.row_vha_dialog, parent, false);
 				break;
 			}
 		}
@@ -141,7 +141,6 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			}
 			break;
 			
-			
 		default:
 			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
 			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
@@ -150,7 +149,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			FlowElement flow = chatItem.getFlowElement();
 			ImageView img = (ImageView) row.findViewById(R.id.icon);
 			if (flow == null) {
-				img.setImageResource(R.drawable.vha_head);
+				img.setImageResource(R.drawable.hotel72);
 			}
 			else {
 				switch (flow.Type) {
@@ -161,7 +160,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 //					img.setImageResource(R.drawable.airplane_small);
 //					break;
 				case Question:
-					img.setImageResource(R.drawable.vha_head);
+					img.setImageResource(R.drawable.hotel72);
 				}
 			}
 			
