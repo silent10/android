@@ -144,7 +144,6 @@ public class HotelListAdapter extends BaseAdapter {
 		// Format price
 		DecimalFormat rateFormat = new DecimalFormat("#.00");
 		String formattedRate = rateFormat.format(holder.hotel.mSummary.mLowRate);
-
 		String rate = SettingsAPI.getCurrencySymbol(mParent.getActivity()) + " " + formattedRate;
 
 		holder.rate.setText(rate);

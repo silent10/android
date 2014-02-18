@@ -4,6 +4,7 @@ import roboguice.activity.RoboFragmentActivity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -35,7 +36,14 @@ public class HotelMapActivity extends RoboFragmentActivity {
 
 	private void setUpMapIfNeeded() {
 		if (mMap == null) {
-			SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+			FragmentManager fm = getSupportFragmentManager();
+			SupportMapFragment mapFragment = (SupportMapFragment)  fm.findFragmentByTag("the_map");
+			if (mapFragment == null || mapFragment.isAdded() == false) {
+				mapFragment = SupportMapFragment.newInstance();
+		        fm.beginTransaction().replace(R.id.map_container, mapFragment, "the_map").commit();
+		        fm.executePendingTransactions();
+			}
+		
 			mMap = mapFragment.getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {

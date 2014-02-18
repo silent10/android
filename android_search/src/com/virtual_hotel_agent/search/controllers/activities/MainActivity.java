@@ -37,6 +37,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -90,6 +92,7 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemClicked;
+import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
@@ -224,6 +227,15 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		eva.registerPreferenceListener();
 		eva.setScope("h");
+		
+		PackageInfo pInfo;
+		try {
+			pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+			eva.setAppVersion("vha_"+pInfo.versionCode);
+		} catch (NameNotFoundException e) {
+			Log.w(TAG, "Failed to get app version");
+			eva.setAppVersion("vha_unknown");
+		}
 		
 		mStatusPanel = findViewById(R.id.status_panel);
 		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
@@ -873,10 +885,19 @@ public class MainActivity extends RoboFragmentActivity implements
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
-				mSearchButton.setBackgroundResource(R.drawable.transition_button_dectivate);
+				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(padding, padding, padding, padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				drawable.startTransition(100);
+				drawable.reverseTransition(100);
+				mSearchButton.postDelayed(new Runnable() {
+				    @Override
+				    public void run() {
+				    	mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
+				    	mSearchButton.setPadding(padding, padding, padding, padding);
+				    	TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
+				    	drawable.resetTransition();
+				    }
+				}, 110);
 		    }
 		});
 	}
@@ -1007,26 +1028,6 @@ public class MainActivity extends RoboFragmentActivity implements
 
 
 
-	public void showHotelDetails(int hotelIndex) {
-		Log.d(TAG, "showHotelDetails()");
-		if (MyApplication.getDb() == null) {
-			Log.w(TAG, "MyApplication.getDb() == null");
-			return;
-		}
-
-		if (mHotelDownloader != null) {
-			if (false == mHotelDownloader.cancel(true)) {
-				Log.d(TAG, "false == mHotelDownloader.cancel(true)");
-				// return;
-			}
-		}
-
-		mHotelDownloader = new HotelDownloaderTask(this, hotelIndex);
-		//this.endProgressDialog(R.string.HOTEL, "fake response");
-		mHotelDownloader.execute();
-
-	}
-
 //	int mDebugTab = -1;
 //	private String lastEvaReply;
 //	private String lastVayantReply;
@@ -1145,7 +1146,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				flashBadSearchButton(2);
 			}
 			else {
-				activateSearchButton();
+				deactivateSearchButton();
 			}
 			SpannableString chat = null;
 			if (reply.originalInputText != null) {
@@ -1578,13 +1579,29 @@ public class MainActivity extends RoboFragmentActivity implements
 		if (mapTabIndex != -1) {
 			HotelsMapFragment frag = (HotelsMapFragment)  mSwipeyAdapter.instantiateItem(mViewPager, mapTabIndex);
 			if (frag != null) {
-				Activity hostedActivity = frag.getHostedActivity();
-				if (hostedActivity != null) {
-					HotelsMapActivity hma = (HotelsMapActivity) hostedActivity;
-					hma.onHotelsListUpdated();
-				}
+				frag.onHotelsListUpdated();
 			}
 		}
+	}
+	
+	public void onHotelItemClicked( @Observes HotelItemClicked event) {
+		Log.d(TAG, "onHotelItemClicked("+event.hotelIndex+")");
+		if (MyApplication.getDb() == null) {
+			Log.w(TAG, "MyApplication.getDb() == null");
+			return;
+		}
+
+		if (mHotelDownloader != null) {
+			if (false == mHotelDownloader.cancel(true)) {
+				Log.d(TAG, "false == mHotelDownloader.cancel(true)");
+				// return;
+			}
+		}
+
+		mHotelDownloader = new HotelDownloaderTask(this, event.hotelIndex);
+		//this.endProgressDialog(R.string.HOTEL, "fake response");
+		mHotelDownloader.execute();
+
 	}
 		
 	public void onChatItemClicked( @Observes ChatItemClicked  event) {

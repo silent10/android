@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -96,6 +97,9 @@ import com.evature.util.ExternalIpAddressGetter;
 			}
 			if (mResponseId != -1) {
 				evatureUrl += ("&dialog_response="+mResponseId);
+			}
+			if (mEva.mConfig.appVersion != null) {
+				evatureUrl += "&app_version="+ mEva.mConfig.appVersion;
 			}
 			if (mNBest != null) {
 				for (String input: mNBest) {

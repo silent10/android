@@ -87,6 +87,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		public String siteCode;
 		public String locale;// IL, UK or US - see docs
 		public String language;
+		public String appVersion;
 		public String vrService;// voice recognition service
 		public String deviceId;
 		public String context;// "h" for hotels, "f" for flights, etc... see docs
@@ -504,5 +505,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public void setScope(String scope) {
 		mConfig.scope = scope;
+	}
+	
+	public void setAppVersion(String ver) {
+		mConfig.appVersion = ver;
 	}
 }
