@@ -7,7 +7,9 @@ import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+
 import com.evature.util.Log;
+
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +33,7 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
@@ -125,7 +128,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			    .set(Fields.SCREEN_NAME, "Hotels Screen")
 			    .build()
 			);
-
 	}
 
 	@Override
@@ -190,7 +192,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			return;
 		}
 
-		((MainActivity) getActivity()).showHotelDetails(holder.getHotelIndex());
+		eventManager.fire(new HotelItemClicked(holder.getHotelIndex()));
 		Log.d(TAG, "running showHotelDetails()");
 
 	}

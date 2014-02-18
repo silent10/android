@@ -127,6 +127,9 @@ public class EvaVoiceClient {
 		qparams.add(new BasicNameValuePair("site_code", mConfig.siteCode));
 		qparams.add(new BasicNameValuePair("api_key", mConfig.appKey));
 		qparams.add(new BasicNameValuePair("sdk_version", EvaComponent.SDK_VERSION));
+		if (mConfig.appVersion != null) {
+			qparams.add(new BasicNameValuePair("app_version", mConfig.appVersion));
+		}
 		qparams.add(new BasicNameValuePair("uid",  mConfig.deviceId));
 		qparams.add(new BasicNameValuePair("ffi_chains", "true"));
 		qparams.add(new BasicNameValuePair("session_id", mConfig.sessionId));
