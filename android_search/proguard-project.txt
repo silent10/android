@@ -19,7 +19,6 @@
 #   public *;
 #}
 
-
 -keep class * extends java.util.ListResourceBundle {
     protected Object[][] getContents();
 }
@@ -28,6 +27,14 @@
 -keep class com.evaapis.android.FLACStreamEncoder  {
     *;
 }
+
+# events - https://github.com/roboguice/roboguice/wiki/ProGuard
+# use the on*Event convention to identify event handlers
+-keep class com.virtual_hotel_agent.search.controllers.events.*
+-keepclasseswithmembers class * { 
+	void onEvent*(...); 
+}
+
 
 # http://stackoverflow.com/questions/5582383/problem-with-proguard-and-roboguice-with-inject-annotations
 
