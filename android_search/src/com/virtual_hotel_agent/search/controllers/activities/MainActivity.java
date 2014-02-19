@@ -1149,10 +1149,11 @@ public class MainActivity extends RoboFragmentActivity implements
 				deactivateSearchButton();
 			}
 			SpannableString chat = null;
-			if (reply.originalInputText != null) {
-				chat = new SpannableString(reply.originalInputText);
-			}
-			else if (reply.processedText != null) {
+//			if (reply.originalInputText != null) {
+//				chat = new SpannableString(reply.originalInputText);
+//			}
+//			else 
+			if (reply.processedText != null) {
 				// reply of voice -  add a "Me" chat item for the input text
 				chat = new SpannableString(reply.processedText);
 				if (reply.evaWarnings.size() > 0) {
@@ -1574,7 +1575,8 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 	}
 	
-	public void onHotelsListUpdated( @Observes HotelsListUpdated event) {
+	// note "onEvent" template is needed for progruard to not break roboguice
+	public void onEventHotelsListUpdated( @Observes HotelsListUpdated event) {
 		int mapTabIndex = mTabTitles.indexOf("MAP");
 		if (mapTabIndex != -1) {
 			HotelsMapFragment frag = (HotelsMapFragment)  mSwipeyAdapter.instantiateItem(mViewPager, mapTabIndex);
@@ -1584,7 +1586,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 	}
 	
-	public void onHotelItemClicked( @Observes HotelItemClicked event) {
+	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
 		Log.d(TAG, "onHotelItemClicked("+event.hotelIndex+")");
 		if (MyApplication.getDb() == null) {
 			Log.w(TAG, "MyApplication.getDb() == null");
@@ -1604,7 +1606,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	}
 		
-	public void onChatItemClicked( @Observes ChatItemClicked  event) {
+	public void onEventChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
 		Log.i(TAG, "Chat Item clicked "+chatItem.getChat());
 		if (chatItem.getType() == ChatType.VirtualAgentWelcome ) {
