@@ -29,8 +29,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	private ChatItemList mChatList;
 	LayoutInflater mInflater;
 
-	int myChatInSessionBg, myChatInSessionText, myChatNoSessionBg, myChatNoSessionText;
-	int vhaChatInSessionBg, vhaChatInSessionText, vhaChatNoSessionBg, vhaChatNoSessionText;
+	int  myChatInSessionText,  myChatNoSessionText;
+	int  vhaChatInSessionText,  vhaChatNoSessionText;
 	
 	public ChatAdapter(Activity activity, int resource, int textViewResourceId, ChatItemList chatList) {
 		super(activity, resource, textViewResourceId, chatList);
@@ -38,13 +38,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		mInflater = LayoutInflater.from(activity);
 		
 		Resources resources = activity.getResources();
-		myChatInSessionBg = resources.getColor(R.color.my_chat_in_session_bg);
 		myChatInSessionText = resources.getColor(R.color.my_chat_in_session_text);
-		myChatNoSessionBg = resources.getColor(R.color.my_chat_no_session_bg);
 		myChatNoSessionText = resources.getColor(R.color.my_chat_no_session_text);
-		vhaChatInSessionBg = resources.getColor(R.color.vha_chat_in_session_bg);
 		vhaChatInSessionText = resources.getColor(R.color.vha_chat_in_session_text);
-		vhaChatNoSessionBg = resources.getColor(R.color.vha_chat_no_session_bg);
 		vhaChatNoSessionText = resources.getColor(R.color.vha_chat_no_session_text);
 	}
 	
@@ -92,6 +88,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				row = mInflater.inflate(R.layout.row_vha_chat, parent, false);
 				break;
 			case VirtualAgentContinued:
+				row = mInflater.inflate(R.layout.row_vha_extra, parent, false);
+				break;
 			case DialogAnswer:
 				row = mInflater.inflate(R.layout.row_vha_dialog, parent, false);
 				break;
@@ -108,8 +106,6 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		// some row types require more than label setting...
 		switch (viewType) {
 		case VirtualAgentContinued:
-			TextView _respInd = (TextView)row.findViewById(R.id.response_index);
-			_respInd.setText( "" );
 			label.setTextColor(vhaChatInSessionText);
 			label.setTypeface(null, Typeface.NORMAL);
 			break;
@@ -130,18 +126,17 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		case Me:
 //			TextView icon = (TextView)row.findViewById(R.id.icon);
 			if (chatItem.isInSession()) {
-				row.setBackgroundColor(myChatInSessionBg);
 				label.setTextColor(myChatInSessionText);
 //				icon.setTextColor(myChatInSessionText);
 			}
 			else {
-				row.setBackgroundColor(myChatNoSessionBg);
 				label.setTextColor(myChatNoSessionText);
 //				icon.setTextColor(myChatNoSessionText);
 			}
 			break;
 			
 		default:
+			View right_pane = row.findViewById(R.id.right_pane);
 			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
 			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
 			progress.setVisibility(View.GONE);
@@ -155,12 +150,17 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				switch (flow.Type) {
 				case Hotel:
 					img.setImageResource(R.drawable.hotel_small);
+					right_pane.setVisibility(View.VISIBLE);
 					break;
 //				case Flight:
 //					img.setImageResource(R.drawable.airplane_small);
 //					break;
 				case Question:
 					img.setImageResource(R.drawable.hotel72);
+					right_pane.setVisibility(View.GONE);
+					break;
+				default:
+					right_pane.setVisibility(View.GONE);
 				}
 			}
 			
@@ -179,11 +179,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			}
 			
 			if (chatItem.isInSession()) {
-				row.setBackgroundColor(vhaChatInSessionBg);
 				label.setTextColor(vhaChatInSessionText);
 			}
 			else {
-				row.setBackgroundColor(vhaChatNoSessionBg);
 				label.setTextColor(vhaChatNoSessionText);
 			}
 		}

@@ -42,9 +42,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.evature.util.EvatureSSLSocketFactory;
+import com.evature.util.Log;
 
 public class EvaVoiceClient {
 
@@ -254,7 +254,7 @@ public class EvaVoiceClient {
 		HttpEntity resEntity = response.getEntity();
 
 
-		System.out.println(response.getStatusLine());
+		Log.d(TAG, response.getStatusLine().toString());
 		Header [] h = response.getAllHeaders();
 
 		for(int i=0;i<h.length;i++)

@@ -24,13 +24,13 @@ import java.util.List;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
+import roboguice.event.eventListener.RunnableAsyncTaskAdaptor;
 import roboguice.inject.InjectView;
-import android.animation.ValueAnimator;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,7 +40,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -105,6 +104,7 @@ import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
+import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.SwipeyTabs;
 import com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
@@ -154,12 +154,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	public EvaComponent eva;
 
 	EvaSpeechComponent speechSearch = null;
-
-	private View mStatusPanel;
-	private TextView mStatusText;
-	private ProgressBar mProgressBar;
-	private SoundLevelView mSoundView;
-	private ImageButton mSearchButton;
+	
+	MainView mainView;
 
 
 	@Override
@@ -237,11 +233,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			eva.setAppVersion("vha_unknown");
 		}
 		
-		mStatusPanel = findViewById(R.id.status_panel);
-		mStatusText = (TextView)findViewById(R.id.text_listeningStatus);
-		mProgressBar = (ProgressBar)findViewById(R.id.progressBar1);
-		mSoundView = (SoundLevelView)findViewById(R.id.surfaceView_sound_wave);
-		mSearchButton = (ImageButton) findViewById(R.id.search_button);
+		mainView = new MainView(this);
 		
 		eva.setApiKey(SettingsAPI.getEvaKey(this));
 		eva.setSiteCode(SettingsAPI.getEvaSiteCode(this));
@@ -316,14 +308,15 @@ public class MainActivity extends RoboFragmentActivity implements
 				"  Sort by price"
 			};
 		String greeting = getResources().getString(R.string.examples_greetings);
-		ChatItem chatItem = new ChatItem(greeting,null, null, ChatType.VirtualAgentContinued);
-		MainActivity.this.addChatItem(chatItem);
+		String examplesString = "";
 		for (String example : examples) {
-			SpannableString exampleFormatted = new SpannableString(example);
-			exampleFormatted.setSpan( new StyleSpan(Typeface.ITALIC), 0, exampleFormatted.length(), 0);
-			chatItem = new ChatItem(exampleFormatted,null, null, ChatType.VirtualAgentContinued);
-			MainActivity.this.addChatItem(chatItem);
+			examplesString += "\n"+example;
 		}
+		SpannableString chatFormatted = new SpannableString(greeting+examplesString);
+		chatFormatted.setSpan( new StyleSpan(Typeface.ITALIC), greeting.length(), chatFormatted.length(), 0);
+
+		ChatItem chatItem = new ChatItem(chatFormatted, null, null, ChatType.VirtualAgentContinued);
+		MainActivity.this.addChatItem(chatItem);
 	}
 
 	private void showIntro() {
@@ -809,133 +802,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void updateProgress(int id, DownloaderStatus mProgress) {
 	}
 
-	final int padding = 24;
-	private void activateSearchButton() {
-		Log.d(TAG, "activate search button");
-		mSearchButton.post(new Runnable() {
-		    @Override
-		    public void run() {
-				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
-				mSearchButton.setPadding(padding, padding, padding, padding);
-				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				drawable.startTransition(100);
-		    }
-		});
-	}
-	
-	private void flashSearchButton(final int times) {
-		if (times <= 0) {
-			return;
-		}
-		if (times == 1) {
-			Log.d(TAG, "flash search button");
-		}
-		mSearchButton.post(new Runnable() {
-		    @Override
-		    public void run() {
-				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
-				mSearchButton.setPadding(padding, padding, padding, padding);
-				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				drawable.startTransition(250);
-				mSearchButton.postDelayed(new Runnable() {
-				    @Override
-				    public void run() {
-				      // reverse the transition after it completes
-				    	mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
-						mSearchButton.setPadding(padding, padding, padding, padding);
-				    	TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				    	drawable.reverseTransition(250);
-				    	
-				    	mSearchButton.postDelayed(new Runnable() {
-						    @Override
-						    public void run() {
-						    	flashSearchButton(times-1);
-						    }
-				    	}, 260);
-				    }
-				}, 260);
-		    }
-		});
-	}
-	
-	private void disableSearchButton() {
-		Log.d(TAG, "disable search button");
-		mSearchButton.post(new Runnable() {
-			@Override
-			public void run() {
-				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
-				mSearchButton.setPadding(padding, padding, padding, padding);
-				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				drawable.reverseTransition(50);
-				mSearchButton.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						mSearchButton.setBackgroundResource(R.drawable.transition_button_dectivate);
-						mSearchButton.setPadding(padding, padding, padding, padding);
-						TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-						drawable.startTransition(50);
-					}
-				}, 60);
-			}
-		});
-	}
-	
-	private void deactivateSearchButton() {
-		Log.d(TAG, "deactivate search button");
-		mSearchButton.post(new Runnable() {
-		    @Override
-		    public void run() {
-				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
-				mSearchButton.setPadding(padding, padding, padding, padding);
-				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				drawable.reverseTransition(100);
-				mSearchButton.postDelayed(new Runnable() {
-				    @Override
-				    public void run() {
-				    	mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
-				    	mSearchButton.setPadding(padding, padding, padding, padding);
-				    	TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				    	drawable.resetTransition();
-				    }
-				}, 110);
-		    }
-		});
-	}
-	
-	
-	private void flashBadSearchButton(final int times) {
-		if (times <= 0) {
-			return;
-		}
-		if (times == 1) {
-			Log.d(TAG, "flash bad search button");
-		}
-				
-		mSearchButton.post(new Runnable() {
-		    @Override
-		    public void run() {
-				mSearchButton.setBackgroundResource(R.drawable.transition_button_bad);
-				mSearchButton.setPadding(padding, padding, padding, padding);
-				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-				drawable.startTransition(100);
-				mSearchButton.postDelayed(new Runnable() {
-				    @Override
-				    public void run() {
-						mSearchButton.setBackgroundResource(R.drawable.transition_button_bad);
-						mSearchButton.setPadding(padding, padding, padding, padding);
-						TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
-						drawable.reverseTransition(150);
-						// repeat
-						mSearchButton.postDelayed(new Runnable() { 
-							public void run() {		flashBadSearchButton(times-1); }
-						}, 110);
-				    }
-				}, 110);
-		    }
-		});
-	}
-	
-	Handler mUpdateLevel;
+
 	
 	// search button click handler ("On Click property" of the button in the xml)
 	// http://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
@@ -960,67 +827,8 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			
 			MainActivity.this.eva.speak("");
-			mStatusPanel.setVisibility(View.VISIBLE);
-			mStatusText.setText("Listening...");
+			mainView.startSpeechSearch(speechSearch);
 			
-			activateSearchButton();
-			//view.setBackgroundResource(R.drawable.custom_button_active);
-			mUpdateLevel = new Handler()  {
-				private boolean processing = false;
-				@Override
-				public void handleMessage(Message msg) {
-					SpeechAudioStreamer  speechAudioStreamer = speechSearch.getSpeechAudioStreamer();
-					
-					if (speechAudioStreamer.wasNoise) {
-						if (speechAudioStreamer.getIsRecording() == false) {
-							if (!processing) {
-								processing = true;
-								mStatusText.setText("Processing...");
-								disableSearchButton();							
-								mProgressBar.setVisibility(View.VISIBLE);
-							}
-						}
-						else {
-							mSoundView.setSoundData(
-									speechAudioStreamer.getSoundLevelBuffer(), 
-									speechAudioStreamer.getBufferIndex(),
-									speechAudioStreamer.getPeakLevel(),
-									speechAudioStreamer.getMinSoundLevel()
-							);
-							if (mSoundView.getVisibility() != View.VISIBLE)
-								mSoundView.setVisibility(View.VISIBLE);
-							mSoundView.invalidate();
-						}
-					}
-					
-					sendEmptyMessageDelayed(0, 200);
-					super.handleMessage(msg);
-				}
-			};
-			
-			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
-			
-			speechSearch.start(new SpeechRecognitionResultListener() {
-
-				private void finishSpeech() {
-					mUpdateLevel.removeMessages(0);
-					mSoundView.setVisibility(View.GONE);
-					mStatusPanel.setVisibility(View.GONE);
-				}
-				
-				@Override
-				public void speechResultError(String message, Object cookie) {
-					finishSpeech();
-					MainActivity.this.eva.speechResultError(message, cookie);
-					flashBadSearchButton(2);
-				}
-
-				@Override
-				public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
-					finishSpeech();
-					MainActivity.this.eva.speechResultOK(evaJson, debugData, cookie);
-				}
-			}, "voice");
 			break;
 		}
 	}
@@ -1143,10 +951,10 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		if ("voice".equals(cookie)) {
 			if (reply.errorMessage != null) {
-				flashBadSearchButton(2);
+				mainView.flashBadSearchButton(2);
 			}
 			else {
-				deactivateSearchButton();
+				mainView.deactivateSearchButton();
 			}
 			SpannableString chat = null;
 //			if (reply.originalInputText != null) {
@@ -1465,13 +1273,17 @@ public class MainActivity extends RoboFragmentActivity implements
 		case Question:
 			// flash the microphone button
 			Log.d(TAG, "Question asked");
-			// give some delay to the flashing - to happen while question is asked 
-			mSearchButton.postDelayed(new Runnable() {
+			// give some delay to the flashing - to happen while question is asked
+			
+			Handler flash = new Handler() {
 				@Override
-				public void run() {
-					flashSearchButton(3);
+				public void handleMessage(Message msg) {
+					mainView.flashSearchButton(3);
+					super.handleMessage(msg);
 				}
-			}, 2000);
+			}; 
+			
+			flash.sendEmptyMessageDelayed(1, 2000);
 			break;
 		
 		}

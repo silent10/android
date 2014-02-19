@@ -2,33 +2,22 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"    
-    android:background="@color/white"
      >
 
  <LinearLayout 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="15dip"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/bubble2_red"
+        android:layout_marginRight="10dip"
+        android:orientation="horizontal"    
         >
-        
-    <TextView
-        android:id="@+id/response_index"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dip"
-        android:text="3"
-        android:textColor="@color/vha_chat_in_session_text"
-        android:textSize="20sp"
-        />
     
     <TextView
         android:id="@+id/label"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:paddingLeft="5dp"
         android:textColor="@color/vha_chat_no_session_text"
         android:text="Bla bla lorem ipsum" />
 	</LinearLayout>
