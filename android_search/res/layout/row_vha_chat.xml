@@ -2,25 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@color/vha_chat_in_session_bg"
-    android:orientation="horizontal" >
+     >
 
-    <TextView
-        android:id="@+id/label"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/right_pane"
-        android:paddingBottom="2dip"
-        android:paddingLeft="3dip"
-        android:paddingRight="3dip"
-        android:textColor="@color/vha_chat_in_session_text"
-        android:textSize="16sp" />
-
+    <LinearLayout 
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/bubble2_red"
+        android:orientation="horizontal"    
+        android:layout_marginRight="2dip"
+        >
+         <TextView
+            android:id="@+id/label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Hello bubbles!"
+            
+            android:layout_margin="2dip"
+            android:textSize="16sp"
+            android:textColor="@android:color/primary_text_light" />
+         
+         
     <FrameLayout
-        android:id="@id/right_pane"
+        android:id="@+id/right_pane"
         android:layout_width="40dip"
         android:layout_height="40dip"
-        android:layout_alignParentRight = "true"
+        android:visibility="gone"
         >
 
         <ImageView
@@ -47,5 +55,21 @@
             android:layout_height="match_parent" />
 
     </FrameLayout>
+    </LinearLayout>
+    
+     
+     <!-- 
+    <TextView
+        android:id="@+id/label"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/right_pane"
+        android:paddingBottom="2dip"
+        android:paddingLeft="3dip"
+        android:paddingRight="3dip"
+        android:textColor="@color/vha_chat_in_session_text"
+        android:textSize="16sp" />
+         -->
+
 
 </RelativeLayout>

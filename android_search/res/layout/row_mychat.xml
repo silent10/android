@@ -2,19 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/row_mychat_background"
     android:orientation="horizontal"
      >
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="2dip"
-        android:src="@drawable/chat_icon" 
-        android:contentDescription="@string/chat_icon_description"/>
- 
-    
+      <LinearLayout 
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/bubble2_blue"
+        android:orientation="horizontal"   
+        android:layout_marginLeft="2dip"
+        android:layout_marginTop="2dip" 
+        >   
+      <TextView
+            android:id="@+id/label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="2dip"
+            android:textSize="16sp"
+            android:text="Lorem ipsum bla bla asdfg dfswe"
+            android:textColor="@android:color/primary_text_light" />
+      
+<!--    
     <TextView
         android:id="@+id/label"
         android:layout_width="fill_parent"
@@ -26,8 +36,8 @@
         android:paddingBottom="7dip"
         android:textColor="@color/my_chat_in_session_text"
         android:text="Lorem ipsum bla bla asdfg dfswe"
-        android:textSize="16sp" />
-    
+        android:textSize="16sp" /> --> 
+    <!-- 
     <EditText 
         android:id="@+id/editText"
         android:visibility="gone"
@@ -38,5 +48,7 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         />
-
+        
+ -->
+ 	</LinearLayout>
 </LinearLayout>
