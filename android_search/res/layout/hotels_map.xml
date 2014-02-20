@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+	    android:paddingBottom="110dip"
+	    android:paddingTop="5dip"
+	    android:paddingLeft="7dip"
+	    android:paddingRight="7dip"
+    >
+    <RelativeLayout 
+	    android:id="@+id/map_container" 
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:background="@color/white" 
+        >
+        
+    </RelativeLayout>
+
+</RelativeLayout>

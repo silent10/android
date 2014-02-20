@@ -20,23 +20,29 @@
         android:id="@+id/viewpager"
         android:layout_width="fill_parent"
         android:layout_below="@id/swipeytabs"
-        android:layout_above="@+id/bottom_bar"
+        android:layout_alignParentBottom="true"
         android:layout_height="fill_parent" />
+<!--         android:layout_above="@+id/bottom_bar" -->
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
         android:layout_above="@+id/bottom_bar" 
         android:visibility="gone"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
         android:id="@+id/status_panel"
+        android:background="#ee000000"
         >
 
         <TextView
             android:id="@+id/text_listeningStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/listening_" />
+            android:text="@string/listening_"
+            android:textColor="#dddddd" />
 
         <ProgressBar
             android:id="@+id/progressBar1"
@@ -64,9 +70,8 @@
         android:layout_height="110dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/custom_button_disabled" >
-    
-    
+        android:background="@drawable/bottom_bar_background"
+         >
     
     
      <ImageButton

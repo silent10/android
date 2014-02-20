@@ -24,12 +24,10 @@ import java.util.List;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
-import roboguice.event.eventListener.RunnableAsyncTaskAdaptor;
 import roboguice.inject.InjectView;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -40,7 +38,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
-import android.graphics.drawable.TransitionDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -64,17 +61,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
-import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
-import com.evaapis.android.SoundLevelView;
-import com.evaapis.android.SpeechAudioStreamer;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
 import com.evaapis.crossplatform.flow.FlowElement;
@@ -480,12 +472,18 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 
 		@Override
-		public void onPageScrolled(int arg0, float arg1, int arg2) {
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+			if (positionOffset > 0) {
+				lastShown = position+1;
+			}
+			else {
+				lastShown = position;
+			}
 		}
 
 		@Override
-		public void onPageSelected(int arg0) {
-			lastShown = arg0;
+		public void onPageSelected(int position) {
+			lastShown = position;
 		}
 
 		@Override
@@ -749,7 +747,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	@Override
 	public void endProgressDialog(int id, JSONObject result) { // we got the hotels list or hotel details reply successfully
 		Log.d(TAG, "endProgressDialog() for id " + id);
-
+		mainView.hideStatus();
 //		setDebugData(DebugTextType.ExpediaDebug, result);
 		
 		if (id == R.string.HOTEL && mHotelDownloader != null) {
@@ -796,6 +794,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	@Override
 	public void endProgressDialogWithError(int id, JSONObject result) {
 //		setDebugData(DebugTextType.ExpediaDebug, result);
+		mainView.hideStatus();
 	}
 
 	@Override
@@ -1066,6 +1065,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		@Override
 		public void endProgressDialog(int id, JSONObject result) {
 			Log.i(TAG, "End search for "+currentItem.getChat());
+			mainView.hideStatus();
 			currentItem.setSearchResults(result);
 			currentItem.setStatus(Status.HasResults);
 			
@@ -1124,6 +1124,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		@Override
 		public void endProgressDialogWithError(int id, JSONObject result) {
 			Log.i(TAG, "End search with ERROR for "+currentItem.getChat());
+			mainView.hideStatus();
 			currentItem.setStatus(Status.ToSearch);
 			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
 				XpediaDatabase db = MyApplication.getDb();
@@ -1187,6 +1188,7 @@ public class MainActivity extends RoboFragmentActivity implements
 //			mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
 //		}
 //		else {
+			mainView.showStatus("Searching for hotels...");
 			mSearchExpediaTask.execute();
 //		}
 	}
@@ -1412,6 +1414,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 
+		mainView.showStatus("Getting Hotel info...");
 		mHotelDownloader = new HotelDownloaderTask(this, event.hotelIndex);
 		//this.endProgressDialog(R.string.HOTEL, "fake response");
 		mHotelDownloader.execute();

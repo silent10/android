@@ -23,9 +23,8 @@ import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 public class ChatAdapter extends ArrayAdapter<ChatItem> {
 
 	private static final String TAG = "ChatAdapter";
-	private static final int VIEW_TYPE_COUNT = ChatType.values().length;
+	private static final int VIEW_TYPE_COUNT = ChatType.values().length+1;
 	
-	// TODO: move to resource file
 	private ChatItemList mChatList;
 	LayoutInflater mInflater;
 
@@ -62,17 +61,32 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			Log.e(TAG, "null chatList");
 			return 0;
 		}
-		return mChatList.size();
+		return mChatList.size()+1;
 	};
 
 	@Override
 	public int getItemViewType(int position){
+		if (position >= mChatList.size()) {
+			return VIEW_TYPE_COUNT-1;
+		}
 		ChatItem chatItem = getItem(position);
 		return chatItem.getType().ordinal(); 
+	}
+	
+	private View fillerView(View view, ViewGroup parent) {
+		if (view == null) {
+			view = mInflater.inflate(R.layout.row_filler, parent, false);
+			view.setClickable(false);
+			view.setEnabled(false);
+		}
+		return view;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		if (position >= mChatList.size()) {
+			return fillerView(convertView, parent);
+		}
 		ChatItem chatItem = getItem(position);
 		ChatType viewType = chatItem.getType(); // should be same logic as getItemViewType
 		View row = convertView;
@@ -150,7 +164,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				switch (flow.Type) {
 				case Hotel:
 					img.setImageResource(R.drawable.hotel_small);
-					right_pane.setVisibility(View.VISIBLE);
+					//right_pane.setVisibility(View.VISIBLE);
 					break;
 //				case Flight:
 //					img.setImageResource(R.drawable.airplane_small);

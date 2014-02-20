@@ -86,7 +86,9 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	public void onItemClick(AdapterView<?> parent, View view, int position,
 			long id) {
 		ChatItem item = (ChatItem) view.getTag();
-		
+		if (item == null) {
+			return;
+		}
 		
 		switch (item.getType()) {
 		case DialogAnswer:

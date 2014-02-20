@@ -103,11 +103,12 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 			Context context = RoomsSelectFragement.this.getActivity();
 			Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-			defaultTracker.send(MapBuilder
-				    .createAppView()
-				    .set(Fields.SCREEN_NAME, "Rooms display")
-				    .build()
-				);
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createAppView()
+					    .set(Fields.SCREEN_NAME, "Rooms display")
+					    .build()
+					);
 
 			
 			mView = inflater.inflate(R.layout.select_hotel_room,container,false);

@@ -37,6 +37,7 @@ import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
+import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
@@ -123,11 +124,12 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		
 		Context context = getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-		defaultTracker.send(MapBuilder
-			    .createAppView()
-			    .set(Fields.SCREEN_NAME, "Hotels Screen")
-			    .build()
-			);
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createAppView()
+				    .set(Fields.SCREEN_NAME, "Hotels Screen")
+				    .build()
+				);
 	}
 
 	@Override

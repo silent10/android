@@ -28,13 +28,18 @@
     *;
 }
 
-# events - https://github.com/roboguice/roboguice/wiki/ProGuard
+# Events - https://github.com/roboguice/roboguice/wiki/ProGuard
 # use the on*Event convention to identify event handlers
 -keep class com.virtual_hotel_agent.search.controllers.events.*
 -keepclasseswithmembers class * { 
 	void onEvent*(...); 
 }
 
+# Actionbar sherlock  - http://actionbarsherlock.com/faq.html
+#-keep class android.support.v4.app.** { *; }
+#-keep interface android.support.v4.app.** { *; }
+#-keep class com.actionbarsherlock.** { *; }
+#-keep interface com.actionbarsherlock.** { *; }
 
 # http://stackoverflow.com/questions/5582383/problem-with-proguard-and-roboguice-with-inject-annotations
 
