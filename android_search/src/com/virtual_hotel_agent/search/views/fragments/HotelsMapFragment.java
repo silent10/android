@@ -53,16 +53,17 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		
 		Context context = getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-		defaultTracker.send(MapBuilder
-			    .createAppView()
-			    .set(Fields.SCREEN_NAME, "HotelsMap Screen")
-			    .build()
-			);
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createAppView()
+				    .set(Fields.SCREEN_NAME, "HotelsMap Screen")
+				    .build()
+				);
 	}
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		mView = inflater.inflate(R.layout.hotel_map, container, false);
+		mView = inflater.inflate(R.layout.hotels_map, container, false);
 		return mView;
 	}
 

@@ -49,7 +49,7 @@ public class HotelListAdapter extends BaseAdapter {
 	public int getCount() {
 		XpediaDatabase evaDb = getDb();
 		if (evaDb != null && evaDb.mHotelData != null) {
-			return evaDb.mHotelData.length;
+			return evaDb.mHotelData.length+1;
 		}
 		return 0;
 	}
@@ -58,6 +58,9 @@ public class HotelListAdapter extends BaseAdapter {
 	public Object getItem(int position) {
 		XpediaDatabase evaDb = getDb();
 		if (evaDb != null && evaDb.mHotelData != null) {
+			if (position >= evaDb.mHotelData.length) {
+				return null;
+			}
 			return evaDb.mHotelData[position];
 		}
 		return null;
@@ -68,10 +71,24 @@ public class HotelListAdapter extends BaseAdapter {
 		return position;
 	}
 
+	private View fillerView(View view, ViewGroup parent) {
+		if (view == null) {
+			view = mInflater.inflate(R.layout.row_filler, parent, false);
+			view.setClickable(false);
+			view.setEnabled(false);
+		}
+		return view;
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
-		if (convertView == null) {
+		
+		XpediaDatabase evaDb = getDb();
+		if (evaDb != null && evaDb.mHotelData != null && position >= evaDb.mHotelData.length) {
+			return fillerView(convertView, parent);
+		}
+		if (convertView == null || convertView.getTag() == null) {
 			convertView = mInflater.inflate(R.layout.hotel_list_item, null);
 			holder = new ViewHolder();
 			holder.image = (ImageView) convertView.findViewById(R.id.hotelImage);

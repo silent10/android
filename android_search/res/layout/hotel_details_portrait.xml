@@ -58,6 +58,8 @@
 	            android:background="@drawable/custom_button_active"
 	            android:gravity="center"
 	            android:text="Select"
+	            android:paddingLeft="17dip"
+	            android:paddingRight="17dip"
 	            android:textColor="#FFFFFFFF"
 	            android:textSize="16dp" />
 
@@ -71,6 +73,8 @@
 	            android:gravity="center"
 	            android:layout_marginRight="10dp"
 	            android:text="Map"
+	            android:paddingLeft="11dip"
+	            android:paddingRight="11dip"
 	            android:textColor="#FFFFFFFF"
 	            android:textSize="12sp" />
          
@@ -168,6 +172,11 @@
                 android:layout_height="wrap_content"
                 android:text="Location" >
             </WebView>
+            
+             <View
+		        android:id="@+id/view1"
+		        android:layout_width="fill_parent"
+		        android:layout_height="110dip" />
         </LinearLayout>
     </ScrollView>
 

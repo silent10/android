@@ -255,11 +255,12 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			public void onClick(View v) {
 				Context context  = mParent;
 				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-				defaultTracker.send(MapBuilder
-					    .createAppView()
-					    .set(Fields.SCREEN_NAME, "Booking Screen")
-					    .build()
-					);
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createAppView()
+						    .set(Fields.SCREEN_NAME, "Booking Screen")
+						    .build()
+						);
 				
 				ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
 				String newUrl = room.buildTravelUrl(mHotel.mSummary.mHotelId, 

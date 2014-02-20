@@ -173,6 +173,17 @@ public class MainView {
 		});
 	}
 	
+	public void showStatus(String text) {
+		mStatusText.setText(text);
+		mProgressBar.setVisibility(View.VISIBLE);
+		mStatusPanel.setVisibility(View.VISIBLE);
+	}
+	public void hideStatus() {
+		mStatusText.setText("");
+		mProgressBar.setVisibility(View.GONE);
+		mStatusPanel.setVisibility(View.GONE);
+	}
+	
 	static class SearchHandler extends Handler {
 		private boolean processing = false;
 		private EvaSpeechComponent speechSearch;
@@ -191,9 +202,8 @@ public class MainView {
 				if (speechAudioStreamer.getIsRecording() == false) {
 					if (!processing) {
 						processing = true;
-						view.mStatusText.setText("Processing...");
-						view.disableSearchButton();							
-						view.mProgressBar.setVisibility(View.VISIBLE);
+						view.disableSearchButton();
+						view.showStatus("Processing...");
 					}
 				}
 				else {
@@ -215,8 +225,7 @@ public class MainView {
 	};
 
 	public void startSpeechSearch(final EvaSpeechComponent speechSearch) {
-		mStatusPanel.setVisibility(View.VISIBLE);
-		mStatusText.setText("Listening...");
+		showStatus("Listening...");
 		
 		activateSearchButton();
 		//view.setBackgroundResource(R.drawable.custom_button_active);
@@ -231,7 +240,7 @@ public class MainView {
 				if (h != null)
 					h.removeMessages(0);
 				mSoundView.setVisibility(View.GONE);
-				mStatusPanel.setVisibility(View.GONE);
+				hideStatus();
 			}
 			
 			@Override
