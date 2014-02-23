@@ -21,6 +21,7 @@ package com.virtual_hotel_agent.search.controllers.activities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
@@ -74,7 +75,9 @@ import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evaapis.crossplatform.flow.QuestionElement;
 import com.evature.util.Log;
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -101,12 +104,12 @@ import com.virtual_hotel_agent.search.views.SwipeyTabs;
 import com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
-//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
+//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 
 public class MainActivity extends RoboFragmentActivity implements 
 													EvaSearchReplyListener,
@@ -167,12 +170,63 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+
+	
+	// This examples assumes the use of Google Analytics campaign
+	// "utm" parameters, like "utm_source"
+	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
+	 /*
+	   * Given a URI, returns a map of campaign data that can be sent with
+	   * any GA hit.
+	   *
+	   * @param uri A hierarchical URI that may or may not have campaign data
+	   *     stored in query parameters.
+	   *
+	   * @return A map that may contain campaign or referrer
+	   *     that may be sent with any Google Analytics hit.
+	   */
+	Map<String, String> getReferrerMapFromUri(Uri uri) {
+
+		MapBuilder paramMap = new MapBuilder();
+
+		// If no URI, return an empty Map.
+		if (uri == null) {
+			return paramMap.build();
+		}
+
+		// Source is the only required campaign field. No need to continue if
+		// not
+		// present.
+		if (uri.getQueryParameter(CAMPAIGN_SOURCE_PARAM) != null) {
+
+			// MapBuilder.setCampaignParamsFromUrl parses Google Analytics
+			// campaign
+			// ("UTM") parameters from a string URL into a Map that can be set
+			// on
+			// the Tracker.
+			paramMap.setCampaignParamsFromUrl(uri.toString());
+
+			// If no source parameter, set authority to source and medium to
+			// "referral".
+		} else if (uri.getAuthority() != null) {
+
+			paramMap.set(Fields.CAMPAIGN_MEDIUM, "referral");
+			paramMap.set(Fields.CAMPAIGN_SOURCE, uri.getAuthority());
+
+		}
+
+		return paramMap.build();
+	}
 	
 
 	@Override
 	public void onStart() {
 		super.onStart();
 		Tracker t1 = GoogleAnalytics.getInstance(this).getTracker("UA-47284954-1");
+
+		Intent intent = this.getIntent();
+	    Uri uri = intent.getData();
+		MapBuilder.createAppView().setAll(getReferrerMapFromUri(uri));
 	    EasyTracker.getInstance(this).activityStart(this);
 	}
 	
@@ -826,6 +880,13 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			
 			MainActivity.this.eva.speak("");
+			Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createEvent("speech_search", "speech_search_start", "", 0l)
+					    .build()
+					   );
+			
 			mainView.startSpeechSearch(speechSearch);
 			
 			break;
@@ -951,9 +1012,23 @@ public class MainActivity extends RoboFragmentActivity implements
 		if ("voice".equals(cookie)) {
 			if (reply.errorMessage != null) {
 				mainView.flashBadSearchButton(2);
+				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createEvent("speech_search", "speech_search_end_bad", reply.errorMessage, 0l)
+						    .build()
+						   );
+				
 			}
 			else {
 				mainView.deactivateSearchButton();
+				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createEvent("speech_search", "speech_search_end_ok", reply.processedText, 0l)
+						    .build()
+						   );
+
 			}
 			SpannableString chat = null;
 //			if (reply.originalInputText != null) {
@@ -970,7 +1045,7 @@ public class MainActivity extends RoboFragmentActivity implements
 							continue;
 						}
 						chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
-						chat.setSpan( new StyleSpan(Typeface.ITALIC), warning.position, warning.position+warning.text.length(), 0);
+						//chat.setSpan( new StyleSpan(Typeface.ITALIC), warning.position, warning.position+warning.text.length(), 0);
 					}
 				}
 			}

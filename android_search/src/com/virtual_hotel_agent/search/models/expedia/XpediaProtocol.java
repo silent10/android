@@ -2,6 +2,7 @@ package com.virtual_hotel_agent.search.models.expedia;
 
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 
 import com.evaapis.crossplatform.EvaApiReply;
@@ -19,21 +20,21 @@ public class XpediaProtocol {
 		return XpediaProtocolStatic.download_Image(path);
 	}
 
-	public JSONObject getExpediaHotelInformation(int hotelId, String currencyCode) {
-		return XpediaProtocolStatic.getExpediaHotelInformation(hotelId, currencyCode);
+	public JSONObject getExpediaHotelInformation(Context context, int hotelId, String currencyCode) {
+		return XpediaProtocolStatic.getExpediaHotelInformation(context, hotelId, currencyCode);
 	}
 
-	public JSONObject getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db,String currencyCode) {
-		return XpediaProtocolStatic.getExpediaAnswer(apiReply, db, currencyCode);
+	public JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaRequestParameters db,String currencyCode) {
+		return XpediaProtocolStatic.getExpediaAnswer(context, apiReply, db, currencyCode);
 	}
 
-	public JSONObject getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
+	public JSONObject getRoomInformationForHotel(Context context, int hotelId, ExpediaRequestParameters db,
 			String currencyCode) {
-		return XpediaProtocolStatic.getRoomInformationForHotel(hotelId, db, currencyCode);
+		return XpediaProtocolStatic.getRoomInformationForHotel(context, hotelId, db, currencyCode);
 	}
 
-	public JSONObject getExpediaNext(String mQueryString, String currencyCode) {
-		return XpediaProtocolStatic.getExpediaNext(mQueryString, currencyCode);
+	public JSONObject getExpediaNext(Context context, String mQueryString, String currencyCode) {
+		return XpediaProtocolStatic.getExpediaNext(context, mQueryString, currencyCode);
 	}
 
 

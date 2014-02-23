@@ -149,7 +149,7 @@
     <color name="destination_header_background_gradient_start">#ff9a9a9a</color>
     <color name="destination_header_background_gradient_end">#ff7b7d7b</color>
     <color name="my_chat_in_session_text">#202050</color>
-    <color name="my_chat_no_session_text">#303060</color>
+    <color name="my_chat_no_session_text">#353565</color>
     <color name="vha_chat_no_session_text">#756060</color>
     <color name="vha_chat_in_session_text">#502020</color>
     <color name="white">#fff</color>

@@ -7,9 +7,6 @@ import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-
-import com.evature.util.Log;
-
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,20 +21,21 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.evature.util.Log;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
-import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
-import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
@@ -194,6 +192,13 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			return;
 		}
 
+		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("ui_action", "hotel_click", "hotel_list", (long) holder.getHotelIndex())
+				    .build()
+				   );
+		
 		eventManager.fire(new HotelItemClicked(holder.getHotelIndex()));
 		Log.d(TAG, "running showHotelDetails()");
 

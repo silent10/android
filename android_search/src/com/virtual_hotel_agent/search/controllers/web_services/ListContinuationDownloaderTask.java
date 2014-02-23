@@ -39,7 +39,7 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 	protected JSONObject doInBackground(Void... params) {
 		Log.i(TAG, "Do in background");
 
-		JSONObject hotelListResponse = XpediaProtocolStatic.getExpediaNext(mNextQuery, mCurrencyCode);
+		JSONObject hotelListResponse = XpediaProtocolStatic.getExpediaNext(hotelFragment.getActivity(), mNextQuery, mCurrencyCode);
 		if (hotelListResponse == null)
 			Log.e(TAG, "Response for next null");
 		mProgress = DownloaderStatus.MadeSomeProgress;

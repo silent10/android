@@ -12,10 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.evaapis.android.EvaSpeechComponent;
+import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.android.SoundLevelView;
 import com.evaapis.android.SpeechAudioStreamer;
-import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evature.util.Log;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
@@ -248,6 +251,12 @@ public class MainView {
 				finishSpeech();
 				mainActivity.eva.speechResultError(message, cookie);
 				flashBadSearchButton(2);
+				Tracker defaultTracker = GoogleAnalytics.getInstance(mainActivity).getDefaultTracker();
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createEvent("speech_search", "speech_search_end_bad", message, 0l)
+						    .build()
+						   );
 			}
 
 			@Override
