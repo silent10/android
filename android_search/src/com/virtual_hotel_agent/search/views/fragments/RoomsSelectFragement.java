@@ -54,7 +54,6 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private HotelData mHotelData;
 	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
-	private Bitmap mEvaBmp = null;
 
 	private Handler mHandlerFinish = new Handler(){
 

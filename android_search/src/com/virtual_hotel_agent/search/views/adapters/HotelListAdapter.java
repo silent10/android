@@ -178,7 +178,7 @@ public class HotelListAdapter extends BaseAdapter {
 			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
 		}
 
-		holder.layout.setOnClickListener(mParent);
+		//holder.layout.setOnClickListener(mParent);
 		/*
 		 * holder.image.setOnClickListener(new View.OnClickListener() {
 		 * 

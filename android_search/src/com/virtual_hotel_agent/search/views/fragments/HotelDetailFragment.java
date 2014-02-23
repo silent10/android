@@ -1,5 +1,7 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.text.DecimalFormat;
+
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,7 +15,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
+
 import com.evature.util.Log;
+
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,25 +25,30 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.GridView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
+import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
 import com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 
 @SuppressLint("ValidFragment")
-public class HotelFragment extends RoboFragment {
+public class HotelDetailFragment extends RoboFragment implements OnItemClickListener {
 
-	protected static final String TAG = HotelFragment.class.getSimpleName();
+	protected static final String TAG = HotelDetailFragment.class.getSimpleName();
 
 	private static final String HOTEL_INDEX = "hotelIndex";
 	int mHotelIndex;
@@ -79,7 +88,7 @@ public class HotelFragment extends RoboFragment {
 
 	static boolean mViewingHotelData = false;
 
-	HotelFragment(int hotelIndex) {
+	HotelDetailFragment(int hotelIndex) {
 		mHotelIndex = hotelIndex;
 	}
 
@@ -119,11 +128,13 @@ public class HotelFragment extends RoboFragment {
 
 		mHotelGalleryAdapter = new HotelGalleryAdapter(getActivity());
 
-		mEvaBmp = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.hotel);
+		mEvaBmp = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.hotel72);
 
 		mHotelGalleryAdapter.addBitmap(mEvaBmp);
 
 		mHotelGallery.setAdapter(mHotelGalleryAdapter);
+		
+		mHotelGallery.setOnItemClickListener(this);
 
 		fillData();
 
@@ -134,7 +145,7 @@ public class HotelFragment extends RoboFragment {
 		return mView;
 	}
 
-	public HotelFragment() {
+	public HotelDetailFragment() {
 
 	}
 
@@ -275,10 +286,27 @@ public class HotelFragment extends RoboFragment {
 			public void onClick(View v) {
 				Intent intent = new Intent(getActivity(),HotelMapActivity.class);
 				
-				intent.putExtra(HotelMapActivity.HOTEL_NAME,mHotelData.mSummary.mName);	
-				intent.putExtra(HotelMapActivity.HOTEL_LATITUDE,""+(mHotelData.mSummary.mLatitude));
-				intent.putExtra(HotelMapActivity.HOTEL_LONGITUDE,""+(mHotelData.mSummary.mLongitude));
-				intent.putExtra(HotelMapActivity.HOTEL_CITY,mHotelData.mSummary.mCity);
+				HotelSummary hotelSummary = mHotelData.mSummary;
+				intent.putExtra(HotelMapActivity.HOTEL_NAME, hotelSummary.mName);	
+				intent.putExtra(HotelMapActivity.HOTEL_LATITUDE,""+(hotelSummary.mLatitude));
+				intent.putExtra(HotelMapActivity.HOTEL_LONGITUDE,""+(hotelSummary.mLongitude));
+				
+				double rating = hotelSummary.mHotelRating;
+				String formattedRating = Integer.toString((int) rating);
+				if (Math.round(rating) != Math.floor(rating)) {
+					formattedRating += "½";
+				}
+
+				String snippet = formattedRating + " stars";
+				
+				DecimalFormat rateFormat = new DecimalFormat("#.00");
+				String formattedRate = rateFormat.format(hotelSummary.mLowRate);
+				if (getActivity() != null) {
+					String rate = formattedRate + " " +  SettingsAPI.getCurrencySymbol(getActivity());
+					snippet += ", " + rate;
+				}
+				intent.putExtra(HotelMapActivity.HOTEL_SNIPPET, snippet); 
+				
 				getActivity().startActivity(intent);
 			}
 		});
@@ -287,12 +315,12 @@ public class HotelFragment extends RoboFragment {
 
 	}
 
-	public HotelFragment(String hotelInfo, int hotelIndex) {
+	public HotelDetailFragment(String hotelInfo, int hotelIndex) {
 		mHotelIndex = hotelIndex;
 	}
 
-	public static HotelFragment newInstance(int hotelIndex) {
-		return new HotelFragment(hotelIndex);
+	public static HotelDetailFragment newInstance(int hotelIndex) {
+		return new HotelDetailFragment(hotelIndex);
 	}
 
 	private boolean mRunThreads;
@@ -345,5 +373,15 @@ public class HotelFragment extends RoboFragment {
 			}
 		};
 		mImageDownloadThread.start();
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		
+		if (isAdded()) {
+			Intent intent = new Intent(this.getActivity(), ImageGalleryActivity.class);
+			startActivity(intent);
+		}
 	}
 }

@@ -45,6 +45,8 @@ public class HotelDownloaderTask extends DownloaderTask {
 		XpediaDatabase db = MyApplication.getDb();
 		HotelData hotelData = db.mHotelData[mHotelIndex];
 
+		db.setHotelSelected(mHotelIndex);
+		
 		publishProgress();
 
 		JSONObject jHotel = XpediaProtocolStatic.getExpediaHotelInformation(mContext, hotelData.mSummary.mHotelId,

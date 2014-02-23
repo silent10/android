@@ -21,9 +21,9 @@ import com.virtual_hotel_agent.search.R;
 public class HotelMapActivity extends RoboFragmentActivity {
 	
     public static String HOTEL_NAME="SUMMARY";
-    public static String HOTEL_CITY="CITY";
     public static String HOTEL_LATITUDE="LATITUDE";
     public static String HOTEL_LONGITUDE="LONGITUDE";
+    public static String HOTEL_SNIPPET="SNIPPET";
     private GoogleMap mMap = null;
 	
 	@Override
@@ -57,36 +57,32 @@ public class HotelMapActivity extends RoboFragmentActivity {
         }
 	}
 
-
 	private void addHotelToMap() {
-      Intent intent = getIntent();
-      Bundle extras = intent.getExtras();
-      
-      String name = extras.getString(HOTEL_NAME);
-      String longitudeString = extras.getString(HOTEL_LONGITUDE);
-      String latitudeString = extras.getString(HOTEL_LATITUDE);
-      //String city = extras.getString(HOTEL_CITY);
-      
-      Double longitude= Double.valueOf(longitudeString);
-      Double latitude= Double.valueOf(latitudeString);
-      
-      LatLng point = new LatLng(latitude,longitude);
-      
-      BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small);
-      
-      mMap.addMarker(new MarkerOptions()
-		            .position(point)
-		            .title(name)
-		            //.snippet("The most populous city in Australia.")
-		            .icon(hotelIcon));
-      
-      CameraPosition position = new CameraPosition.Builder().target(point)
-	      .zoom(14.5f)
-	      .bearing(0)
-	      .tilt(15)
-	      .build();
+		Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
 
-      mMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+		String name = extras.getString(HOTEL_NAME);
+		String longitudeString = extras.getString(HOTEL_LONGITUDE);
+		String latitudeString = extras.getString(HOTEL_LATITUDE);
+		String snippet = extras.getString(HOTEL_SNIPPET);
+		// String city = extras.getString(HOTEL_CITY);
+
+		Double longitude = Double.valueOf(longitudeString);
+		Double latitude = Double.valueOf(latitudeString);
+
+		LatLng point = new LatLng(latitude, longitude);
+
+		BitmapDescriptor hotelIcon = BitmapDescriptorFactory
+				.fromResource(R.drawable.hotel_small_flag_selected);
+
+		mMap.addMarker(new MarkerOptions().position(point).title(name)
+				.anchor(0, 1).snippet(snippet)
+				.icon(hotelIcon));
+
+		CameraPosition position = new CameraPosition.Builder().target(point)
+				.zoom(14.5f).bearing(0).tilt(15).build();
+
+		mMap.moveCamera(CameraUpdateFactory.newCameraPosition(position));
 	}
 
 	@Override

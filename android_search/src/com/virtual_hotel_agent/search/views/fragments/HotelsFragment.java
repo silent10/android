@@ -3,6 +3,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 import org.json.JSONObject;
 
 import roboguice.event.EventManager;
+import roboguice.event.Observes;
 import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -22,7 +23,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.evature.util.Log;
-import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -40,7 +40,7 @@ import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
 
-public class HotelsFragment extends RoboFragment implements OnClickListener, OnItemClickListener, OnKeyListener,
+public class HotelsFragment extends RoboFragment implements OnItemClickListener, OnKeyListener,
 		DownloaderTaskInterface {
 
 	@Inject protected EventManager eventManager;
@@ -135,6 +135,7 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 
 		mView = inflater.inflate(R.layout.hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
+		mHotelListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
@@ -173,19 +174,23 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 		mHotelListView.setOnItemClickListener(this);
 	}
 
-	@Override
-	public void onClick(View v) {
-
-		Log.i(TAG, "Stam");
-
-		onItemClick(null, v, 0, 0);
+	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
+		
+		final int hotelIndex = event.hotelIndex;
+		
+		mHotelListView.post(new Runnable() {
+			@Override
+			public void run() {
+				mHotelListView.setItemChecked(hotelIndex, true);
+			}
+		});		
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View v, int arg2, long arg3) {
-		Log.d(TAG, "onItemClick");
+	public void onItemClick(AdapterView<?> parent, View view, int position,	long id) {		
+		Log.d(TAG, "onItemClick "+position);
 
-		HotelListAdapter.ViewHolder holder = (HotelListAdapter.ViewHolder) v.getTag();
+		HotelListAdapter.ViewHolder holder = (HotelListAdapter.ViewHolder) view.getTag();
 
 		if (holder == null) {
 			Log.e(TAG, "Got null holder");
@@ -228,7 +233,6 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 			}
 		}
 	};
-
 	@Override
 	public void endProgressDialog(int id, JSONObject result) {
 //		if (mDownLoader != null && id == mDownLoader.getId()) {
@@ -322,5 +326,4 @@ public class HotelsFragment extends RoboFragment implements OnClickListener, OnI
 	public HotelListAdapter getAdapter() {
 		return mAdapter;
 	}
-
 }
