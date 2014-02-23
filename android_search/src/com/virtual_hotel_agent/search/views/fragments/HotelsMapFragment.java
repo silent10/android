@@ -193,6 +193,12 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	        		&& Math.abs(position.longitude - hotel.mLongitude) < 0.001) {
 	        		
 	        		Log.d(TAG, "Hotel "+i+" clicked in map");
+	        		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();
+	        		if (defaultTracker != null) 
+	        			defaultTracker.send(MapBuilder
+	        				    .createEvent("ui_action", "hotel_click", "hotels_map", (long) i)
+	        				    .build()
+	        				   );
 	        		eventManager.fire(new HotelItemClicked(i) );
 	        	}
 	        }

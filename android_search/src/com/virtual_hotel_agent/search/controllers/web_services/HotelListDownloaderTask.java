@@ -2,11 +2,14 @@ package com.virtual_hotel_agent.search.controllers.web_services;
 
 import org.json.JSONObject;
 
+import android.content.Context;
+
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.Log;
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocol;
@@ -17,6 +20,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
 	// String mSearchQuery;
 	String mCurrencyCode;
 	EvaApiReply apiReply;
+	Context context;
 	
 	@Inject XpediaProtocol xpediaProtocol;
 
@@ -24,11 +28,12 @@ public class HotelListDownloaderTask extends DownloaderTask {
 		super(R.string.HOTELS);
 	}
 
-	public void initialize(DownloaderTaskInterface listener, EvaApiReply apiReply, String currencyCode) {
+	public void initialize(MainActivity listener, EvaApiReply apiReply, String currencyCode) {
 		Log.i(TAG, "CTOR");
 		// mSearchQuery = searchQuery;
 		this.apiReply = apiReply;
 		attach(listener);
+		context = (Context)listener;
 		mCurrencyCode = currencyCode;
 	}
 
@@ -63,7 +68,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
-		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(apiReply, MyApplication.getExpediaRequestParams(), mCurrencyCode);
+		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(context, apiReply, MyApplication.getExpediaRequestParams(), mCurrencyCode);
 		if (hotelListResponse == null) {
 			Log.d(TAG, "null hotelist response!");
 		}

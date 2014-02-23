@@ -27,14 +27,20 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import com.evature.util.Log;
 
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.RequestAttributes.SortOrderEnum;
 import com.evature.util.ExternalIpAddressGetter;
+import com.evature.util.Log;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.StandardExceptionParser;
+import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.MyApplication;
 
 public class XpediaProtocolStatic {
@@ -137,20 +143,34 @@ public class XpediaProtocolStatic {
 		return urlString;
 	}
 
-	static public JSONObject getExpediaHotelInformation(int hotelId, String currencyCode) {
+	static public JSONObject getExpediaHotelInformation(Context context, int hotelId, String currencyCode) {
 		String urlString = HOTEL_INFO_URL;
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
 		urlString += "&hotelId=" + hotelId;
 		//urlString += "&options=0";
 
-		return executeWithTimeout(urlString);
+		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("expedia_search", "hotel_info", "", (long) hotelId)
+				    .build()
+				   );
+
+		return executeWithTimeout(context, urlString);
 	}
 
-	public static JSONObject getExpediaAnswer(EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
+	public static JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
 		Log.i(TAG, "getExpediaAnswer()");
-		if (apiReply == null)
+		if (apiReply == null) {
+			Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createEvent("expedia_search", "hotels_list", "no apiReply", 0l)
+					    .build()
+					   );
 			return null;
+		}
 
 		double longitude, latitude;
 				
@@ -239,10 +259,17 @@ public class XpediaProtocolStatic {
 			}
 		}
 		
-		return executeWithTimeout(urlString);
+		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("expedia_search", "hotels_list", urlString, 0l)
+				    .set(Fields.CURRENCY_CODE, currencyCode)
+				    .build()
+				   );
+		return executeWithTimeout(context, urlString);
 	}
 
-	private static JSONObject executeWithTimeout(String url) {
+	private static JSONObject executeWithTimeout(Context context, String url) {
 		
 		Log.d(TAG, "Fetching "+url);
 		
@@ -264,7 +291,15 @@ public class XpediaProtocolStatic {
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode != HTTP_STATUS_OK) {
 				Log.e(TAG, "Status code from server: "+statusCode);
-				Log.e(TAG, "Content: "+EntityUtils.toString(response.getEntity()));
+				String content = EntityUtils.toString(response.getEntity());
+				Log.e(TAG, "Content: "+content);
+				
+				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createEvent("expedia_search_error", content, url, (long)statusCode)
+						    .build()
+						   );
 				return null;
 			}
 	
@@ -294,11 +329,28 @@ public class XpediaProtocolStatic {
 				sessionId = jResult.optString("customerSessionId", null);
 				if (jResult.has("EanWSError")) {
 					Log.w(TAG, "Error from expedia: "+jResult.getJSONObject("EanWSError").toString(2));
+					
+					Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+					if (defaultTracker != null) 
+						defaultTracker.send(MapBuilder
+							    .createEvent("expedia_search_error", jResult.getJSONObject("EanWSError").toString(2), url, 0l)
+							    .build()
+							   );
 				}
 			}catch(JSONException e) {
 				Log.e(TAG, "Error parsing json of expedia result", e);
 				jResult = null;
 				sessionId = null;
+				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+				  // StandardExceptionParser is provided to help get meaningful Exception descriptions.
+				defaultTracker.send(MapBuilder
+				      .createException(new StandardExceptionParser(context, null)              // Context and optional collection of package names
+				                                                                            // to be used in reporting the exception.
+				                       .getDescription(Thread.currentThread().getName(),    // The name of the thread on which the exception occurred.
+				                                       e),                                  // The exception.
+				    		  			false)                                               // False indicates a fatal exception
+				      .build());
+
 			}
 			
 			return jResult;
@@ -309,7 +361,7 @@ public class XpediaProtocolStatic {
 		} 
 	}
 
-	public static JSONObject getRoomInformationForHotel(int hotelId, ExpediaRequestParameters db,
+	public static JSONObject getRoomInformationForHotel(Context context, int hotelId, ExpediaRequestParameters db,
 			String currencyCode) {
 		String arrivalDateParam = db.mArrivalDateParam;
 		String departureDateParam = db.mDepartureDateParam;
@@ -336,17 +388,32 @@ public class XpediaProtocolStatic {
 		// LinearLayout foot = (LinearLayout) li.inflate(R.layout.listfoot, null);
 		// mHotelListView.addFooterView(foot);
 
+		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("expedia_search", "room_info", urlString, (long) hotelId)
+				    .set(Fields.CURRENCY_CODE, currencyCode)
+				    .build()
+				   );
 		
-		return executeWithTimeout(urlString);
+		return executeWithTimeout(context, urlString);
 	}
 
-	public static JSONObject getExpediaNext(String mQueryString, String currencyCode) {
+	public static JSONObject getExpediaNext(Context context, String mQueryString, String currencyCode) {
 		String urlString = HOTEL_LIST_URL;
 		urlString += "numberOfResults=10&";
 		urlString += getContantHttpParams() + "&currencyCode=" + currencyCode;
 		urlString += mQueryString;
 
-		return executeWithTimeout(urlString);
+		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("expedia_search", "hotels_list_next", mQueryString, 0l)
+				    .set(Fields.CURRENCY_CODE, currencyCode)
+				    .build()
+				   );
+		
+		return executeWithTimeout(context, urlString);
 	}
 
 

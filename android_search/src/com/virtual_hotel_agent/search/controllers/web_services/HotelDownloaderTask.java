@@ -47,7 +47,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 		publishProgress();
 
-		JSONObject jHotel = XpediaProtocolStatic.getExpediaHotelInformation(hotelData.mSummary.mHotelId,
+		JSONObject jHotel = XpediaProtocolStatic.getExpediaHotelInformation(mContext, hotelData.mSummary.mHotelId,
 				SettingsAPI.getCurrencyCode(mContext));
 
 		if (jHotel == null) {

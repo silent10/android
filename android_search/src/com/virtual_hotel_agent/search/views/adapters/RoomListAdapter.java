@@ -248,20 +248,18 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 		desc.loadData(marked_up.toString(), "text/html; charset=UTF-8", "utf-8");
 		
+		Tracker defaultTracker = GoogleAnalytics.getInstance(mParent).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("ui_action", "room_expanded", String.valueOf(mHotel.mSummary.mHotelId), (long)groupPosition)
+				    .build()
+				   );
+		
 		Button bookButton = (Button) convertView.findViewById(R.id.buttonChooseRoom);
 		bookButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				Context context  = mParent;
-				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-				if (defaultTracker != null) 
-					defaultTracker.send(MapBuilder
-						    .createAppView()
-						    .set(Fields.SCREEN_NAME, "Booking Screen")
-						    .build()
-						);
-				
 				ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
 				String newUrl = room.buildTravelUrl(mHotel.mSummary.mHotelId, 
 						mHotel.mSummary.mSupplierType,
@@ -272,12 +270,28 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 						db.getAgeChild1(),
 						db.getAgeChild2(),
 						db.getAgeChild3());
+
+				
+				Tracker defaultTracker = GoogleAnalytics.getInstance(mParent).getDefaultTracker();
+				if (defaultTracker != null) {
+					defaultTracker.send(MapBuilder
+						    .createAppView()
+						    .set(Fields.SCREEN_NAME, "Booking Screen")
+						    .build()
+						);
+					
+					defaultTracker.send(MapBuilder
+						    .createEvent("ui_action", "room_checkout", newUrl, 0l)
+						    .build()
+						   );
+				}
+				
 				//String url = mHotel.mSummary.roomDetails[arg2].mDeepLink;
 				Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());
 				Intent i = new Intent(Intent.ACTION_VIEW);
 				i.setData(uri);
 				Log.i(TAG, "Setting Browser to url:  "+uri);
-				context.startActivity(i);
+				mParent.startActivity(i);
 			}
 		});
 		
