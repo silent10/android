@@ -157,13 +157,13 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			topImg.setVisibility(View.GONE);
 			FlowElement flow = chatItem.getFlowElement();
 			ImageView img = (ImageView) row.findViewById(R.id.icon);
-			if (flow == null) {
+			/*if (flow == null) {
 				img.setImageResource(R.drawable.hotel72);
 			}
 			else {
 				switch (flow.Type) {
 				case Hotel:
-					img.setImageResource(R.drawable.hotel_small);
+					img.setImageResource(R.drawable.hotel_small_flag);
 					//right_pane.setVisibility(View.VISIBLE);
 					break;
 //				case Flight:
@@ -176,8 +176,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				default:
 					right_pane.setVisibility(View.GONE);
 				}
-			}
-			
+			}*/
+			/*
 			switch(chatItem.getStatus()) {
 			case HasResults:
 				topImg.setImageResource(R.drawable.see_results);
@@ -190,7 +190,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				topImg.setImageResource(R.drawable.search);
 				topImg.setVisibility(View.VISIBLE);
 				break;				
-			}
+			}*/
 			
 			if (chatItem.isInSession()) {
 				label.setTextColor(vhaChatInSessionText);

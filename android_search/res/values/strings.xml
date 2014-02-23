@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
+
     <string name="app_name">Virtual Hotel Agent</string>
-    <string name="lots_of_text">
-This is a cool Travel Search application for which we did not write the about text yet.\n
+    <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\n
 We will, someday.\n
 We promise.\n
 \n
@@ -10,10 +10,8 @@ Using:\n
   Expedia API for hotel search.\n
 \n
 Check us out at\n
-\nhttp://www.evature.com\n</string> <!--    Vayant API for travel search.\n -->
-	<string name="help_text">
-	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".
-	</string>
+\nhttp://www.evature.com\n</string> <!-- Vayant API for travel search.\n -->
+    <string name="help_text">	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".</string>
     <string name="ok_button">OK, got it.</string>
     <string name="_ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -50,22 +48,22 @@ Check us out at\n
     <string name="search_icon">Search</string>
     <string name="save_encoded">Save Encoded</string>
     <string name="room_price_disclaimer">The room rates listed are for double occupancy per room unless 
-        otherwise stated and exclude tax recovery charges and service fees. See 
-        	<a href='http://www.travelnow.com/templates/352395/faq#9'>FAQs</a> for more details.</string>
-    <string name="room_price_disclaimer_hotel_collect">
-        This hotel can be booked online only.
+        otherwise stated and exclude tax recovery charges and service fees. See <a href="http://www.travelnow.com/templates/352395/faq#9">FAQs</a> for more details.</string>
+    <string name="room_price_disclaimer_hotel_collect">        This hotel can be booked online only.
         This hotel is a non-discounted property. All rates displayed are nightly, and based on double occupancy per room 
         unless otherwise specified. Some rates may require special identification. Our booking  fee, taxes, and other surcharges 
         imposed by the hotel are not included. Any extra adults or children above the room\'s listed occupancy may be subject to 
-        additional charges at the property\'s discretion.
-    </string>
-	<string name="star_rating">Star Rating</string>
-	<string name="faq">FAQ</string>
-	<string name="help">help</string>
-	<string name="children_per_room_">Children per room (3 max):</string>
-	<string name="guest_num">Number of Guests in room:</string>
-	
-	<string name="greeting">Hello, I am your hotel agent.\nYou can tell me what you would like to find using voice.</string>
-	<string name="examples_greetings">You can try me by clicking on the microphone and saying any of these examples:</string>
-	<string name="checkout">Checkout</string>
+        additional charges at the property\'s discretion.</string>
+    <string name="star_rating">Star Rating</string>
+    <string name="faq">FAQ</string>
+    <string name="help">help</string>
+    <string name="children_per_room_">Children per room (3 max):</string>
+    <string name="guest_num">Number of Guests in room:</string>
+    <string name="greeting">Hello, I am your hotel agent.\nYou can tell me what you would like to find using voice.</string>
+    <string name="examples_greetings">You can try me by clicking on the microphone and saying any of these examples:</string>
+    <string name="checkout">Checkout</string>
+    <string name="title_activity_image_gallery">ImageGalleryActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
 </resources>

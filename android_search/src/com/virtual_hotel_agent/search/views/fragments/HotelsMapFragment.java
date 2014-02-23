@@ -2,11 +2,14 @@ package com.virtual_hotel_agent.search.views.fragments;
 
 import java.text.DecimalFormat;
 
+import roboguice.activity.event.OnResumeEvent;
 import roboguice.event.EventManager;
+import roboguice.event.Observes;
 import roboguice.fragment.RoboFragment;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +38,7 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
+import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
@@ -44,6 +48,10 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 
 	private GoogleMap mMap = null;
 	private View mView;
+	private Marker selectedMarker=null;
+	private String mCurrency;
+	
+	private final int MAX_HOTELS = 30; 
 
 	@Inject protected EventManager eventManager;
 
@@ -52,6 +60,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		super.onCreate(savedInstanceState);
 		
 		Context context = getActivity();
+		mCurrency = SettingsAPI.getCurrencySymbol(context);
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 		if (defaultTracker != null) 
 			defaultTracker.send(MapBuilder
@@ -68,7 +77,6 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	}
 
 
-	
 	private void setUpMapIfNeeded() {
 		if (mMap == null) {
 			FragmentManager fm = getChildFragmentManager();
@@ -80,15 +88,16 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 			}
 		
 			mMap = mapFragment.getMap();
-            // Check if we were successful in obtaining the map.
-            if (mMap != null) {
-            	mapFragment.getView().post(new Runnable(){
-					@Override
-					public void run() {
-						addHotelsToMap();
-					}
-            	});
-            }
+        }
+		
+		// Check if we were successful in obtaining the map.
+        if (mMap != null && mView != null) {
+        	mView.post(new Runnable(){
+				@Override
+				public void run() {
+					addHotelsToMap();
+				}
+        	});
         }
 	}
 
@@ -96,9 +105,11 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	@Override
     public void onResume() {
         super.onResume();
-        int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity());
+        FragmentActivity activity = this.getActivity();
+		mCurrency = SettingsAPI.getCurrencySymbol(activity);
+        int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
 		if (errCode != ConnectionResult.SUCCESS) {
-			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errCode, this.getActivity(), 0);
+			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errCode, activity, 0);
 			errorDialog.show();
 		}
 		else {
@@ -114,7 +125,6 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		setUpMapIfNeeded();
 	}
 	
-	
 	private void addHotelsToMap()
 	{	    
        
@@ -124,37 +134,31 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         if (length == 0) {
         	return;
         }
-        if(length>30) 
-        	length=30;
+        int startFrom = 0;
+        if(length > MAX_HOTELS) 
+        	startFrom = length - MAX_HOTELS; // show the last MAX_HOTELS in map
         
-        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small);
+        BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag);
+        BitmapDescriptor hotelIconSelected = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag_selected);
         Builder boundsBuilder = new LatLngBounds.Builder();
         
-        for(int i=0;i<length;i++)
+        selectedMarker = null;
+        HotelData selectedHotel = null;
+        
+        for(int i=startFrom;i<length;i++)
         {
-	        String name = evaDb.mHotelData[i].mSummary.mName;
-	        name = name.replace("&amp;", "&");
-			
-	        double rating = evaDb.mHotelData[i].mSummary.mHotelRating;
-	        String formattedRating = Integer.toString((int)rating);
-	        if (Math.round(rating) != Math.floor(rating)) {
-	        	formattedRating += "½";
+	        HotelData hotelData = evaDb.mHotelData[i];
+	        if (hotelData.isSelected()) {
+	        	selectedHotel = hotelData;
 	        }
-	        
-
-			DecimalFormat rateFormat = new DecimalFormat("#.00");
-			String formattedRate = rateFormat.format(evaDb.mHotelData[i].mSummary.mLowRate);
-			String rate = formattedRate+" "+SettingsAPI.getCurrencySymbol(this.getActivity());
-			
-	        
-	        LatLng point = new LatLng(evaDb.mHotelData[i].mSummary.mLatitude, evaDb.mHotelData[i].mSummary.mLongitude);
-	        Marker marker = mMap.addMarker(new MarkerOptions()
-				            .position(point)
-				            .title(name)
-				            .snippet(formattedRating+" stars, "+rate)
-				            .icon(hotelIcon));
-            
-	        boundsBuilder.include(point);
+	        else {
+	        	addMapPoint(hotelData, hotelIcon, boundsBuilder);
+	        }
+        }
+        if (selectedHotel != null) {
+        	selectedMarker = addMapPoint(selectedHotel, hotelIconSelected, boundsBuilder);
+            selectedMarker.showInfoWindow();
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(selectedMarker.getPosition()));
         }
         
         mMap.setOnInfoWindowClickListener(this);
@@ -172,6 +176,35 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         }
 	}
 
+	private Marker addMapPoint(HotelData hotelData, BitmapDescriptor icon, Builder boundsBuilder) {
+		HotelSummary hotelSummary = hotelData.mSummary;
+		String name = hotelSummary.mName;
+		name = name.replace("&amp;", "&");
+		
+		double rating = hotelSummary.mHotelRating;
+		String formattedRating = Integer.toString((int)rating);
+		if (Math.round(rating) != Math.floor(rating)) {
+			formattedRating += "½";
+		}
+		
+
+		DecimalFormat rateFormat = new DecimalFormat("#.00");
+		String formattedRate = rateFormat.format(hotelSummary.mLowRate);
+		String rate = formattedRate+" "+mCurrency;
+		
+		LatLng point = new LatLng(hotelSummary.mLatitude, hotelSummary.mLongitude);
+		Marker marker = mMap.addMarker(new MarkerOptions()
+			            .position(point)
+			            .title(name)
+			            .anchor(0, 1)
+			            .snippet(formattedRating+" stars, "+rate)
+			            .icon(icon));
+		if (boundsBuilder != null) {
+			boundsBuilder.include(point);
+		}
+		return marker;
+	}
+
 
 	@Override
 	public void onInfoWindowClick(Marker marker) {
@@ -180,10 +213,21 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         if (length == 0) {
         	return;
         }
-        if(length>30) 
-        	length=30;
+        int startFrom = 0;
+        if(length > MAX_HOTELS) 
+        	startFrom = length - MAX_HOTELS;
+
+        if (selectedMarker != null) {
+			selectedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag));
+			selectedMarker = null;
+		}
+        selectedMarker = marker;
+        selectedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag_selected));
+        selectedMarker.showInfoWindow();
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(selectedMarker.getPosition()));
+
         
-        for(int i=0;i<length;i++)
+        for(int i=startFrom; i<length; i++)
         {
 	        HotelSummary hotel = evaDb.mHotelData[i].mSummary;
 			String name = hotel.mName.replace("&amp;", "&");

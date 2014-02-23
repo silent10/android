@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="picker_text_color">#ff101010</color>
     <color name="toolbar_logo_divider">#ff576eb1</color>
     <color name="actionbar_background_border_top">#ff72727a</color>
@@ -155,4 +156,6 @@
     <color name="white">#fff</color>
     <color name="half_black">#88000000</color>
     <color name="non_refundable">#ffd07040</color>
+    <color name="black_overlay">#66000000</color>
+
 </resources>

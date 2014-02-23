@@ -106,7 +106,7 @@ import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
-import com.virtual_hotel_agent.search.views.fragments.HotelFragment;
+import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
@@ -483,7 +483,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			if (mTabTitles.get(position).equals(mHotelTabName)) { // Single hotel
 				int hotelIndex = MyApplication.getExpediaRequestParams().getHotelId();
 				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
-				return HotelFragment.newInstance(hotelIndex);
+				return HotelDetailFragment.newInstance(hotelIndex);
 			}
 //			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 //				Log.i(TAG, "Trains Fragment");
@@ -1489,6 +1489,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 
+		
 		mainView.showStatus("Getting Hotel info...");
 		mHotelDownloader = new HotelDownloaderTask(this, event.hotelIndex);
 		//this.endProgressDialog(R.string.HOTEL, "fake response");

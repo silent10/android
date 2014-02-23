@@ -228,6 +228,14 @@ public class XpediaDatabase {
 	}
 
 
+	public void setHotelSelected(int hotelIndex) {
+		for (HotelData hotel : mHotelData) {
+			hotel.setSelected(false);
+		}
+		mHotelData[hotelIndex].setSelected(true);
+	}
+
+
 }
 
 
