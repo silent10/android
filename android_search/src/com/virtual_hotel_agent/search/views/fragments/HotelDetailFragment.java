@@ -256,7 +256,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		if (poolAvailable)
 			thumbIds[count++] = R.drawable.pool;
 		if (breakfestAvailable)
-			thumbIds[count++] = R.drawable.breakfest;
+			thumbIds[count++] = R.drawable.breakfast;
 
 		ImageAdapter amenitiesImageAdapter = new ImageAdapter(getActivity(), thumbIds);
 
