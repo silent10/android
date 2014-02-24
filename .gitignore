@@ -3,3 +3,7 @@ EvaAPIs/obj
 gen/
 bin/
 .settings
+deadcode/
+makefile
+*.apk
+key_store
