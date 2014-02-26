@@ -96,19 +96,19 @@ public class HotelDetails {
 	public class HotelImage
 	{
 		int hotelImageId;
-		String name;
-		int category;
+		public String name;
+//		int category;
 		int type;
-		String caption;
+		public String caption;
 		public String url;
-		String thumbnailUrl;
+		public String thumbnailUrl;
 		
 		HotelImage(JSONObject jobj)
 		{
 			try {
 				hotelImageId = jobj.getInt("hotelImageId");
 				name = jobj.getString("name");
-				category = jobj.getInt("category");
+//				category = jobj.getInt("category");
 				type = jobj.getInt("type");
 				if (jobj.has("caption"))
 					caption = jobj.getString("caption");

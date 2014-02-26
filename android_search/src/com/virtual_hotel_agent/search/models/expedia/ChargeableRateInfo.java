@@ -68,37 +68,38 @@ public class ChargeableRateInfo {
 			e.printStackTrace();
 		}
 		
-		try {
-			JSONObject jSurcharges = jChargeableRateInfo.getJSONObject("Surcharges");
-			
-			int size = XpediaDatabase.getSafeInt(jSurcharges,"@size");
-			
-			if(size==-1)
-			{
-				size=1;
-			}
-							
-			mSurcharges = new Surcharge[size];
-			
-			if(size==1)
-			{
-				JSONObject jSurcharge = jSurcharges.getJSONObject("Surcharge");
+		if (jChargeableRateInfo.has("Surcharges")) {
+			try {
+				JSONObject jSurcharges = jChargeableRateInfo.getJSONObject("Surcharges");
 				
-				mSurcharges[0] = new Surcharge(jSurcharge);
-			}
-			else
-			{
-				JSONArray jSurchargesArray = jSurcharges.getJSONArray("Surcharge"); 
-				for(int i=0;i<size;i++)
+				int size = XpediaDatabase.getSafeInt(jSurcharges,"@size");
+				
+				if(size==-1)
 				{
-					JSONObject jSurcharge = jSurchargesArray.getJSONObject(i);
-					mSurcharges[i]=new Surcharge(jSurcharge);
+					size=1;
 				}
-			}
-			
+								
+				mSurcharges = new Surcharge[size];
+				
+				if(size==1)
+				{
+					JSONObject jSurcharge = jSurcharges.getJSONObject("Surcharge");
+					
+					mSurcharges[0] = new Surcharge(jSurcharge);
+				}
+				else
+				{
+					JSONArray jSurchargesArray = jSurcharges.getJSONArray("Surcharge"); 
+					for(int i=0;i<size;i++)
+					{
+						JSONObject jSurcharge = jSurchargesArray.getJSONObject(i);
+						mSurcharges[i]=new Surcharge(jSurcharge);
+					}
+				}
 		} catch (JSONException e) {
 			if (XpediaDatabase.PRINT_STACKTRACE)
 				e.printStackTrace();
+			}
 		}
 		
 		

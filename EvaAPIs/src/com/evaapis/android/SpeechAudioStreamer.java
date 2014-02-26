@@ -72,7 +72,7 @@ public class SpeechAudioStreamer {
 	}
 
 	void initRecorder() {
-		Log.e(TAG, "<<< Starting to record");
+		Log.i(TAG, "<<< Starting to record");
 		
 		int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);

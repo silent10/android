@@ -1,22 +1,27 @@
 package com.virtual_hotel_agent.search.views.adapters;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+/****
+ * Adapter for image resource ids
+ */
 public class ImageAdapter extends BaseAdapter {
     private Context mContext;
-
+    private ArrayList<Integer> mThumbIds;
   
-    public ImageAdapter(Context c, Integer [] thumbIds) {
+    public ImageAdapter(Context c, ArrayList<Integer> thumbIds) {
     	 mThumbIds = thumbIds;
     	 mContext = c;
 	}
 
 	public int getCount() {
-        return mThumbIds.length;
+        return mThumbIds.size();
     }
 
     public Object getItem(int position) {
@@ -36,10 +41,9 @@ public class ImageAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
-        imageView.setImageResource(mThumbIds[position]);
+        imageView.setImageResource(mThumbIds.get(position));
         return imageView;
     }
 
-    // references to our images
-    private Integer[] mThumbIds;
+    
 }

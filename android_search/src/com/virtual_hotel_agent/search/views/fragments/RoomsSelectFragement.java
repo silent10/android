@@ -1,12 +1,17 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.util.LruCache;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
@@ -21,10 +26,12 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
@@ -32,6 +39,8 @@ import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
+import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
+import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.RoomListAdapter;
 
 @SuppressLint("ValidFragment")
@@ -55,42 +64,30 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
 
-	private Handler mHandlerFinish = new Handler(){
+	static class DownloadedImg extends Handler {
+		private WeakReference<RoomsSelectFragement> fragmentRef;
 
+		public DownloadedImg(WeakReference<RoomsSelectFragement> fragmentRef) {
+			this.fragmentRef = fragmentRef;
+		}
+		
 		@Override
 		public void handleMessage(Message msg) {
-			mHotelImage.setImageBitmap((Bitmap)msg.obj);		
-			super.handleMessage(msg);
-		}};
-
-		private void startImageDownload() {
-			Thread imageDownloadThread = new Thread()
-			{
-
-				@Override
-				public void run()
-				{	
-					Bitmap bmp = null;
-
-					if(mHotelData.mDetails != null && mHotelData.mDetails.hotelImages[0]!=null)
-					{
-						if(mHotelData.mDetails.hotelImages[0].url!=null)
-						{
-							bmp = XpediaProtocolStatic.download_Image(mHotelData.mDetails.hotelImages[0].url);
-						}							
-					}
-
-					if(bmp!=null)
-					{
-						Message message = mHandlerFinish.obtainMessage();
-						message.obj = bmp;
-						mHandlerFinish.sendMessage(message);
-					}
-
+			if (fragmentRef != null) {
+				RoomsSelectFragement rsf = fragmentRef.get();
+				if (rsf != null) {
+					rsf.mHotelImage.setImageBitmap((Bitmap)msg.obj);
 				}
-			};
-			imageDownloadThread.start();
+			}
+			super.handleMessage(msg);
 		}
+	}
+	
+	
+	private DownloadedImg mHandlerFinish; 
+	private ImageDownloader imageDownloader;
+
+
 
 		public RoomsSelectFragement()
 		{}
@@ -132,10 +129,34 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 			if (db != null && db.mHotelData != null &&  mHotelIndex < db.mHotelData.length) {
 				mHotelData = db.mHotelData[mHotelIndex];
 				
-				Bitmap hotelBitmap = db.mImagesMap.get(mHotelData.mSummary.mThumbNailUrl);
-				if(hotelBitmap!=null)
+				Drawable drawable = S3DrawableBackgroundLoader.getInstance().getDrawableFromCache(mHotelData.mSummary.mThumbNailUrl);
+				if (drawable != null)
 				{
-					mHotelImage.setImageBitmap(hotelBitmap);
+					Log.d(TAG, "Showing thumbnail from cache");
+					mHotelImage.setImageDrawable(drawable);
+				}
+				
+				WeakReference<RoomsSelectFragement> fragmentRef = new WeakReference<RoomsSelectFragement>(this);
+				mHandlerFinish = new DownloadedImg(fragmentRef);
+				imageDownloader = new ImageDownloader(db.getImagesCache(), mHandlerFinish);
+				
+				// if already loaded full image - no need for downloader thread
+				if (mHotelData != null && mHotelData.mDetails != null && mHotelData.mDetails.hotelImages != null) {
+					ArrayList<String> urls = new ArrayList<String>();
+					for (HotelImage hotel : mHotelData.mDetails.hotelImages) {
+						if (hotel.url != null) {
+							urls.add(hotel.url);
+							break;
+						}
+					}
+					Bitmap fullImage = db.getImagesCache().get(urls.get(0));
+					if (fullImage != null) {
+						Log.d(TAG, "Showing full Image from cache");
+						mHotelImage.setImageBitmap(fullImage);
+					}
+					else {
+						imageDownloader.startDownload(urls);
+					}
 				}
 	
 				Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
@@ -210,8 +231,6 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 				{
 					Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
 				}
-	
-				startImageDownload();
 
 			}
 

@@ -103,11 +103,10 @@ public class S3DrawableBackgroundLoader {
 				response = connection.getContent();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.e(TAG, "IO exception", e);
 				return null;
 			} catch (OutOfMemoryError e) {
-				Log.e(TAG, "Out of memory");
-				e.printStackTrace();
+				Log.e(TAG, "Out of memory", e);
 				return null;
 			}
 
@@ -136,7 +135,7 @@ public class S3DrawableBackgroundLoader {
 		}
 	}
 
-	private Drawable getDrawableFromCache(String lookup) {
+	public Drawable getDrawableFromCache(String lookup) {
 		if (mCache.containsKey(lookup)) {
 			return mCache.get(lookup).get();
 		}

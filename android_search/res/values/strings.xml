@@ -60,10 +60,9 @@ Check us out at\n
     <string name="children_per_room_">Children per room (3 max):</string>
     <string name="guest_num">Number of Guests in room:</string>
     <string name="greeting">Hello, I am your hotel agent.\nYou can tell me what you would like to find using voice.</string>
-    <string name="examples_greetings">You can try me by clicking on the microphone and saying any of these examples:</string>
+    <string name="examples_greetings">You can try me by tapping on the microphone and saying any of these examples:</string>
     <string name="checkout">Checkout</string>
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="show_fullscreen">Show Fullscreen</string>
 
 </resources>
