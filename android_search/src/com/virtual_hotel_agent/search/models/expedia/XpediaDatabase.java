@@ -1,5 +1,6 @@
 package com.virtual_hotel_agent.search.models.expedia;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.json.JSONArray;
@@ -7,7 +8,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+
+
+
+
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
+
 import com.evature.util.Log;
 
 
@@ -31,12 +38,11 @@ public class XpediaDatabase {
 	public String errorMessage = null;
 	public String errorVerboseMessage = null;
 	public String errorHandling = null;
-	
+
+	private final LruCache<String, Bitmap> mHotelImagesCache;
 
 	public HotelData mHotelData[];
 
-	public HashMap<String,Bitmap> mImagesMap;
-	
 	public static double getSafeDouble(JSONObject obj,String name)
 	{
 		double retVal;
@@ -122,10 +128,28 @@ public class XpediaDatabase {
 		return retVal;
 	}
 
+	public LruCache<String, Bitmap> getImagesCache() {
+		return mHotelImagesCache;
+	}
+
+
+	public void clearImagesCache() {
+		mHotelImagesCache.evictAll();
+	}
+
 
 	public XpediaDatabase(JSONObject serverResponse)
 	{
-		mImagesMap = new HashMap<String, Bitmap>();
+		final int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		mHotelImagesCache = new LruCache<String, Bitmap>(cacheSize) {
+			@Override
+			protected int sizeOf(final String key, final Bitmap bitmap) {
+				// The cache size will be measured in kilobytes rather than
+				// number of items.
+				return bitmap.getByteCount()/ 1024;
+			}
+		};
+
 					
 		try {						
 			String response = getSafeString(serverResponse,"HotelListResponse");
@@ -219,6 +243,11 @@ public class XpediaDatabase {
 			for (;i<newHotelData.length; i++)
 				newHotelData[i] = db.mHotelData[i-mHotelData.length];
 			mHotelData = newHotelData;
+		}
+		
+		for (String key : db.mHotelImagesCache.snapshot().keySet()) {
+			Bitmap bmp = db.mHotelImagesCache.remove(key);
+			mHotelImagesCache.put(key, bmp);
 		}
 	}
 

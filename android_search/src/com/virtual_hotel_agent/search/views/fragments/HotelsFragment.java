@@ -40,8 +40,7 @@ import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
 
-public class HotelsFragment extends RoboFragment implements OnItemClickListener, OnKeyListener,
-		DownloaderTaskInterface {
+public class HotelsFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskInterface {
 
 	@Inject protected EventManager eventManager;
 	
@@ -315,12 +314,6 @@ public class HotelsFragment extends RoboFragment implements OnItemClickListener,
 			
 			
 		}
-	}
-
-	@Override
-	public boolean onKey(View v, int keyCode, KeyEvent event) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 
 	public HotelListAdapter getAdapter() {

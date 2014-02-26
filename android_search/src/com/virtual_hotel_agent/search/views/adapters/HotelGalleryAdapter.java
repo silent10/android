@@ -12,7 +12,6 @@ import android.widget.ImageView;
 
 public class HotelGalleryAdapter extends BaseAdapter {
 
-	private ArrayList<ImageView> mImageViews;
 	private Context mContext;
 	private ArrayList<Bitmap> mBitmaps;
 	private int mGalleryItemBackground;
@@ -21,8 +20,9 @@ public class HotelGalleryAdapter extends BaseAdapter {
 		return mBitmaps.size();
 	}
 
-	public Object getItem(final int position) {
-		return mImageViews.get(position);
+	@Override
+	public Object getItem(int position) {
+		return mBitmaps.get(position);
 	}
 
 	public long getItemId(final int position) {
@@ -44,18 +44,7 @@ public class HotelGalleryAdapter extends BaseAdapter {
 		myView.setScaleType(ImageView.ScaleType.FIT_XY);
 		myView.setBackgroundResource(mGalleryItemBackground);
 
-		if (!mImageViews.contains(myView)) {
-			mImageViews.add(myView);
-		}
-
 		return myView;
-	}
-
-	public HotelGalleryAdapter(Context ctx) {
-		mContext = ctx;
-		mBitmaps = new ArrayList<Bitmap>();
-		mImageViews = new ArrayList<ImageView>();
-		mGalleryItemBackground = android.R.drawable.picture_frame;
 	}
 
 	public void addBitmap(Bitmap bmp) {
@@ -65,11 +54,21 @@ public class HotelGalleryAdapter extends BaseAdapter {
 
 	public void removeBitmap(Bitmap bmp) {
 		int i = mBitmaps.indexOf(bmp);
-		mBitmaps.remove(i);
-		if (i < mImageViews.size()) { // VERY basic sanity patch.
-			mImageViews.remove(i); // I had a crash here once... (remove(0) when size was 0)
-			// mBitmaps and mImageViews must be aligned and today they are not.
+		if (i != -1) {
+			mBitmaps.remove(i);
+			notifyDataSetChanged();
 		}
+	}
+	
+	public HotelGalleryAdapter(Context ctx) {
+		mContext = ctx;
+		mBitmaps = new ArrayList<Bitmap>();
+		mGalleryItemBackground = android.R.drawable.picture_frame;
+	}
+
+	public void clear() {
+		mBitmaps.clear();
 		notifyDataSetChanged();
 	}
+
 }

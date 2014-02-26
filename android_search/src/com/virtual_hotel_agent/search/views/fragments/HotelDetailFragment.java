@@ -1,12 +1,13 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -15,9 +16,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
-
-import com.evature.util.Log;
-
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,15 +31,18 @@ import android.widget.GridView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
-import com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
+import com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
+import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
 import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
-import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
+import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 
@@ -63,34 +64,58 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	private static final int PARKING_AMENITY_CODE = 16384;
 	private static final int POOL_AMENITY_CODE = 128;
 	private static final int BREAKFEST_AMENITY_CODE = 2048;
-	protected static final int FINISHED_DATA_DOWNLOAD = 1;
-	protected static final int UPDATE_ACTIVITY = 2;
-	protected static final int IMAGE_DOWNLOADED = 3;
-	protected static final int ROOMS_UPDATED = 4;
-	public static final int FINISHED_DATA_DOWNLOAD_ERROR = 0xFF;
 	private Gallery mHotelGallery;
-
 	private TextView mHotelName;
 	private WebView mPropertyDescription;
 //	private RatingBar mTripAdvisorRatingBar;
 	private RatingBar mStarRatingBar;
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
+	private Button mMapButton;
 
 	HotelData mHotelData = null;
 
 	private View mView;
 	private HotelGalleryAdapter mHotelGalleryAdapter;
 	private Bitmap mEvaBmp;
-	private Thread mImageDownloadThread;
+	private Bitmap mEvaBmpCached;
 
-	private Button mMapButton;
 
 	static boolean mViewingHotelData = false;
 
 	HotelDetailFragment(int hotelIndex) {
 		mHotelIndex = hotelIndex;
+		
 	}
+	
+	static class DownloadedImg extends Handler {
+		private WeakReference<HotelDetailFragment> fragmentRef;
+
+		public DownloadedImg(WeakReference<HotelDetailFragment> fragmentRef) {
+			this.fragmentRef = fragmentRef;
+		}
+		
+		@Override
+		public void handleMessage(Message msg) {
+			if (fragmentRef != null) {
+				HotelDetailFragment hdf = fragmentRef.get();
+				if (hdf != null) {
+					if (hdf.mEvaBmp != null) {
+						hdf.mHotelGalleryAdapter.removeBitmap(hdf.mEvaBmp);
+						hdf.mEvaBmp = null;
+					}
+					
+					hdf.mHotelGalleryAdapter.addBitmap((Bitmap) msg.obj);
+				}
+			}
+			super.handleMessage(msg);
+		}
+	}
+	
+	
+	private Handler mHandlerFinish;
+	private ImageDownloader imageDownloader;
+
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -101,46 +126,38 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		Log.i(TAG, "onCreateView for hotel index " + mHotelIndex);
 
-		if (MyApplication.getDb() == null) {
+		XpediaDatabase db = MyApplication.getDb();
+		if (db == null) {
 			return super.onCreateView(inflater, container, savedInstanceState);
 		}
 
-		int orientation = getResources().getConfiguration().orientation;
+//		int orientation = getResources().getConfiguration().orientation;
+//		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//			mView = inflater.inflate(R.layout.hotel_details_landscape, container, false);
+//		} else {
+		mView = inflater.inflate(R.layout.hotel_details_portrait, container, false);
+//		}
 
-		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			mView = inflater.inflate(R.layout.hotel_details_landscape, container, false);
-		} else {
-			mView = inflater.inflate(R.layout.hotel_details_portrait, container, false);
-		}
-
+		mBookButton = (Button) mView.findViewById(R.id.selectButton);
+		mMapButton = (Button) mView.findViewById(R.id.mapButton);
+		
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
-
 		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
-
 		mPropertyDescription = (WebView) mView.findViewById(R.id.propertyDescription);
-
-//		mTripAdvisorRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarTripAdvisor);
+//		mTripAdvisorRatingBar;
 		mStarRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarStar);
-
 		mAmenitiesGridView = (GridView) mView.findViewById(R.id.amenitiesGridview);
-
-		mHotelData = MyApplication.getDb().mHotelData[mHotelIndex];
+		
+		WeakReference<HotelDetailFragment> _this = new WeakReference<HotelDetailFragment>(this);
+		mHandlerFinish = new DownloadedImg(_this);
 
 		mHotelGalleryAdapter = new HotelGalleryAdapter(getActivity());
 
-		mEvaBmp = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.hotel72);
-
-		mHotelGalleryAdapter.addBitmap(mEvaBmp);
-
-		mHotelGallery.setAdapter(mHotelGalleryAdapter);
-		
 		mHotelGallery.setOnItemClickListener(this);
+		
+		mEvaBmpCached = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.hotel72);
 
 		fillData();
-
-		mRunThreads = true;
-
-		startImageDownload();
 
 		return mView;
 	}
@@ -148,28 +165,27 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	public HotelDetailFragment() {
 
 	}
+	
+	public void changeHotelId(int hotelIndex) {
+		mHotelIndex = hotelIndex;
+		fillData();
+	}
 
 	@Override
 	public void onDestroy() {
-		mRunThreads = false;
+		if (imageDownloader != null)
+			imageDownloader.stopDownload();
 		super.onDestroy();
 	}
-
+	
 	@SuppressLint("ValidFragment")
 	void fillData() {
-		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
+		XpediaDatabase db = MyApplication.getDb();
+		if (db == null) {
+			return;
+		}
 
-		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
-
-		mPropertyDescription = (WebView) mView.findViewById(R.id.propertyDescription);
-
-//		mTripAdvisorRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarTripAdvisor);
-		mStarRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarStar);
-
-		mAmenitiesGridView = (GridView) mView.findViewById(R.id.amenitiesGridview);
-
-		mHotelGallery.setAdapter(mHotelGalleryAdapter);
-
+		mHotelData = db.mHotelData[mHotelIndex];
 		Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
 
 		String name = spannedName.toString();
@@ -189,7 +205,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		// }
 
 		mHotelName.setText(name);
-		Log.i(TAG, "fillData hotel name = " + name);
+		Log.i(TAG, "hotel name = " + name);
 
 		Log.i(TAG, "1)mHotelData.mSummary.mName:" + mHotelData.mSummary.mName);
 		
@@ -214,6 +230,30 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		mStarRatingBar.setRating((float) mHotelData.mSummary.mHotelRating);
 
+		if (imageDownloader != null) {
+			imageDownloader.stopDownload();
+		}
+		
+		mEvaBmp = mEvaBmpCached;
+		mHotelGalleryAdapter.clear();
+		mHotelGalleryAdapter.addBitmap(mEvaBmp);
+
+		mHotelGallery.setAdapter(mHotelGalleryAdapter);
+
+
+		imageDownloader = new ImageDownloader(db.getImagesCache(), mHandlerFinish);
+		
+		if (mHotelData != null && mHotelData.mDetails != null && mHotelData.mDetails.hotelImages != null) {
+			ArrayList<String> urls = new ArrayList<String>();
+			for (HotelImage hotel : mHotelData.mDetails.hotelImages) {
+				if (hotel.url != null)
+					urls.add(hotel.url);
+			}
+			Log.i(TAG, "gallery showing "+urls.size()+" imgs for hotel "+mHotelIndex);
+			imageDownloader.startDownload(urls);
+		}
+
+		
 		boolean wifiAvailable = false;
 		boolean poolAvailable = false;
 		boolean breakfestAvailable = false;
@@ -236,37 +276,24 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			poolAvailable = true;
 		}
 
-		if (wifiAvailable)
-			count++;
-		if (parkingAvailable)
-			count++;
-		if (poolAvailable)
-			count++;
-		if (breakfestAvailable)
-			count++;
-
-		Integer thumbIds[] = new Integer[count];
-
-		count = 0;
+		ArrayList<Integer> thumbIds = new ArrayList<Integer>();
 
 		if (wifiAvailable)
-			thumbIds[count++] = R.drawable.internet;
+			thumbIds.add(R.drawable.internet);
 		if (parkingAvailable)
-			thumbIds[count++] = R.drawable.parking;
+			thumbIds.add(R.drawable.parking);
 		if (poolAvailable)
-			thumbIds[count++] = R.drawable.pool;
+			thumbIds.add(R.drawable.pool);
 		if (breakfestAvailable)
-			thumbIds[count++] = R.drawable.breakfast;
+			thumbIds.add(R.drawable.breakfast);
 
-		ImageAdapter amenitiesImageAdapter = new ImageAdapter(getActivity(), thumbIds);
-
-		mAmenitiesGridView.setAdapter(amenitiesImageAdapter);
-		if (count == 0) {
+		if (thumbIds.size() == 0) {
 			mAmenitiesGridView.setVisibility(View.GONE);
 		}
-
-		mBookButton = (Button) mView.findViewById(R.id.selectButton);
-
+		else {
+			ImageAdapter amenitiesImageAdapter = new ImageAdapter(getActivity(), thumbIds);
+			mAmenitiesGridView.setAdapter(amenitiesImageAdapter);
+		}
 		mBookButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -278,8 +305,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			}
 		});
 		
-		mMapButton = (Button) mView.findViewById(R.id.mapButton);
-
 		mMapButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -315,65 +340,10 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 	}
 
-	public HotelDetailFragment(String hotelInfo, int hotelIndex) {
-		mHotelIndex = hotelIndex;
-	}
-
 	public static HotelDetailFragment newInstance(int hotelIndex) {
 		return new HotelDetailFragment(hotelIndex);
 	}
-
-	private boolean mRunThreads;
-
-	private Handler mHandlerFinish = new Handler() {
-
-		@Override
-		public void handleMessage(Message msg) {
-			if (mEvaBmp != null) {
-				mHotelGalleryAdapter.removeBitmap(mEvaBmp);
-				mEvaBmp = null;
-			}
-			mHotelGalleryAdapter.addBitmap((Bitmap) msg.obj);
-			super.handleMessage(msg);
-		}
-	};
-
-	private void startImageDownload() {
-		mImageDownloadThread = new Thread() {
-
-			@Override
-			public void run() {
-				Bitmap bmp;
-				
-				
-				if(mHotelData.mDetails==null)
-				{
-					return;
-				}
-				
-				if ((mHotelData.mDetails.hotelImages != null) && (mRunThreads)) {
-					for (int i = 0; i < mHotelData.mDetails.hotelImages.length; i++) {
-						bmp = null;
-
-						if (mHotelData.mDetails.hotelImages[i] != null) {
-							if (mHotelData.mDetails.hotelImages[i].url != null) {
-								bmp = XpediaProtocolStatic.download_Image(mHotelData.mDetails.hotelImages[i].url);
-							}
-						}
-
-						if (bmp != null) {
-							Message message = mHandlerFinish.obtainMessage();
-							message.obj = bmp;
-							message.what = IMAGE_DOWNLOADED;
-							mHandlerFinish.sendMessage(message);
-						}
-
-					}
-				}
-			}
-		};
-		mImageDownloadThread.start();
-	}
+	
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -381,6 +351,8 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 		if (isAdded()) {
 			Intent intent = new Intent(this.getActivity(), ImageGalleryActivity.class);
+			intent.putExtra(ImageGalleryActivity.PHOTO_INDEX, position);
+			intent.putExtra(ImageGalleryActivity.HOTEL_ID, mHotelIndex);
 			startActivity(intent);
 		}
 	}

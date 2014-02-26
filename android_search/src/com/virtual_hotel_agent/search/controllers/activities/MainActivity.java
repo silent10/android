@@ -48,21 +48,17 @@ import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.evaapis.android.EvaComponent;
@@ -81,7 +77,8 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.virtual_hotel_agent.components.MyViewPager;
+import com.viewpagerindicator.TitlePageIndicator;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -100,8 +97,6 @@ import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.MainView;
-import com.virtual_hotel_agent.search.views.SwipeyTabs;
-import com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
@@ -127,8 +122,9 @@ public class MainActivity extends RoboFragmentActivity implements
 	private List<String> mTabTitles;
 	@Inject Injector injector;
 	
-	@InjectView(R.id.viewpager) private MyViewPager mViewPager; // see http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html
-	@InjectView(R.id.swipeytabs) private SwipeyTabs mTabs; // The main swipey tabs element and the main view pager element:
+	@InjectView(R.id.viewpager) private ViewPager mViewPager; 
+//	@InjectView(R.id.indicator) private TabPageIndicator mTabs;
+	@InjectView(R.id.indicator) private TitlePageIndicator mTabs;
 	//SearchVayantTask mSearchVayantTask;
 	//SearchTravelportTask mSearchTravelportTask;
 	SwipeyTabsPagerAdapter mSwipeyAdapter;
@@ -291,7 +287,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mHotelTabName = getString(R.string.HOTEL);
 
 		
-		if (savedInstanceState != null) { // Restore state
+		if (savedInstanceState != null  && MyApplication.getDb().mHotelData != null) { // Restore state
 			// Same code as onRestoreInstanceState() ?
 			Log.d(TAG, "restoring saved instance state");
 			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
@@ -302,12 +298,17 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		
 		
+		mSwipeyAdapter = new SwipeyTabsPagerAdapter(getSupportFragmentManager());
 
-//		getActionBar().setDisplayHomeAsUpEnabled(true);
-		mSwipeyAdapter = new SwipeyTabsPagerAdapter(this, getSupportFragmentManager(), mViewPager, mTabs);
 		mViewPager.setAdapter(mSwipeyAdapter);
-		mTabs.setAdapter(mSwipeyAdapter);
-		mViewPager.setOnPageChangeListener(mTabs); // To sync the tabs with the viewpager
+		mTabs.setViewPager(mViewPager);
+		mViewPager.setOffscreenPageLimit(5);
+		mTabs.setOnPageChangeListener(mSwipeyAdapter);
+		
+
+		//getActionBar().setDisplayHomeAsUpEnabled(true);
+		
+		//mViewPager.setOnPageChangeListener(mTabs); // To sync the tabs with the viewpager
 		// Initialize text-to-speech. This is an asynchronous operation.
 		// The OnInitListener (of the second argument) is called after initialization completes.
 	
@@ -325,7 +326,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 //		setDebugData(DebugTextType.None, null);
 
-		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
@@ -374,7 +375,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		else {
 			int pos = greeting.length();
-			String seeExamples = "\nClick here to see some examples.";
+			String seeExamples = "\nTap here to see some examples.";
 			greeting += new SpannedString(seeExamples);
 			SpannableString sgreet = new SpannableString(greeting);
 			int col = getResources().getColor(R.color.vha_chat_no_session_text);
@@ -384,7 +385,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			MainActivity.this.addChatItem(chat);
 		}
 		
-		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+		//mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 	}
 	
 	@Override
@@ -395,33 +396,26 @@ public class MainActivity extends RoboFragmentActivity implements
 		   super.onBackPressed();
 	   }
 	   else {
-		   mSwipeyAdapter.showTab(chatInd);
+		   mTabs.setCurrentItem(chatInd);
 	   }
 	}
 
-	// Using FragmentStatePagerAdapter to overcome bug: http://code.google.com/p/android/issues/detail?id=19001
-	// This is an uglier approach I did not use: http://stackoverflow.com/a/7287121/78234
-	public class SwipeyTabsPagerAdapter extends FragmentStatePagerAdapter implements SwipeyTabsAdapter,
-			ViewPager.OnPageChangeListener {
-		// Nicer example: http://developer.android.com/reference/android/support/v4/view/ViewPager.html
-		private final Context mContext;
-		private final ViewPager mViewPager;
+	public class SwipeyTabsPagerAdapter  extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
+		
+		//private final ViewPager mViewPager;
 		private final String TAG = SwipeyTabsPagerAdapter.class.getSimpleName();
 
-		public SwipeyTabsPagerAdapter(Context context, FragmentManager fm, ViewPager pager, SwipeyTabs tabs) {
+		public SwipeyTabsPagerAdapter( FragmentManager fm) {
 			super(fm);
 			Log.i(TAG, "CTOR");
-			mViewPager = pager;
-			mViewPager.setAdapter(this);
-			mViewPager.setOnPageChangeListener(this);
-			this.mContext = context;
 		}
 		
-//		@Override 
-//		public int getItemPosition(Object item) {
-//			return POSITION_NONE;
-//		}
-		
+
+	    @Override
+	    public int getItemPosition(Object object){
+	        return POSITION_NONE;
+	    }
+				
 
 		@Override
 		public Fragment getItem(int position) {// Asks for the main fragment
@@ -431,25 +425,6 @@ public class MainActivity extends RoboFragmentActivity implements
 				Log.e(TAG, "No fragment made for Position "+position);
 				return null;
 			}
-//			if (mTabTitles.get(position).equals(mDebugTabName)) { // debug window
-//				Log.d(TAG, "Debug Fragment");
-//				DebugFragment fragment = injector.getInstance(DebugFragment.class);
-//				return fragment;
-//			}
-			
-//			if (mTabTitles.get(position).equals(mExamplesTabName)) { // Examples window
-//				Log.d(TAG, "Example Fragment");
-//				ExamplesFragment fragment = injector.getInstance(ExamplesFragment.class);
-//				fragment.setHandler(new ExampleClickedHandler() {
-//					@Override
-//					public void onClick(String example) {
-//						Log.d(TAG, "Running example: "+example);
-//						MainActivity.this.addChatItem(new ChatItem(example));
-//						mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
-//						MainActivity.this.eva.searchWithText(example);
-//					}});
-//				return fragment; 
-//			}
 			if (mTabTitles.get(position).equals(mChatTabName)) { // Main Chat window
 				Log.d(TAG, "Chat Fragment");
 				ChatFragment chatFragment = injector.getInstance(ChatFragment.class);
@@ -496,31 +471,14 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		@Override
 		public int getCount() {
-			int count = mTabTitles.size();
-			// Log.i(TAG, "getCount() " + String.valueOf(count));
-			return count;
-		}
-
-		public TextView getTab(final int position, SwipeyTabs root) { // asks for just the tab part
-			Log.i(TAG, "getTab() " + String.valueOf(position));
-			TextView view = (TextView) LayoutInflater.from(mContext)
-					.inflate(R.layout.swipey_tab_indicator, root, false);
-			view.setText(mTabTitles.get(position));
-			view.setOnClickListener(new OnClickListener() { // You can swipe AND click on a specific tab
-				public void onClick(View v) {
-					mSwipeyAdapter.showTab(position);
-				}
-			});
-			return view;
+			return mTabTitles.size();
 		}
 		
 		@Override
-		public Object instantiateItem(ViewGroup container, int position) {
-			Object item = super.instantiateItem(container, position);
-			this.finishUpdate(container);
-			return item;
-		}
-
+        public CharSequence getPageTitle(int position) {
+            return mTabTitles.get(position % mTabTitles.size());
+        }
+	 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
 		}
@@ -539,18 +497,10 @@ public class MainActivity extends RoboFragmentActivity implements
 		public void onPageSelected(int position) {
 			lastShown = position;
 		}
-
+		
 		@Override
 		public void notifyDataSetChanged() {
-			Log.i(TAG, "notifyDataSetChanged()");
-			try {
-				mTabs.setAdapter(this);
-				mViewPager.setAdapter(this);
-				mViewPager.setCurrentItem(lastShown, true);
-			}
-			catch(IllegalStateException e) {
-				Log.w(TAG, "Illegal state exception while 'notifyDataSetChange'",e);
-			}
+			mTabs.notifyDataSetChanged();
 			super.notifyDataSetChanged();
 		}
 		
@@ -567,16 +517,16 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		public void addTab(String name) { // Dynamic tabs add to end
 			Log.d(TAG, "addTab "+name);
-			mTabs.setAdapter(null);
-			mViewPager.setAdapter(null);
+//			mTabs.setAdapter(null);
+			// ??? mViewPager.setAdapter(null);
 			mTabTitles.add(name);
 			notifyDataSetChanged();
 		}
 		
 		public void addTab(String name, int position) { // Dynamic tabs add to certain position
 			Log.d(TAG, "addTab "+name);
-			mTabs.setAdapter(null);
-			mViewPager.setAdapter(null);
+//			mTabs.setAdapter(null);
+			// ??? mViewPager.setAdapter(null);
 			mTabTitles.add(position, name);
 			notifyDataSetChanged();
 		}
@@ -592,8 +542,8 @@ public class MainActivity extends RoboFragmentActivity implements
 		public void removeTab(int tabIndex)
 		{
 			Log.d(TAG, "removeTab "+tabIndex);
-			mTabs.setAdapter(null);
-			mViewPager.setAdapter(null);
+//			mTabs.setAdapter(null);
+			// ??? mViewPager.setAdapter(null);
 			mTabTitles.remove(tabIndex);
 			notifyDataSetChanged();
 		}
@@ -620,9 +570,9 @@ public class MainActivity extends RoboFragmentActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
 		Intent intent;
 		switch (item.getItemId()) {
-//		case android.R.id.home:
-//			mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
-//			return true;
+		case android.R.id.home:
+			mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
+			return true;
 		case R.id.settings: // Did the user select "settings"?
 			intent = new Intent();
 			// Then set the activity class that needs to be launched/started.
@@ -722,7 +672,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		mChatListModel.add(item);
 		invalidateChatFragment();
-		//mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+		//mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 	}
 	
 	private void invalidateChatFragment() {
@@ -778,7 +728,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			mSwipeyAdapter.addTab(tabName);
 			index = mTabTitles.size() - 1;
 		}
-		mSwipeyAdapter.showTab(index);
+		mTabs.setCurrentItem(index);
 		return index;
 	}
 
@@ -812,11 +762,23 @@ public class MainActivity extends RoboFragmentActivity implements
 			// remove hotel tab and add it again
 			String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
 			int index = mTabTitles.indexOf(tabName);
-			if (index != -1)
-				mSwipeyAdapter.removeTab(index);
-			mSwipeyAdapter.addTab(tabName);
+//			if (index != -1)
+//				mSwipeyAdapter.removeTab(index);
+//			mSwipeyAdapter.addTab(tabName);
+			if (index == -1) {
+				mSwipeyAdapter.addTab(tabName);
+			}
+			else {
+	
+				HotelDetailFragment fragment = (HotelDetailFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
+				if (fragment != null) // could be null if not instantiated yet
+				{
+					fragment.changeHotelId(hotelIndex);
+				}
+			}
+
 			index = mTabTitles.indexOf(tabName);
-			mSwipeyAdapter.showTab(index);
+			mTabs.setCurrentItem(index);
 		}
 
 		
@@ -1169,7 +1131,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				mSwipeyAdapter.removeTab(mHotelTabName);
 			}
 			if (this.switchToResult) {
-				mSwipeyAdapter.showTab(index);
+				mTabs.setCurrentItem(index);
 			}
 			
 			
@@ -1221,8 +1183,8 @@ public class MainActivity extends RoboFragmentActivity implements
 			
 			lastHotelCompleted.setStatus(Status.ToSearch);
 			
-			mViewPager.setAdapter(null);
-			mTabs.setAdapter(null);
+			// ??? mViewPager.setAdapter(null);
+			//mTabs.setAdapter(null);
 			
 			// clear the hotel, flights and map
 			int index = mTabTitles.indexOf(mHotelsTabName);
@@ -1240,10 +1202,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			XpediaDatabase evaDb = MyApplication.getDb();
 			if (evaDb != null) {
 				evaDb.mHotelData = null;
-				if (evaDb.mImagesMap != null) {
-					evaDb.mImagesMap.clear();
-					evaDb.mImagesMap = null;
-				}
+				evaDb.clearImagesCache();
 			}
 		}
 	}
@@ -1428,8 +1387,9 @@ public class MainActivity extends RoboFragmentActivity implements
 		lastFlightCompleted = null;
 		lastHotelCompleted = null;
 
-		mViewPager.setAdapter(null);
-		mTabs.setAdapter(null);
+		mSwipeyAdapter.showTab(mTabTitles.indexOf(mChatTabName));
+		// ??? mViewPager.setAdapter(null);
+		//mTabs.setAdapter(null);
 		
 		// clear the hotel, flights and map
 		int index = mTabTitles.indexOf(mHotelsTabName);
@@ -1445,23 +1405,20 @@ public class MainActivity extends RoboFragmentActivity implements
 		if (index != -1)
 			mTabTitles.remove(index);
 		
+		mSwipeyAdapter.notifyDataSetChanged();
 		// not sure why - but in order for chat fragment to update I remove it here also :b
-		index = mTabTitles.indexOf(getString(R.string.CHAT));
-		if (index != -1)
-			mTabTitles.remove(index);
+//		index = mTabTitles.indexOf(getString(R.string.CHAT));
+//		if (index != -1)
+//			mTabTitles.remove(index);
 		
-		//mSwipeyAdapter.stuffChanged(mTabTitles.indexOf(mChatTabName));
+		//mSwipeyAdapter.stuffChged(mTabTitles.indexOf(mChatTabName));
 		
 		XpediaDatabase evaDb = MyApplication.getDb();
 		if (evaDb != null) {
 			evaDb.mHotelData = null;
-			if (evaDb.mImagesMap != null) {
-				evaDb.mImagesMap.clear();
-				evaDb.mImagesMap = null;
-			}
 		}
 		
-		
+		S3DrawableBackgroundLoader.getInstance().Reset();
 	}
 	
 	// note "onEvent" template is needed for progruard to not break roboguice
@@ -1504,6 +1461,10 @@ public class MainActivity extends RoboFragmentActivity implements
 			showExamples();
 		}
 		
+		if (chatItem.getType() == ChatType.VirtualAgentContinued && Log.DEBUG) {
+			addChatItem(new ChatItem("Hotel tonight"));
+			eva.searchWithText("Hotel tonight");
+		}
 		
 		if (chatItem.getFlowElement() != null) {
 			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);

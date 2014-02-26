@@ -6,12 +6,13 @@
 	    android:paddingTop="5dip"
 	    android:paddingLeft="7dip"
 	    android:paddingRight="7dip"
+	    android:background="@drawable/chat_background"
     >
     <RelativeLayout 
 	    android:id="@+id/map_container" 
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
-	    android:background="@color/white" 
+	    android:background="@color/half_black" 
         >
         
     </RelativeLayout>

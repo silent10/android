@@ -1,0 +1,68 @@
+<FrameLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/chat_background"
+    tools:context=".ImageGalleryActivity" >
+
+    <!--
+         The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc.
+    -->
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/fullscreen_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <!--
+         This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows.
+    -->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true" >
+
+        <LinearLayout
+            android:id="@+id/fullscreen_content_controls"
+            style="?buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:orientation="vertical"
+            tools:ignore="UselessParent" >
+            
+            <TextView 
+                android:id="@+id/photo_caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                />
+            
+            <com.viewpagerindicator.LinePageIndicator
+		        android:id="@+id/indicator"
+		        android:layout_height="2dp"
+		        android:paddingLeft="0dp"
+		        android:paddingRight="0dp"
+		        android:layout_width="fill_parent"
+		    />
+            
+            
+            <Button
+                android:id="@+id/show_fullscreen"
+                style="?buttonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:background="@color/black_overlay"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/show_fullscreen" />
+
+           
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>

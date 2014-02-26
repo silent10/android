@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.util.LruCache;
 
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evaapis.crossplatform.EvaApiReply;
@@ -142,8 +143,17 @@ public class XpediaProtocolStatic {
 		urlString += "&customerSessionId="+sessionId;
 		return urlString;
 	}
+	
+	// save the last 3 recently used Hotel-Information
+	static LruCache<String, JSONObject>  hotelInformationCache = new LruCache<String, JSONObject>(3);
 
 	static public JSONObject getExpediaHotelInformation(Context context, int hotelId, String currencyCode) {
+		String key = "hotel_info_"+hotelId+"_"+currencyCode;
+		JSONObject cached = hotelInformationCache.get(key);
+		if (cached != null) {
+			Log.d(TAG, "Hotel info "+hotelId+" found in cache");
+			return cached;
+		}
 		String urlString = HOTEL_INFO_URL;
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
@@ -157,7 +167,11 @@ public class XpediaProtocolStatic {
 				    .build()
 				   );
 
-		return executeWithTimeout(context, urlString);
+		JSONObject result = executeWithTimeout(context, urlString);
+		if (result != null) {
+			hotelInformationCache.put(key, result);
+		}
+		return result;
 	}
 
 	public static JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
