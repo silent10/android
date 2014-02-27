@@ -48,7 +48,7 @@
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
         android:id="@+id/status_panel"
-        android:background="#ee000000"
+        android:background="@color/half_black"
         >
 
         <TextView
@@ -116,6 +116,7 @@
          android:onClick="myClickHandler"
          android:contentDescription="Restart"
          android:src="@drawable/session_restart"
-         android:padding="3dp"  />
+         android:padding="3dp"
+           />
      </RelativeLayout>
 </RelativeLayout>

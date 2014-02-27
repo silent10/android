@@ -140,7 +140,8 @@ public class XpediaDatabase {
 
 	public XpediaDatabase(JSONObject serverResponse)
 	{
-		final int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		// fill up to 40% of maxMemory with images
+		final int cacheSize = (int) (0.4 * Runtime.getRuntime().maxMemory() / 1024);
 		mHotelImagesCache = new LruCache<String, Bitmap>(cacheSize) {
 			@Override
 			protected int sizeOf(final String key, final Bitmap bitmap) {

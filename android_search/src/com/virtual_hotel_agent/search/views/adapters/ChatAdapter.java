@@ -4,7 +4,6 @@ package com.virtual_hotel_agent.search.views.adapters;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import com.evature.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +14,7 @@ import android.widget.TextView;
 
 import com.evaapis.crossplatform.flow.FlowElement;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
@@ -58,7 +58,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	@Override public int getCount() {
 		// todo: if some items are collapsed then count from start and skip them
 		if (mChatList == null) {
-			Log.e(TAG, "null chatList");
+			MainActivity.LogError(TAG, "null chatList");
 			return 0;
 		}
 		return mChatList.size()+1;

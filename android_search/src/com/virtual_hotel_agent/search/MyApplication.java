@@ -9,9 +9,10 @@ import org.acra.annotation.ReportsCrashes;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
-import com.evature.util.Log;
 
+import com.evature.util.Log;
 import com.evaapis.android.EvatureLocationUpdater;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
@@ -33,7 +34,7 @@ public class MyApplication extends Application {
 
 		// if (!BuildConfig.DEBUG) // Not when in debug mode!
 		// The following line triggers the initialization of ACRA
-//		ACRA.init(this); AcraInitialized = true;
+		ACRA.init(this); AcraInitialized = true;
 		Log.d(TAG, "onCreate");
 
 		Resources resources = getResources();
@@ -73,7 +74,7 @@ public class MyApplication extends Application {
 
 	@Override
 	public void onLowMemory() {
-		Log.e(TAG, "onLowMemory");
+		MainActivity.LogError(TAG, "onLowMemory");
 		super.onLowMemory();
 	}
 

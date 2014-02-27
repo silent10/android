@@ -5,18 +5,19 @@ import org.json.JSONObject;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
-import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
+import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
 public class ListContinuationDownloaderTask extends DownloaderTask {
 	private static final String TAG = ListContinuationDownloaderTask.class.getSimpleName();
 	private String mNextQuery;
 	private String mCurrencyCode;
-	private HotelsFragment hotelFragment;
+	private HotelListFragment hotelFragment;
 
-	public ListContinuationDownloaderTask(HotelsFragment listener, String nextQuery, String currencyCode) {
+	public ListContinuationDownloaderTask(HotelListFragment listener, String nextQuery, String currencyCode) {
 		super(R.string.HOTELS);
 		Log.i(TAG, "CTOR");
 		mNextQuery = nextQuery;
@@ -41,7 +42,7 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 
 		JSONObject hotelListResponse = XpediaProtocolStatic.getExpediaNext(hotelFragment.getActivity(), mNextQuery, mCurrencyCode);
 		if (hotelListResponse == null)
-			Log.e(TAG, "Response for next null");
+			MainActivity.LogError(TAG, "Response for next null");
 		mProgress = DownloaderStatus.MadeSomeProgress;
 		onProgressUpdate();
 		

@@ -8,8 +8,12 @@
     <View
         android:id="@+id/view1"
         android:layout_width="wrap_content"
-        android:layout_height="110dip"
+        android:layout_height="125dip"
         android:listSelector="@android:color/transparent"
+        android:focusableInTouchMode="false"
+        android:focusable="false"
+        android:visibility="invisible"
+        android:clickable="false"
          />
 
 </LinearLayout>

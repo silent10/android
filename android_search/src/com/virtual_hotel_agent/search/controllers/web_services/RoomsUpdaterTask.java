@@ -7,6 +7,7 @@ import android.content.Context;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
@@ -23,7 +24,7 @@ public class RoomsUpdaterTask extends DownloaderTask {
 		if (db != null && db.mHotelData != null && db.mHotelData.length > hotelIndex)
 			mHotelData = db.mHotelData[hotelIndex];
 		else {
-			Log.e(TAG, "Attempting to update rooms without hotelData");
+			MainActivity.LogError(TAG, "Attempting to update rooms without hotelData");
 		}
 		mContext= context;
 	}

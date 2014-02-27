@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evature.util.Log;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 
 
@@ -96,13 +97,13 @@ public class HotelSummary {
 					roomDetails = new RoomDetails[1];
 					roomDetails[0] = new RoomDetails(jRoomDetailsObj);
 				} catch (JSONException e2) {
-					Log.e(TAG, "Json Exception getting RoomRateDetails", e2);
+					MainActivity.LogError(TAG, "Json Exception getting RoomRateDetails", e2);
 					return;
 				}
 			}
 		}
 		catch (JSONException e2) {
-			Log.e(TAG, "Json Exception getting RoomRateDetailsList", e2);
+			MainActivity.LogError(TAG, "Json Exception getting RoomRateDetailsList", e2);
 			return;
 		}
 	}

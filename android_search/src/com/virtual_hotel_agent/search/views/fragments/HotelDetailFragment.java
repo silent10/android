@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -16,12 +15,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
 import android.text.Spanned;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -37,7 +34,9 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
 import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
@@ -83,11 +82,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 	static boolean mViewingHotelData = false;
 
-	HotelDetailFragment(int hotelIndex) {
-		mHotelIndex = hotelIndex;
-		
-	}
-	
 	static class DownloadedImg extends Handler {
 		private WeakReference<HotelDetailFragment> fragmentRef;
 
@@ -124,12 +118,21 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		// mHotelIndex = savedInstanceState.getInt(HOTEL_INDEX, mHotelIndex);
 		// }
 
-		Log.i(TAG, "onCreateView for hotel index " + mHotelIndex);
 
 		XpediaDatabase db = MyApplication.getDb();
 		if (db == null) {
+			MainActivity.LogError(TAG, "HotelDetailFragment onCreateView - no DB");
 			return super.onCreateView(inflater, container, savedInstanceState);
 		}
+		
+		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+		if (rp == null) {
+			MainActivity.LogError(TAG, "HotelDetailFragment onCreateView - no RequestParams");
+			return super.onCreateView(inflater, container, savedInstanceState);
+		}
+		
+		mHotelIndex = rp.getHotelId();
+		Log.i(TAG, "onCreateView for hotel index " + mHotelIndex);
 
 //		int orientation = getResources().getConfiguration().orientation;
 //		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -175,11 +178,16 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	public void onDestroy() {
 		if (imageDownloader != null)
 			imageDownloader.stopDownload();
+		if (mPropertyDescription != null) {
+			mPropertyDescription.destroy();
+		}
 		super.onDestroy();
 	}
 	
 	@SuppressLint("ValidFragment")
 	void fillData() {
+		mPropertyDescription.loadData("","text/html", "utf-8");
+		
 		XpediaDatabase db = MyApplication.getDb();
 		if (db == null) {
 			return;
@@ -187,10 +195,11 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		mHotelData = db.mHotelData[mHotelIndex];
 		Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
-
 		String name = spannedName.toString();
 
-		Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+		Log.d(TAG, "Filling hotel data: "+mHotelName.getText()+ " --> "+name);
+
+//		Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
 		/* Now we can retrieve all display-related infos */
 		// int width = display.getWidth();
@@ -212,7 +221,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		String description = "";
 		if(mHotelData.mDetails!=null)
 		{
-			Log.i(TAG, "2)mHotelData.mDetails.propertyDescription:" + mHotelData.mDetails.propertyDescription);
 			description += mHotelData.mDetails.propertyDescription;
 		}
 		
@@ -339,11 +347,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 
 	}
-
-	public static HotelDetailFragment newInstance(int hotelIndex) {
-		return new HotelDetailFragment(hotelIndex);
-	}
-	
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position,

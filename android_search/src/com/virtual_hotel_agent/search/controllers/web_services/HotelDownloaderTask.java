@@ -9,6 +9,7 @@ import com.evature.util.Log;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails;
@@ -69,7 +70,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 			return jHotel;
 
 		} catch (JSONException e) {
-			Log.e(TAG, "JSON exception getting hotel details", e);
+			MainActivity.LogError(TAG, "JSON exception getting hotel details", e);
 			return jHotel;
 		}
 	}
