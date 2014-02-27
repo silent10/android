@@ -2,15 +2,14 @@ package com.virtual_hotel_agent.search.views.fragments;
 
 import java.text.DecimalFormat;
 
-import roboguice.activity.event.OnResumeEvent;
 import roboguice.event.EventManager;
-import roboguice.event.Observes;
 import roboguice.fragment.RoboFragment;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,7 +120,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	
 	public void onHotelsListUpdated() {
 		Log.d(TAG, "Updating map because hotels list was updated");
-		mMap = null;
+		mMap.clear();
 		setUpMapIfNeeded();
 	}
 	
@@ -170,7 +169,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         	mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
         	Log.d(TAG, "Camera moved successfully");
         } catch(IllegalStateException e) {
-        	Log.e(TAG, "Camera move exception", e);
+        	Log.w(TAG, "Camera move exception", e);
             mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,400,400,10));
             Log.d(TAG, "Camera moved to hardcoded width height");
         }
@@ -179,7 +178,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	private Marker addMapPoint(HotelData hotelData, BitmapDescriptor icon, Builder boundsBuilder) {
 		HotelSummary hotelSummary = hotelData.mSummary;
 		String name = hotelSummary.mName;
-		name = name.replace("&amp;", "&");
+		name = Html.fromHtml(name).toString();
 		
 		double rating = hotelSummary.mHotelRating;
 		String formattedRating = Integer.toString((int)rating);
@@ -230,7 +229,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         for(int i=startFrom; i<length; i++)
         {
 	        HotelSummary hotel = evaDb.mHotelData[i].mSummary;
-			String name = hotel.mName.replace("&amp;", "&");
+			String name = Html.fromHtml(hotel.mName).toString();
 	        if (name.equals(marker.getTitle())){ 
 	        	LatLng position = marker.getPosition();
 	        	if (Math.abs(position.latitude - hotel.mLatitude) < 0.001

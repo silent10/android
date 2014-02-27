@@ -40,9 +40,9 @@ import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.StandardExceptionParser;
 import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 public class XpediaProtocolStatic {
 
@@ -103,11 +103,10 @@ public class XpediaProtocolStatic {
 			bmp = BitmapFactory.decodeStream((InputStream) response);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MainActivity.LogError(TAG, "IOException loading bitmap", e);
 			return null;
 		} catch (OutOfMemoryError e) {
-			Log.e(TAG, "Out of memory");
-			e.printStackTrace();
+			MainActivity.LogError(TAG, "Out of memory loading bmp", e);
 			return null;
 		}
 
@@ -144,8 +143,8 @@ public class XpediaProtocolStatic {
 		return urlString;
 	}
 	
-	// save the last 3 recently used Hotel-Information
-	static LruCache<String, JSONObject>  hotelInformationCache = new LruCache<String, JSONObject>(3);
+	// save the last 5 recently used Hotel-Information
+	static LruCache<String, JSONObject>  hotelInformationCache = new LruCache<String, JSONObject>(5);
 
 	static public JSONObject getExpediaHotelInformation(Context context, int hotelId, String currencyCode) {
 		String key = "hotel_info_"+hotelId+"_"+currencyCode;
@@ -304,9 +303,8 @@ public class XpediaProtocolStatic {
 			// Check if server response is valid
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode != HTTP_STATUS_OK) {
-				Log.e(TAG, "Status code from server: "+statusCode);
 				String content = EntityUtils.toString(response.getEntity());
-				Log.e(TAG, "Content: "+content);
+				MainActivity.LogError(TAG, "Status code from server: "+statusCode+"  content: "+content);
 				
 				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 				if (defaultTracker != null) 
@@ -336,7 +334,7 @@ public class XpediaProtocolStatic {
 
 			// Return result from buffered stream
 			String result = new String(content.toByteArray());
-			Log.i(TAG, "Result is "+result);
+			//Log.d(TAG, "Result is "+result);
 			JSONObject jResult;
 			try {
 				jResult = new JSONObject(result);
@@ -352,25 +350,15 @@ public class XpediaProtocolStatic {
 							   );
 				}
 			}catch(JSONException e) {
-				Log.e(TAG, "Error parsing json of expedia result", e);
+				MainActivity.LogError(TAG, "Error parsing json of expedia result", e);
 				jResult = null;
 				sessionId = null;
-				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
-				  // StandardExceptionParser is provided to help get meaningful Exception descriptions.
-				defaultTracker.send(MapBuilder
-				      .createException(new StandardExceptionParser(context, null)              // Context and optional collection of package names
-				                                                                            // to be used in reporting the exception.
-				                       .getDescription(Thread.currentThread().getName(),    // The name of the thread on which the exception occurred.
-				                                       e),                                  // The exception.
-				    		  			false)                                               // False indicates a fatal exception
-				      .build());
-
 			}
 			
 			return jResult;
 		}
 		catch(IOException e) {
-			Log.e(TAG, "Problem communicating with API", e);
+			MainActivity.LogError(TAG, "Problem communicating with API", e);
 			return null;
 		} 
 	}

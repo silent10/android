@@ -8,11 +8,8 @@ import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -36,11 +33,13 @@ import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
 
-public class HotelsFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskInterface {
+public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskInterface {
 
 	@Inject protected EventManager eventManager;
 	
@@ -135,7 +134,11 @@ public class HotelsFragment extends RoboFragment implements OnItemClickListener,
 		mView = inflater.inflate(R.layout.hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
+		mHotelListView.clearChoices();
+		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+		if (rp != null) {
+			mHotelListView.setSelection(rp.getHotelId());
+		}
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
 			mContinuationLoader.cancel(true);
@@ -192,7 +195,7 @@ public class HotelsFragment extends RoboFragment implements OnItemClickListener,
 		HotelListAdapter.ViewHolder holder = (HotelListAdapter.ViewHolder) view.getTag();
 
 		if (holder == null) {
-			Log.e(TAG, "Got null holder");
+			MainActivity.LogError(TAG, "Got null holder");
 			return;
 		}
 
@@ -226,7 +229,7 @@ public class HotelsFragment extends RoboFragment implements OnItemClickListener,
 				Log.d(TAG, "-Last Scroll-");
 
 				String nextQuery = MyApplication.getDb().getNextQuery();
-				mContinuationLoader = new ListContinuationDownloaderTask(HotelsFragment.this, nextQuery,
+				mContinuationLoader = new ListContinuationDownloaderTask(HotelListFragment.this, nextQuery,
 						SettingsAPI.getCurrencyCode(getActivity()));
 				mContinuationLoader.execute();
 			}
@@ -246,8 +249,8 @@ public class HotelsFragment extends RoboFragment implements OnItemClickListener,
 			mProgressDialog = null;
 		}
 		
-		if (getAdapter() != null) {
-			getAdapter().notifyDataSetChanged();
+		if (mAdapter != null) {
+			mAdapter.notifyDataSetChanged();
 		}
 
 		if (!MyApplication.getDb().mMoreResultsAvailable) {
@@ -316,7 +319,14 @@ public class HotelsFragment extends RoboFragment implements OnItemClickListener,
 		}
 	}
 
-	public HotelListAdapter getAdapter() {
-		return mAdapter;
+	public void listResultUpdated() {
+		if (mAdapter == null) {
+			MainActivity.LogError(TAG, "Unexpected adapter is null");
+			return;
+		}
+		Log.d(TAG, "Hotel list updated");
+		mHotelListView.setSelectionAfterHeaderView();
+		mHotelListView.clearChoices();
+		mAdapter.notifyDataSetChanged();
 	}
 }

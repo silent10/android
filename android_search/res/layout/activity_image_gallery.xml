@@ -28,7 +28,6 @@
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
-            style="?buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
@@ -37,31 +36,20 @@
             
             <TextView 
                 android:id="@+id/photo_caption"
+                style="?buttonBarButtonStyle"
+                android:background="@color/black_overlay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
+                android:visibility="gone"
                 />
             
-            <com.viewpagerindicator.LinePageIndicator
+            <com.viewpagerindicator.UnderlinePageIndicator
 		        android:id="@+id/indicator"
 		        android:layout_height="2dp"
-		        android:paddingLeft="0dp"
-		        android:paddingRight="0dp"
 		        android:layout_width="fill_parent"
 		    />
-            
-            
-            <Button
-                android:id="@+id/show_fullscreen"
-                style="?buttonBarButtonStyle"
-                android:layout_width="match_parent"
-                android:background="@color/black_overlay"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="@string/show_fullscreen" />
-
-           
-
+      
         </LinearLayout>
     </FrameLayout>
 

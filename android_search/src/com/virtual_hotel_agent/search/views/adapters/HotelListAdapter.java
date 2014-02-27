@@ -24,17 +24,17 @@ import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
-import com.virtual_hotel_agent.search.views.fragments.HotelsFragment;
+import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
 public class HotelListAdapter extends BaseAdapter {
 
 	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
 	private static final double DISTANCE_DELTA = 200;
 	private LayoutInflater mInflater;
-	private HotelsFragment mParent;
+	private HotelListFragment mParent;
 	static Drawable mHotelIcon;
 
-	public HotelListAdapter(HotelsFragment parent) {
+	public HotelListAdapter(HotelListFragment parent) {
 
 		mInflater = LayoutInflater.from(parent.getActivity());
 		mParent = parent;

@@ -5,6 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evature.util.Log;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 
 
@@ -88,8 +89,7 @@ public class HotelDetails {
 			jobj = jobj.getJSONObject("HotelSummary"); 
 						
 		} catch (JSONException e) {
-			Log.e("XPD","FullHotelDetails:JSON Element not found!");
-			e.printStackTrace();
+			MainActivity.LogError("XPD","FullHotelDetails:JSON Element not found!");
 		}
 	}
 	
@@ -115,8 +115,7 @@ public class HotelDetails {
 				url = jobj.getString("url");
 				thumbnailUrl = jobj.getString("thumbnailUrl");
 			} catch (JSONException e) {
-				Log.e("XPD","HotelImage: JSON Element not found!");
-				e.printStackTrace();
+				MainActivity.LogError("XPD","HotelImage: JSON Element not found!");
 			}
 			
 		
@@ -133,8 +132,7 @@ public class HotelDetails {
 				amenityId = jobj.getInt("amenityId");	
 				amenity = jobj.getString("amenity");	
 			} catch (JSONException e) {
-				Log.e("XPD","Amenity: JSON Element not found!");
-				e.printStackTrace();
+				MainActivity.LogError("XPD","Amenity: JSON Element not found!");
 			}
 		}
 		
@@ -164,9 +162,7 @@ public class HotelDetails {
 					}
 				}
 			} catch (JSONException e) {
-				Log.e("XPD","RoomType: JSON Element not found!");
-				if (XpediaDatabase.PRINT_STACKTRACE)
-					e.printStackTrace();
+				MainActivity.LogError("XPD","RoomType: JSON Element not found!");
 			}
 			
 			

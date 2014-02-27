@@ -59,9 +59,11 @@ public class ImageDownloader {
 							if (bmp == null) {
 								//Log.d(TAG, url+" not found - downloading");
 								bmp = XpediaProtocolStatic.download_Image(url);
-								synchronized (cache) {
-									if (cache.get(url) == null) {
-										cache.put(url, bmp);
+								if (bmp != null) {
+									synchronized (cache) {
+										if (cache.get(url) == null) {
+											cache.put(url, bmp);
+										}
 									}
 								}
 								//Log.d(TAG, "Now in cache: "+cache.size()+" kb");
