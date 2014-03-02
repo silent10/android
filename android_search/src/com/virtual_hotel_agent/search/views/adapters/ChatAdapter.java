@@ -7,12 +7,12 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.evaapis.crossplatform.flow.FlowElement;
+import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
@@ -32,7 +32,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	int  vhaChatInSessionText,  vhaChatNoSessionText;
 	
 	public ChatAdapter(Activity activity, int resource, int textViewResourceId, ChatItemList chatList) {
-		super(activity, resource, textViewResourceId, chatList);
+		super(chatList, false);
 		mChatList = chatList;
 		mInflater = LayoutInflater.from(activity);
 		
@@ -49,8 +49,21 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	}
 	
 	@Override
+	public long getItemId(final int position) {
+		return position;
+	}
+	@Override
+	public boolean hasStableIds() {
+		return true;
+	}
+
+	
+	@Override
 	public ChatItem getItem(int position) {
 		// todo: if some items are collapsed then count from start and skip them
+		if (position > mChatList.size()) {
+			MainActivity.LogError(TAG, "Accessing chat item "+position+" but size is "+mChatList.size());
+		}
 		ChatItem chatItem = mChatList.get(position);
 		return chatItem;
 	};
