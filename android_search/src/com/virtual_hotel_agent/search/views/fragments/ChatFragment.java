@@ -4,7 +4,6 @@ import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
 import android.text.SpannableString;
-import com.evature.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,10 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.evature.util.Log;
 import com.google.inject.Inject;
+import com.nhaarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingRightInAnimationAdapter;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemClicked;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
@@ -39,6 +41,8 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	DialogClickHandler mDialogClickHandler;
 	
 	private ChatAdapter mChatAdapter;
+
+	private SingleAnimationAdapter mAnimAdapter;
 	static final String TAG = "ChatFragment";
 
 //	public static Fragment newInstance(ChatItemList chatListModel) {
@@ -58,7 +62,13 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 		// Connect the data of the chat history to the view:
 //		mChatListModel.loadInstanceState(savedInstanceState);
 		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row_vha_chat, R.id.label, mChatListModel);
-		chatListView.setAdapter(mChatAdapter);
+
+		mAnimAdapter = //new SwingBottomInAnimationAdapter(
+				new SwingRightInAnimationAdapter(mChatAdapter);//);
+		mAnimAdapter.setAbsListView(chatListView);
+        chatListView.setAdapter(mAnimAdapter);
+        	        
+//		chatListView.setAdapter(mChatAdapter);
 		
 		chatListView.setOnItemClickListener(this);
 		return root;
@@ -72,10 +82,12 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 //		mChatListModel.saveInstanceState(instanceState);
 	}
 
-//	public void addChatItem(ChatItem chatItem) {
-//		
-//		mChatAdapter.add(chatItem);
-//	}
+	public void addChatItem(ChatItem chatItem) {
+		if (mChatAdapter != null) {
+			mAnimAdapter.reset();
+			mChatAdapter.add(chatItem);
+		}
+	}
 	
 	public void invalidate() { 
 		if (mChatAdapter != null)
@@ -124,6 +136,10 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 
 	public void setDialogHandler(DialogClickHandler handler) {
 		mDialogClickHandler = handler;
+	}
+
+	public boolean isReady() {
+		return mChatAdapter != null;
 	}
 	
 	

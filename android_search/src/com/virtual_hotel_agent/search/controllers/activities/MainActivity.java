@@ -81,6 +81,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
+import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -716,12 +717,17 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	private void addChatItem(ChatItem item) {
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
-		mChatListModel.add(item);
-		invalidateChatFragment();
+		ChatFragment chatFragment = getChatFragment();
+		if (chatFragment != null && chatFragment.isReady()) {
+			chatFragment.addChatItem(item);
+		}
+		else {
+			mChatListModel.add(item);
+		}
 		//mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 	}
 	
-	private void invalidateChatFragment() {
+	private ChatFragment getChatFragment() {
 		//showTab(R.string.CHAT);
 		int index = mTabTitles.indexOf(mChatTabName);
 				Log.i(TAG, "Chat tab at index "+index);
@@ -731,14 +737,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		// http://stackoverflow.com/a/8886019/78234
 		ChatFragment fragment = (ChatFragment) mSwipeyAdapter.instantiateItem(mViewPager, index);
-		if (fragment != null) // could be null if not instantiated yet
-		{
-			fragment.invalidate();
-		} 
-		else {
-			Log.w(TAG, "chat fragment == null!?");
-		}
-		
+		return fragment;
 	}
 	
 
@@ -1102,16 +1101,15 @@ public class MainActivity extends RoboFragmentActivity implements
 				}
 				lastFlightCompleted = currentItem;
 			}
-			invalidateChatFragment();
-			
-
+			// if chat items change when search is done - update chat list 
+			//invalidateChatFragment();
 		}
 
 		@Override
 		public void startProgressDialog(int id) {
 			Log.i(TAG, "Start search for "+currentItem.getChat());
 			currentItem.setStatus(Status.InSearch);
-			invalidateChatFragment();
+			//invalidateChatFragment();
 		}
 
 		@Override
@@ -1126,7 +1124,7 @@ public class MainActivity extends RoboFragmentActivity implements
 					executeFlowElement(currentItem.getEvaReply(), currentItem.getFlowElement(), currentItem, false);
 				}
 			}
-			invalidateChatFragment();
+			// invalidateChatFragment();
 		}
 
 		@Override
@@ -1300,7 +1298,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);
-			MainActivity.this.addChatItem(chat);
+			addChatItem(chat);
 			eva.speak(greeting);
 
 //		}
@@ -1349,7 +1347,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			ChatItem lastItem = mChatListModel.get(mChatListModel.size()-1);
 			mChatListModel.clear();
 			if (lastItem.getType() == ChatType.Me) {
-				mChatListModel.add(lastItem);
+				addChatItem(lastItem);
 			}
 		}		
 		lastFlightCompleted = null;
@@ -1420,8 +1418,8 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	}
 		
-//	private static Random randomGenerator = new Random();
-//	private String tests[] = { "Hotel tonight", "Hotel in Madrid tomorrow", "Hotel in Paris tomorrow", "Hotel in Miami Florida tonight" };
+	private static Random randomGenerator = new Random();
+	private String tests[] = { "Hotel tonight", "Hotel in Madrid tomorrow", "Hotel in Paris tomorrow", "Hotel in Miami Florida tonight" };
 	
 	public void onEventChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
@@ -1430,11 +1428,11 @@ public class MainActivity extends RoboFragmentActivity implements
 			showExamples();
 		}
 		
-//		if (chatItem.getType() == ChatType.VirtualAgentContinued && Log.DEBUG) {
-//			String t = tests[randomGenerator.nextInt(tests.length)];
-//			addChatItem(new ChatItem(t));
-//			eva.searchWithText(t);
-//		}
+		if (chatItem.getType() == ChatType.VirtualAgentContinued && BuildConfig.DEBUG) {
+			String t = tests[randomGenerator.nextInt(tests.length)];
+			addChatItem(new ChatItem(t));
+			eva.searchWithText(t);
+		}
 		
 		if (chatItem.getFlowElement() != null) {
 			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);
