@@ -47,6 +47,8 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	private String disclaimer;
 	private Bitmap mEvaBmpCached;
 	protected static final String TAG = "RoomListAdapter";
+	private int selectedColor;
+	private int selectedNonRefundColor;
 		
 	public RoomListAdapter(Context context, HotelData hotel)
 	{	
@@ -54,9 +56,11 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	    mParent = context;
 		mHotel = hotel;
 		Resources resources = context.getResources();
+		selectedColor = resources.getColor(R.color.selected_room_list_item);
+		selectedNonRefundColor = resources.getColor(R.color.selected_non_refundable_room_list_item);
 		disclaimer = "";
 		
-		mEvaBmpCached = BitmapFactory.decodeResource(context.getResources(), R.drawable.hotel72);
+		mEvaBmpCached = BitmapFactory.decodeResource(resources, R.drawable.hotel72);
 	}
 	
 	public void setDisclaimer(String disclaimer) {
@@ -130,10 +134,20 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		 if(roomDetails.mRateInfo!=null)
 		 {
 			 if (roomDetails.mRateInfo.mNonRefundable) {
-				 holder.container.setBackgroundResource(R.drawable.non_refundable_background);
+				 if (isExpanded) {
+					 holder.container.setBackgroundResource(R.drawable.non_refundable_background_selected);
+				 }
+				 else {
+					 holder.container.setBackgroundResource(R.drawable.non_refundable_background);
+				 }
 			 }
 			 else {
-				 holder.container.setBackgroundResource(R.drawable.hotel_background);
+				 if (isExpanded) {
+					 holder.container.setBackgroundResource(R.drawable.hotel_background_selected);
+				 }
+				 else {
+					 holder.container.setBackgroundResource(R.drawable.hotel_background);
+				 }
 			 }
 			 double fullRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageBaseRate;
 			 double promoRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageRate;
@@ -212,8 +226,17 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		{
 			convertView = mInflater.inflate(R.layout.room_list_item_expanded, null);
 		}
-		WebView desc = (WebView) convertView.findViewById(R.id.roomDescription);
+
 		final RoomDetails room = mHotel.mSummary.roomDetails[groupPosition];
+		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);
+		
+		if (nonRefundable) {
+			convertView.setBackgroundColor(selectedNonRefundColor);
+		}
+		else {
+			convertView.setBackgroundColor(selectedColor);
+		}
+		WebView desc = (WebView) convertView.findViewById(R.id.roomDescription);
 		StringBuilder text  = new StringBuilder("&lt;html&gt;&lt;head&gt;&lt;meta http-equiv=\"Content-type\" content=\"text/html;charset=UTF-8\"&gt;"
 				+ "&lt;meta charset=\"UTF-8\"&gt;&lt;/head&gt;&lt;body&gt;&lt;font color=\"black\"&gt;");
 		if (disclaimer.equals("") == false)
@@ -268,7 +291,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			text.append(room.mOtherInformation)
 				.append("&lt;br&gt;");
 		}
-		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);
+		
 		text.append("&lt;p&gt; &lt;b&gt; Refundable: &lt;/b&gt; ").append(nonRefundable ? "No" : "Yes").append("&lt;br&gt;");
 		text.append("&lt;p&gt; &lt;b&gt; Smoking Policy: &lt;/b&gt; ").append(room.mSmoking).append("&lt;br&gt;");
 		if (room.mRateInfo != null) {
