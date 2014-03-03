@@ -75,12 +75,12 @@ import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
-import com.google.analytics.tracking.android.StandardExceptionParser;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
+import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -1063,12 +1063,13 @@ public class MainActivity extends RoboFragmentActivity implements
 				index = mTabTitles.size() - 1;
 				
 				// Adding map delayed because adding map takes time (2-3 seconds) and don't want to delay switching to list
-				mTabs.postDelayed(new Runnable() {
+				Handler handler = new Handler();
+				handler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
 						mSwipeyAdapter.addTab("MAP");
 					}
-				}, 20);
+				}, 500);
 			} 
 			else if (id == R.string.HOTELS) {
 				HotelsMapFragment mapFragment = (HotelsMapFragment) mSwipeyAdapter.instantiateItem(mViewPager, index+1);
@@ -1420,8 +1421,8 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	}
 		
-//	private static Random randomGenerator = new Random();
-//	private String tests[] = { "Hotel tonight", "Hotel in Madrid tomorrow", "Hotel in Paris tomorrow", "Hotel in Miami Florida tonight" };
+	private static Random randomGenerator = new Random();
+	private String tests[] = { "Hotel tonight", "Hotel in Madrid March 10th to 12th", "Hotel in Paris March 10th to 12th", "Hotel in Miami Florida March 10th to 12th" };
 	
 	public void onEventChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
@@ -1430,11 +1431,11 @@ public class MainActivity extends RoboFragmentActivity implements
 			showExamples();
 		}
 		
-//		if (chatItem.getType() == ChatType.VirtualAgentContinued && Log.DEBUG) {
-//			String t = tests[randomGenerator.nextInt(tests.length)];
-//			addChatItem(new ChatItem(t));
-//			eva.searchWithText(t);
-//		}
+		if (chatItem.getType() == ChatType.VirtualAgentContinued && BuildConfig.DEBUG) {
+			String t = tests[randomGenerator.nextInt(tests.length)];
+			addChatItem(new ChatItem(t));
+			eva.searchWithText(t);
+		}
 		
 		if (chatItem.getFlowElement() != null) {
 			executeFlowElement(chatItem.getEvaReply(), chatItem.getFlowElement(), chatItem, true);

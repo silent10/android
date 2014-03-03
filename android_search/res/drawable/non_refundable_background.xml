@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+ android:exitFadeDuration="@android:integer/config_shortAnimTime">
+
+	<item android:state_expanded="true">
+	    <shape android:shape="rectangle">
+	        <gradient
+		        android:endColor="#ffe08050"        
+		        android:startColor="#ffffffff"
+		        android:angle="270"/>
+	    </shape>
+	</item>
+	<item>
+		<shape android:shape="rectangle">
+	        <gradient
+		        android:endColor="#ffd07040"        
+		        android:startColor="#fff0af9f"
+		        android:angle="270"/>
+	    </shape>
+	</item>
+</selector>
+
+ 

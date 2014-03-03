@@ -51,6 +51,7 @@ public class ImageDownloader {
 					return;
 				}
 				
+				int count = 0;
 				for (String url : urls) {
 					if (mRunThreads) {
 						bmp = null;
@@ -73,6 +74,7 @@ public class ImageDownloader {
 						if (bmp != null && handler != null) {
 							Message message = Message.obtain();
 							message.obj = bmp;
+							message.arg1 = count++;
 							handler.sendMessage(message);
 						}
 					}
