@@ -156,4 +156,6 @@
     <color name="white">#fff</color>
     <color name="half_black">#88000000</color>
     <color name="black_overlay">#66000000</color>
+    <color name="selected_room_list_item">#ffc3c3ff</color>
+    <color name="selected_non_refundable_room_list_item">#ffe08050</color>
 </resources>
