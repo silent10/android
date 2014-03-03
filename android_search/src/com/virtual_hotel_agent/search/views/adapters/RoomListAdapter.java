@@ -5,40 +5,47 @@ import java.text.DecimalFormat;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v4.util.LruCache;
 import android.text.Html;
 import android.text.Spanned;
-import com.evature.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
 import com.virtual_hotel_agent.search.models.expedia.Surcharge;
 import com.virtual_hotel_agent.search.models.expedia.ValueAdd;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 public class RoomListAdapter extends BaseExpandableListAdapter {
 
 	HotelData mHotel;
 	private LayoutInflater mInflater;
 	private Context mParent;
-	private static int nonRefundableColor = -1;
 	static final DecimalFormat formatter = new DecimalFormat("#.##");
 	private String disclaimer;
+	private Bitmap mEvaBmpCached;
 	protected static final String TAG = "RoomListAdapter";
 		
 	public RoomListAdapter(Context context, HotelData hotel)
@@ -46,11 +53,10 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		mInflater = LayoutInflater.from(context);
 	    mParent = context;
 		mHotel = hotel;
-		if (nonRefundableColor == -1) {
-			Resources resources = context.getResources();
-			nonRefundableColor = resources.getColor(R.color.non_refundable);
-		}
+		Resources resources = context.getResources();
 		disclaimer = "";
+		
+		mEvaBmpCached = BitmapFactory.decodeResource(context.getResources(), R.drawable.hotel72);
 	}
 	
 	public void setDisclaimer(String disclaimer) {
@@ -66,6 +72,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			 convertView = mInflater.inflate(R.layout.room_list_item, null);
 			 holder = new ViewHolder();
 			 
+			 holder.photo = (ImageView)convertView.findViewById(R.id.roomImage);
 			 holder.promo = (TextView)convertView.findViewById(R.id.promo);
 			 holder.full_rate_nights = (TextView)convertView.findViewById(R.id.per_night_full);
 			 holder.full_rate = (TextView)convertView.findViewById(R.id.full_rate);
@@ -101,13 +108,29 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	//		 }
 	//		 		 		 		 
 			 holder.promo.setText(name);
+			 
+			 if (roomDetails.mImageUrls != null && roomDetails.mImageUrls.length > 0) {
+				 XpediaDatabase db = MyApplication.getDb();
+				 LruCache<String, Bitmap> cache = db != null ? db.getImagesCache() : null;
+				 Bitmap cachedPhoto = cache != null ? cache.get(roomDetails.mImageUrls[0]) : null;
+				 if (cachedPhoto != null) {
+					 holder.photo.setImageBitmap(cachedPhoto);
+				 }
+				 else {
+					 holder.photo.setImageBitmap(mEvaBmpCached);
+				 }
+				 holder.photo.setVisibility(View.VISIBLE);
+			 }
+			 else {
+				 holder.photo.setVisibility(View.GONE);
+			 }
 		 }
 
 		 
 		 if(roomDetails.mRateInfo!=null)
 		 {
 			 if (roomDetails.mRateInfo.mNonRefundable) {
-				 holder.container.setBackgroundColor(nonRefundableColor);
+				 holder.container.setBackgroundResource(R.drawable.non_refundable_background);
 			 }
 			 else {
 				 holder.container.setBackgroundResource(R.drawable.hotel_background);
@@ -131,13 +154,20 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				 
 			 }
 			 
-			 holder.details.setText(roomDetails.mRateInfo.mPromoDescription);
+			 if (roomDetails.mRateInfo.mPromoDescription != null && roomDetails.mRateInfo.mPromoDescription.equals("") == false) {
+				 holder.details.setText(roomDetails.mRateInfo.mPromoDescription);
+				 holder.details.setVisibility(View.VISIBLE);
+			 }
+			 else {
+				 holder.details.setVisibility(View.GONE);
+			 }
 		 }
 		 else
 		 {
 			 holder.full_rate.setVisibility(View.GONE);
 			 holder.promo_rate.setText("NA");
 			 holder.details.setText("");
+			 holder.details.setVisibility(View.GONE);
 			 holder.container.setBackgroundResource(R.drawable.hotel_background);
 		 }
 		 
@@ -150,6 +180,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	static class ViewHolder
 	{
 		TextView full_rate_nights;
+		ImageView photo;
 		TextView promo;
 		TextView full_rate;
 		TextView promo_rate;
@@ -188,7 +219,11 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		if (disclaimer.equals("") == false)
 			text.append("&lt;p&gt;"+disclaimer+"&lt;/p&gt;");
 		if (room.mRateInfo != null && room.mRateInfo.mPromoDetailText != null) {
-			text.append("&lt;p&gt; "+room.mRateInfo.mPromoDetailText + "&lt;/p&gt; ");
+			text.append("&lt;p&gt; "+TextUtils.htmlEncode(room.mRateInfo.mPromoDetailText) + "&lt;/p&gt; ");
+		}
+		if (room.mRoomDescription != null) {
+			text.append("&lt;p&gt; &lt;b&gt;Room Description &lt;/b&gt; &lt;br&gt;");
+			text.append(TextUtils.htmlEncode(room.mRoomDescription) + "&lt;/p&gt; ");
 		}
 		if (room.mValueAdds != null && room.mValueAdds.length > 0) {
 			text.append("&lt;b&gt;You also get:&lt;/b&gt; &lt;ul&gt;");
@@ -228,9 +263,9 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				.append(room.mPolicy)
 				.append("&lt;/p&gt;");
 		}
-		text.append("&lt;p&gt; &lt;b&gt;Other Information&lt;/b&gt; &lt;br&gt;");
 		if (room.mOtherInformation != null && room.mOtherInformation.equals("") == false) {
-				text.append(room.mPolicy)
+			text.append("&lt;p&gt; &lt;b&gt;Other Information&lt;/b&gt; &lt;br&gt;");
+			text.append(room.mOtherInformation)
 				.append("&lt;br&gt;");
 		}
 		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);

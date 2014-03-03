@@ -2,7 +2,7 @@ package com.evature.util;
 
 
 public class Log {
-	static public final boolean DEBUG = false;
+	static public boolean DEBUG = false;
 	public static void d(String tag, String txt) {
 		if (DEBUG)
 			android.util.Log.d(tag, txt);

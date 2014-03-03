@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.Loader.OnLoadCompleteListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -20,12 +21,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.GridView;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.evature.util.Log;
@@ -71,7 +74,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
 	private Button mMapButton;
-
+	private ScrollView mScrollView;
 	HotelData mHotelData = null;
 
 	private View mView;
@@ -143,6 +146,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		mBookButton = (Button) mView.findViewById(R.id.selectButton);
 		mMapButton = (Button) mView.findViewById(R.id.mapButton);
+		mScrollView = (ScrollView) mView.findViewById(R.id.scrollView1);
 		
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
 		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
@@ -187,6 +191,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	@SuppressLint("ValidFragment")
 	void fillData() {
 		mPropertyDescription.loadData("","text/html", "utf-8");
+		mScrollView.setScrollY(0);
 		
 		XpediaDatabase db = MyApplication.getDb();
 		if (db == null) {
@@ -197,7 +202,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
 		String name = spannedName.toString();
 
-		Log.d(TAG, "Filling hotel data: "+mHotelName.getText()+ " --> "+name);
+		Log.d(TAG, "Filling hotel data: "+mHotelName.getText()+ "  --> "+name);
 
 //		Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -344,8 +349,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			}
 		});
 		
-		
-
 	}
 
 	@Override

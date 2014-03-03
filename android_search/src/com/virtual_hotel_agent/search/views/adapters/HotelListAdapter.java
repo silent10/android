@@ -178,56 +178,7 @@ public class HotelListAdapter extends BaseAdapter {
 			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
 		}
 
-		//holder.layout.setOnClickListener(mParent);
-		/*
-		 * holder.image.setOnClickListener(new View.OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder) ((View)v.getParent()).getTag();
-		 * 
-		 * String hotelInfo =
-		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
-		 * 
-		 * Intent intent = new Intent(mParent,ShowHotel.class);
-		 * 
-		 * intent.putExtra("hotelString", hotelInfo); intent.putExtra("hotelIndex", holder.hotelIndex );
-		 * 
-		 * mParent.startActivity(intent);
-		 * 
-		 * } });
-		 */
-
-		/*
-		 * holder.name.setOnClickListener(new View.OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder)
-		 * ((View)v.getParent().getParent()).getTag();
-		 * 
-		 * String hotelInfo =
-		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
-		 * 
-		 * Intent intent = new Intent(mParent,ShowHotel.class);
-		 * 
-		 * intent.putExtra("hotelString", hotelInfo); intent.putExtra("hotelIndex", holder.hotelIndex );
-		 * 
-		 * mParent.startActivity(intent);
-		 * 
-		 * } });
-		 * 
-		 * holder.rating.setOnClickListener(new View.OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder) ((View)v.getParent()).getTag();
-		 * 
-		 * String hotelInfo =
-		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
-		 * 
-		 * Intent intent = new Intent(mParent,ShowHotel.class);
-		 * 
-		 * intent.putExtra("hotelString", hotelInfo); intent.putExtra("hotelIndex", holder.hotelIndex );
-		 * 
-		 * mParent.startActivity(intent);
-		 * 
-		 * } });
-		 */
+		
 		return convertView;
 	}
 
