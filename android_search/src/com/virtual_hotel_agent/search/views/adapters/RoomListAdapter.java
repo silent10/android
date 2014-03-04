@@ -67,9 +67,22 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		this.disclaimer = disclaimer;
 	}
 
+	private View fillerView(View view, ViewGroup parent) {
+		if (view == null) {
+			view = mInflater.inflate(R.layout.row_filler, parent, false);
+			view.setClickable(false);
+			view.setEnabled(false);
+		}
+		return view;
+	}
+
 	
 	@Override
 	public View getGroupView(int position, boolean isExpanded, View convertView, ViewGroup parent) {
+		if (getGroupType(position) == 1) {
+			return fillerView(convertView, parent);
+		}
+		
 		 ViewHolder holder;
 		 if (convertView == null) 
 		 {
@@ -360,6 +373,10 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public int getChildrenCount(int groupPosition) {
+		if (getGroupType(groupPosition) == 1) {
+			// this is a filler row
+			return 0;
+		}
 		return 1;
 	}
 
@@ -376,7 +393,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public boolean isChildSelectable(int groupPosition, int childPosition) {
-		return true;
+		return false;
 	}
 	
 
@@ -393,7 +410,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		if (mHotel.mSummary.roomDetails == null) {
 			return 0;
 		}
-		return mHotel.mSummary.roomDetails.length;
+		return mHotel.mSummary.roomDetails.length + 1;
 	}
 
 
@@ -403,5 +420,18 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		return groupPosition;
 	}
 
+	@Override
+	public int getGroupTypeCount() {
+		return 2;
+	}
+	
+	@Override
+	public int getGroupType(int groupPosition) {
+		if (groupPosition >= mHotel.mSummary.roomDetails.length) {
+			// filler row
+			return 1;
+		}
+		return 0;
+	}
 
 }

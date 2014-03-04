@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:freezesText="true"
-            android:text="hotel namehotel namehotel namehotel namehotel namehotel namehotel namehotel namehotel namehotel name"
+            android:text="hotel name"
             android:textColor="#FF000000"
             android:textSize="18sp"
             android:textStyle="bold"

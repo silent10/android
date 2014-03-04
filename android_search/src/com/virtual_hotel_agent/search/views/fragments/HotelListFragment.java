@@ -31,7 +31,7 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
+import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
@@ -39,7 +39,7 @@ import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
 
-public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskInterface {
+public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
 
 	@Inject protected EventManager eventManager;
 	

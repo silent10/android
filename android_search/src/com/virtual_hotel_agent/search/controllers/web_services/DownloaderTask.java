@@ -7,25 +7,25 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 
 import com.evature.util.Log;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
+import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
 abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject> {
 
 	static private final String TAG = DownloaderTask.class.getSimpleName();
 	
 	protected int id;
-	ArrayList<DownloaderTaskInterface> mListeners = new ArrayList<DownloaderTaskInterface>();
+	ArrayList<DownloaderTaskListenerInterface> mListeners = new ArrayList<DownloaderTaskListenerInterface>();
 
 	public DownloaderTask(int id) {
 		this.id = id;
 	}
 	
-	public void attach(DownloaderTaskInterface listener) {
+	public void attach(DownloaderTaskListenerInterface listener) {
 		mListeners.add(listener);
 	}
 
 	public void detach() {
-		mListeners = new ArrayList<DownloaderTaskInterface>();
+		mListeners = new ArrayList<DownloaderTaskListenerInterface>();
 	}
 
 	DownloaderStatus mProgress = DownloaderStatus.NotStarted;
@@ -53,7 +53,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 		Log.d(TAG, "onPostExecute");
 
 
-		for (DownloaderTaskInterface listener : mListeners) {
+		for (DownloaderTaskListenerInterface listener : mListeners) {
 			if (mProgress == DownloaderStatus.Finished) {
 				listener.endProgressDialog(getId(), result);
 			} else {
@@ -68,7 +68,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 		Log.d(TAG, "onPreExecute");
 
 		mProgress = DownloaderStatus.Started;
-		for (DownloaderTaskInterface listener : mListeners) {
+		for (DownloaderTaskListenerInterface listener : mListeners) {
 			listener.startProgressDialog(getId());
 		}
 
@@ -80,7 +80,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 
 		Log.d(TAG, "onProgressUpdate:" + mProgress);
 
-		for (DownloaderTaskInterface listener : mListeners) {
+		for (DownloaderTaskListenerInterface listener : mListeners) {
 			listener.updateProgress(getId(), mProgress);
 		}
 		super.onProgressUpdate(values);
