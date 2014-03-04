@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
+import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocol;
 
@@ -28,12 +28,12 @@ public class HotelListDownloaderTask extends DownloaderTask {
 		super(R.string.HOTELS);
 	}
 
-	public void initialize(MainActivity listener, EvaApiReply apiReply, String currencyCode) {
+	public void initialize(DownloaderTaskListenerInterface listener, Context context, EvaApiReply apiReply, String currencyCode) {
 		Log.i(TAG, "CTOR");
 		// mSearchQuery = searchQuery;
 		this.apiReply = apiReply;
 		attach(listener);
-		context = (Context)listener;
+		this.context = context;
 		mCurrencyCode = currencyCode;
 	}
 
