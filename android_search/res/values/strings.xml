@@ -22,9 +22,9 @@ Check us out at\n
     <string name="error_tts_init">Could not initialize text-to-speech</string>
     <string name="CHAT">CHAT</string>
     <string name="HOTELS">HOTELS</string>
-    <string name="HOTELS_MAP">MAP</string>
     <string name="HOTEL">HOTEL</string>
     <string name="ROOMS">ROOMS</string>
+    <string name="MAP">MAP</string>
     <string name="button_stop">Stop</string>
     <string name="people_per_room">Adults per room:</string>
     <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
