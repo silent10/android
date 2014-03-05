@@ -143,7 +143,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 //		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //			mView = inflater.inflate(R.layout.hotel_details_landscape, container, false);
 //		} else {
-		mView = inflater.inflate(R.layout.hotel_details_portrait, container, false);
+		mView = inflater.inflate(R.layout.fragment_hotel_details_portrait, container, false);
 //		}
 
 		mBookButton = (Button) mView.findViewById(R.id.selectButton);
@@ -196,7 +196,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mScrollView.setScrollY(0);
 		
 		XpediaDatabase db = MyApplication.getDb();
-		if (db == null) {
+		if (db == null || db.mHotelData == null || db.mHotelData.length <= mHotelIndex) {
 			return;
 		}
 

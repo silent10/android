@@ -48,7 +48,7 @@ public class HotelListAdapter extends BaseAdapter {
 	@Override
 	public int getCount() {
 		XpediaDatabase evaDb = getDb();
-		if (evaDb != null && evaDb.mHotelData != null) {
+		if (evaDb != null && evaDb.mHotelData != null && evaDb.mHotelData.length > 0) {
 			return evaDb.mHotelData.length+1;
 		}
 		return 0;
@@ -117,7 +117,7 @@ public class HotelListAdapter extends BaseAdapter {
 
 		String name = spannedName.toString();
 
-		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+//		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
 		/* Now we can retrieve all display-related infos */
 		// int width = display.getWidth();

@@ -91,6 +91,10 @@
         android:choiceMode="singleChoice"
         android:divider="@drawable/divider"
         android:childDivider="#00000000"
+        android:childIndicatorStart="0dp"
+        android:childIndicatorEnd="0dp"
+        android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay"
         android:groupIndicator="@android:color/transparent" >
 
     </ExpandableListView>

@@ -16,12 +16,12 @@ public class EvaLocation {
 						   // duration of the trip (so a location with index 11 is visited before a location with index
 						   // 21). An index number is unique for a locations in Locations (unless the same location visited
 						   // multiple times, for example home location at start and end of trip will have the same index)
-						   // but ???????Alt Locations???????? may have multiple locations with the same index, indicating alternatives
+						   // but "Alt Locations" may have multiple locations with the same index, indicating alternatives
 						   // for the same part of a trip. Index numbers are not serial, so indexes can be (0,1,11,21,22,
-						   // etc.). Index number ???????0???????? is unique and always represents the home location.
+						   // etc.). Index number "0" is unique and always represents the home location.
 
 	public int next = -1; // The index number of the location in a trip, if known.
-	public String allAirportCode; // Will be present in cities that have an ???????all airports???????? IATA code
+	public String allAirportCode; // Will be present in cities that have an "all airports" IATA code
 									// e.g. San Francisco, New York, etc.
 	public List<String> airports = null; // If a location is not an airport, this key provides 5 recommended airports
 											// for this location. Airports are named by their IATA code.
@@ -30,11 +30,11 @@ public class EvaLocation {
 							// name of the location will be given in as value instead. The format of this name is
 							// currently not set and MAY CHANGE. If you plan to use this field, please contact us.
 	public HashSet<String> actions; // Provides a list of actions requested for this location. Actions can include the
-								// following values: ???????Get There???????? (request any way to be transported there, mostly
-								// flights but can be train, bus etc.), ???????Get Accommodation????????, ???????Get Car????????.
+								// following values: "Get There" (request any way to be transported there, mostly
+								// flights but can be train, bus etc.), "Get Accommodation", "Get Car".
 	public RequestAttributes requestAttributes = null; // There are many general request attributes that apply to the
 														// entire request and not just some portion of it. Examples:
-														// ???????last minute deals???????? and ???????Low deposits????????.
+														// "last minute deals" and "Low deposits".
 
 	public double Latitude;
 	public double Longitude;
@@ -45,8 +45,11 @@ public class EvaLocation {
 	public EvaTime Stay = null;
 	public HashSet<String> purpose;
 	public String derivedFrom = "";
+	public HotelAttributes hotelAttributes = null;
 	
 	public FlightAttributes flightAttributes = null;
+	
+	
 
 	public EvaLocation(JSONObject location, List<String> parseErrors) {
 		try {
@@ -112,6 +115,9 @@ public class EvaLocation {
 			
 			if (location.has("Flight Attributes")) {
 				flightAttributes = new FlightAttributes(location.getJSONObject("Flight Attributes"), parseErrors);
+			}
+			if (location.has("Hotel Attributes")) {
+				hotelAttributes = new HotelAttributes(location.getJSONObject("Hotel Attributes"), parseErrors);
 			}
 			if (location.has("Purpose")) {
 				JSONArray jPurpose = location.getJSONArray("Purpose");

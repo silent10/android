@@ -139,7 +139,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				 holder.photo.setVisibility(View.VISIBLE);
 			 }
 			 else {
-				 holder.photo.setVisibility(View.GONE);
+				 holder.photo.setVisibility(View.INVISIBLE);
 			 }
 		 }
 
