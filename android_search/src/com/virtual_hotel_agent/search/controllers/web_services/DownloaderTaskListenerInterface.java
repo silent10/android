@@ -2,7 +2,7 @@ package com.virtual_hotel_agent.search.controllers.web_services;
 
 import org.json.JSONObject;
 
-public interface DownloaderTaskInterface {
+public interface DownloaderTaskListenerInterface {
 
 	enum DownloaderStatus {
 		NotStarted,

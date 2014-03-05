@@ -10,8 +10,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 
-import com.evature.util.Log;
 import com.evaapis.android.EvatureLocationUpdater;
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
@@ -34,8 +34,13 @@ public class MyApplication extends Application {
 
 		// if (!BuildConfig.DEBUG) // Not when in debug mode!
 		// The following line triggers the initialization of ACRA
-		ACRA.init(this); AcraInitialized = true;
+		if (BuildConfig.DEBUG == false) {
+			ACRA.init(this); 
+			AcraInitialized = true;
+		}
+		Log.DEBUG = BuildConfig.DEBUG;
 		Log.d(TAG, "onCreate");
+		
 
 		Resources resources = getResources();
 		mExpediaApiKey = resources.getString(R.string.EXPEDIA_API_KEY);

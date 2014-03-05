@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -26,16 +27,18 @@ import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.GridView;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.evature.util.Log;
+import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity;
+import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
@@ -71,8 +74,10 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
 	private Button mMapButton;
-
+	private ScrollView mScrollView;
 	HotelData mHotelData = null;
+	
+	@Inject protected EventManager eventManager;
 
 	private View mView;
 	private HotelGalleryAdapter mHotelGalleryAdapter;
@@ -138,11 +143,12 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 //		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
 //			mView = inflater.inflate(R.layout.hotel_details_landscape, container, false);
 //		} else {
-		mView = inflater.inflate(R.layout.hotel_details_portrait, container, false);
+		mView = inflater.inflate(R.layout.fragment_hotel_details_portrait, container, false);
 //		}
 
 		mBookButton = (Button) mView.findViewById(R.id.selectButton);
 		mMapButton = (Button) mView.findViewById(R.id.mapButton);
+		mScrollView = (ScrollView) mView.findViewById(R.id.scrollView1);
 		
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
 		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
@@ -187,9 +193,10 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	@SuppressLint("ValidFragment")
 	void fillData() {
 		mPropertyDescription.loadData("","text/html", "utf-8");
+		mScrollView.setScrollY(0);
 		
 		XpediaDatabase db = MyApplication.getDb();
-		if (db == null) {
+		if (db == null || db.mHotelData == null || db.mHotelData.length <= mHotelIndex) {
 			return;
 		}
 
@@ -197,7 +204,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
 		String name = spannedName.toString();
 
-		Log.d(TAG, "Filling hotel data: "+mHotelName.getText()+ " --> "+name);
+		Log.d(TAG, "Filling hotel data: "+mHotelName.getText()+ "  --> "+name);
 
 //		Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -306,10 +313,13 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 			@Override
 			public void onClick(View v) {
-				//Log.e(TAG, "PLEASE IMPLEMENT CHECKOUT");
-				Intent intent = new Intent(getActivity(), SelectRoomActivity.class);
-				intent.putExtra(SelectRoomActivity.HOTEL_INDEX, mHotelIndex);
-				getActivity().startActivityForResult(intent, 0);
+//				//Log.e(TAG, "PLEASE IMPLEMENT CHECKOUT");
+//				Intent intent = new Intent(getActivity(), SelectRoomActivity.class);
+//				intent.putExtra(SelectRoomActivity.HOTEL_INDEX, mHotelIndex);
+//				getActivity().startActivityForResult(intent, 0);
+//				
+				
+				eventManager.fire(new HotelSelected(mHotelIndex));
 			}
 		});
 		
@@ -344,8 +354,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			}
 		});
 		
-		
-
 	}
 
 	@Override

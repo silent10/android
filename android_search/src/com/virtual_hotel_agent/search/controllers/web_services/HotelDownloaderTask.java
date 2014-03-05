@@ -10,7 +10,7 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface.DownloaderStatus;
+import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
@@ -31,11 +31,11 @@ public class HotelDownloaderTask extends DownloaderTask {
 	int mHotelIndex;
 	Context mContext;
 
-	public HotelDownloaderTask(DownloaderTaskInterface listener, int hotelndex) {
+	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, Context context, int hotelndex) {
 		super( R.string.HOTEL);
 		Log.d(TAG, "CTOR");
 		attach(listener);
-		mContext = (Context) listener;
+		mContext = context;
 		mHotelIndex = hotelndex;
 	}
 

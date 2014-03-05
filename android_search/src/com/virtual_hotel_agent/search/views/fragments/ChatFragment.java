@@ -14,7 +14,6 @@ import android.widget.ListView;
 import com.evature.util.Log;
 import com.google.inject.Inject;
 import com.nhaarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
-import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingRightInAnimationAdapter;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemClicked;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
@@ -22,6 +21,7 @@ import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.views.adapters.ChatAdapter;
+import com.virtual_hotel_agent.search.views.adapters.ChatAnimAdapter;
 
 public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	
@@ -63,8 +63,8 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 //		mChatListModel.loadInstanceState(savedInstanceState);
 		mChatAdapter = new ChatAdapter(getActivity(), R.layout.row_vha_chat, R.id.label, mChatListModel);
 
-		mAnimAdapter = //new SwingBottomInAnimationAdapter(
-				new SwingRightInAnimationAdapter(mChatAdapter);//);
+		mAnimAdapter = new ChatAnimAdapter(mChatAdapter); //new SwingBottomInAnimationAdapter(
+				//new SwingRightInAnimationAdapter(mChatAdapter);//);
 		mAnimAdapter.setAbsListView(chatListView);
         chatListView.setAdapter(mAnimAdapter);
         	        
@@ -84,7 +84,6 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 
 	public void addChatItem(ChatItem chatItem) {
 		if (mChatAdapter != null) {
-			mAnimAdapter.reset();
 			mChatAdapter.add(chatItem);
 		}
 	}

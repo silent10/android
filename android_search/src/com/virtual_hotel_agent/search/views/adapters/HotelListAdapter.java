@@ -48,7 +48,7 @@ public class HotelListAdapter extends BaseAdapter {
 	@Override
 	public int getCount() {
 		XpediaDatabase evaDb = getDb();
-		if (evaDb != null && evaDb.mHotelData != null) {
+		if (evaDb != null && evaDb.mHotelData != null && evaDb.mHotelData.length > 0) {
 			return evaDb.mHotelData.length+1;
 		}
 		return 0;
@@ -117,7 +117,7 @@ public class HotelListAdapter extends BaseAdapter {
 
 		String name = spannedName.toString();
 
-		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+//		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
 		/* Now we can retrieve all display-related infos */
 		// int width = display.getWidth();
@@ -178,56 +178,7 @@ public class HotelListAdapter extends BaseAdapter {
 			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
 		}
 
-		//holder.layout.setOnClickListener(mParent);
-		/*
-		 * holder.image.setOnClickListener(new View.OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder) ((View)v.getParent()).getTag();
-		 * 
-		 * String hotelInfo =
-		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
-		 * 
-		 * Intent intent = new Intent(mParent,ShowHotel.class);
-		 * 
-		 * intent.putExtra("hotelString", hotelInfo); intent.putExtra("hotelIndex", holder.hotelIndex );
-		 * 
-		 * mParent.startActivity(intent);
-		 * 
-		 * } });
-		 */
-
-		/*
-		 * holder.name.setOnClickListener(new View.OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder)
-		 * ((View)v.getParent().getParent()).getTag();
-		 * 
-		 * String hotelInfo =
-		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
-		 * 
-		 * Intent intent = new Intent(mParent,ShowHotel.class);
-		 * 
-		 * intent.putExtra("hotelString", hotelInfo); intent.putExtra("hotelIndex", holder.hotelIndex );
-		 * 
-		 * mParent.startActivity(intent);
-		 * 
-		 * } });
-		 * 
-		 * holder.rating.setOnClickListener(new View.OnClickListener() {
-		 * 
-		 * @Override public void onClick(View v) { ViewHolder holder = (ViewHolder) ((View)v.getParent()).getTag();
-		 * 
-		 * String hotelInfo =
-		 * XpediaProtocolStatic.getExpediaHotelInformation(mEvaDb.mHotelData[holder.hotelIndex].mSummary.mHotelId);
-		 * 
-		 * Intent intent = new Intent(mParent,ShowHotel.class);
-		 * 
-		 * intent.putExtra("hotelString", hotelInfo); intent.putExtra("hotelIndex", holder.hotelIndex );
-		 * 
-		 * mParent.startActivity(intent);
-		 * 
-		 * } });
-		 */
+		
 		return convertView;
 	}
 
