@@ -25,6 +25,9 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
+import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.ScaleInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -34,7 +37,6 @@ import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
@@ -151,7 +153,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		return mView;
 	}
 
-	void setAdapter() {
+	private void setAdapter() {
 		
 		if (mEnabledPaging && mFooterView != null)
 			mHotelListView.removeFooterView(mFooterView);
@@ -172,7 +174,11 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		}
 
 		mAdapter = new HotelListAdapter(this);
-		mHotelListView.setAdapter(mAdapter);
+		
+		AnimationAdapter animAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
+		animAdapter.setAbsListView(mHotelListView);
+		mHotelListView.setAdapter(animAdapter);
+		
 		mHotelListView.setOnItemClickListener(this);
 	}
 
