@@ -371,6 +371,7 @@ public class XpediaProtocolStatic {
 		String urlString = HOTEL_AVAILABILITY_URL;
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
+		urlString += "&includeRoomImages=true";
 		urlString += "&hotelId=" + hotelId;
 		urlString += "&arrivalDate=" + arrivalDateParam + "&departureDate=" + departureDateParam;
 		urlString += "&room1="+numOfAdults;
@@ -384,7 +385,7 @@ public class XpediaProtocolStatic {
 				}
 			}
 		}
-		urlString += "&options=0";
+		urlString += "&options=ROOM_TYPES";
 
 		// LayoutInflater li = this.getLayoutInflater();
 		// LinearLayout foot = (LinearLayout) li.inflate(R.layout.listfoot, null);
@@ -398,7 +399,8 @@ public class XpediaProtocolStatic {
 				    .build()
 				   );
 		
-		return executeWithTimeout(context, urlString);
+		JSONObject result =  executeWithTimeout(context, urlString);
+		return result;
 	}
 
 	public static JSONObject getExpediaNext(Context context, String mQueryString, String currencyCode) {

@@ -5,7 +5,7 @@
   android:layout_width="fill_parent"
   android:layout_height="fill_parent"
   android:orientation="vertical"
-  android:background="@drawable/hotel_background"
+  android:background="@color/selected_room_list_item"
   android:descendantFocusability="blocksDescendants">
 
     <Button
@@ -13,7 +13,6 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_marginTop="4dip"
-         android:layout_marginBottom="4dip"
          android:layout_gravity="center_horizontal"
          android:textColor="@color/white"
          android:background="@drawable/custom_button_active"
@@ -35,8 +34,9 @@
      <WebView
           android:id="@+id/roomDescription"
           android:layout_width="fill_parent"
-          android:layout_height="wrap_content" >
-      </WebView>
+          android:layout_height="wrap_content"
+          android:layout_margin="4dp"
+           />
             
 
 </LinearLayout>

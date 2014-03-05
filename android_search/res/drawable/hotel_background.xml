@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+		 android:exitFadeDuration="@android:integer/config_shortAnimTime">
+
+	<item android:state_activated="true">
+	    <shape android:shape="rectangle">
+	        <gradient android:angle="270" android:endColor="@color/selected_room_list_item" android:startColor="#ffefefff" />
+	    </shape>
+	</item>
+	<item>
+		<shape android:shape="rectangle">
+	        <gradient android:angle="270" android:endColor="#ffc3c3c3" android:startColor="#ffefefef" />
+	    </shape>
+	</item>
+</selector>

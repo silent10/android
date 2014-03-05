@@ -115,7 +115,6 @@ android.support.v4.app.ActionBarDrawerToggleHoneycomb$SetIndicatorInfo -> androi
     java.lang.reflect.Method setHomeActionContentDescription -> b
     android.widget.ImageView upIndicatorView -> c
 android.support.v4.app.ActivityCompat -> android.support.v4.app.ActivityCompat:
-    63:67:boolean invalidateOptionsMenu(android.app.Activity) -> a
 android.support.v4.app.ActivityCompatHoneycomb -> android.support.v4.app.ActivityCompatHoneycomb:
     29:30:void invalidateOptionsMenu(android.app.Activity) -> a
 android.support.v4.app.ActivityCompatJB -> android.support.v4.app.ActivityCompatJB:
@@ -267,7 +266,6 @@ android.support.v4.app.Fragment -> android.support.v4.app.Fragment:
     452:452:int hashCode() -> hashCode
     457:472:java.lang.String toString() -> toString
     510:510:android.os.Bundle getArguments() -> g
-    522:527:void setInitialSavedState(android.support.v4.app.Fragment$SavedState) -> a
     563:563:android.support.v4.app.FragmentActivity getActivity() -> h
     570:573:android.content.res.Resources getResources() -> i
     583:583:java.lang.CharSequence getText(int) -> a
@@ -280,6 +278,7 @@ android.support.v4.app.Fragment -> android.support.v4.app.Fragment:
     724:724:void onHiddenChanged(boolean) -> b
     778:784:void setMenuVisibility(boolean) -> c
     800:805:void setUserVisibleHint(boolean) -> d
+    835:839:void startActivity(android.content.Intent) -> a
     867:867:void onActivityResult(int,int,android.content.Intent) -> a
     875:875:android.view.LayoutInflater getLayoutInflater(android.os.Bundle) -> b
     921:922:void onInflate(android.app.Activity,android.util.AttributeSet,android.os.Bundle) -> a
@@ -388,6 +387,7 @@ android.support.v4.app.FragmentActivity -> android.support.v4.app.FragmentActivi
     798:798:void onAttachFragment(android.support.v4.app.Fragment) -> a
     805:805:android.support.v4.app.FragmentManager getSupportFragmentManager() -> e
     814:818:void startActivityForResult(android.content.Intent,int) -> startActivityForResult
+    825:833:void startActivityFromFragment(android.support.v4.app.Fragment,android.content.Intent,int) -> a
     837:844:void invalidateSupportFragment(java.lang.String) -> a
     863:875:android.support.v4.app.LoaderManagerImpl getLoaderManager(java.lang.String,boolean,boolean) -> a
 android.support.v4.app.FragmentActivity$1 -> android.support.v4.app.FragmentActivity$1:
@@ -411,9 +411,6 @@ android.support.v4.app.FragmentManager -> android.support.v4.app.FragmentManager
     boolean executePendingTransactions() -> b
     android.support.v4.app.Fragment findFragmentByTag(java.lang.String) -> a
     void popBackStack(int,int) -> a
-    void putFragment(android.os.Bundle,java.lang.String,android.support.v4.app.Fragment) -> a
-    android.support.v4.app.Fragment getFragment(android.os.Bundle,java.lang.String) -> a
-    android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment) -> a
 android.support.v4.app.FragmentManager$BackStackEntry -> android.support.v4.app.FragmentManager$BackStackEntry:
 android.support.v4.app.FragmentManager$OnBackStackChangedListener -> android.support.v4.app.FragmentManager$OnBackStackChangedListener:
     void onBackStackChanged() -> a
@@ -454,20 +451,19 @@ android.support.v4.app.FragmentManagerImpl -> android.support.v4.app.FragmentMan
     498:506:void popBackStack(int,int) -> a
     545:550:void putFragment(android.os.Bundle,java.lang.String,android.support.v4.app.Fragment) -> a
     554:567:android.support.v4.app.Fragment getFragment(android.os.Bundle,java.lang.String) -> a
-    572:580:android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment) -> a
     585:595:java.lang.String toString() -> toString
     600:709:void dump(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[]) -> a
     720:730:android.view.animation.Animation makeOpenCloseAnimation(android.content.Context,float,float,float,float) -> a
     734:737:android.view.animation.Animation makeFadeAnimation(android.content.Context,float,float) -> a
     742:796:android.view.animation.Animation loadAnimation(android.support.v4.app.Fragment,int,boolean,int) -> a
-    800:809:void performPendingDeferredStart(android.support.v4.app.Fragment) -> b
+    800:809:void performPendingDeferredStart(android.support.v4.app.Fragment) -> a
     814:1063:void moveToState(android.support.v4.app.Fragment,int,int,int,boolean) -> a
-    1066:1067:void moveToState(android.support.v4.app.Fragment) -> c
+    1066:1067:void moveToState(android.support.v4.app.Fragment) -> b
     1070:1071:void moveToState(int,boolean) -> a
     1074:1104:void moveToState(int,int,int,boolean) -> a
     1107:1115:void startPendingDeferredFragments() -> d
-    1118:1134:void makeActive(android.support.v4.app.Fragment) -> d
-    1137:1149:void makeInactive(android.support.v4.app.Fragment) -> e
+    1118:1134:void makeActive(android.support.v4.app.Fragment) -> c
+    1137:1149:void makeInactive(android.support.v4.app.Fragment) -> d
     1152:1171:void addFragment(android.support.v4.app.Fragment,boolean) -> a
     1174:1188:void removeFragment(android.support.v4.app.Fragment,int,int) -> a
     1191:1207:void hideFragment(android.support.v4.app.Fragment,int,int) -> b
@@ -486,8 +482,8 @@ android.support.v4.app.FragmentManagerImpl -> android.support.v4.app.FragmentMan
     1476:1481:void addBackStackState(android.support.v4.app.BackStackRecord) -> b
     1484:1543:boolean popBackStackState(android.os.Handler,java.lang.String,int,int) -> a
     1547:1562:java.util.ArrayList retainNonConfig() -> g
-    1566:1579:void saveFragmentViewState(android.support.v4.app.Fragment) -> f
-    1582:1611:android.os.Bundle saveFragmentBasicState(android.support.v4.app.Fragment) -> g
+    1566:1579:void saveFragmentViewState(android.support.v4.app.Fragment) -> e
+    1582:1611:android.os.Bundle saveFragmentBasicState(android.support.v4.app.Fragment) -> f
     1617:1727:android.os.Parcelable saveAllState() -> h
     1733:1840:void restoreAllState(android.os.Parcelable,java.util.ArrayList) -> a
     1844:1848:void attachActivity(android.support.v4.app.FragmentActivity,android.support.v4.app.FragmentContainer,android.support.v4.app.Fragment) -> a
@@ -545,6 +541,20 @@ android.support.v4.app.FragmentManagerState$1 -> android.support.v4.app.Fragment
     363:363:java.lang.Object[] newArray(int) -> newArray
     363:363:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
 android.support.v4.app.FragmentPagerAdapter -> android.support.v4.app.FragmentPagerAdapter:
+    android.support.v4.app.FragmentManager mFragmentManager -> a
+    android.support.v4.app.FragmentTransaction mCurTransaction -> b
+    android.support.v4.app.Fragment mCurrentPrimaryItem -> c
+    android.support.v4.app.Fragment getItem(int) -> a
+    80:80:void startUpdate(android.view.ViewGroup) -> a
+    84:107:java.lang.Object instantiateItem(android.view.ViewGroup,int) -> a
+    112:118:void destroyItem(android.view.ViewGroup,int,java.lang.Object) -> a
+    122:134:void setPrimaryItem(android.view.ViewGroup,int,java.lang.Object) -> b
+    138:143:void finishUpdate(android.view.ViewGroup) -> b
+    147:147:boolean isViewFromObject(android.view.View,java.lang.Object) -> a
+    152:152:android.os.Parcelable saveState() -> a
+    157:157:void restoreState(android.os.Parcelable,java.lang.ClassLoader) -> a
+    169:169:long getItemId(int) -> b
+    173:173:java.lang.String makeFragmentName(int,long) -> a
 android.support.v4.app.FragmentState -> android.support.v4.app.FragmentState:
     java.lang.String mClassName -> a
     int mIndex -> b
@@ -567,20 +577,6 @@ android.support.v4.app.FragmentState$1 -> android.support.v4.app.FragmentState$1
     137:137:java.lang.Object[] newArray(int) -> newArray
     137:137:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
 android.support.v4.app.FragmentStatePagerAdapter -> android.support.v4.app.FragmentStatePagerAdapter:
-    android.support.v4.app.FragmentManager mFragmentManager -> a
-    android.support.v4.app.FragmentTransaction mCurTransaction -> b
-    java.util.ArrayList mSavedState -> c
-    java.util.ArrayList mFragments -> d
-    android.support.v4.app.Fragment mCurrentPrimaryItem -> e
-    android.support.v4.app.Fragment getItem(int) -> a
-    86:86:void startUpdate(android.view.ViewGroup) -> a
-    94:121:java.lang.Object instantiateItem(android.view.ViewGroup,int) -> a
-    126:140:void destroyItem(android.view.ViewGroup,int,java.lang.Object) -> a
-    144:156:void setPrimaryItem(android.view.ViewGroup,int,java.lang.Object) -> b
-    160:165:void finishUpdate(android.view.ViewGroup) -> b
-    169:169:boolean isViewFromObject(android.view.View,java.lang.Object) -> a
-    174:191:android.os.Parcelable saveState() -> a
-    196:224:void restoreState(android.os.Parcelable,java.lang.ClassLoader) -> a
 android.support.v4.app.FragmentTabHost -> android.support.v4.app.FragmentTabHost:
     java.util.ArrayList mTabs -> a
     android.content.Context mContext -> b
@@ -1004,9 +1000,24 @@ android.support.v4.util.LongSparseArray -> android.support.v4.util.LongSparseArr
     363:363:int idealLongArraySize(int) -> b
     24:24:java.lang.Object clone() -> clone
 android.support.v4.util.LruCache -> android.support.v4.util.LruCache:
-    int maxSize -> a
-    int hitCount -> b
-    int missCount -> c
+    java.util.LinkedHashMap map -> a
+    int size -> b
+    int maxSize -> c
+    int putCount -> d
+    int createCount -> e
+    int evictionCount -> f
+    int hitCount -> g
+    int missCount -> h
+    62:105:java.lang.Object get(java.lang.Object) -> a
+    116:135:java.lang.Object put(java.lang.Object,java.lang.Object) -> a
+    149:169:void trimToSize(int) -> a
+    177:193:java.lang.Object remove(java.lang.Object) -> b
+    211:211:void entryRemoved(boolean,java.lang.Object,java.lang.Object,java.lang.Object) -> a
+    229:229:java.lang.Object create(java.lang.Object) -> c
+    233:237:int safeSizeOf(java.lang.Object,java.lang.Object) -> c
+    248:248:int sizeOf(java.lang.Object,java.lang.Object) -> b
+    255:256:void evictAll() -> a
+    317:317:java.util.Map snapshot() -> b
     321:323:java.lang.String toString() -> toString
 android.support.v4.util.SparseArrayCompat -> android.support.v4.util.SparseArrayCompat:
     java.lang.Object DELETED -> a
@@ -1288,8 +1299,8 @@ android.support.v4.view.PagerAdapter -> android.support.v4.view.PagerAdapter:
     276:277:void notifyDataSetChanged() -> c
     285:286:void registerDataSetObserver(android.database.DataSetObserver) -> a
     294:295:void unregisterDataSetObserver(android.database.DataSetObserver) -> b
-    307:307:java.lang.CharSequence getPageTitle(int) -> b
-    318:318:float getPageWidth(int) -> c
+    307:307:java.lang.CharSequence getPageTitle(int) -> c
+    318:318:float getPageWidth(int) -> d
 android.support.v4.view.PagerTabStrip -> android.support.v4.view.PagerTabStrip:
     int mIndicatorColor -> f
     int mIndicatorHeight -> g
@@ -1542,27 +1553,28 @@ android.support.v4.view.ViewPager -> android.support.v4.view.ViewPager:
     int mFlingDistance -> M
     int mCloseEnough -> N
     boolean mFakeDragging -> O
-    android.support.v4.widget.EdgeEffectCompat mLeftEdge -> P
-    android.support.v4.widget.EdgeEffectCompat mRightEdge -> Q
-    boolean mFirstLayout -> R
-    boolean mNeedCalculatePageOffsets -> S
-    boolean mCalledSuper -> T
-    int mDecorChildCount -> U
-    android.support.v4.view.ViewPager$OnPageChangeListener mOnPageChangeListener -> V
-    android.support.v4.view.ViewPager$OnPageChangeListener mInternalPageChangeListener -> W
-    android.support.v4.view.ViewPager$OnAdapterChangeListener mAdapterChangeListener -> Z
-    android.support.v4.view.ViewPager$PageTransformer mPageTransformer -> aa
-    java.lang.reflect.Method mSetChildrenDrawingOrderEnabled -> ab
-    int mDrawingOrder -> ac
-    java.util.ArrayList mDrawingOrderedChildren -> ad
-    android.support.v4.view.ViewPager$ViewPositionComparator sPositionComparator -> ae
-    java.lang.Runnable mEndScrollRunnable -> af
-    int mScrollState -> ag
+    long mFakeDragBeginTime -> P
+    android.support.v4.widget.EdgeEffectCompat mLeftEdge -> Q
+    android.support.v4.widget.EdgeEffectCompat mRightEdge -> R
+    boolean mFirstLayout -> S
+    boolean mNeedCalculatePageOffsets -> T
+    boolean mCalledSuper -> U
+    int mDecorChildCount -> V
+    android.support.v4.view.ViewPager$OnPageChangeListener mOnPageChangeListener -> W
+    android.support.v4.view.ViewPager$OnPageChangeListener mInternalPageChangeListener -> Z
+    android.support.v4.view.ViewPager$OnAdapterChangeListener mAdapterChangeListener -> aa
+    android.support.v4.view.ViewPager$PageTransformer mPageTransformer -> ab
+    java.lang.reflect.Method mSetChildrenDrawingOrderEnabled -> ac
+    int mDrawingOrder -> ad
+    java.util.ArrayList mDrawingOrderedChildren -> ae
+    android.support.v4.view.ViewPager$ViewPositionComparator sPositionComparator -> af
+    java.lang.Runnable mEndScrollRunnable -> ag
+    int mScrollState -> ah
     352:377:void initViewPager() -> a
     381:383:void onDetachedFromWindow() -> onDetachedFromWindow
     386:398:void setScrollState(int) -> setScrollState
     406:449:void setAdapter(android.support.v4.view.PagerAdapter) -> setAdapter
-    452:460:void removeNonDecorViews() -> g
+    452:460:void removeNonDecorViews() -> j
     468:468:android.support.v4.view.PagerAdapter getAdapter() -> getAdapter
     472:473:void setOnAdapterChangeListener(android.support.v4.view.ViewPager$OnAdapterChangeListener) -> setOnAdapterChangeListener
     476:476:int getClientWidth() -> getClientWidth
@@ -1590,7 +1602,7 @@ android.support.v4.view.ViewPager -> android.support.v4.view.ViewPager:
     842:908:void dataSetChanged() -> b
     911:912:void populate() -> c
     915:1099:void populate(int) -> a
-    1102:1115:void sortChildDrawingOrder() -> h
+    1102:1115:void sortChildDrawingOrder() -> k
     1118:1201:void calculatePageOffsets(android.support.v4.view.ViewPager$ItemInfo,int,android.support.v4.view.ViewPager$ItemInfo) -> a
     1257:1263:android.os.Parcelable onSaveInstanceState() -> onSaveInstanceState
     1268:1284:void onRestoreInstanceState(android.os.Parcelable) -> onRestoreInstanceState
@@ -1612,21 +1624,25 @@ android.support.v4.view.ViewPager -> android.support.v4.view.ViewPager:
     1767:1773:void enableLayers(boolean) -> b
     1783:1914:boolean onInterceptTouchEvent(android.view.MotionEvent) -> onInterceptTouchEvent
     1919:2035:boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
-    2039:2082:boolean performDrag(float) -> b
-    2090:2128:android.support.v4.view.ViewPager$ItemInfo infoForCurrentScrollPosition() -> i
+    2039:2082:boolean performDrag(float) -> c
+    2090:2128:android.support.v4.view.ViewPager$ItemInfo infoForCurrentScrollPosition() -> l
     2133:2148:int determineTargetPage(int,float,int,int) -> a
     2153:2191:void draw(android.graphics.Canvas) -> draw
     2195:2235:void onDraw(android.graphics.Canvas) -> onDraw
+    2255:2271:boolean beginFakeDrag() -> d
+    2281:2302:void endFakeDrag() -> e
+    2312:2350:void fakeDragBy(float) -> b
+    2362:2362:boolean isFakeDragging() -> f
     2366:2378:void onSecondaryPointerUp(android.view.MotionEvent) -> a
-    2381:2388:void endDrag() -> j
+    2381:2388:void endDrag() -> m
     2391:2403:void setScrollingCacheEnabled(boolean) -> setScrollingCacheEnabled
     2417:2436:boolean canScroll(android.view.View,boolean,int,int,int) -> a
     2442:2442:boolean dispatchKeyEvent(android.view.KeyEvent) -> dispatchKeyEvent
     2454:2476:boolean executeKeyEvent(android.view.KeyEvent) -> a
     2480:2542:boolean arrowScroll(int) -> c
     2546:2568:android.graphics.Rect getChildRectInPagerCoordinates(android.graphics.Rect,android.view.View) -> a
-    2572:2576:boolean pageLeft() -> d
-    2580:2584:boolean pageRight() -> e
+    2572:2576:boolean pageLeft() -> g
+    2580:2584:boolean pageRight() -> h
     2592:2629:void addFocusables(java.util.ArrayList,int,int) -> addFocusables
     2639:2648:void addTouchables(java.util.ArrayList) -> addTouchables
     2659:2680:boolean onRequestFocusInDescendants(int,android.graphics.Rect) -> onRequestFocusInDescendants
@@ -1638,7 +1654,7 @@ android.support.v4.view.ViewPager -> android.support.v4.view.ViewPager:
     82:82:void access$000(android.support.v4.view.ViewPager,int) -> a
     82:82:android.support.v4.view.PagerAdapter access$200(android.support.v4.view.ViewPager) -> a
     82:82:int access$300(android.support.v4.view.ViewPager) -> b
-    82:82:int[] access$400() -> f
+    82:82:int[] access$400() -> i
 android.support.v4.view.ViewPager$1 -> android.support.v4.view.ViewPager$1:
     117:117:int compare(android.support.v4.view.ViewPager$ItemInfo,android.support.v4.view.ViewPager$ItemInfo) -> a
     114:114:int compare(java.lang.Object,java.lang.Object) -> compare
@@ -3075,6 +3091,7 @@ com.evature.util.Log -> com.a.a.g:
     9:9:void d(java.lang.String,java.lang.String) -> a
     19:19:void e(java.lang.String,java.lang.String) -> b
     24:24:void e(java.lang.String,java.lang.String,java.lang.Throwable) -> a
+    27:27:java.lang.String getStackTraceString(java.lang.Throwable) -> a
     33:33:void i(java.lang.String,java.lang.String) -> c
     62:62:void w(java.lang.String,java.lang.String) -> d
     67:67:void w(java.lang.String,java.lang.String,java.lang.Throwable) -> b
@@ -4239,8 +4256,10 @@ com.google.analytics.tracking.android.Logger$LogLevel -> com.google.analytics.tr
 com.google.analytics.tracking.android.MapBuilder -> com.google.analytics.tracking.android.au:
     java.util.Map map -> a
     57:63:com.google.analytics.tracking.android.MapBuilder set(java.lang.String,java.lang.String) -> a
+    67:72:com.google.analytics.tracking.android.MapBuilder setAll(java.util.Map) -> a
     81:81:java.util.Map build() -> a
     88:91:com.google.analytics.tracking.android.MapBuilder createAppView() -> b
+    99:106:com.google.analytics.tracking.android.MapBuilder createEvent(java.lang.String,java.lang.String,java.lang.String,java.lang.Long) -> a
     164:169:com.google.analytics.tracking.android.MapBuilder createException(java.lang.String,java.lang.Boolean) -> a
     260:283:com.google.analytics.tracking.android.MapBuilder setCampaignParamsFromUrl(java.lang.String) -> a
     287:290:java.lang.String booleanToString(java.lang.Boolean) -> a
@@ -6636,13 +6655,16 @@ com.google.android.gms.maps.CameraUpdateFactory -> com.google.android.gms.maps.b
     com.google.android.gms.maps.internal.ICameraUpdateFactoryDelegate ct() -> a
     void a(com.google.android.gms.maps.internal.ICameraUpdateFactoryDelegate) -> a
     com.google.android.gms.maps.CameraUpdate newCameraPosition(com.google.android.gms.maps.model.CameraPosition) -> a
+    com.google.android.gms.maps.CameraUpdate newLatLng(com.google.android.gms.maps.model.LatLng) -> a
     com.google.android.gms.maps.CameraUpdate newLatLngBounds(com.google.android.gms.maps.model.LatLngBounds,int) -> a
     com.google.android.gms.maps.CameraUpdate newLatLngBounds(com.google.android.gms.maps.model.LatLngBounds,int,int,int) -> a
 com.google.android.gms.maps.GoogleMap -> com.google.android.gms.maps.c:
     com.google.android.gms.maps.internal.IGoogleMapDelegate pf -> a
     com.google.android.gms.maps.internal.IGoogleMapDelegate cu() -> a
     void moveCamera(com.google.android.gms.maps.CameraUpdate) -> a
+    void animateCamera(com.google.android.gms.maps.CameraUpdate) -> b
     com.google.android.gms.maps.model.Marker addMarker(com.google.android.gms.maps.model.MarkerOptions) -> a
+    void clear() -> b
     void setOnInfoWindowClickListener(com.google.android.gms.maps.GoogleMap$OnInfoWindowClickListener) -> a
 com.google.android.gms.maps.GoogleMap$10 -> com.google.android.gms.maps.d:
     com.google.android.gms.maps.GoogleMap$OnInfoWindowClickListener pt -> a
@@ -7294,7 +7316,9 @@ com.google.android.gms.maps.model.LatLngCreator -> com.google.android.gms.maps.m
 com.google.android.gms.maps.model.Marker -> com.google.android.gms.maps.model.j:
     com.google.android.gms.maps.model.internal.d qz -> a
     com.google.android.gms.maps.model.LatLng getPosition() -> a
+    void setIcon(com.google.android.gms.maps.model.BitmapDescriptor) -> a
     java.lang.String getTitle() -> b
+    void showInfoWindow() -> c
     boolean equals(java.lang.Object) -> equals
     int hashCode() -> hashCode
 com.google.android.gms.maps.model.MarkerOptions -> com.google.android.gms.maps.model.MarkerOptions:
@@ -7319,6 +7343,7 @@ com.google.android.gms.maps.model.MarkerOptions -> com.google.android.gms.maps.m
     android.os.IBinder cN() -> b
     com.google.android.gms.maps.model.MarkerOptions position(com.google.android.gms.maps.model.LatLng) -> a
     com.google.android.gms.maps.model.MarkerOptions icon(com.google.android.gms.maps.model.BitmapDescriptor) -> a
+    com.google.android.gms.maps.model.MarkerOptions anchor(float,float) -> a
     com.google.android.gms.maps.model.MarkerOptions title(java.lang.String) -> a
     com.google.android.gms.maps.model.MarkerOptions snippet(java.lang.String) -> b
     com.google.android.gms.maps.model.LatLng getPosition() -> c
@@ -11897,14 +11922,393 @@ com.google.tagmanager.protobuf.WireFormat$JavaType -> com.google.tagmanager.a.br
     com.google.tagmanager.protobuf.WireFormat$JavaType[] $VALUES -> k
     49:49:com.google.tagmanager.protobuf.WireFormat$JavaType[] values() -> values
     49:49:com.google.tagmanager.protobuf.WireFormat$JavaType valueOf(java.lang.String) -> valueOf
-com.virtual_hotel_agent.components.MyViewPager -> com.virtual_hotel_agent.components.MyViewPager:
-    24:32:void setMyScroller() -> g
-com.virtual_hotel_agent.components.MyViewPager$MyScroller -> com.virtual_hotel_agent.components.a:
-    com.virtual_hotel_agent.components.MyViewPager this$0 -> a
-    44:49:void startScroll(int,int,int,int,int) -> startScroll
-com.virtual_hotel_agent.components.S3BlockingDeque -> com.virtual_hotel_agent.components.b:
-com.virtual_hotel_agent.components.S3Deque -> com.virtual_hotel_agent.components.c:
-com.virtual_hotel_agent.components.S3DrawableBackgroundLoader -> com.virtual_hotel_agent.components.d:
+com.viewpagerindicator.CirclePageIndicator -> com.viewpagerindicator.CirclePageIndicator:
+    float mRadius -> a
+    android.graphics.Paint mPaintPageFill -> b
+    android.graphics.Paint mPaintStroke -> c
+    android.graphics.Paint mPaintFill -> d
+    android.support.v4.view.ViewPager mViewPager -> e
+    android.support.v4.view.ViewPager$OnPageChangeListener mListener -> f
+    int mCurrentPage -> g
+    int mSnapPage -> h
+    float mPageOffset -> i
+    int mScrollState -> j
+    int mOrientation -> k
+    boolean mCentered -> l
+    boolean mSnap -> m
+    int mTouchSlop -> n
+    float mLastMotionX -> o
+    int mActivePointerId -> p
+    boolean mIsDragging -> q
+    118:120:void setCentered(boolean) -> setCentered
+    127:129:void setPageColor(int) -> setPageColor
+    132:132:int getPageColor() -> getPageColor
+    136:138:void setFillColor(int) -> setFillColor
+    141:141:int getFillColor() -> getFillColor
+    145:155:void setOrientation(int) -> setOrientation
+    158:158:int getOrientation() -> getOrientation
+    162:164:void setStrokeColor(int) -> setStrokeColor
+    167:167:int getStrokeColor() -> getStrokeColor
+    171:173:void setStrokeWidth(float) -> setStrokeWidth
+    176:176:float getStrokeWidth() -> getStrokeWidth
+    180:182:void setRadius(float) -> setRadius
+    185:185:float getRadius() -> getRadius
+    189:191:void setSnap(boolean) -> setSnap
+    199:279:void onDraw(android.graphics.Canvas) -> onDraw
+    282:361:boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
+    366:378:void setViewPager(android.support.v4.view.ViewPager) -> setViewPager
+    388:394:void setCurrentItem(int) -> setCurrentItem
+    403:408:void onPageScrollStateChanged(int) -> a_
+    412:419:void onPageScrolled(int,float,int) -> a
+    423:432:void onPageSelected(int) -> b_
+    436:437:void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener) -> setOnPageChangeListener
+    446:451:void onMeasure(int,int) -> onMeasure
+    462:478:int measureLong(int) -> c
+    490:504:int measureShort(int) -> d
+    509:514:void onRestoreInstanceState(android.os.Parcelable) -> onRestoreInstanceState
+    518:521:android.os.Parcelable onSaveInstanceState() -> onSaveInstanceState
+com.viewpagerindicator.CirclePageIndicator$SavedState -> com.viewpagerindicator.CirclePageIndicator$SavedState:
+    int currentPage -> a
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    538:540:void writeToParcel(android.os.Parcel,int) -> writeToParcel
+com.viewpagerindicator.CirclePageIndicator$SavedState$1 -> com.viewpagerindicator.a:
+    546:546:com.viewpagerindicator.CirclePageIndicator$SavedState createFromParcel(android.os.Parcel) -> a
+    551:551:com.viewpagerindicator.CirclePageIndicator$SavedState[] newArray(int) -> a
+    1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+    1:1:java.lang.Object[] newArray(int) -> newArray
+com.viewpagerindicator.LinePageIndicator -> com.viewpagerindicator.LinePageIndicator:
+    android.graphics.Paint mPaintUnselected -> a
+    android.graphics.Paint mPaintSelected -> b
+    android.support.v4.view.ViewPager mViewPager -> c
+    android.support.v4.view.ViewPager$OnPageChangeListener mListener -> d
+    int mCurrentPage -> e
+    boolean mCentered -> f
+    float mLineWidth -> g
+    float mGapWidth -> h
+    int mTouchSlop -> i
+    float mLastMotionX -> j
+    int mActivePointerId -> k
+    boolean mIsDragging -> l
+    102:104:void setCentered(boolean) -> setCentered
+    111:113:void setUnselectedColor(int) -> setUnselectedColor
+    116:116:int getUnselectedColor() -> getUnselectedColor
+    120:122:void setSelectedColor(int) -> setSelectedColor
+    125:125:int getSelectedColor() -> getSelectedColor
+    129:131:void setLineWidth(float) -> setLineWidth
+    134:134:float getLineWidth() -> getLineWidth
+    138:141:void setStrokeWidth(float) -> setStrokeWidth
+    144:144:float getStrokeWidth() -> getStrokeWidth
+    148:150:void setGapWidth(float) -> setGapWidth
+    153:153:float getGapWidth() -> getGapWidth
+    158:191:void onDraw(android.graphics.Canvas) -> onDraw
+    194:273:boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
+    278:291:void setViewPager(android.support.v4.view.ViewPager) -> setViewPager
+    301:307:void setCurrentItem(int) -> setCurrentItem
+    316:319:void onPageScrollStateChanged(int) -> a_
+    323:326:void onPageScrolled(int,float,int) -> a
+    330:336:void onPageSelected(int) -> b_
+    340:341:void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener) -> setOnPageChangeListener
+    345:346:void onMeasure(int,int) -> onMeasure
+    357:372:int measureWidth(int) -> c
+    384:398:int measureHeight(int) -> d
+    403:407:void onRestoreInstanceState(android.os.Parcelable) -> onRestoreInstanceState
+    411:414:android.os.Parcelable onSaveInstanceState() -> onSaveInstanceState
+com.viewpagerindicator.LinePageIndicator$SavedState -> com.viewpagerindicator.LinePageIndicator$SavedState:
+    int currentPage -> a
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    431:433:void writeToParcel(android.os.Parcel,int) -> writeToParcel
+com.viewpagerindicator.LinePageIndicator$SavedState$1 -> com.viewpagerindicator.b:
+    439:439:com.viewpagerindicator.LinePageIndicator$SavedState createFromParcel(android.os.Parcel) -> a
+    444:444:com.viewpagerindicator.LinePageIndicator$SavedState[] newArray(int) -> a
+    1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+    1:1:java.lang.Object[] newArray(int) -> newArray
+com.viewpagerindicator.PageIndicator -> com.viewpagerindicator.c:
+com.viewpagerindicator.R -> com.viewpagerindicator.d:
+com.viewpagerindicator.R$attr -> com.viewpagerindicator.e:
+    int centered -> centered
+    int clipPadding -> clipPadding
+    int fadeDelay -> fadeDelay
+    int fadeLength -> fadeLength
+    int fades -> fades
+    int fillColor -> fillColor
+    int footerColor -> footerColor
+    int footerIndicatorHeight -> footerIndicatorHeight
+    int footerIndicatorStyle -> footerIndicatorStyle
+    int footerIndicatorUnderlinePadding -> footerIndicatorUnderlinePadding
+    int footerLineHeight -> footerLineHeight
+    int footerPadding -> footerPadding
+    int gapWidth -> gapWidth
+    int linePosition -> linePosition
+    int lineWidth -> lineWidth
+    int pageColor -> pageColor
+    int radius -> radius
+    int selectedBold -> selectedBold
+    int selectedColor -> selectedColor
+    int snap -> snap
+    int strokeColor -> strokeColor
+    int strokeWidth -> strokeWidth
+    int titlePadding -> titlePadding
+    int topPadding -> topPadding
+    int unselectedColor -> unselectedColor
+    int vpiCirclePageIndicatorStyle -> vpiCirclePageIndicatorStyle
+    int vpiIconPageIndicatorStyle -> vpiIconPageIndicatorStyle
+    int vpiLinePageIndicatorStyle -> vpiLinePageIndicatorStyle
+    int vpiTabPageIndicatorStyle -> vpiTabPageIndicatorStyle
+    int vpiTitlePageIndicatorStyle -> vpiTitlePageIndicatorStyle
+    int vpiUnderlinePageIndicatorStyle -> vpiUnderlinePageIndicatorStyle
+com.viewpagerindicator.R$bool -> com.viewpagerindicator.f:
+    int default_circle_indicator_centered -> default_circle_indicator_centered
+    int default_circle_indicator_snap -> default_circle_indicator_snap
+    int default_line_indicator_centered -> default_line_indicator_centered
+    int default_title_indicator_selected_bold -> default_title_indicator_selected_bold
+    int default_underline_indicator_fades -> default_underline_indicator_fades
+com.viewpagerindicator.R$color -> com.viewpagerindicator.g:
+    int default_circle_indicator_fill_color -> default_circle_indicator_fill_color
+    int default_circle_indicator_page_color -> default_circle_indicator_page_color
+    int default_circle_indicator_stroke_color -> default_circle_indicator_stroke_color
+    int default_line_indicator_selected_color -> default_line_indicator_selected_color
+    int default_line_indicator_unselected_color -> default_line_indicator_unselected_color
+    int default_title_indicator_footer_color -> default_title_indicator_footer_color
+    int default_title_indicator_selected_color -> default_title_indicator_selected_color
+    int default_title_indicator_text_color -> default_title_indicator_text_color
+    int default_underline_indicator_selected_color -> default_underline_indicator_selected_color
+    int vpi__background_holo_dark -> vpi__background_holo_dark
+    int vpi__background_holo_light -> vpi__background_holo_light
+    int vpi__bright_foreground_disabled_holo_dark -> vpi__bright_foreground_disabled_holo_dark
+    int vpi__bright_foreground_disabled_holo_light -> vpi__bright_foreground_disabled_holo_light
+    int vpi__bright_foreground_holo_dark -> vpi__bright_foreground_holo_dark
+    int vpi__bright_foreground_holo_light -> vpi__bright_foreground_holo_light
+    int vpi__bright_foreground_inverse_holo_dark -> vpi__bright_foreground_inverse_holo_dark
+    int vpi__bright_foreground_inverse_holo_light -> vpi__bright_foreground_inverse_holo_light
+    int vpi__dark_theme -> vpi__dark_theme
+    int vpi__light_theme -> vpi__light_theme
+com.viewpagerindicator.R$dimen -> com.viewpagerindicator.h:
+    int default_circle_indicator_radius -> default_circle_indicator_radius
+    int default_circle_indicator_stroke_width -> default_circle_indicator_stroke_width
+    int default_line_indicator_gap_width -> default_line_indicator_gap_width
+    int default_line_indicator_line_width -> default_line_indicator_line_width
+    int default_line_indicator_stroke_width -> default_line_indicator_stroke_width
+    int default_title_indicator_clip_padding -> default_title_indicator_clip_padding
+    int default_title_indicator_footer_indicator_height -> default_title_indicator_footer_indicator_height
+    int default_title_indicator_footer_indicator_underline_padding -> default_title_indicator_footer_indicator_underline_padding
+    int default_title_indicator_footer_line_height -> default_title_indicator_footer_line_height
+    int default_title_indicator_footer_padding -> default_title_indicator_footer_padding
+    int default_title_indicator_text_size -> default_title_indicator_text_size
+    int default_title_indicator_title_padding -> default_title_indicator_title_padding
+    int default_title_indicator_top_padding -> default_title_indicator_top_padding
+com.viewpagerindicator.R$integer -> com.viewpagerindicator.i:
+    int default_circle_indicator_orientation -> default_circle_indicator_orientation
+    int default_title_indicator_footer_indicator_style -> default_title_indicator_footer_indicator_style
+    int default_title_indicator_line_position -> default_title_indicator_line_position
+    int default_underline_indicator_fade_delay -> default_underline_indicator_fade_delay
+    int default_underline_indicator_fade_length -> default_underline_indicator_fade_length
+com.viewpagerindicator.R$styleable -> com.viewpagerindicator.j:
+    int[] CirclePageIndicator -> CirclePageIndicator
+    int CirclePageIndicator_android_background -> CirclePageIndicator_android_background
+    int CirclePageIndicator_android_orientation -> CirclePageIndicator_android_orientation
+    int CirclePageIndicator_centered -> CirclePageIndicator_centered
+    int CirclePageIndicator_fillColor -> CirclePageIndicator_fillColor
+    int CirclePageIndicator_pageColor -> CirclePageIndicator_pageColor
+    int CirclePageIndicator_radius -> CirclePageIndicator_radius
+    int CirclePageIndicator_snap -> CirclePageIndicator_snap
+    int CirclePageIndicator_strokeColor -> CirclePageIndicator_strokeColor
+    int CirclePageIndicator_strokeWidth -> CirclePageIndicator_strokeWidth
+    int[] LinePageIndicator -> LinePageIndicator
+    int LinePageIndicator_android_background -> LinePageIndicator_android_background
+    int LinePageIndicator_centered -> LinePageIndicator_centered
+    int LinePageIndicator_gapWidth -> LinePageIndicator_gapWidth
+    int LinePageIndicator_lineWidth -> LinePageIndicator_lineWidth
+    int LinePageIndicator_selectedColor -> LinePageIndicator_selectedColor
+    int LinePageIndicator_strokeWidth -> LinePageIndicator_strokeWidth
+    int LinePageIndicator_unselectedColor -> LinePageIndicator_unselectedColor
+    int[] TitlePageIndicator -> TitlePageIndicator
+    int TitlePageIndicator_android_background -> TitlePageIndicator_android_background
+    int TitlePageIndicator_android_textColor -> TitlePageIndicator_android_textColor
+    int TitlePageIndicator_android_textSize -> TitlePageIndicator_android_textSize
+    int TitlePageIndicator_clipPadding -> TitlePageIndicator_clipPadding
+    int TitlePageIndicator_footerColor -> TitlePageIndicator_footerColor
+    int TitlePageIndicator_footerIndicatorHeight -> TitlePageIndicator_footerIndicatorHeight
+    int TitlePageIndicator_footerIndicatorStyle -> TitlePageIndicator_footerIndicatorStyle
+    int TitlePageIndicator_footerIndicatorUnderlinePadding -> TitlePageIndicator_footerIndicatorUnderlinePadding
+    int TitlePageIndicator_footerLineHeight -> TitlePageIndicator_footerLineHeight
+    int TitlePageIndicator_footerPadding -> TitlePageIndicator_footerPadding
+    int TitlePageIndicator_linePosition -> TitlePageIndicator_linePosition
+    int TitlePageIndicator_selectedBold -> TitlePageIndicator_selectedBold
+    int TitlePageIndicator_selectedColor -> TitlePageIndicator_selectedColor
+    int TitlePageIndicator_titlePadding -> TitlePageIndicator_titlePadding
+    int TitlePageIndicator_topPadding -> TitlePageIndicator_topPadding
+    int[] UnderlinePageIndicator -> UnderlinePageIndicator
+    int UnderlinePageIndicator_android_background -> UnderlinePageIndicator_android_background
+    int UnderlinePageIndicator_fadeDelay -> UnderlinePageIndicator_fadeDelay
+    int UnderlinePageIndicator_fadeLength -> UnderlinePageIndicator_fadeLength
+    int UnderlinePageIndicator_fades -> UnderlinePageIndicator_fades
+    int UnderlinePageIndicator_selectedColor -> UnderlinePageIndicator_selectedColor
+    int[] ViewPagerIndicator -> ViewPagerIndicator
+    int ViewPagerIndicator_vpiCirclePageIndicatorStyle -> ViewPagerIndicator_vpiCirclePageIndicatorStyle
+    int ViewPagerIndicator_vpiIconPageIndicatorStyle -> ViewPagerIndicator_vpiIconPageIndicatorStyle
+    int ViewPagerIndicator_vpiLinePageIndicatorStyle -> ViewPagerIndicator_vpiLinePageIndicatorStyle
+    int ViewPagerIndicator_vpiTabPageIndicatorStyle -> ViewPagerIndicator_vpiTabPageIndicatorStyle
+    int ViewPagerIndicator_vpiTitlePageIndicatorStyle -> ViewPagerIndicator_vpiTitlePageIndicatorStyle
+    int ViewPagerIndicator_vpiUnderlinePageIndicatorStyle -> ViewPagerIndicator_vpiUnderlinePageIndicatorStyle
+com.viewpagerindicator.TitlePageIndicator -> com.viewpagerindicator.TitlePageIndicator:
+    android.support.v4.view.ViewPager mViewPager -> a
+    android.support.v4.view.ViewPager$OnPageChangeListener mListener -> b
+    int mCurrentPage -> c
+    float mPageOffset -> d
+    int mScrollState -> e
+    android.graphics.Paint mPaintText -> f
+    boolean mBoldText -> g
+    int mColorText -> h
+    int mColorSelected -> i
+    android.graphics.Path mPath -> j
+    android.graphics.Rect mBounds -> k
+    android.graphics.Paint mPaintFooterLine -> l
+    com.viewpagerindicator.TitlePageIndicator$IndicatorStyle mFooterIndicatorStyle -> m
+    com.viewpagerindicator.TitlePageIndicator$LinePosition mLinePosition -> n
+    android.graphics.Paint mPaintFooterIndicator -> o
+    float mFooterIndicatorHeight -> p
+    float mFooterIndicatorUnderlinePadding -> q
+    float mFooterPadding -> r
+    float mTitlePadding -> s
+    float mTopPadding -> t
+    float mClipPadding -> u
+    float mFooterLineHeight -> v
+    int mTouchSlop -> w
+    float mLastMotionX -> x
+    int mActivePointerId -> y
+    boolean mIsDragging -> z
+    com.viewpagerindicator.TitlePageIndicator$OnCenterItemClickListener mCenterItemClickListener -> A
+    int[] $SWITCH_TABLE$com$viewpagerindicator$TitlePageIndicator$IndicatorStyle -> B
+    220:220:int getFooterColor() -> getFooterColor
+    224:227:void setFooterColor(int) -> setFooterColor
+    230:230:float getFooterLineHeight() -> getFooterLineHeight
+    234:237:void setFooterLineHeight(float) -> setFooterLineHeight
+    240:240:float getFooterIndicatorHeight() -> getFooterIndicatorHeight
+    244:246:void setFooterIndicatorHeight(float) -> setFooterIndicatorHeight
+    249:249:float getFooterIndicatorPadding() -> getFooterIndicatorPadding
+    253:255:void setFooterIndicatorPadding(float) -> setFooterIndicatorPadding
+    258:258:com.viewpagerindicator.TitlePageIndicator$IndicatorStyle getFooterIndicatorStyle() -> getFooterIndicatorStyle
+    262:264:void setFooterIndicatorStyle(com.viewpagerindicator.TitlePageIndicator$IndicatorStyle) -> setFooterIndicatorStyle
+    267:267:com.viewpagerindicator.TitlePageIndicator$LinePosition getLinePosition() -> getLinePosition
+    271:273:void setLinePosition(com.viewpagerindicator.TitlePageIndicator$LinePosition) -> setLinePosition
+    276:276:int getSelectedColor() -> getSelectedColor
+    280:282:void setSelectedColor(int) -> setSelectedColor
+    289:291:void setSelectedBold(boolean) -> setSelectedBold
+    294:294:int getTextColor() -> getTextColor
+    298:301:void setTextColor(int) -> setTextColor
+    304:304:float getTextSize() -> getTextSize
+    308:310:void setTextSize(float) -> setTextSize
+    313:313:float getTitlePadding() -> getTitlePadding
+    317:319:void setTitlePadding(float) -> setTitlePadding
+    322:322:float getTopPadding() -> getTopPadding
+    326:328:void setTopPadding(float) -> setTopPadding
+    331:331:float getClipPadding() -> getClipPadding
+    335:337:void setClipPadding(float) -> setClipPadding
+    340:342:void setTypeface(android.graphics.Typeface) -> setTypeface
+    345:345:android.graphics.Typeface getTypeface() -> getTypeface
+    355:542:void onDraw(android.graphics.Canvas) -> onDraw
+    545:636:boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
+    648:650:void clipViewOnTheRight(android.graphics.Rect,float,int) -> a
+    661:663:void clipViewOnTheLeft(android.graphics.Rect,float,int) -> b
+    672:688:java.util.ArrayList calculateAllBounds(android.graphics.Paint) -> a
+    700:704:android.graphics.Rect calcBounds(int,android.graphics.Paint) -> a
+    709:721:void setViewPager(android.support.v4.view.ViewPager) -> setViewPager
+    731:732:void notifyDataSetChanged() -> a
+    740:741:void setOnCenterItemClickListener(com.viewpagerindicator.TitlePageIndicator$OnCenterItemClickListener) -> setOnCenterItemClickListener
+    745:751:void setCurrentItem(int) -> setCurrentItem
+    755:760:void onPageScrollStateChanged(int) -> a_
+    764:771:void onPageScrolled(int,float,int) -> a
+    775:783:void onPageSelected(int) -> b_
+    787:788:void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener) -> setOnPageChangeListener
+    793:813:void onMeasure(int,int) -> onMeasure
+    817:821:void onRestoreInstanceState(android.os.Parcelable) -> onRestoreInstanceState
+    825:828:android.os.Parcelable onSaveInstanceState() -> onSaveInstanceState
+    864:868:java.lang.CharSequence getTitle(int) -> c
+    47:47:int[] $SWITCH_TABLE$com$viewpagerindicator$TitlePageIndicator$IndicatorStyle() -> b
+com.viewpagerindicator.TitlePageIndicator$IndicatorStyle -> com.viewpagerindicator.k:
+    com.viewpagerindicator.TitlePageIndicator$IndicatorStyle None -> a
+    com.viewpagerindicator.TitlePageIndicator$IndicatorStyle Triangle -> b
+    com.viewpagerindicator.TitlePageIndicator$IndicatorStyle Underline -> c
+    int value -> d
+    com.viewpagerindicator.TitlePageIndicator$IndicatorStyle[] ENUM$VALUES -> e
+    89:94:com.viewpagerindicator.TitlePageIndicator$IndicatorStyle fromValue(int) -> a
+    1:1:com.viewpagerindicator.TitlePageIndicator$IndicatorStyle[] values() -> values
+    1:1:com.viewpagerindicator.TitlePageIndicator$IndicatorStyle valueOf(java.lang.String) -> valueOf
+com.viewpagerindicator.TitlePageIndicator$LinePosition -> com.viewpagerindicator.l:
+    com.viewpagerindicator.TitlePageIndicator$LinePosition Bottom -> a
+    com.viewpagerindicator.TitlePageIndicator$LinePosition Top -> b
+    int value -> c
+    com.viewpagerindicator.TitlePageIndicator$LinePosition[] ENUM$VALUES -> d
+    108:113:com.viewpagerindicator.TitlePageIndicator$LinePosition fromValue(int) -> a
+    1:1:com.viewpagerindicator.TitlePageIndicator$LinePosition[] values() -> values
+    1:1:com.viewpagerindicator.TitlePageIndicator$LinePosition valueOf(java.lang.String) -> valueOf
+com.viewpagerindicator.TitlePageIndicator$OnCenterItemClickListener -> com.viewpagerindicator.m:
+    void onCenterItemClick(int) -> a
+com.viewpagerindicator.TitlePageIndicator$SavedState -> com.viewpagerindicator.TitlePageIndicator$SavedState:
+    int currentPage -> a
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    845:847:void writeToParcel(android.os.Parcel,int) -> writeToParcel
+com.viewpagerindicator.TitlePageIndicator$SavedState$1 -> com.viewpagerindicator.n:
+    853:853:com.viewpagerindicator.TitlePageIndicator$SavedState createFromParcel(android.os.Parcel) -> a
+    858:858:com.viewpagerindicator.TitlePageIndicator$SavedState[] newArray(int) -> a
+    1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+    1:1:java.lang.Object[] newArray(int) -> newArray
+com.viewpagerindicator.UnderlinePageIndicator -> com.viewpagerindicator.UnderlinePageIndicator:
+    android.graphics.Paint mPaint -> a
+    boolean mFades -> b
+    int mFadeDelay -> c
+    int mFadeLength -> d
+    int mFadeBy -> e
+    android.support.v4.view.ViewPager mViewPager -> f
+    android.support.v4.view.ViewPager$OnPageChangeListener mListener -> g
+    int mScrollState -> h
+    int mCurrentPage -> i
+    float mPositionOffset -> j
+    int mTouchSlop -> k
+    float mLastMotionX -> l
+    int mActivePointerId -> m
+    boolean mIsDragging -> n
+    java.lang.Runnable mFadeRunnable -> o
+    113:113:boolean getFades() -> getFades
+    117:127:void setFades(boolean) -> setFades
+    130:130:int getFadeDelay() -> getFadeDelay
+    134:135:void setFadeDelay(int) -> setFadeDelay
+    138:138:int getFadeLength() -> getFadeLength
+    142:144:void setFadeLength(int) -> setFadeLength
+    147:147:int getSelectedColor() -> getSelectedColor
+    151:153:void setSelectedColor(int) -> setSelectedColor
+    157:179:void onDraw(android.graphics.Canvas) -> onDraw
+    182:261:boolean onTouchEvent(android.view.MotionEvent) -> onTouchEvent
+    266:286:void setViewPager(android.support.v4.view.ViewPager) -> setViewPager
+    296:302:void setCurrentItem(int) -> setCurrentItem
+    311:316:void onPageScrollStateChanged(int) -> a_
+    320:335:void onPageScrolled(int,float,int) -> a
+    339:348:void onPageSelected(int) -> b_
+    352:353:void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener) -> setOnPageChangeListener
+    357:361:void onRestoreInstanceState(android.os.Parcelable) -> onRestoreInstanceState
+    365:368:android.os.Parcelable onSaveInstanceState() -> onSaveInstanceState
+    44:44:boolean access$0(com.viewpagerindicator.UnderlinePageIndicator) -> a
+    42:42:android.graphics.Paint access$1(com.viewpagerindicator.UnderlinePageIndicator) -> b
+    47:47:int access$2(com.viewpagerindicator.UnderlinePageIndicator) -> c
+    60:60:java.lang.Runnable access$3(com.viewpagerindicator.UnderlinePageIndicator) -> d
+com.viewpagerindicator.UnderlinePageIndicator$1 -> com.viewpagerindicator.o:
+    com.viewpagerindicator.UnderlinePageIndicator this$0 -> a
+    62:70:void run() -> run
+com.viewpagerindicator.UnderlinePageIndicator$2 -> com.viewpagerindicator.p:
+    com.viewpagerindicator.UnderlinePageIndicator this$0 -> a
+    281:284:void run() -> run
+com.viewpagerindicator.UnderlinePageIndicator$SavedState -> com.viewpagerindicator.UnderlinePageIndicator$SavedState:
+    int currentPage -> a
+    android.os.Parcelable$Creator CREATOR -> CREATOR
+    385:387:void writeToParcel(android.os.Parcel,int) -> writeToParcel
+com.viewpagerindicator.UnderlinePageIndicator$SavedState$1 -> com.viewpagerindicator.q:
+    393:393:com.viewpagerindicator.UnderlinePageIndicator$SavedState createFromParcel(android.os.Parcel) -> a
+    398:398:com.viewpagerindicator.UnderlinePageIndicator$SavedState[] newArray(int) -> a
+    1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
+    1:1:java.lang.Object[] newArray(int) -> newArray
+com.virtual_hotel_agent.components.S3BlockingDeque -> com.virtual_hotel_agent.a.a:
+com.virtual_hotel_agent.components.S3Deque -> com.virtual_hotel_agent.a.b:
+com.virtual_hotel_agent.components.S3DrawableBackgroundLoader -> com.virtual_hotel_agent.a.c:
     java.util.Map mCache -> d
     java.util.LinkedList mChacheController -> e
     java.util.concurrent.ExecutorService mThreadPool -> f
@@ -11912,42 +12316,43 @@ com.virtual_hotel_agent.components.S3DrawableBackgroundLoader -> com.virtual_hot
     int MAX_CACHE_SIZE -> a
     int THREAD_POOL_SIZE -> b
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader mTheObject -> c
-    42:42:com.virtual_hotel_agent.components.S3DrawableBackgroundLoader getInstance() -> a
-    46:46:java.util.concurrent.ExecutorService createThreadPool() -> b
+    43:43:com.virtual_hotel_agent.components.S3DrawableBackgroundLoader getInstance() -> a
+    47:47:java.util.concurrent.ExecutorService createThreadPool() -> b
+    58:65:void Reset() -> c
     120:121:void loadDrawable(java.lang.String,android.widget.ImageView,android.graphics.drawable.Drawable) -> a
     126:137:void loadDrawable(com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer,java.lang.String,android.widget.ImageView,android.graphics.drawable.Drawable) -> a
     140:144:android.graphics.drawable.Drawable getDrawableFromCache(java.lang.String) -> a
     148:154:void putDrawableInCache(java.lang.String,android.graphics.drawable.Drawable) -> a
     159:191:void queueJob(com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer,java.lang.String,android.widget.ImageView,android.graphics.drawable.Drawable) -> b
     195:197:android.graphics.drawable.Drawable downloadDrawable(com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer,java.lang.String) -> a
-    27:27:java.util.Map access$0(com.virtual_hotel_agent.components.S3DrawableBackgroundLoader) -> a
+    28:28:java.util.Map access$0(com.virtual_hotel_agent.components.S3DrawableBackgroundLoader) -> a
     193:193:android.graphics.drawable.Drawable access$1(com.virtual_hotel_agent.components.S3DrawableBackgroundLoader,com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer,java.lang.String) -> a
-com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$1 -> com.virtual_hotel_agent.components.e:
+com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$1 -> com.virtual_hotel_agent.a.d:
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader this$0 -> a
     android.widget.ImageView val$imageView -> b
     java.lang.String val$lookup -> c
     android.graphics.drawable.Drawable val$placeholder -> d
     162:171:void handleMessage(android.os.Message) -> handleMessage
-com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$2 -> com.virtual_hotel_agent.components.f:
+com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$2 -> com.virtual_hotel_agent.a.e:
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader this$0 -> a
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer val$sourceContainer -> b
     java.lang.String val$lookup -> c
     android.widget.ImageView val$imageView -> d
     android.os.Handler val$handler -> e
     178:189:void run() -> run
-com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$DrawableBackgroundLoaderHolder -> com.virtual_hotel_agent.components.g:
+com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$DrawableBackgroundLoaderHolder -> com.virtual_hotel_agent.a.f:
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader instance -> a
-com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer -> com.virtual_hotel_agent.components.h:
+com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainer -> com.virtual_hotel_agent.a.g:
     int mType -> a
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader this$0 -> b
     android.graphics.drawable.Drawable getDrawable(java.lang.String) -> a
-com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainerWebUrl -> com.virtual_hotel_agent.components.i:
+com.virtual_hotel_agent.components.S3DrawableBackgroundLoader$SourceContainerWebUrl -> com.virtual_hotel_agent.a.h:
     java.lang.String mUrl -> c
     com.virtual_hotel_agent.components.S3DrawableBackgroundLoader this$0 -> d
-    89:114:android.graphics.drawable.Drawable getDrawable(java.lang.String) -> a
-com.virtual_hotel_agent.components.S3LifoThreadPoolExecutor -> com.virtual_hotel_agent.components.j:
+    90:114:android.graphics.drawable.Drawable getDrawable(java.lang.String) -> a
+com.virtual_hotel_agent.components.S3LifoThreadPoolExecutor -> com.virtual_hotel_agent.a.i:
     16:18:com.virtual_hotel_agent.components.S3LifoThreadPoolExecutor createInstance(int) -> a
-com.virtual_hotel_agent.components.S3LinkedBlockingDeque -> com.virtual_hotel_agent.components.k:
+com.virtual_hotel_agent.components.S3LinkedBlockingDeque -> com.virtual_hotel_agent.a.j:
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node first -> a
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node last -> b
     int count -> d
@@ -11991,7 +12396,7 @@ com.virtual_hotel_agent.components.S3LinkedBlockingDeque -> com.virtual_hotel_ag
     964:970:java.lang.String toString() -> toString
     977:993:void clear() -> clear
     1005:1005:java.util.Iterator iterator() -> iterator
-com.virtual_hotel_agent.components.S3LinkedBlockingDeque$AbstractItr -> com.virtual_hotel_agent.components.l:
+com.virtual_hotel_agent.components.S3LinkedBlockingDeque$AbstractItr -> com.virtual_hotel_agent.a.k:
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node next -> a
     java.lang.Object nextItem -> b
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node lastRet -> d
@@ -12002,14 +12407,40 @@ com.virtual_hotel_agent.components.S3LinkedBlockingDeque$AbstractItr -> com.virt
     1081:1081:boolean hasNext() -> hasNext
     1085:1090:java.lang.Object next() -> next
     1094:1106:void remove() -> remove
-com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Itr -> com.virtual_hotel_agent.components.m:
+com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Itr -> com.virtual_hotel_agent.a.l:
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque this$0 -> d
     1112:1112:com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node firstNode() -> a
     1116:1116:com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node nextNode(com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node) -> a
-com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node -> com.virtual_hotel_agent.components.n:
+com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node -> com.virtual_hotel_agent.a.m:
     java.lang.Object item -> a
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node prev -> b
     com.virtual_hotel_agent.components.S3LinkedBlockingDeque$Node next -> c
+com.virtual_hotel_agent.search.ImageGalleryActivity -> com.virtual_hotel_agent.search.ImageGalleryActivity:
+    int initialPage -> a
+    com.virtual_hotel_agent.search.util.ImageDownloader imageDownloader -> b
+    com.virtual_hotel_agent.search.views.adapters.BitmapAdapter adapter -> c
+    com.viewpagerindicator.UnderlinePageIndicator mIndicator -> d
+    android.os.Handler mHandlerImgDownloaded -> e
+    java.util.ArrayList captions -> f
+    java.lang.String mHotelName -> g
+    android.support.v4.view.ViewPager contentView -> h
+    android.widget.TextView captionView -> i
+    73:150:void onCreate(android.os.Bundle) -> onCreate
+    160:163:void onDestroy() -> onDestroy
+    167:167:void onPageScrollStateChanged(int) -> a_
+    171:171:void onPageScrolled(int,float,int) -> a
+    175:182:void onPageSelected(int) -> b_
+    185:194:void setCaption(int) -> c
+    37:37:com.virtual_hotel_agent.search.views.adapters.BitmapAdapter access$0(com.virtual_hotel_agent.search.ImageGalleryActivity) -> a
+    154:154:android.support.v4.view.ViewPager access$1(com.virtual_hotel_agent.search.ImageGalleryActivity) -> b
+    35:35:int access$2(com.virtual_hotel_agent.search.ImageGalleryActivity) -> c
+com.virtual_hotel_agent.search.ImageGalleryActivity$1 -> com.virtual_hotel_agent.search.a:
+    com.virtual_hotel_agent.search.ImageGalleryActivity this$0 -> a
+    int val$position -> b
+    179:180:void run() -> run
+com.virtual_hotel_agent.search.ImageGalleryActivity$DownloadedImg -> com.virtual_hotel_agent.search.b:
+    java.lang.ref.WeakReference activityRef -> a
+    49:60:void handleMessage(android.os.Message) -> handleMessage
 com.virtual_hotel_agent.search.MyApplication -> com.virtual_hotel_agent.search.MyApplication:
     com.virtual_hotel_agent.search.models.expedia.XpediaDatabase mEvaDb -> a
     com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters requestParams -> b
@@ -12018,39 +12449,15 @@ com.virtual_hotel_agent.search.MyApplication -> com.virtual_hotel_agent.search.M
     java.lang.String mExpediaClientId -> e
     android.content.Context context -> g
     boolean AcraInitialized -> f
-    36:48:void onCreate() -> onCreate
-    51:51:com.virtual_hotel_agent.search.models.expedia.XpediaDatabase getDb() -> a
-    55:56:void setDb(com.virtual_hotel_agent.search.models.expedia.XpediaDatabase) -> a
-    59:59:com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters getExpediaRequestParams() -> b
-    63:63:java.lang.String getExpediaApiKey() -> c
-    67:67:java.lang.String getExpediaSecret() -> d
-    71:71:java.lang.String getExpediaClientId() -> e
-    76:78:void onLowMemory() -> onLowMemory
-    82:84:void onTerminate() -> onTerminate
-com.virtual_hotel_agent.search.R -> com.virtual_hotel_agent.search.a:
-com.virtual_hotel_agent.search.R$styleable -> com.virtual_hotel_agent.search.b:
-    int[] AdsAttrs -> AdsAttrs
-    int AdsAttrs_adSize -> AdsAttrs_adSize
-    int AdsAttrs_adUnitId -> AdsAttrs_adUnitId
-    int[] MapAttrs -> MapAttrs
-    int MapAttrs_cameraBearing -> MapAttrs_cameraBearing
-    int MapAttrs_cameraTargetLat -> MapAttrs_cameraTargetLat
-    int MapAttrs_cameraTargetLng -> MapAttrs_cameraTargetLng
-    int MapAttrs_cameraTilt -> MapAttrs_cameraTilt
-    int MapAttrs_cameraZoom -> MapAttrs_cameraZoom
-    int MapAttrs_mapType -> MapAttrs_mapType
-    int MapAttrs_uiCompass -> MapAttrs_uiCompass
-    int MapAttrs_uiRotateGestures -> MapAttrs_uiRotateGestures
-    int MapAttrs_uiScrollGestures -> MapAttrs_uiScrollGestures
-    int MapAttrs_uiTiltGestures -> MapAttrs_uiTiltGestures
-    int MapAttrs_uiZoomControls -> MapAttrs_uiZoomControls
-    int MapAttrs_uiZoomGestures -> MapAttrs_uiZoomGestures
-    int MapAttrs_useViewLifecycle -> MapAttrs_useViewLifecycle
-    int MapAttrs_zOrderOnTop -> MapAttrs_zOrderOnTop
-    int[] SwipeyTabs -> SwipeyTabs
-    int SwipeyTabs_bottomBarColor -> SwipeyTabs_bottomBarColor
-    int SwipeyTabs_bottomBarHeight -> SwipeyTabs_bottomBarHeight
-    int SwipeyTabs_tabIndicatorHeight -> SwipeyTabs_tabIndicatorHeight
+    37:49:void onCreate() -> onCreate
+    52:52:com.virtual_hotel_agent.search.models.expedia.XpediaDatabase getDb() -> a
+    56:57:void setDb(com.virtual_hotel_agent.search.models.expedia.XpediaDatabase) -> a
+    60:60:com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters getExpediaRequestParams() -> b
+    64:64:java.lang.String getExpediaApiKey() -> c
+    68:68:java.lang.String getExpediaSecret() -> d
+    72:72:java.lang.String getExpediaClientId() -> e
+    77:79:void onLowMemory() -> onLowMemory
+    83:85:void onTerminate() -> onTerminate
 com.virtual_hotel_agent.search.SettingsAPI -> com.virtual_hotel_agent.search.c:
     14:30:java.lang.String getCurrencyCode(android.content.Context) -> a
     34:50:java.lang.String getCurrencySymbol(android.content.Context) -> b
@@ -12075,138 +12482,140 @@ com.virtual_hotel_agent.search.controllers.activities.BugReportDialog$1 -> com.v
     105:113:void send(org.acra.collector.CrashReportData) -> a
 com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity -> com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity:
     java.lang.String HOTEL_NAME -> n
-    java.lang.String HOTEL_CITY -> o
-    java.lang.String HOTEL_LATITUDE -> p
-    java.lang.String HOTEL_LONGITUDE -> q
+    java.lang.String HOTEL_LATITUDE -> o
+    java.lang.String HOTEL_LONGITUDE -> p
+    java.lang.String HOTEL_SNIPPET -> q
     com.google.android.gms.maps.GoogleMap mMap -> r
     31:35:void onCreate(android.os.Bundle) -> onCreate
     38:58:void setUpMapIfNeeded() -> f
-    62:90:void addHotelToMap() -> g
-    94:103:void onResume() -> onResume
-    61:61:void access$0(com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity) -> a
+    61:86:void addHotelToMap() -> g
+    90:99:void onResume() -> onResume
+    60:60:void access$0(com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity) -> a
 com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity$1 -> com.virtual_hotel_agent.search.controllers.activities.b:
     com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity this$0 -> a
     53:54:void run() -> run
 com.virtual_hotel_agent.search.controllers.activities.MainActivity -> com.virtual_hotel_agent.search.controllers.activities.MainActivity:
-    java.lang.String TAG -> z
-    boolean mSpeechToTextWasConfigured -> A
-    java.util.List mTabTitles -> B
+    java.lang.String TAG -> A
+    boolean mSpeechToTextWasConfigured -> B
+    java.util.List mTabTitles -> C
     com.google.inject.Injector injector -> injector
-    com.virtual_hotel_agent.components.MyViewPager mViewPager -> C
-    com.virtual_hotel_agent.search.views.SwipeyTabs mTabs -> D
+    android.support.v4.view.ViewPager mViewPager -> D
+    com.viewpagerindicator.TitlePageIndicator mTabs -> E
     com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter mSwipeyAdapter -> n
     com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask mSearchExpediaTask -> o
-    boolean mIsNetworkingOk -> E
-    java.lang.String mChatTabName -> F
-    java.lang.String mHotelsTabName -> G
-    java.lang.String mHotelTabName -> H
+    boolean mIsNetworkingOk -> F
+    java.lang.String mChatTabName -> G
+    java.lang.String mHotelsTabName -> H
+    java.lang.String mHotelTabName -> I
     com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask mHotelDownloader -> p
     com.evaapis.android.EvaComponent eva -> q
     com.evaapis.android.EvaSpeechComponent speechSearch -> r
     com.virtual_hotel_agent.search.views.MainView mainView -> s
-    boolean shownExamples -> I
-    com.virtual_hotel_agent.search.models.chat.ChatItem currentHotelSearch -> t
-    com.virtual_hotel_agent.search.models.chat.ChatItem currentFlightSearch -> u
-    com.virtual_hotel_agent.search.models.chat.ChatItem lastHotelCompleted -> v
-    com.virtual_hotel_agent.search.models.chat.ChatItem lastFlightCompleted -> w
+    java.lang.ref.WeakReference sContext -> t
+    boolean shownExamples -> J
+    com.virtual_hotel_agent.search.models.chat.ChatItem currentHotelSearch -> u
+    com.virtual_hotel_agent.search.models.chat.ChatItem currentFlightSearch -> v
+    com.virtual_hotel_agent.search.models.chat.ChatItem lastHotelCompleted -> w
+    com.virtual_hotel_agent.search.models.chat.ChatItem lastFlightCompleted -> x
     com.virtual_hotel_agent.search.models.chat.ChatItemList mChatListModel -> mChatListModel
-    int[] $SWITCH_TABLE$com$evaapis$crossplatform$flow$FlowElement$TypeEnum -> J
-    155:158:void onDestroy() -> onDestroy
-    166:169:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    174:177:void onStart() -> onStart
-    181:183:void onStop() -> onStop
-    188:192:void onResume() -> onResume
-    196:203:void onPause() -> onPause
-    207:287:void onCreate(android.os.Bundle) -> onCreate
-    291:312:void showExamples() -> j
-    315:334:void showIntro() -> k
-    338:346:void onBackPressed() -> onBackPressed
-    553:553:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
-    558:560:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
-    568:637:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
-    645:655:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    659:665:void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
-    668:672:void addChatItem(com.virtual_hotel_agent.search.models.chat.ChatItem) -> a
-    676:697:void invalidateChatFragment() -> l
-    721:728:int showTab(int) -> b
-    734:745:void fatal_error(int) -> c
-    749:788:void endProgressDialog(int,org.json.JSONObject) -> a
-    792:792:void startProgressDialog(int) -> c_
-    797:798:void endProgressDialogWithError(int,org.json.JSONObject) -> b
-    802:802:void updateProgress(int,com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface$DownloaderStatus) -> a
-    809:833:void myClickHandler(android.view.View) -> myClickHandler
-    916:926:void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String) -> onSharedPreferenceChanged
-    932:991:void onEvaReply(com.evaapis.crossplatform.EvaApiReply,java.lang.Object) -> a
-    999:1047:void handleFlow(com.evaapis.crossplatform.EvaApiReply) -> a
-    1145:1174:void clearExpediaCache() -> f
-    1181:1194:void searchHotels(com.virtual_hotel_agent.search.models.chat.ChatItem,com.evaapis.crossplatform.EvaApiReply,boolean) -> a
-    1199:1292:void executeFlowElement(com.evaapis.crossplatform.EvaApiReply,com.evaapis.crossplatform.flow.FlowElement,com.virtual_hotel_agent.search.models.chat.ChatItem,boolean) -> a
-    1299:1317:void startNewSession() -> m
-    1327:1390:void newSessionStarted(boolean) -> a_
-    1394:1401:void onEventHotelsListUpdated(com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated) -> onEventHotelsListUpdated
-    1404:1422:void onEventHotelItemClicked(com.virtual_hotel_agent.search.controllers.events.HotelItemClicked) -> onEventHotelItemClicked
-    1425:1435:void onEventChatItemClicked(com.virtual_hotel_agent.search.controllers.events.ChatItemClicked) -> onEventChatItemClicked
-    1439:1446:void hotelsFragmentVisible() -> g
+    int[] $SWITCH_TABLE$com$evaapis$crossplatform$flow$FlowElement$TypeEnum -> K
+    157:161:void onDestroy() -> onDestroy
+    169:172:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    190:218:java.util.Map getReferrerMapFromUri(android.net.Uri) -> a
+    224:231:void onStart() -> onStart
+    235:237:void onStop() -> onStop
+    242:246:void onResume() -> onResume
+    250:257:void onPause() -> onPause
+    261:350:void onCreate(android.os.Bundle) -> onCreate
+    354:376:void showExamples() -> j
+    379:398:void showIntro() -> k
+    402:410:void onBackPressed() -> onBackPressed
+    414:415:void LogError(java.lang.String,java.lang.String) -> a
+    418:448:void LogError(java.lang.String,java.lang.String,java.lang.Throwable) -> a
+    603:603:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
+    608:610:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    618:687:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    695:705:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
+    709:715:void onRestoreInstanceState(android.os.Bundle) -> onRestoreInstanceState
+    718:722:void addChatItem(com.virtual_hotel_agent.search.models.chat.ChatItem) -> a
+    726:742:void invalidateChatFragment() -> l
+    766:773:int showTab(int) -> b
+    779:790:void fatal_error(int) -> c
+    794:828:void endProgressDialog(int,org.json.JSONObject) -> a
+    832:832:void startProgressDialog(int) -> c_
+    837:838:void endProgressDialogWithError(int,org.json.JSONObject) -> b
+    842:842:void updateProgress(int,com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface$DownloaderStatus) -> a
+    849:880:void myClickHandler(android.view.View) -> myClickHandler
+    887:897:void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String) -> onSharedPreferenceChanged
+    903:976:void onEvaReply(com.evaapis.crossplatform.EvaApiReply,java.lang.Object) -> a
+    984:1032:void handleFlow(com.evaapis.crossplatform.EvaApiReply) -> a
+    1138:1164:void clearExpediaCache() -> f
+    1171:1184:void searchHotels(com.virtual_hotel_agent.search.models.chat.ChatItem,com.evaapis.crossplatform.EvaApiReply,boolean) -> a
+    1189:1282:void executeFlowElement(com.evaapis.crossplatform.EvaApiReply,com.evaapis.crossplatform.flow.FlowElement,com.virtual_hotel_agent.search.models.chat.ChatItem,boolean) -> a
+    1289:1307:void startNewSession() -> m
+    1317:1388:void newSessionStarted(boolean) -> a_
+    1393:1400:void onEventHotelsListUpdated(com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated) -> onEventHotelsListUpdated
+    1403:1421:void onEventHotelItemClicked(com.virtual_hotel_agent.search.controllers.events.HotelItemClicked) -> onEventHotelItemClicked
+    1427:1442:void onEventChatItemClicked(com.virtual_hotel_agent.search.controllers.events.ChatItemClicked) -> onEventChatItemClicked
+    1446:1453:void hotelsFragmentVisible() -> g
     124:124:java.util.List access$0(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> a
-    136:136:java.lang.String access$1(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> b
-    667:667:void access$2(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.virtual_hotel_agent.search.models.chat.ChatItem) -> a
-    139:139:java.lang.String access$3(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> c
-    140:140:java.lang.String access$4(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> d
-    128:128:com.virtual_hotel_agent.search.views.SwipeyTabs access$5(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> e
-    119:119:java.lang.String access$6() -> h
-    127:127:com.virtual_hotel_agent.components.MyViewPager access$7(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> f
-    674:674:void access$8(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> g
-    1196:1196:void access$9(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.evaapis.crossplatform.EvaApiReply,com.evaapis.crossplatform.flow.FlowElement,com.virtual_hotel_agent.search.models.chat.ChatItem,boolean) -> a
-    1176:1176:void access$10(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.virtual_hotel_agent.search.models.chat.ChatItem,com.evaapis.crossplatform.EvaApiReply,boolean) -> a
+    137:137:java.lang.String access$1(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> b
+    717:717:void access$2(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.virtual_hotel_agent.search.models.chat.ChatItem) -> a
+    140:140:java.lang.String access$3(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> c
+    141:141:java.lang.String access$4(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> d
+    129:129:com.viewpagerindicator.TitlePageIndicator access$5(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> e
+    127:127:android.support.v4.view.ViewPager access$6(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> f
+    119:119:java.lang.String access$7() -> h
+    724:724:void access$8(com.virtual_hotel_agent.search.controllers.activities.MainActivity) -> g
+    1186:1186:void access$9(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.evaapis.crossplatform.EvaApiReply,com.evaapis.crossplatform.flow.FlowElement,com.virtual_hotel_agent.search.models.chat.ChatItem,boolean) -> a
+    1166:1166:void access$10(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.virtual_hotel_agent.search.models.chat.ChatItem,com.evaapis.crossplatform.EvaApiReply,boolean) -> a
     111:111:int[] $SWITCH_TABLE$com$evaapis$crossplatform$flow$FlowElement$TypeEnum() -> i
 com.virtual_hotel_agent.search.controllers.activities.MainActivity$1 -> com.virtual_hotel_agent.search.controllers.activities.c:
     com.virtual_hotel_agent.search.controllers.activities.MainActivity this$0 -> a
-    741:741:void onClick(android.content.DialogInterface,int) -> onClick
+    786:786:void onClick(android.content.DialogInterface,int) -> onClick
 com.virtual_hotel_agent.search.controllers.activities.MainActivity$2 -> com.virtual_hotel_agent.search.controllers.activities.d:
     com.virtual_hotel_agent.search.controllers.activities.MainActivity this$0 -> a
     com.evaapis.crossplatform.flow.FlowElement val$_flow -> b
     com.virtual_hotel_agent.search.models.chat.ChatItem val$_chatItem -> c
     com.evaapis.crossplatform.EvaApiReply val$_reply -> d
     boolean val$_switchToResult -> e
-    1229:1235:void onDialogPositiveClick(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> a
-    1239:1240:void onDialogNegativeClick(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> b
+    1219:1225:void onDialogPositiveClick(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> a
+    1229:1230:void onDialogNegativeClick(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> b
 com.virtual_hotel_agent.search.controllers.activities.MainActivity$3 -> com.virtual_hotel_agent.search.controllers.activities.e:
     com.virtual_hotel_agent.search.controllers.activities.MainActivity this$0 -> a
-    1283:1285:void handleMessage(android.os.Message) -> handleMessage
+    1273:1275:void handleMessage(android.os.Message) -> handleMessage
 com.virtual_hotel_agent.search.controllers.activities.MainActivity$DownloaderListener -> com.virtual_hotel_agent.search.controllers.activities.f:
     com.virtual_hotel_agent.search.models.chat.ChatItem currentItem -> a
     boolean switchToResult -> b
     com.virtual_hotel_agent.search.controllers.activities.MainActivity this$0 -> c
-    1067:1115:void endProgressDialog(int,org.json.JSONObject) -> a
-    1119:1122:void startProgressDialog(int) -> c_
-    1126:1137:void endProgressDialogWithError(int,org.json.JSONObject) -> b
-    1141:1141:void updateProgress(int,com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface$DownloaderStatus) -> a
-com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter -> com.virtual_hotel_agent.search.controllers.activities.g:
-    android.content.Context mContext -> c
-    android.support.v4.view.ViewPager mViewPager -> d
-    java.lang.String TAG -> e
+    1053:1108:void endProgressDialog(int,org.json.JSONObject) -> a
+    1112:1115:void startProgressDialog(int) -> c_
+    1119:1130:void endProgressDialogWithError(int,org.json.JSONObject) -> b
+    1134:1134:void updateProgress(int,com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface$DownloaderStatus) -> a
+    1040:1040:com.virtual_hotel_agent.search.controllers.activities.MainActivity access$0(com.virtual_hotel_agent.search.controllers.activities.MainActivity$DownloaderListener) -> a
+com.virtual_hotel_agent.search.controllers.activities.MainActivity$DownloaderListener$1 -> com.virtual_hotel_agent.search.controllers.activities.g:
+    com.virtual_hotel_agent.search.controllers.activities.MainActivity$DownloaderListener this$1 -> a
+    1069:1070:void run() -> run
+com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter -> com.virtual_hotel_agent.search.controllers.activities.h:
+    java.lang.String TAG -> c
     int lastShown -> a
     com.virtual_hotel_agent.search.controllers.activities.MainActivity this$0 -> b
-    374:440:android.support.v4.app.Fragment getItem(int) -> a
-    445:447:int getCount() -> b
-    451:460:android.widget.TextView getTab(int,com.virtual_hotel_agent.search.views.SwipeyTabs) -> a
-    465:467:java.lang.Object instantiateItem(android.view.ViewGroup,int) -> a
-    472:472:void onPageScrollStateChanged(int) -> a_
-    476:482:void onPageScrolled(int,float,int) -> a
-    486:487:void onPageSelected(int) -> b_
-    491:501:void notifyDataSetChanged() -> c
-    507:512:void showTab(int) -> d
-    515:520:void addTab(java.lang.String) -> a
-    533:536:void removeTab(java.lang.String) -> b
-    540:545:void removeTab(int) -> e
-    350:350:com.virtual_hotel_agent.search.controllers.activities.MainActivity access$0(com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter) -> a
-com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter$1 -> com.virtual_hotel_agent.search.controllers.activities.h:
+    463:463:int getItemPosition(java.lang.Object) -> a
+    469:515:android.support.v4.app.Fragment getItem(int) -> a
+    520:520:int getCount() -> b
+    525:525:java.lang.CharSequence getPageTitle(int) -> c
+    530:530:void onPageScrollStateChanged(int) -> a_
+    534:540:void onPageScrolled(int,float,int) -> a
+    544:545:void onPageSelected(int) -> b_
+    549:551:void notifyDataSetChanged() -> c
+    557:562:void showTab(int) -> e
+    565:570:void addTab(java.lang.String) -> a
+    583:586:void removeTab(java.lang.String) -> b
+    590:595:void removeTab(int) -> f
+    450:450:com.virtual_hotel_agent.search.controllers.activities.MainActivity access$0(com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter) -> a
+com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter$1 -> com.virtual_hotel_agent.search.controllers.activities.i:
     com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter this$1 -> a
-    406:409:void onClick(android.text.SpannableString,int) -> a
-com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter$2 -> com.virtual_hotel_agent.search.controllers.activities.i:
-    com.virtual_hotel_agent.search.controllers.activities.MainActivity$SwipeyTabsPagerAdapter this$1 -> a
-    int val$position -> b
-    457:458:void onClick(android.view.View) -> onClick
+    482:485:void onClick(android.text.SpannableString,int) -> a
 com.virtual_hotel_agent.search.controllers.activities.MyPreferences -> com.virtual_hotel_agent.search.controllers.activities.MyPreferences:
     17:19:void onCreate(android.os.Bundle) -> onCreate
 com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity -> com.virtual_hotel_agent.search.controllers.activities.SelectRoomActivity:
@@ -12260,31 +12669,32 @@ com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask -> c
     java.lang.String lastResponse -> d
     int mHotelIndex -> e
     android.content.Context mContext -> f
-    27:28:void onProgressUpdate(java.lang.Integer[]) -> a
-    43:71:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
-    76:76:int getHotelIndex() -> c
+    28:29:void onProgressUpdate(java.lang.Integer[]) -> a
+    44:74:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
+    79:79:int getHotelIndex() -> c
 com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask -> com.virtual_hotel_agent.search.controllers.a.e:
-    java.lang.String TAG -> f
+    java.lang.String TAG -> g
     java.lang.String mCurrencyCode -> d
     com.evaapis.crossplatform.EvaApiReply apiReply -> e
+    android.content.Context context -> f
     com.virtual_hotel_agent.search.models.expedia.XpediaProtocol xpediaProtocol -> xpediaProtocol
-    28:33:void initialize(com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface,com.evaapis.crossplatform.EvaApiReply,java.lang.String) -> a
-    37:56:void createHotelData(org.json.JSONObject) -> b
-    61:72:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
-    77:92:void onPostExecute(org.json.JSONObject) -> a
+    32:38:void initialize(com.virtual_hotel_agent.search.controllers.activities.MainActivity,com.evaapis.crossplatform.EvaApiReply,java.lang.String) -> a
+    42:61:void createHotelData(org.json.JSONObject) -> b
+    66:79:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
+    84:99:void onPostExecute(org.json.JSONObject) -> a
 com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask -> com.virtual_hotel_agent.search.controllers.a.f:
     java.lang.String TAG -> d
     java.lang.String mNextQuery -> e
     java.lang.String mCurrencyCode -> f
-    com.virtual_hotel_agent.search.views.fragments.HotelsFragment hotelFragment -> g
-    32:36:void onPostExecute(org.json.JSONObject) -> a
-    40:54:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
-    59:75:boolean addHotelData(org.json.JSONObject) -> b
+    com.virtual_hotel_agent.search.views.fragments.HotelListFragment hotelFragment -> g
+    33:37:void onPostExecute(org.json.JSONObject) -> a
+    41:55:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
+    60:76:boolean addHotelData(org.json.JSONObject) -> b
 com.virtual_hotel_agent.search.controllers.web_services.RoomsUpdaterTask -> com.virtual_hotel_agent.search.controllers.a.g:
     com.virtual_hotel_agent.search.models.expedia.HotelData mHotelData -> d
     android.content.Context mContext -> e
-    26:28:void onPostExecute(org.json.JSONObject) -> a
-    32:38:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
+    35:37:void onPostExecute(org.json.JSONObject) -> a
+    41:47:org.json.JSONObject doInBackground(java.lang.Void[]) -> a
 com.virtual_hotel_agent.search.models.chat.ChatItem -> com.virtual_hotel_agent.search.a.a.a:
     android.text.SpannableString chat -> a
     com.virtual_hotel_agent.search.models.chat.ChatItem$ChatType chatType -> b
@@ -12300,7 +12710,6 @@ com.virtual_hotel_agent.search.models.chat.ChatItem -> com.virtual_hotel_agent.s
     118:118:boolean isInSession() -> c
     122:122:com.evaapis.crossplatform.flow.FlowElement getFlowElement() -> d
     126:126:com.evaapis.crossplatform.EvaApiReply getEvaReply() -> e
-    130:130:com.virtual_hotel_agent.search.models.chat.ChatItem$Status getStatus() -> f
     134:138:void setStatus(com.virtual_hotel_agent.search.models.chat.ChatItem$Status) -> a
     141:142:void setSearchResults(org.json.JSONObject) -> a
 com.virtual_hotel_agent.search.models.chat.ChatItem$ChatType -> com.virtual_hotel_agent.search.a.a.b:
@@ -12326,17 +12735,17 @@ com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem -> com.virtual_h
     int mIndex -> h
     boolean mChosen -> j
     com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem mQuestion -> i
-    22:22:int getIndex() -> g
-    26:26:boolean isChosen() -> h
-    30:32:void setChosen() -> i
-    35:35:com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem getQuestion() -> j
+    22:22:int getIndex() -> f
+    26:26:boolean isChosen() -> g
+    30:32:void setChosen() -> h
+    35:35:com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem getQuestion() -> i
 com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem -> com.virtual_hotel_agent.search.a.a.f:
     boolean mAnswered -> h
     java.util.List mAnswers -> i
-    20:20:boolean isAnswered() -> g
-    24:25:void setAnswered() -> h
+    20:20:boolean isAnswered() -> f
+    24:25:void setAnswered() -> g
     28:29:void addAnswer(com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem) -> a
-    32:32:java.util.List getAnswers() -> i
+    32:32:java.util.List getAnswers() -> h
 com.virtual_hotel_agent.search.models.expedia.ChargeableRateInfo -> com.virtual_hotel_agent.search.a.b.a:
     double mCommissionableUsdTotal -> g
     double mTotal -> a
@@ -12371,8 +12780,11 @@ com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters -> com.vi
     73:74:void setAgeChild3(int) -> e
     78:79:void setNumberOfAdults(int) -> f
 com.virtual_hotel_agent.search.models.expedia.HotelData -> com.virtual_hotel_agent.search.a.b.c:
+    boolean selected -> c
     com.virtual_hotel_agent.search.models.expedia.HotelSummary mSummary -> a
     com.virtual_hotel_agent.search.models.expedia.HotelDetails mDetails -> b
+    22:23:void setSelected(boolean) -> a
+    26:26:boolean isSelected() -> a
 com.virtual_hotel_agent.search.models.expedia.HotelDetails -> com.virtual_hotel_agent.search.a.b.d:
     java.lang.String propertyDescription -> a
     com.virtual_hotel_agent.search.models.expedia.HotelDetails$HotelImage[] hotelImages -> b
@@ -12385,12 +12797,11 @@ com.virtual_hotel_agent.search.models.expedia.HotelDetails$Amenity -> com.virtua
 com.virtual_hotel_agent.search.models.expedia.HotelDetails$HotelImage -> com.virtual_hotel_agent.search.a.b.f:
     int hotelImageId -> a
     java.lang.String name -> b
-    int category -> c
-    int type -> d
-    java.lang.String caption -> e
-    java.lang.String url -> f
-    java.lang.String thumbnailUrl -> g
-    com.virtual_hotel_agent.search.models.expedia.HotelDetails this$0 -> h
+    int type -> c
+    java.lang.String caption -> d
+    java.lang.String url -> e
+    java.lang.String thumbnailUrl -> f
+    com.virtual_hotel_agent.search.models.expedia.HotelDetails this$0 -> g
 com.virtual_hotel_agent.search.models.expedia.HotelDetails$RoomType -> com.virtual_hotel_agent.search.a.b.g:
     java.lang.String descriptionLong -> a
     com.virtual_hotel_agent.search.models.expedia.HotelDetails$Amenity[] roomAmenities -> b
@@ -12425,7 +12836,7 @@ com.virtual_hotel_agent.search.models.expedia.HotelSummary -> com.virtual_hotel_
     java.lang.String mThumbNailUrl -> x
     com.virtual_hotel_agent.search.models.expedia.RoomDetails[] roomDetails -> y
     com.virtual_hotel_agent.search.models.expedia.HotelSummary$CurrentRoomDetails mCurrentRoomDetails -> z
-    114:159:void updateRoomDetails(org.json.JSONObject) -> a
+    115:160:void updateRoomDetails(org.json.JSONObject) -> a
 com.virtual_hotel_agent.search.models.expedia.HotelSummary$CurrentRoomDetails -> com.virtual_hotel_agent.search.a.b.i:
     java.lang.String mArrivalDate -> a
     java.lang.String mDepartureDate -> b
@@ -12478,35 +12889,59 @@ com.virtual_hotel_agent.search.models.expedia.XpediaDatabase -> com.virtual_hote
     java.lang.String errorMessage -> i
     java.lang.String errorVerboseMessage -> j
     java.lang.String errorHandling -> k
+    android.support.v4.util.LruCache mHotelImagesCache -> m
     com.virtual_hotel_agent.search.models.expedia.HotelData[] mHotelData -> l
-    java.util.HashMap mImagesMap -> m
-    43:57:double getSafeDouble(org.json.JSONObject,java.lang.String) -> a
-    63:81:java.lang.String getSafeString(org.json.JSONObject,java.lang.String) -> b
-    87:101:int getSafeInt(org.json.JSONObject,java.lang.String) -> c
-    107:122:boolean getSafeBool(org.json.JSONObject,java.lang.String) -> d
-    202:203:java.lang.String getNextQuery() -> a
-    208:223:void addData(com.virtual_hotel_agent.search.models.expedia.XpediaDatabase) -> a
-    227:227:boolean isMoreResultsAvailable() -> b
-com.virtual_hotel_agent.search.models.expedia.XpediaProtocol -> com.virtual_hotel_agent.search.a.b.p:
-    27:27:org.json.JSONObject getExpediaAnswer(com.evaapis.crossplatform.EvaApiReply,com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters,java.lang.String) -> a
-com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic -> com.virtual_hotel_agent.search.a.b.q:
-    java.lang.String TAG -> b
-    java.lang.String minorRev -> c
-    java.lang.String CONSTANT_HTTP_PARAMS -> d
+    49:63:double getSafeDouble(org.json.JSONObject,java.lang.String) -> a
+    69:87:java.lang.String getSafeString(org.json.JSONObject,java.lang.String) -> b
+    93:107:int getSafeInt(org.json.JSONObject,java.lang.String) -> c
+    113:128:boolean getSafeBool(org.json.JSONObject,java.lang.String) -> d
+    132:132:android.support.v4.util.LruCache getImagesCache() -> a
+    137:138:void clearImagesCache() -> b
+    227:228:java.lang.String getNextQuery() -> c
+    233:253:void addData(com.virtual_hotel_agent.search.models.expedia.XpediaDatabase) -> a
+    257:257:boolean isMoreResultsAvailable() -> d
+    262:266:void setHotelSelected(int) -> a
+com.virtual_hotel_agent.search.models.expedia.XpediaDatabase$1 -> com.virtual_hotel_agent.search.a.b.p:
+    com.virtual_hotel_agent.search.models.expedia.XpediaDatabase this$0 -> a
+    150:150:int sizeOf(java.lang.String,android.graphics.Bitmap) -> a
+    1:1:int sizeOf(java.lang.Object,java.lang.Object) -> b
+com.virtual_hotel_agent.search.models.expedia.XpediaProtocol -> com.virtual_hotel_agent.search.a.b.q:
+    28:28:org.json.JSONObject getExpediaAnswer(android.content.Context,com.evaapis.crossplatform.EvaApiReply,com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters,java.lang.String) -> a
+com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic -> com.virtual_hotel_agent.search.a.b.r:
+    java.lang.String TAG -> c
+    java.lang.String minorRev -> d
+    java.lang.String CONSTANT_HTTP_PARAMS -> e
     java.lang.String sessionId -> a
-    int[] $SWITCH_TABLE$com$evaapis$crossplatform$RequestAttributes$SortEnum -> e
-    66:66:java.lang.String getApiKey() -> a
-    70:70:java.lang.String getSecret() -> b
-    74:74:java.lang.String getClientId() -> c
-    79:107:android.graphics.Bitmap download_Image(java.lang.String) -> a
-    111:122:java.lang.String getSignature() -> e
-    126:137:java.lang.String getContantHttpParams() -> f
-    141:147:org.json.JSONObject getExpediaHotelInformation(int,java.lang.String) -> a
-    151:242:org.json.JSONObject getExpediaAnswer(com.evaapis.crossplatform.EvaApiReply,com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters,java.lang.String) -> a
-    247:308:org.json.JSONObject executeWithTimeout(java.lang.String) -> b
-    314:340:org.json.JSONObject getRoomInformationForHotel(int,com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters,java.lang.String) -> a
-    344:349:org.json.JSONObject getExpediaNext(java.lang.String,java.lang.String) -> a
-    40:40:int[] $SWITCH_TABLE$com$evaapis$crossplatform$RequestAttributes$SortEnum() -> d
+    android.support.v4.util.LruCache hotelInformationCache -> b
+    int[] $SWITCH_TABLE$com$evaapis$crossplatform$RequestAttributes$SortEnum -> f
+    73:73:java.lang.String getApiKey() -> a
+    77:77:java.lang.String getSecret() -> b
+    81:81:java.lang.String getClientId() -> c
+    86:113:android.graphics.Bitmap download_Image(java.lang.String) -> a
+    117:128:java.lang.String getSignature() -> e
+    132:143:java.lang.String getContantHttpParams() -> f
+    150:173:org.json.JSONObject getExpediaHotelInformation(android.content.Context,int,java.lang.String) -> a
+    177:282:org.json.JSONObject getExpediaAnswer(android.content.Context,com.evaapis.crossplatform.EvaApiReply,com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters,java.lang.String) -> a
+    287:362:org.json.JSONObject executeWithTimeout(android.content.Context,java.lang.String) -> a
+    368:401:org.json.JSONObject getRoomInformationForHotel(android.content.Context,int,com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters,java.lang.String) -> a
+    405:418:org.json.JSONObject getExpediaNext(android.content.Context,java.lang.String,java.lang.String) -> a
+    47:47:int[] $SWITCH_TABLE$com$evaapis$crossplatform$RequestAttributes$SortEnum() -> d
+com.virtual_hotel_agent.search.util.ImageDownloader -> com.virtual_hotel_agent.search.b.a:
+    boolean mRunThreads -> a
+    android.support.v4.util.LruCache cache -> b
+    android.os.Handler handler -> c
+    java.lang.Thread mImageDownloadThread -> d
+    android.os.Handler doneHandler -> e
+    35:39:void stopDownload() -> a
+    42:90:void startDownload(java.util.ArrayList) -> a
+    16:16:boolean access$0(com.virtual_hotel_agent.search.util.ImageDownloader) -> a
+    17:17:android.support.v4.util.LruCache access$1(com.virtual_hotel_agent.search.util.ImageDownloader) -> b
+    18:18:android.os.Handler access$2(com.virtual_hotel_agent.search.util.ImageDownloader) -> c
+    20:20:android.os.Handler access$3(com.virtual_hotel_agent.search.util.ImageDownloader) -> d
+com.virtual_hotel_agent.search.util.ImageDownloader$1 -> com.virtual_hotel_agent.search.b.b:
+    com.virtual_hotel_agent.search.util.ImageDownloader this$0 -> a
+    java.util.ArrayList val$urls -> b
+    47:87:void run() -> run
 com.virtual_hotel_agent.search.views.MainView -> com.virtual_hotel_agent.search.views.a:
     android.view.View mStatusPanel -> a
     android.widget.TextView mStatusText -> b
@@ -12516,104 +12951,83 @@ com.virtual_hotel_agent.search.views.MainView -> com.virtual_hotel_agent.search.
     int search_button_padding -> f
     java.lang.ref.WeakReference mUpdateLevel -> g
     com.virtual_hotel_agent.search.controllers.activities.MainActivity mainActivity -> h
-    52:62:void activateSearchButton() -> a
-    65:97:void flashSearchButton(int) -> a
-    100:119:void disableSearchButton() -> b
-    122:141:void deactivateSearchButton() -> c
-    145:174:void flashBadSearchButton(int) -> b
-    177:180:void showStatus(java.lang.String) -> a
-    182:185:void hideStatus() -> d
-    228:259:void startSpeechSearch(com.evaapis.android.EvaSpeechComponent) -> a
-    31:31:com.evaapis.android.SoundLevelView access$0(com.virtual_hotel_agent.search.views.MainView) -> a
-    32:32:android.widget.ImageButton access$1(com.virtual_hotel_agent.search.views.MainView) -> b
-    35:35:java.lang.ref.WeakReference access$2(com.virtual_hotel_agent.search.views.MainView) -> c
-    37:37:com.virtual_hotel_agent.search.controllers.activities.MainActivity access$3(com.virtual_hotel_agent.search.views.MainView) -> d
+    55:65:void activateSearchButton() -> a
+    68:100:void flashSearchButton(int) -> a
+    103:122:void disableSearchButton() -> b
+    125:144:void deactivateSearchButton() -> c
+    148:177:void flashBadSearchButton(int) -> b
+    180:183:void showStatus(java.lang.String) -> a
+    185:188:void hideStatus() -> d
+    231:268:void startSpeechSearch(com.evaapis.android.EvaSpeechComponent) -> a
+    34:34:com.evaapis.android.SoundLevelView access$0(com.virtual_hotel_agent.search.views.MainView) -> a
+    35:35:android.widget.ImageButton access$1(com.virtual_hotel_agent.search.views.MainView) -> b
+    38:38:java.lang.ref.WeakReference access$2(com.virtual_hotel_agent.search.views.MainView) -> c
+    40:40:com.virtual_hotel_agent.search.controllers.activities.MainActivity access$3(com.virtual_hotel_agent.search.views.MainView) -> d
 com.virtual_hotel_agent.search.views.MainView$1 -> com.virtual_hotel_agent.search.views.b:
     com.virtual_hotel_agent.search.views.MainView this$0 -> a
-    56:60:void run() -> run
+    59:63:void run() -> run
 com.virtual_hotel_agent.search.views.MainView$2 -> com.virtual_hotel_agent.search.views.c:
     com.virtual_hotel_agent.search.views.MainView this$0 -> a
     int val$times -> b
-    74:95:void run() -> run
-    71:71:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$2) -> a
+    77:98:void run() -> run
+    74:74:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$2) -> a
 com.virtual_hotel_agent.search.views.MainView$2$1 -> com.virtual_hotel_agent.search.views.d:
     com.virtual_hotel_agent.search.views.MainView$2 this$1 -> a
     int val$times -> b
-    82:93:void run() -> run
-    78:78:com.virtual_hotel_agent.search.views.MainView$2 access$0(com.virtual_hotel_agent.search.views.MainView$2$1) -> a
+    85:96:void run() -> run
+    81:81:com.virtual_hotel_agent.search.views.MainView$2 access$0(com.virtual_hotel_agent.search.views.MainView$2$1) -> a
 com.virtual_hotel_agent.search.views.MainView$2$1$1 -> com.virtual_hotel_agent.search.views.e:
     com.virtual_hotel_agent.search.views.MainView$2$1 this$2 -> a
     int val$times -> b
-    90:91:void run() -> run
+    93:94:void run() -> run
 com.virtual_hotel_agent.search.views.MainView$3 -> com.virtual_hotel_agent.search.views.f:
     com.virtual_hotel_agent.search.views.MainView this$0 -> a
-    104:117:void run() -> run
-    101:101:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$3) -> a
+    107:120:void run() -> run
+    104:104:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$3) -> a
 com.virtual_hotel_agent.search.views.MainView$3$1 -> com.virtual_hotel_agent.search.views.g:
     com.virtual_hotel_agent.search.views.MainView$3 this$1 -> a
-    111:115:void run() -> run
+    114:118:void run() -> run
 com.virtual_hotel_agent.search.views.MainView$4 -> com.virtual_hotel_agent.search.views.h:
     com.virtual_hotel_agent.search.views.MainView this$0 -> a
-    126:139:void run() -> run
-    123:123:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$4) -> a
+    129:142:void run() -> run
+    126:126:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$4) -> a
 com.virtual_hotel_agent.search.views.MainView$4$1 -> com.virtual_hotel_agent.search.views.i:
     com.virtual_hotel_agent.search.views.MainView$4 this$1 -> a
-    133:137:void run() -> run
+    136:140:void run() -> run
 com.virtual_hotel_agent.search.views.MainView$5 -> com.virtual_hotel_agent.search.views.j:
     com.virtual_hotel_agent.search.views.MainView this$0 -> a
     int val$times -> b
-    155:172:void run() -> run
-    152:152:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$5) -> a
+    158:175:void run() -> run
+    155:155:com.virtual_hotel_agent.search.views.MainView access$0(com.virtual_hotel_agent.search.views.MainView$5) -> a
 com.virtual_hotel_agent.search.views.MainView$5$1 -> com.virtual_hotel_agent.search.views.k:
     com.virtual_hotel_agent.search.views.MainView$5 this$1 -> a
     int val$times -> b
-    162:170:void run() -> run
-    159:159:com.virtual_hotel_agent.search.views.MainView$5 access$0(com.virtual_hotel_agent.search.views.MainView$5$1) -> a
+    165:173:void run() -> run
+    162:162:com.virtual_hotel_agent.search.views.MainView$5 access$0(com.virtual_hotel_agent.search.views.MainView$5$1) -> a
 com.virtual_hotel_agent.search.views.MainView$5$1$1 -> com.virtual_hotel_agent.search.views.l:
     com.virtual_hotel_agent.search.views.MainView$5$1 this$2 -> a
     int val$times -> b
-    168:168:void run() -> run
+    171:171:void run() -> run
 com.virtual_hotel_agent.search.views.MainView$6 -> com.virtual_hotel_agent.search.views.m:
     com.virtual_hotel_agent.search.views.MainView this$0 -> a
-    239:244:void finishSpeech() -> a
-    248:251:void speechResultError(java.lang.String,java.lang.Object) -> a
-    255:257:void speechResultOK(java.lang.String,android.os.Bundle,java.lang.Object) -> a
+    242:247:void finishSpeech() -> a
+    251:260:void speechResultError(java.lang.String,java.lang.Object) -> a
+    264:266:void speechResultOK(java.lang.String,android.os.Bundle,java.lang.Object) -> a
 com.virtual_hotel_agent.search.views.MainView$SearchHandler -> com.virtual_hotel_agent.search.views.n:
     boolean processing -> a
     com.evaapis.android.EvaSpeechComponent speechSearch -> b
     com.virtual_hotel_agent.search.views.MainView view -> c
-    199:224:void handleMessage(android.os.Message) -> handleMessage
-com.virtual_hotel_agent.search.views.SwipeyTabs -> com.virtual_hotel_agent.search.views.SwipeyTabs:
-    java.lang.String TAG -> a
-    com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter mAdapter -> b
-    int mCurrentPos -> c
-    int mBottomBarHeight -> d
-    int mTabIndicatorHeight -> e
-    int mBottomBarColor -> f
-    int mTextColor -> g
-    int[] mFrontedTabPos -> h
-    int[] mLeftTabPos -> i
-    int[] mRightTabPos -> j
-    int[] mCurrentTabPos -> k
-    android.graphics.Paint mCachedTabPaint -> l
-    int mWidth -> m
-    80:86:void init() -> a
-    98:126:void setAdapter(com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter) -> setAdapter
-    135:151:void updateTabPositions(boolean) -> a
-    162:197:void calculateTabPosition(int,int[]) -> a
-    203:223:void updateEllipsize() -> b
-    227:244:void onMeasure(int,int) -> onMeasure
-    253:268:void measureTabs(int,int) -> a
-    272:284:void onLayout(boolean,int,int,int,int) -> onLayout
-    288:319:void dispatchDraw(android.graphics.Canvas) -> dispatchDraw
-    323:329:void draw(android.graphics.Canvas) -> draw
-    334:334:float getLeftFadingEdgeStrength() -> getLeftFadingEdgeStrength
-    340:340:float getRightFadingEdgeStrength() -> getRightFadingEdgeStrength
-    344:344:void onPageScrollStateChanged(int) -> a_
-    347:386:void onPageScrolled(int,float,int) -> a
-    389:391:void onPageSelected(int) -> b_
-    394:419:int interpolateColor(int,int,float) -> a
-com.virtual_hotel_agent.search.views.adapters.ChatAdapter -> com.virtual_hotel_agent.search.views.a.a:
+    202:227:void handleMessage(android.os.Message) -> handleMessage
+com.virtual_hotel_agent.search.views.adapters.BitmapAdapter -> com.virtual_hotel_agent.search.views.a.a:
+    android.content.Context context -> a
+    java.util.ArrayList bitmaps -> b
+    android.view.LayoutInflater inflater -> c
+    36:38:void addBitmap(android.graphics.Bitmap) -> a
+    42:42:int getCount() -> b
+    47:47:boolean isViewFromObject(android.view.View,java.lang.Object) -> a
+    53:64:java.lang.Object instantiateItem(android.view.ViewGroup,int) -> a
+    69:71:void destroyItem(android.view.ViewGroup,int,java.lang.Object) -> a
+com.virtual_hotel_agent.search.views.adapters.ChatAdapter -> com.virtual_hotel_agent.search.views.a.b:
     int VIEW_TYPE_COUNT -> f
     com.virtual_hotel_agent.search.models.chat.ChatItemList mChatList -> g
     android.view.LayoutInflater mInflater -> a
@@ -12622,8 +13036,6 @@ com.virtual_hotel_agent.search.views.adapters.ChatAdapter -> com.virtual_hotel_a
     int vhaChatInSessionText -> d
     int vhaChatNoSessionText -> e
     int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$models$chat$ChatItem$ChatType -> h
-    int[] $SWITCH_TABLE$com$evaapis$crossplatform$flow$FlowElement$TypeEnum -> i
-    int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$models$chat$ChatItem$Status -> j
     48:48:int getViewTypeCount() -> getViewTypeCount
     54:55:com.virtual_hotel_agent.search.models.chat.ChatItem getItem(int) -> a
     60:64:int getCount() -> getCount
@@ -12632,22 +13044,20 @@ com.virtual_hotel_agent.search.views.adapters.ChatAdapter -> com.virtual_hotel_a
     87:217:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
     1:1:java.lang.Object getItem(int) -> getItem
     23:23:int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$models$chat$ChatItem$ChatType() -> a
-    23:23:int[] $SWITCH_TABLE$com$evaapis$crossplatform$flow$FlowElement$TypeEnum() -> b
-    23:23:int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$models$chat$ChatItem$Status() -> c
-com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter -> com.virtual_hotel_agent.search.views.a.b:
-    java.util.ArrayList mImageViews -> a
-    android.content.Context mContext -> b
-    java.util.ArrayList mBitmaps -> c
-    int mGalleryItemBackground -> d
-    21:21:int getCount() -> getCount
+com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter -> com.virtual_hotel_agent.search.views.a.c:
+    android.content.Context mContext -> a
+    java.util.ArrayList mBitmaps -> b
+    int mGalleryItemBackground -> c
+    20:20:int getCount() -> getCount
     25:25:java.lang.Object getItem(int) -> getItem
     29:29:long getItemId(int) -> getItemId
-    35:51:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    62:64:void addBitmap(android.graphics.Bitmap) -> a
-    67:74:void removeBitmap(android.graphics.Bitmap) -> b
-com.virtual_hotel_agent.search.views.adapters.HotelListAdapter -> com.virtual_hotel_agent.search.views.a.c:
+    35:47:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    51:53:void addBitmap(android.graphics.Bitmap) -> a
+    56:61:void removeBitmap(android.graphics.Bitmap) -> b
+    70:72:void clear() -> a
+com.virtual_hotel_agent.search.views.adapters.HotelListAdapter -> com.virtual_hotel_agent.search.views.a.d:
     android.view.LayoutInflater mInflater -> b
-    com.virtual_hotel_agent.search.views.fragments.HotelsFragment mParent -> c
+    com.virtual_hotel_agent.search.views.fragments.HotelListFragment mParent -> c
     android.graphics.drawable.Drawable mHotelIcon -> a
     45:45:com.virtual_hotel_agent.search.models.expedia.XpediaDatabase getDb() -> a
     50:54:int getCount() -> getCount
@@ -12655,7 +13065,7 @@ com.virtual_hotel_agent.search.views.adapters.HotelListAdapter -> com.virtual_ho
     71:71:long getItemId(int) -> getItemId
     75:80:android.view.View fillerView(android.view.View,android.view.ViewGroup) -> a
     87:231:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-com.virtual_hotel_agent.search.views.adapters.HotelListAdapter$ViewHolder -> com.virtual_hotel_agent.search.views.a.d:
+com.virtual_hotel_agent.search.views.adapters.HotelListAdapter$ViewHolder -> com.virtual_hotel_agent.search.views.a.e:
     android.widget.LinearLayout layout -> a
     android.widget.ImageView tripAdvisorStrip -> b
     com.virtual_hotel_agent.search.models.expedia.HotelData hotel -> c
@@ -12667,14 +13077,14 @@ com.virtual_hotel_agent.search.views.adapters.HotelListAdapter$ViewHolder -> com
     int hotelIndex -> i
     246:246:int getHotelIndex() -> a
     249:250:void setHotelIndex(int) -> a
-com.virtual_hotel_agent.search.views.adapters.ImageAdapter -> com.virtual_hotel_agent.search.views.a.e:
+com.virtual_hotel_agent.search.views.adapters.ImageAdapter -> com.virtual_hotel_agent.search.views.a.f:
     android.content.Context mContext -> a
-    java.lang.Integer[] mThumbIds -> b
-    19:19:int getCount() -> getCount
-    23:23:java.lang.Object getItem(int) -> getItem
-    27:27:long getItemId(int) -> getItemId
-    33:40:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-com.virtual_hotel_agent.search.views.adapters.RoomListAdapter -> com.virtual_hotel_agent.search.views.a.f:
+    java.util.ArrayList mThumbIds -> b
+    24:24:int getCount() -> getCount
+    28:28:java.lang.Object getItem(int) -> getItem
+    32:32:long getItemId(int) -> getItemId
+    38:45:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+com.virtual_hotel_agent.search.views.adapters.RoomListAdapter -> com.virtual_hotel_agent.search.views.a.g:
     com.virtual_hotel_agent.search.models.expedia.HotelData mHotel -> a
     android.view.LayoutInflater mInflater -> c
     android.content.Context mParent -> d
@@ -12685,19 +13095,19 @@ com.virtual_hotel_agent.search.views.adapters.RoomListAdapter -> com.virtual_hot
     64:145:android.view.View getGroupView(int,boolean,android.view.View,android.view.ViewGroup) -> getGroupView
     165:165:java.lang.Object getChild(int,int) -> getChild
     172:172:long getChildId(int,int) -> getChildId
-    180:284:android.view.View getChildView(int,int,boolean,android.view.View,android.view.ViewGroup) -> getChildView
-    291:291:int getChildrenCount(int) -> getChildrenCount
-    300:300:boolean hasStableIds() -> hasStableIds
-    307:307:boolean isChildSelectable(int,int) -> isChildSelectable
-    314:314:java.lang.Object getGroup(int) -> getGroup
-    321:324:int getGroupCount() -> getGroupCount
-    331:331:long getGroupId(int) -> getGroupId
+    180:298:android.view.View getChildView(int,int,boolean,android.view.View,android.view.ViewGroup) -> getChildView
+    305:305:int getChildrenCount(int) -> getChildrenCount
+    314:314:boolean hasStableIds() -> hasStableIds
+    321:321:boolean isChildSelectable(int,int) -> isChildSelectable
+    328:328:java.lang.Object getGroup(int) -> getGroup
+    335:338:int getGroupCount() -> getGroupCount
+    345:345:long getGroupId(int) -> getGroupId
     38:38:android.content.Context access$0(com.virtual_hotel_agent.search.views.adapters.RoomListAdapter) -> a
-com.virtual_hotel_agent.search.views.adapters.RoomListAdapter$1 -> com.virtual_hotel_agent.search.views.a.g:
+com.virtual_hotel_agent.search.views.adapters.RoomListAdapter$1 -> com.virtual_hotel_agent.search.views.a.h:
     com.virtual_hotel_agent.search.views.adapters.RoomListAdapter this$0 -> a
     com.virtual_hotel_agent.search.models.expedia.RoomDetails val$room -> b
-    256:281:void onClick(android.view.View) -> onClick
-com.virtual_hotel_agent.search.views.adapters.RoomListAdapter$ViewHolder -> com.virtual_hotel_agent.search.views.a.h:
+    263:295:void onClick(android.view.View) -> onClick
+com.virtual_hotel_agent.search.views.adapters.RoomListAdapter$ViewHolder -> com.virtual_hotel_agent.search.views.a.i:
     android.widget.TextView full_rate_nights -> a
     android.widget.TextView promo -> b
     android.widget.TextView full_rate -> c
@@ -12705,10 +13115,7 @@ com.virtual_hotel_agent.search.views.adapters.RoomListAdapter$ViewHolder -> com.
     android.widget.TextView details -> e
     android.view.View container -> f
     int roomIndex -> g
-com.virtual_hotel_agent.search.views.adapters.SwipeyTabsAdapter -> com.virtual_hotel_agent.search.views.a.i:
-    int getCount() -> b
-    android.widget.TextView getTab(int,com.virtual_hotel_agent.search.views.SwipeyTabs) -> a
-com.virtual_hotel_agent.search.views.fragments.ChatFragment -> com.virtual_hotel_agent.search.views.b.a:
+com.virtual_hotel_agent.search.views.fragments.ChatFragment -> com.virtual_hotel_agent.search.views.fragments.a:
     roboguice.event.EventManager eventManager -> eventManager
     com.virtual_hotel_agent.search.models.chat.ChatItemList mChatListModel -> mChatListModel
     com.virtual_hotel_agent.search.views.fragments.ChatFragment$DialogClickHandler mDialogClickHandler -> a
@@ -12720,9 +13127,9 @@ com.virtual_hotel_agent.search.views.fragments.ChatFragment -> com.virtual_hotel
     88:123:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
     126:127:void setDialogHandler(com.virtual_hotel_agent.search.views.fragments.ChatFragment$DialogClickHandler) -> a
     24:24:int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$models$chat$ChatItem$ChatType() -> E
-com.virtual_hotel_agent.search.views.fragments.ChatFragment$DialogClickHandler -> com.virtual_hotel_agent.search.views.b.b:
+com.virtual_hotel_agent.search.views.fragments.ChatFragment$DialogClickHandler -> com.virtual_hotel_agent.search.views.fragments.b:
     void onClick(android.text.SpannableString,int) -> a
-com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment -> com.virtual_hotel_agent.search.views.b.c:
+com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment -> com.virtual_hotel_agent.search.views.fragments.c:
     android.view.View mView -> Y
     android.widget.EditText mNumAdults -> Z
     android.widget.EditText mNumChildren -> aa
@@ -12744,21 +13151,21 @@ com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment -> com.vir
     32:32:android.widget.EditText access$4(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> d
     33:33:android.widget.EditText access$5(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> e
     34:34:com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$ChildAgeDialogListener access$6(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> f
-com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$1 -> com.virtual_hotel_agent.search.views.b.d:
+com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$1 -> com.virtual_hotel_agent.search.views.fragments.d:
     com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment this$0 -> a
     85:113:void onClick(android.content.DialogInterface,int) -> onClick
-com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$2 -> com.virtual_hotel_agent.search.views.b.e:
+com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$2 -> com.virtual_hotel_agent.search.views.fragments.e:
     com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment this$0 -> a
     120:122:void onClick(android.content.DialogInterface,int) -> onClick
-com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$3 -> com.virtual_hotel_agent.search.views.b.f:
+com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$3 -> com.virtual_hotel_agent.search.views.fragments.f:
     com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment this$0 -> a
     146:153:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
     158:158:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
     162:162:void afterTextChanged(android.text.Editable) -> afterTextChanged
-com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$ChildAgeDialogListener -> com.virtual_hotel_agent.search.views.b.g:
+com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment$ChildAgeDialogListener -> com.virtual_hotel_agent.search.views.fragments.g:
     void onDialogPositiveClick(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> a
     void onDialogNegativeClick(com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment) -> b
-com.virtual_hotel_agent.search.views.fragments.HotelFragment -> com.virtual_hotel_agent.search.views.b.h:
+com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment -> com.virtual_hotel_agent.search.views.fragments.h:
     java.lang.String TAG -> a
     int mHotelIndex -> b
     android.widget.Gallery mHotelGallery -> e
@@ -12767,39 +13174,34 @@ com.virtual_hotel_agent.search.views.fragments.HotelFragment -> com.virtual_hote
     android.widget.RatingBar mStarRatingBar -> h
     android.widget.GridView mAmenitiesGridView -> i
     android.widget.Button mBookButton -> Y
+    android.widget.Button mMapButton -> Z
     com.virtual_hotel_agent.search.models.expedia.HotelData mHotelData -> c
-    android.view.View mView -> Z
-    com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter mHotelGalleryAdapter -> aa
-    android.graphics.Bitmap mEvaBmp -> ab
-    java.lang.Thread mImageDownloadThread -> ac
-    android.widget.Button mMapButton -> ad
+    android.view.View mView -> aa
+    com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter mHotelGalleryAdapter -> ab
+    android.graphics.Bitmap mEvaBmp -> ac
+    android.graphics.Bitmap mEvaBmpCached -> ad
     boolean mViewingHotelData -> d
-    boolean mRunThreads -> ae
-    android.os.Handler mHandlerFinish -> af
-    49:51:void onSaveInstanceState(android.os.Bundle) -> e
-    93:134:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    143:145:void onDestroy() -> s
-    149:288:void fillData() -> a
-    295:295:com.virtual_hotel_agent.search.views.fragments.HotelFragment newInstance(int) -> b
-    314:348:void startImageDownload() -> E
-    75:75:android.graphics.Bitmap access$0(com.virtual_hotel_agent.search.views.fragments.HotelFragment) -> a
-    74:74:com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter access$1(com.virtual_hotel_agent.search.views.fragments.HotelFragment) -> b
-    75:75:void access$2(com.virtual_hotel_agent.search.views.fragments.HotelFragment,android.graphics.Bitmap) -> a
-    298:298:boolean access$3(com.virtual_hotel_agent.search.views.fragments.HotelFragment) -> c
-    300:300:android.os.Handler access$4(com.virtual_hotel_agent.search.views.fragments.HotelFragment) -> d
-com.virtual_hotel_agent.search.views.fragments.HotelFragment$1 -> com.virtual_hotel_agent.search.views.b.i:
-    com.virtual_hotel_agent.search.views.fragments.HotelFragment this$0 -> a
-    304:310:void handleMessage(android.os.Message) -> handleMessage
-com.virtual_hotel_agent.search.views.fragments.HotelFragment$2 -> com.virtual_hotel_agent.search.views.b.j:
-    com.virtual_hotel_agent.search.views.fragments.HotelFragment this$0 -> a
-    264:267:void onClick(android.view.View) -> onClick
-com.virtual_hotel_agent.search.views.fragments.HotelFragment$3 -> com.virtual_hotel_agent.search.views.b.k:
-    com.virtual_hotel_agent.search.views.fragments.HotelFragment this$0 -> a
-    276:283:void onClick(android.view.View) -> onClick
-com.virtual_hotel_agent.search.views.fragments.HotelFragment$4 -> com.virtual_hotel_agent.search.views.b.l:
-    com.virtual_hotel_agent.search.views.fragments.HotelFragment this$0 -> a
-    321:345:void run() -> run
-com.virtual_hotel_agent.search.views.fragments.HotelsFragment -> com.virtual_hotel_agent.search.views.b.m:
+    android.os.Handler mHandlerFinish -> ae
+    com.virtual_hotel_agent.search.util.ImageDownloader imageDownloader -> af
+    58:60:void onSaveInstanceState(android.os.Bundle) -> e
+    122:165:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    173:175:void changeHotelId(int) -> b
+    179:185:void onDestroy() -> s
+    189:349:void fillData() -> a
+    355:361:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+    79:79:android.graphics.Bitmap access$0(com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment) -> a
+    78:78:com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter access$1(com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment) -> b
+    79:79:void access$2(com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment,android.graphics.Bitmap) -> a
+com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment$1 -> com.virtual_hotel_agent.search.views.fragments.i:
+    com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment this$0 -> a
+    310:313:void onClick(android.view.View) -> onClick
+com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment$2 -> com.virtual_hotel_agent.search.views.fragments.j:
+    com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment this$0 -> a
+    320:344:void onClick(android.view.View) -> onClick
+com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment$DownloadedImg -> com.virtual_hotel_agent.search.views.fragments.k:
+    java.lang.ref.WeakReference fragmentRef -> a
+    94:106:void handleMessage(android.os.Message) -> handleMessage
+com.virtual_hotel_agent.search.views.fragments.HotelListFragment -> com.virtual_hotel_agent.search.views.fragments.HotelListFragment:
     roboguice.event.EventManager eventManager -> eventManager
     com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask mContinuationLoader -> a
     android.widget.LinearLayout mFooterView -> f
@@ -12812,47 +13214,54 @@ com.virtual_hotel_agent.search.views.fragments.HotelsFragment -> com.virtual_hot
     android.widget.AbsListView$OnScrollListener mListScroll -> Y
     android.app.ProgressDialog mProgressDialog -> e
     int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$controllers$web_services$DownloaderTaskInterface$DownloaderStatus -> Z
-    60:62:void onDestroyView() -> e
-    66:82:void setUserVisibleHint(boolean) -> d
-    86:95:void onPause() -> r
-    99:101:void onResume() -> q
-    105:107:void onSaveInstanceState(android.os.Bundle) -> e
-    111:113:void onStart() -> c
-    117:119:void onStop() -> d
-    123:133:void onCreate(android.os.Bundle) -> a
-    138:150:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    155:176:void setAdapter() -> a
-    181:184:void onClick(android.view.View) -> onClick
-    188:200:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
-    232:251:void endProgressDialog(int,org.json.JSONObject) -> a
-    257:278:void endProgressDialogWithError(int,org.json.JSONObject) -> b
-    282:290:void startProgressDialog(int) -> c_
-    295:309:void updateProgress(int,com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface$DownloaderStatus) -> a
-    314:314:boolean onKey(android.view.View,int,android.view.KeyEvent) -> onKey
-    318:318:com.virtual_hotel_agent.search.views.adapters.HotelListAdapter getAdapter() -> E
-    202:202:boolean access$0(com.virtual_hotel_agent.search.views.fragments.HotelsFragment) -> a
-    45:45:int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$controllers$web_services$DownloaderTaskInterface$DownloaderStatus() -> F
-com.virtual_hotel_agent.search.views.fragments.HotelsFragment$1 -> com.virtual_hotel_agent.search.views.b.n:
-    com.virtual_hotel_agent.search.views.fragments.HotelsFragment this$0 -> a
-    210:210:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
-    214:224:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
-com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment -> com.virtual_hotel_agent.search.views.b.o:
+    56:58:void onDestroyView() -> e
+    62:78:void setUserVisibleHint(boolean) -> d
+    82:91:void onPause() -> r
+    95:97:void onResume() -> q
+    101:103:void onSaveInstanceState(android.os.Bundle) -> e
+    107:109:void onStart() -> c
+    113:115:void onStop() -> d
+    119:129:void onCreate(android.os.Bundle) -> a
+    134:151:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    156:177:void setAdapter() -> a
+    181:189:void onEventHotelItemClicked(com.virtual_hotel_agent.search.controllers.events.HotelItemClicked) -> onEventHotelItemClicked
+    193:212:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+    243:262:void endProgressDialog(int,org.json.JSONObject) -> a
+    268:289:void endProgressDialogWithError(int,org.json.JSONObject) -> b
+    293:301:void startProgressDialog(int) -> c_
+    306:320:void updateProgress(int,com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface$DownloaderStatus) -> a
+    323:331:void listResultUpdated() -> E
+    214:214:boolean access$0(com.virtual_hotel_agent.search.views.fragments.HotelListFragment) -> a
+    42:42:int[] $SWITCH_TABLE$com$virtual_hotel_agent$search$controllers$web_services$DownloaderTaskInterface$DownloaderStatus() -> F
+com.virtual_hotel_agent.search.views.fragments.HotelListFragment$1 -> com.virtual_hotel_agent.search.views.fragments.l:
+    com.virtual_hotel_agent.search.views.fragments.HotelListFragment this$0 -> a
+    222:222:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
+    226:236:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
+com.virtual_hotel_agent.search.views.fragments.HotelListFragment$2 -> com.virtual_hotel_agent.search.views.fragments.m:
+    com.virtual_hotel_agent.search.views.fragments.HotelListFragment this$0 -> a
+    int val$hotelIndex -> b
+    186:187:void run() -> run
+com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment -> com.virtual_hotel_agent.search.views.fragments.n:
     java.lang.String TAG -> a
     com.google.android.gms.maps.GoogleMap mMap -> b
     android.view.View mView -> c
+    com.google.android.gms.maps.model.Marker selectedMarker -> d
+    java.lang.String mCurrency -> e
+    int MAX_HOTELS -> f
     roboguice.event.EventManager eventManager -> eventManager
-    52:62:void onCreate(android.os.Bundle) -> a
-    66:67:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    73:93:void setUpMapIfNeeded() -> E
-    98:107:void onResume() -> q
-    112:115:void onHotelsListUpdated() -> a
-    121:173:void addHotelsToMap() -> F
-    178:200:void onInfoWindowClick(com.google.android.gms.maps.model.Marker) -> a
-    118:118:void access$0(com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment) -> a
-com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment$1 -> com.virtual_hotel_agent.search.views.b.p:
+    59:70:void onCreate(android.os.Bundle) -> a
+    74:75:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    80:101:void setUpMapIfNeeded() -> E
+    106:117:void onResume() -> q
+    122:125:void onHotelsListUpdated() -> a
+    130:176:void addHotelsToMap() -> F
+    179:204:com.google.android.gms.maps.model.Marker addMapPoint(com.virtual_hotel_agent.search.models.expedia.HotelData,com.google.android.gms.maps.model.BitmapDescriptor,com.google.android.gms.maps.model.LatLngBounds$Builder) -> a
+    210:249:void onInfoWindowClick(com.google.android.gms.maps.model.Marker) -> a
+    127:127:void access$0(com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment) -> a
+com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment$1 -> com.virtual_hotel_agent.search.views.fragments.o:
     com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment this$0 -> a
-    88:89:void run() -> run
-com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement -> com.virtual_hotel_agent.search.views.b.q:
+    97:98:void run() -> run
+com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement -> com.virtual_hotel_agent.search.views.fragments.p:
     android.view.View mView -> a
     android.widget.ImageView mHotelImage -> b
     android.widget.TextView mHotelName -> c
@@ -12862,22 +13271,16 @@ com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement -> com.virtu
     com.virtual_hotel_agent.search.models.expedia.HotelData mHotelData -> g
     android.widget.ExpandableListView mRoomListView -> h
     com.virtual_hotel_agent.search.views.adapters.RoomListAdapter mAdapter -> i
-    android.graphics.Bitmap mEvaBmp -> Y
-    android.os.Handler mHandlerFinish -> Z
+    com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement$DownloadedImg mHandlerFinish -> Y
+    com.virtual_hotel_agent.search.util.ImageDownloader imageDownloader -> Z
     int mHotelIndex -> aa
-    42:44:void onSaveInstanceState(android.os.Bundle) -> e
-    68:94:void startImageDownload() -> a
-    104:220:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    230:230:com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement newInstance(int) -> b
-    49:49:android.widget.ImageView access$0(com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement) -> a
-    54:54:com.virtual_hotel_agent.search.models.expedia.HotelData access$1(com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement) -> b
-    59:59:android.os.Handler access$2(com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement) -> c
-com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement$1 -> com.virtual_hotel_agent.search.views.b.r:
-    com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement this$0 -> a
-    63:65:void handleMessage(android.os.Message) -> handleMessage
-com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement$2 -> com.virtual_hotel_agent.search.views.b.s:
-    com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement this$0 -> a
-    74:91:void run() -> run
+    51:53:void onSaveInstanceState(android.os.Bundle) -> e
+    100:238:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    248:248:com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement newInstance(int) -> b
+    58:58:android.widget.ImageView access$0(com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement) -> a
+com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement$DownloadedImg -> com.virtual_hotel_agent.search.views.fragments.q:
+    java.lang.ref.WeakReference fragmentRef -> a
+    76:83:void handleMessage(android.os.Message) -> handleMessage
 javax.inject.Inject -> javax.inject.Inject:
 javax.inject.Named -> javax.inject.Named:
     java.lang.String value() -> value
@@ -19728,8 +20131,8 @@ roboguice.activity.RoboExpandableListActivity -> roboguice.activity.RoboExpandab
     129:131:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
     135:135:java.util.Map getScopedObjectMap() -> a
 roboguice.activity.RoboFragmentActivity -> roboguice.activity.RoboFragmentActivity:
-    roboguice.event.EventManager eventManager -> x
-    java.util.HashMap scopedObjects -> y
+    roboguice.event.EventManager eventManager -> y
+    java.util.HashMap scopedObjects -> z
     roboguice.inject.ContentViewListener ignored -> ignored
     45:50:void onCreate(android.os.Bundle) -> onCreate
     54:56:void onRestart() -> onRestart
@@ -20144,9 +20547,6 @@ roboguice.test.shadow.ShadowFragmentActivity$1 -> roboguice.test.shadow.ShadowFr
     154:154:boolean executePendingTransactions() -> b
     164:164:android.support.v4.app.Fragment findFragmentByTag(java.lang.String) -> a
     187:187:void popBackStack(int,int) -> a
-    210:210:void putFragment(android.os.Bundle,java.lang.String,android.support.v4.app.Fragment) -> a
-    214:214:android.support.v4.app.Fragment getFragment(android.os.Bundle,java.lang.String) -> a
-    219:219:android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment) -> a
 roboguice.test.shadow.ShadowFragmentActivity$1$1 -> roboguice.test.shadow.ShadowFragmentActivity$1$1:
     roboguice.test.shadow.ShadowFragmentActivity$1 this$1 -> a
     32:32:android.support.v4.app.FragmentTransaction add(android.support.v4.app.Fragment,java.lang.String) -> a

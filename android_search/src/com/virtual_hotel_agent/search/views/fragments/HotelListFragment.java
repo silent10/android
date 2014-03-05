@@ -25,21 +25,23 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
+import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.ScaleInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskInterface;
+import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 // From Arik's app
 
-public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskInterface {
+public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
 
 	@Inject protected EventManager eventManager;
 	
@@ -131,7 +133,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		mView = inflater.inflate(R.layout.hotel_list_portrait, container, false);
+		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		mHotelListView.clearChoices();
@@ -151,7 +153,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		return mView;
 	}
 
-	void setAdapter() {
+	private void setAdapter() {
 		
 		if (mEnabledPaging && mFooterView != null)
 			mHotelListView.removeFooterView(mFooterView);
@@ -172,7 +174,11 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		}
 
 		mAdapter = new HotelListAdapter(this);
-		mHotelListView.setAdapter(mAdapter);
+		
+		AnimationAdapter animAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
+		animAdapter.setAbsListView(mHotelListView);
+		mHotelListView.setAdapter(animAdapter);
+		
 		mHotelListView.setOnItemClickListener(this);
 	}
 

@@ -94,7 +94,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		}
 		return view;
 	}
-
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (position >= mChatList.size()) {

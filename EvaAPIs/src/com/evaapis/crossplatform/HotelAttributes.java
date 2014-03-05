@@ -127,9 +127,21 @@ public class HotelAttributes {
 	public HotelAttributes(JSONObject jHotelAttributes, List<String> parseErrors) {
 		try {
 			if (jHotelAttributes.has("Chain")) {
-				chain = jHotelAttributes.getString("Chain");
+				if (jHotelAttributes.get("Chain") instanceof JSONArray) {
+					JSONArray jChains = jHotelAttributes.getJSONArray("Chain");
+					JSONObject jChain = jChains.getJSONObject(0);
+					chain = jChain.getString("Name");
+				}
+				else {
+					chain = jHotelAttributes.getString("Chain");
+				}
 			}
-			
+		} catch (JSONException e) {
+			Log.e(TAG, "Parsing JSON", e);
+			parseErrors.add("Exception during parsing hotel attributes: "+e.getMessage());
+		}
+		
+		try {	
 			if (jHotelAttributes.has("Board")) {
 				JSONArray jBoard = jHotelAttributes.getJSONArray("Board");
 				for (int i = 0; i < jBoard.length(); i++) {

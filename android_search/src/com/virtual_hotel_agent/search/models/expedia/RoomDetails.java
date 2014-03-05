@@ -32,16 +32,29 @@ public class RoomDetails {
 	public String mPolicy;
 	public String mCheckInInstructions;
 
-	
+	public String[] mImageUrls;
 	
 	public RoomDetails(JSONObject jsonObject) {
-		mRoomTypeDescription =	XpediaDatabase.getSafeString(jsonObject, "roomTypeDescription");
-		mRoomTypeCode = XpediaDatabase.getSafeString(jsonObject, "roomTypeCode");
+		mRoomTypeDescription = null;
+		if (jsonObject.has("RoomType")) {
+			JSONObject roomType;
+			try {
+				roomType = jsonObject.getJSONObject("RoomType");
+				mRoomTypeDescription =  XpediaDatabase.getSafeString(roomType, "description");
+				mRoomDescription =  XpediaDatabase.getSafeString(roomType, "descriptionLong");
+				mRoomTypeCode = XpediaDatabase.getSafeString(roomType,	"@roomCode");
+			} catch (JSONException e) {
+			}
+		}
+		if (mRoomTypeDescription == null) {
+			mRoomTypeDescription =	XpediaDatabase.getSafeString(jsonObject, "roomTypeDescription");
+			mRoomTypeCode = XpediaDatabase.getSafeString(jsonObject, "roomTypeCode");
+			mRoomDescription  = XpediaDatabase.getSafeString(jsonObject, "roomDescription");
+		}
 		mRateCode = XpediaDatabase.getSafeString(jsonObject, "rateCode");
 //		mMaxRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "maxRoomOccupancy");
 //		mQuotedRoomOccupancy = EvaXpediaDatabase.getSafeInt(jsonObject, "quotedRoomOccupancy");
 //		mMinGuestAge = EvaXpediaDatabase.getSafeInt(jsonObject, "minGuestAge");
-		mRoomDescription  = XpediaDatabase.getSafeString(jsonObject, "roomDescription");
 //		mCurrentAllotment = EvaXpediaDatabase.getSafeInt(jsonObject, "currentAllotment");
 //		mPropertyAvailable = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyAvailable");
 //		mPropertyRestricted = EvaXpediaDatabase.getSafeBool(jsonObject, "propertyRestricted");
@@ -108,6 +121,24 @@ public class RoomDetails {
 					{
 						JSONObject jValueAdd = jValueAddsArray.getJSONObject(i);
 						mValueAdds[i] = new ValueAdd(jValueAdd);
+					}
+				}
+			}
+			
+			if (jsonObject.has("RoomImages")) {
+				JSONObject jRoomImages = jsonObject.getJSONObject("RoomImages");
+				int size = XpediaDatabase.getSafeInt(jRoomImages, "@size");
+				
+				if(size==-1) size =1;
+				mImageUrls = new String[size];
+				if (size == 1) {
+					JSONObject jImg = jRoomImages.getJSONObject("RoomImage");
+					mImageUrls[0] = XpediaDatabase.getSafeString(jImg, "url");
+				}
+				else {
+					JSONArray jImgs = jRoomImages.getJSONArray("RoomImage");
+					for(int i=0;i<size;i++)	{
+						mImageUrls[i] = XpediaDatabase.getSafeString(jImgs.getJSONObject(i), "url");
 					}
 				}
 			}
