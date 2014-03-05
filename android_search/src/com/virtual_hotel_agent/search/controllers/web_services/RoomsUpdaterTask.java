@@ -47,8 +47,4 @@ public class RoomsUpdaterTask extends DownloaderTask {
 		return result;
 	}
 
-	
-
-	
-
 }

@@ -131,7 +131,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		mView = inflater.inflate(R.layout.hotel_list_portrait, container, false);
+		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		mHotelListView.clearChoices();

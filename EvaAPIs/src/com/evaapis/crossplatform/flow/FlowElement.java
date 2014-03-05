@@ -17,7 +17,8 @@ public class FlowElement {
 		Flight,
 		Hotel,
 		Car,
-		Question
+		Question,
+		Statement
 	}
 	public TypeEnum Type;
 	public EvaLocation[] RelatedLocations;

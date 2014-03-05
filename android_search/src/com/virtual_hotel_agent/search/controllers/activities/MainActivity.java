@@ -370,7 +370,8 @@ public class MainActivity extends RoboFragmentActivity implements
 				"  Hotel near the Eiffel tower",
 				"  3 star hotel near the Eiffel tower",
 				"  Sort by price",
-				"  New York tonight, for less than 150"
+				"  New York tonight, for less than 150",
+				"  A Hilton hotel in Miami Florida"
 			};
 		String greeting = getResources().getString(R.string.examples_greetings);
 		String examplesString = "";
@@ -997,12 +998,12 @@ public class MainActivity extends RoboFragmentActivity implements
 	static ChatItem lastHotelCompleted = null;
 	static ChatItem lastFlightCompleted = null;
 
-	class DownloaderListener implements DownloaderTaskListenerInterface {
+	class ChatItemDownloaderListener extends DownloaderTaskListener {
 		
 		ChatItem currentItem;
 		boolean switchToResult;
 		
-		DownloaderListener(ChatItem chatItem, boolean switchToResult) {
+		ChatItemDownloaderListener(ChatItem chatItem, boolean switchToResult) {
 			currentItem = chatItem;
 			this.switchToResult = switchToResult;
 		}
@@ -1016,40 +1017,54 @@ public class MainActivity extends RoboFragmentActivity implements
 			currentItem.setStatus(Status.HasResults);
 			
 			String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
+			// tabName is HOTELS, FLIGHTS, etc.. depending on chatItem downloader id
 			
-			int index = mTabTitles.indexOf(tabName);
-			if (index == -1) {
-				mTabsAdapter.addTab(tabName);
-				index = mTabTitles.size() - 1;
-				
-				// Adding map delayed because adding map takes time (2-3 seconds) and don't want to delay switching to list
-				Handler handler = new Handler();
-				handler.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						mTabsAdapter.addTab("MAP");
-					}
-				}, 500);
-			} 
-			else if (id == R.string.HOTELS) {
-				HotelsMapFragment mapFragment = (HotelsMapFragment) mTabsAdapter.instantiateItem(mViewPager, index+1);
-				mapFragment.onHotelsListUpdated();
-				
+			XpediaDatabase evaDb = MyApplication.getDb();
+			if (id == R.string.HOTELS && (evaDb == null || evaDb.mHotelData == null || evaDb.mHotelData.length == 0)) {
 				mTabsAdapter.removeTab(mHotelTabName);
 				mTabsAdapter.removeTab(mRoomsTabName);
-			}
-			HotelListFragment fragment = (HotelListFragment) mTabsAdapter.instantiateItem(mViewPager, index);
-			if (fragment != null) {
-				fragment.listResultUpdated();
+				mTabsAdapter.removeTab(mHotelsTabName);
+				mTabsAdapter.removeTab("MAP");
+				Toast.makeText(MainActivity.this, "No hotels available, please try searching for a different location or date", Toast.LENGTH_LONG ).show();
 			}
 			else {
-				MainActivity.LogError(TAG, "Unexpected hotel list fragment is null");
+				int index = mTabTitles.indexOf(tabName);
+				if (index == -1) {
+					mTabsAdapter.addTab(tabName);
+					index = mTabTitles.size() - 1;
+					
+					// Adding map delayed because adding map takes time (2-3 seconds) and don't want to delay switching to list
+					Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							// add map - delayed - only if HOTELS tab is present and has hotels data 
+							int index = mTabTitles.indexOf(mHotelsTabName);
+							if (index != -1) {
+								mTabsAdapter.addTab("MAP");
+							}
+						}
+					}, 500);
+				} 
+				else if (id == R.string.HOTELS) {
+					HotelsMapFragment mapFragment = (HotelsMapFragment) mTabsAdapter.instantiateItem(mViewPager, index+1);
+					mapFragment.onHotelsListUpdated();
+					
+					mTabsAdapter.removeTab(mHotelTabName);
+					mTabsAdapter.removeTab(mRoomsTabName);
+				}
+				HotelListFragment fragment = (HotelListFragment) mTabsAdapter.instantiateItem(mViewPager, index);
+				if (fragment != null) {
+					fragment.listResultUpdated();
+				}
+				else {
+					MainActivity.LogError(TAG, "Unexpected hotel list fragment is null");
+				}
+				
+				if (this.switchToResult) {
+					mTabs.setCurrentItem(index);
+				}
 			}
-			
-			if (this.switchToResult) {
-				mTabs.setCurrentItem(index);
-			}
-			
 			
 			// this is ugly hack - there can be only one hotel chat item with results, and only one flight search with results
 			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
@@ -1065,8 +1080,6 @@ public class MainActivity extends RoboFragmentActivity implements
 				lastFlightCompleted = currentItem;
 			}
 			invalidateChatFragment();
-			
-
 		}
 
 		@Override
@@ -1089,10 +1102,6 @@ public class MainActivity extends RoboFragmentActivity implements
 				}
 			}
 			invalidateChatFragment();
-		}
-
-		@Override
-		public void updateProgress(int id, DownloaderStatus mProgress) {
 		}
 	}
 
@@ -1133,7 +1142,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		SettingsAPI.setShowIntroTips(this, false);
 		
 		mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
-		mSearchExpediaTask.initialize(new DownloaderListener(_chatItem, _switchToResult), 
+		mSearchExpediaTask.initialize(new ChatItemDownloaderListener(_chatItem, _switchToResult), 
 				MainActivity.this, _reply,  SettingsAPI.getCurrencyCode(MainActivity.this)); // TODO: change to be based on flow element, // TODO: change to use currency
 //		if (currentHotelSearch.getStatus() == Status.HasResults) {
 //			// this chat item was already activated and has results - bypass the cloud service and fake results
@@ -1246,7 +1255,9 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	@Inject private ChatItemList mChatListModel;
 
-	private DownloaderTaskListener mRoomUpdaterListener = new DownloaderTaskListener() {
+	private class RoomTaskListener extends DownloaderTaskListener {
+		private boolean mSwitchToTab = false;
+
 		@Override
 		public void endProgressDialog(int id, JSONObject result) { // we got the hotel details reply successfully
 			Log.d(TAG, "endProgressDialog() for hotel rooms  id " + id);
@@ -1270,7 +1281,10 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 
 			index = mTabTitles.indexOf(tabName);
-			mTabs.setCurrentItem(index);
+			if (mSwitchToTab) {
+				mTabs.setCurrentItem(index);
+				mSwitchToTab  = false;
+			}
 		}
 		
 		@Override
@@ -1278,7 +1292,13 @@ public class MainActivity extends RoboFragmentActivity implements
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			mainView.hideStatus();
 		}
+
+		public void switchToTab() {
+			mSwitchToTab  = true;
+		}
 	};
+	
+	private RoomTaskListener mRoomUpdaterListener = new RoomTaskListener(); 
 	
 	private DownloaderTaskListener mHotelDownloadListener = new DownloaderTaskListener() {
 		@Override
@@ -1311,7 +1331,8 @@ public class MainActivity extends RoboFragmentActivity implements
 
 			index = mTabTitles.indexOf(tabName);
 			mTabs.setCurrentItem(index);
-			
+
+			startRoomSearch(hotelIndex);
 			onEventHotelsListUpdated(null);
 		}
 
@@ -1471,8 +1492,19 @@ public class MainActivity extends RoboFragmentActivity implements
 			return;
 		}
 
+		int index = mTabTitles.indexOf(mRoomsTabName);
+		if (index == -1) {
+			// no rooms tab - will be soon - so mark as switch to it
+			if (mRoomUpdater == null) {
+				startRoomSearch(event.hotelIndex);
+			}
+			mRoomUpdaterListener.switchToTab();
+		}
+		else 
+			mTabs.setCurrentItem(index);
+	}
 		
-		
+	private void startRoomSearch(int hotelIndex) {
 		if (mRoomUpdater != null) {
 			if (false == mRoomUpdater.cancel(true)) {
 				Log.d(TAG, "false == mRoomUpdater.cancel(true)");
@@ -1480,14 +1512,15 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 		
-		mainView.showStatus("Getting Rooms info...");
-		mRoomUpdater = new RoomsUpdaterTask(this, event.hotelIndex);
+		mTabsAdapter.removeTab(mRoomsTabName);
+		mainView.showStatus("Getting Rooms info for hotel");
+		mRoomUpdater = new RoomsUpdaterTask(this, hotelIndex);
 		mRoomUpdater.attach(mRoomUpdaterListener);
-		mRoomUpdater.execute();
-	}
-		
+		mRoomUpdater.execute();	}
+
+
 	private static Random randomGenerator = new Random();
-	private String tests[] = { "Hotel tonight", "Hotel in Madrid March 10th to 12th", "Hotel in Paris March 10th to 12th", "Hotel in Miami Florida March 10th to 12th" };
+	private String tests[] = { "Hilton Hotel tonight", "Hilton Hotel in Madrid March 10th to 12th", "Hilton Hotel in Paris March 10th to 12th", "Hilton Hotel in Miami Florida March 10th to 12th" };
 	
 	public void onEventChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;

@@ -73,12 +73,16 @@ import com.evature.util.ExternalIpAddressGetter;
 			if (mNBest != null) {
 				evatureUrl = mEva.mConfig.vproxyHost;
 			}
+			
+			//evatureUrl = "http://10.0.0.52:8008"; 
+			
 			evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());
 			evatureUrl += ("&api_key=" + mEva.getApiKey());
 			//evatureUrl += ("&language=" + mLanguage);
 			evatureUrl += ("&session_id=" + mEva.getSessionId());
 			evatureUrl += ("&sdk_version="+EvaComponent.SDK_VERSION);
+			evatureUrl += "&ffi_chains=true&ffi_statement=true";
 			String language = mEva.getPreferedLanguage();
 			if (language != null && !"".equals(language)) {
 				evatureUrl += "&language="+language;

@@ -123,7 +123,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 				);
 
 		
-		mView = inflater.inflate(R.layout.select_hotel_room,container,false);
+		mView = inflater.inflate(R.layout.fragment_select_hotel_room,container,false);
 
 		mHotelImage = (ImageView)mView.findViewById(R.id.hotelThumbnail);
 
@@ -272,7 +272,14 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		    }
 		});
 
-		if(mAdapter.getGroupCount()==0)
+		// collapse all
+		int len = mAdapter.getGroupCount();           
+        for(int i=0; i<len; i++)
+        {
+        	mRoomListView.collapseGroup(i);
+        }
+
+		if(len==0)
 		{
 			Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
 		}
