@@ -10,7 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.Gallery;
 import android.widget.ImageView;
 
-public class HotelGalleryAdapter extends BaseAdapter {
+public class PhotoGalleryAdapter extends BaseAdapter {
 
 	private Context mContext;
 	private ArrayList<Bitmap> mBitmaps;
@@ -60,7 +60,7 @@ public class HotelGalleryAdapter extends BaseAdapter {
 		}
 	}
 	
-	public HotelGalleryAdapter(Context ctx) {
+	public PhotoGalleryAdapter(Context ctx) {
 		mContext = ctx;
 		mBitmaps = new ArrayList<Bitmap>();
 		mGalleryItemBackground = android.R.drawable.picture_frame;

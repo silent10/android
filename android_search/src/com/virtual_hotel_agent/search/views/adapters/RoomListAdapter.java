@@ -16,6 +16,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.BaseExpandableListAdapter;
@@ -28,6 +29,7 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -139,7 +141,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				 holder.photo.setVisibility(View.VISIBLE);
 			 }
 			 else {
-				 holder.photo.setVisibility(View.INVISIBLE);
+				 holder.photo.setVisibility(View.GONE);
 			 }
 		 }
 
@@ -149,6 +151,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			 if (roomDetails.mRateInfo.mNonRefundable) {
 				 if (isExpanded) {
 					 holder.container.setBackgroundResource(R.drawable.non_refundable_background_selected);
+					 holder.photo.setVisibility(View.GONE);
 				 }
 				 else {
 					 holder.container.setBackgroundResource(R.drawable.non_refundable_background);
@@ -157,6 +160,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			 else {
 				 if (isExpanded) {
 					 holder.container.setBackgroundResource(R.drawable.hotel_background_selected);
+					 holder.photo.setVisibility(View.GONE);
 				 }
 				 else {
 					 holder.container.setBackgroundResource(R.drawable.hotel_background);
@@ -242,6 +246,38 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 		final RoomDetails room = mHotel.mSummary.roomDetails[groupPosition];
 		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);
+		
+		
+		ImageView photoHolder = (ImageView) convertView.findViewById(R.id.roomImage);
+		if (room.mImageUrls != null && room.mImageUrls.length > 0) {
+			 XpediaDatabase db = MyApplication.getDb();
+			 LruCache<String, Bitmap> cache = db != null ? db.getImagesCache() : null;
+			 Bitmap cachedPhoto = cache != null ? cache.get(room.mImageUrls[0]) : null;
+			 if (cachedPhoto != null) {
+				 photoHolder.setImageBitmap(cachedPhoto);
+			 }
+			 else {
+				 photoHolder.setImageBitmap(mEvaBmpCached);
+			 }
+			 photoHolder.setVisibility(View.VISIBLE);
+			 photoHolder.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					Intent intent = new Intent(mParent, ImageGalleryActivity.class);
+					intent.putExtra(ImageGalleryActivity.PHOTO_URLS, room.mImageUrls);
+					Spanned spannedName = Html.fromHtml(room.mRoomTypeDescription);
+					String name = spannedName.toString();
+					 
+					intent.putExtra(ImageGalleryActivity.TITLE, name);
+					mParent.startActivity(intent);
+				}
+			});
+		 }
+		 else {
+			 photoHolder.setVisibility(View.GONE);
+		 }
+		
 		
 		if (nonRefundable) {
 			convertView.setBackgroundColor(selectedNonRefundColor);
