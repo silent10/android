@@ -46,7 +46,7 @@
         <RatingBar
             android:id="@+id/starRating"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="24dp"
             android:layout_alignParentRight="true"
             android:layout_below="@id/location"
             android:isIndicator="true"
@@ -69,9 +69,9 @@
         android:id="@+id/noticeText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/hotelThumbnail"
         android:maxHeight="45dp"
         android:scrollbars="vertical"
+        android:visibility="gone"
         android:text="" />
 
     <ImageView

@@ -2,6 +2,7 @@ package com.virtual_hotel_agent.search;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,6 +31,9 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 
 	public static final String PHOTO_INDEX = "PhotoIndex";
 	public static final String HOTEL_ID = "HotelId";
+	public static final String PHOTO_URLS = "PhotoUrls";
+
+	public static final String TITLE = "Title";
 
 
 	private int initialPage = 99999;
@@ -64,7 +68,7 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 	
 	private ArrayList<String> captions;
 
-	private String mHotelName;
+	private String mTitle;
 
 
 	
@@ -76,25 +80,36 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 
 
 		Intent intent = getIntent();
+		
+		String[] urlsArray = intent.getStringArrayExtra(PHOTO_URLS);
+		
 		int hotelId = intent.getIntExtra(HOTEL_ID, -1);
-		if (hotelId == -1) {
-			MainActivity.LogError(TAG, "No hotel ID");
+		if (hotelId == -1 && urlsArray == null) {
+			MainActivity.LogError(TAG, "No hotel ID and no urls");
 			this.finish();
 			return;
 		}
 
 		XpediaDatabase db = MyApplication.getDb();
 		HotelData hotelData = null;
-		if (db != null && db.mHotelData != null && db.mHotelData.length > hotelId) {
-			hotelData = db.mHotelData[hotelId];
+		if (hotelId != -1) {
+			if (db != null && db.mHotelData != null && db.mHotelData.length > hotelId) {
+				hotelData = db.mHotelData[hotelId];
+			}
+			else {
+				MainActivity.LogError(TAG, "No DB - hotelId = "+hotelId);
+				this.finish();
+				return;
+			}
+			
+			mTitle = hotelData.mSummary.mName;
 		}
 		else {
-			MainActivity.LogError(TAG, "No DB - hotelId = "+hotelId);
-			this.finish();
-			return;
+			mTitle = intent.getStringExtra(TITLE);
+			if (mTitle == null) {
+				mTitle = "";
+			}
 		}
-		
-		mHotelName = hotelData.mSummary.mName;
 
 		WeakReference<ImageGalleryActivity> _this = new WeakReference<ImageGalleryActivity>(this);
 		mHandlerImgDownloaded = new DownloadedImg(_this);
@@ -111,17 +126,24 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		
 		imageDownloader = new ImageDownloader(db.getImagesCache(), mHandlerImgDownloaded);//, mHandlerAllDone);
 		
-		captions = new ArrayList<String>();
-		ArrayList<String> urls = new ArrayList<String>();
-		if (hotelData != null && hotelData.mDetails != null && hotelData.mDetails.hotelImages != null) {
-			for (HotelImage hotelImage : hotelData.mDetails.hotelImages) {
-				if (hotelImage.url != null) {
-					urls.add(hotelImage.url);
-					if (hotelImage.caption != null) {
-						captions.add(hotelImage.caption);
-					}
-					else {
-						captions.add(hotelImage.name);
+		ArrayList<String> urls;
+		if (urlsArray != null) {
+			captions = null;
+			urls = new ArrayList<String>(Arrays.asList(urlsArray));
+		}
+		else {
+			captions = new ArrayList<String>();
+			urls = new ArrayList<String>();
+			if (hotelData != null && hotelData.mDetails != null && hotelData.mDetails.hotelImages != null) {
+				for (HotelImage hotelImage : hotelData.mDetails.hotelImages) {
+					if (hotelImage.url != null) {
+						urls.add(hotelImage.url);
+						if (hotelImage.caption != null) {
+							captions.add(hotelImage.caption);
+						}
+						else {
+							captions.add(hotelImage.name);
+						}
 					}
 				}
 			}
@@ -145,8 +167,9 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		
 		Log.i(TAG, "Showing "+urls.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
 		
-	
-		Toast.makeText(this, "Swipe left and right to view other photos\nPress 'back' to close", Toast.LENGTH_LONG).show();
+		if (urls.size() > 1) {
+			Toast.makeText(this, "Swipe left and right to view other photos\nPress 'back' to close", Toast.LENGTH_LONG).show();
+		}
 	}
 
 
@@ -189,7 +212,10 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 				captionView.setText(text);
 				captionView.setVisibility(View.VISIBLE);
 			 }
+			 setTitle((position+1)+"/"+captions.size() + " - "+ mTitle);
 		}
-		setTitle((position+1)+"/"+captions.size() + " - "+ mHotelName);
+		else {
+			setTitle(mTitle);
+		}
 	}
 }

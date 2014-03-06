@@ -18,21 +18,23 @@
             android:id="@+id/roomImage"
             android:layout_width="72dp"
             android:layout_height="72dp"
+            android:layout_alignParentRight="true"
             android:visibility="visible"
+            android:background="@android:drawable/picture_frame"
             android:src="@drawable/hotel72"
             />
         
         <LinearLayout 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/roomImage"
+            android:layout_toLeftOf="@+id/roomImage"
             android:orientation="vertical"
+            android:layout_alignParentLeft="true"
             >
         <TextView
             android:id="@+id/promo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:text="Room Name"
             android:textColor="#FF000000"
             android:textSize="16sp"

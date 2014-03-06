@@ -45,8 +45,8 @@ import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
 import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
-import com.virtual_hotel_agent.search.views.adapters.HotelGalleryAdapter;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
+import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
 
 @SuppressLint("ValidFragment")
 public class HotelDetailFragment extends RoboFragment implements OnItemClickListener {
@@ -74,7 +74,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	@Inject protected EventManager eventManager;
 
 	private View mView = null;
-	private HotelGalleryAdapter mHotelGalleryAdapter;
+	private PhotoGalleryAdapter mHotelGalleryAdapter;
 	private Bitmap mEvaBmp;
 	private Bitmap mEvaBmpCached;
 
@@ -140,7 +140,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		WeakReference<HotelDetailFragment> _this = new WeakReference<HotelDetailFragment>(this);
 		mHandlerFinish = new DownloadedImg(_this);
 
-		mHotelGalleryAdapter = new HotelGalleryAdapter(getActivity());
+		mHotelGalleryAdapter = new PhotoGalleryAdapter(getActivity());
 
 		mHotelGallery.setOnItemClickListener(this);
 		

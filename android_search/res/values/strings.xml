@@ -66,5 +66,6 @@ Check us out at\n
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
     <string name="show_fullscreen">Show Fullscreen</string>
     <string name="no_rooms_available">No rooms available</string>
+    <string name="room_photo">Room Photo</string>
 
 </resources>
