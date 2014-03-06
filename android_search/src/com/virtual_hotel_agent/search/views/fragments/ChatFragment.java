@@ -43,6 +43,8 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	private ChatAdapter mChatAdapter;
 
 	private SingleAnimationAdapter mAnimAdapter;
+
+	private ViewGroup root;
 	static final String TAG = "ChatFragment";
 
 //	public static Fragment newInstance(ChatItemList chatListModel) {
@@ -55,8 +57,14 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
+
+		if (root != null) {
+			Log.w(TAG, "Fragment initialized twice");
+			((ViewGroup) root.getParent()).removeView(root);
+			return root;
+		}
 		
-		ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_chat, null);
+		root = (ViewGroup) inflater.inflate(R.layout.fragment_chat, null);
 		ListView chatListView = (ListView) root.findViewById(R.id.chat_list);
 		
 		// Connect the data of the chat history to the view:

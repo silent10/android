@@ -132,10 +132,14 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+		if (mView != null) {
+			Log.w(TAG, "Fragment initialized twice");
+			((ViewGroup) mView.getParent()).removeView(mView);
+			return mView;
+		}
+		
 		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
-		mHotelListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		mHotelListView.clearChoices();
 		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
 		if (rp != null) {
@@ -185,13 +189,14 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
 		
 		final int hotelIndex = event.hotelIndex;
-		
-		mHotelListView.post(new Runnable() {
-			@Override
-			public void run() {
-				mHotelListView.setItemChecked(hotelIndex, true);
-			}
-		});		
+		if (mHotelListView.getCheckedItemPosition() != hotelIndex) {
+			mHotelListView.post(new Runnable() {
+				@Override
+				public void run() {
+					mHotelListView.setItemChecked(hotelIndex, true);
+				}
+			});
+		}
 	}
 
 	@Override
@@ -212,6 +217,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 				    .build()
 				   );
 		
+		mHotelListView.setItemChecked(holder.getHotelIndex(), true);
 		eventManager.fire(new HotelItemClicked(holder.getHotelIndex()));
 		Log.d(TAG, "running showHotelDetails()");
 
@@ -331,7 +337,6 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 			return;
 		}
 		Log.d(TAG, "Hotel list updated");
-		mHotelListView.setSelectionAfterHeaderView();
 		mHotelListView.clearChoices();
 		mAdapter.notifyDataSetChanged();
 	}

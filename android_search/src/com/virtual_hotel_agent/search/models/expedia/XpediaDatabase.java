@@ -1,16 +1,8 @@
 package com.virtual_hotel_agent.search.models.expedia;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-
-
-
-
 
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
@@ -168,7 +160,7 @@ public class XpediaDatabase {
 				if ("UNRECOVERABLE".equals(errorHandling)) {
 					unrecoverableError = true;
 					Log.w(TAG, "Unrecoverable error returned from Xpedia Web service");
-					mHotelData = new HotelData[0];
+					mHotelData = null;
 					return;
 				}
 			}

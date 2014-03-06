@@ -9,14 +9,13 @@ public class ExpediaRequestParameters {
 	private int mAgeChild3;
 
 
-	private int mExpediaHotelId; // last viewed hotel
+	private int mExpediaHotelId = -1; // last viewed hotel
 	
 	public String mArrivalDateParam;
 	public String mDepartureDateParam;
 
 	public void setArrivalDate(String paramFromEvatureResponse) {
 		mArrivalDateParam = paramFromEvatureResponse;
-		
 	}
 
 
