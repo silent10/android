@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
@@ -255,7 +257,7 @@ public class XpediaProtocolStatic {
 		sessionId = null;
 
 		String urlString = HOTEL_LIST_URL;
-		urlString += "numberOfResults=10&";
+		urlString += "numberOfResults=20&";
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode;
 		urlString += params;
@@ -282,11 +284,22 @@ public class XpediaProtocolStatic {
 		return executeWithTimeout(context, urlString);
 	}
 
-	private static JSONObject executeWithTimeout(Context context, String url) {
+	private static JSONObject executeWithTimeout(Context context, String urlStr) {
+		URL url;
+		try {
+			url = new URL(urlStr);
+			URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+			url = uri.toURL();
+			urlStr = url.toString();
+		} catch (MalformedURLException e1) {
+			MainActivity.LogError(TAG, "Malformed URL: "+urlStr);
+		} catch (URISyntaxException e) {
+			MainActivity.LogError(TAG, "URI Syntax: "+urlStr);
+		}
 		
-		Log.d(TAG, "Fetching "+url);
+		Log.d(TAG, "Fetching "+urlStr);
 		
-		HttpGet request = new HttpGet(url);
+		HttpGet request = new HttpGet(urlStr);
 		request.addHeader("Accept-Encoding","gzip");
 
 		HttpParams params = new BasicHttpParams();
@@ -309,7 +322,7 @@ public class XpediaProtocolStatic {
 				Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 				if (defaultTracker != null) 
 					defaultTracker.send(MapBuilder
-						    .createEvent("expedia_search_error", content, url, (long)statusCode)
+						    .createEvent("expedia_search_error", content, urlStr, (long)statusCode)
 						    .build()
 						   );
 				return null;
@@ -345,7 +358,7 @@ public class XpediaProtocolStatic {
 					Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 					if (defaultTracker != null) 
 						defaultTracker.send(MapBuilder
-							    .createEvent("expedia_search_error", jResult.getJSONObject("EanWSError").toString(2), url, 0l)
+							    .createEvent("expedia_search_error", jResult.getJSONObject("EanWSError").toString(2), urlStr, 0l)
 							    .build()
 							   );
 				}

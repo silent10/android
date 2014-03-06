@@ -43,10 +43,20 @@ public class HotelDownloaderTask extends DownloaderTask {
 	protected JSONObject doInBackground(Void... params) {
 		Log.d(TAG, "doInBackground()");
 
+		mProgress = DownloaderStatus.Started;
 		XpediaDatabase db = MyApplication.getDb();
+		if (db == null || db.mHotelData == null || db.mHotelData.length <= mHotelIndex) {
+			MainActivity.LogError(TAG, "No info for hotel downloader");
+			mProgress = DownloaderStatus.FinishedWithError;
+			return null;
+		}
 		HotelData hotelData = db.mHotelData[mHotelIndex];
 
 		db.setHotelSelected(mHotelIndex);
+		
+		if (isCancelled()) {
+			Log.w(TAG, "thread was canceled!");
+		}
 		
 		publishProgress();
 

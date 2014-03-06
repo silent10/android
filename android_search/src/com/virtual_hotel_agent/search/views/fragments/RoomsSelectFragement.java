@@ -44,15 +44,9 @@ import com.virtual_hotel_agent.search.views.adapters.RoomListAdapter;
 @SuppressLint("ValidFragment")
 public class RoomsSelectFragement extends RoboFragment {//implements OnItemClickListener {
 
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		outState.putInt(HOTEL_INDEX, mHotelIndex);
-		super.onSaveInstanceState(outState);
-	}
-
 	private static final String HOTEL_INDEX = "HotelIndex";
 	private static final String TAG = "RoomsSelectFragement";
-	private View mView;
+	private View mView = null;
 	private ImageView mHotelImage;
 	private TextView mHotelName;
 	private TextView mNoticeText;
@@ -61,7 +55,8 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private HotelData mHotelData;
 	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
-
+	private int mHotelIndex = -1;
+	
 	static class DownloadedImg extends Handler {
 		private WeakReference<RoomsSelectFragement> fragmentRef;
 
@@ -90,28 +85,16 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private ImageDownloader imageDownloader;
 
 
-
-	public RoomsSelectFragement()
-	{
-	}
-
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
-		if (rp == null) {
-			MainActivity.LogError(TAG, "HotelDetailFragment onCreateView - no RequestParams");
-			return super.onCreateView(inflater, container, savedInstanceState);
+		if (mView != null) {
+			Log.w(TAG, "Fragment initialized twice");
+			((ViewGroup) mView.getParent()).removeView(mView);
+			return mView;
 		}
 		
-		mHotelIndex = rp.getHotelId();
-
-
-//		if(savedInstanceState!=null) {
-//			mHotelIndex=savedInstanceState.getInt(HOTEL_INDEX);
-//		}
 		
 		Context context = RoomsSelectFragement.this.getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
@@ -135,9 +118,13 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 		mStarRatingBar = (RatingBar)mView.findViewById(R.id.starRating);
 		
-
-		fillData();
-		
+		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+		if (rp == null) {
+			MainActivity.LogError(TAG, "onCreateView - no RequestParams");
+		}
+		else {
+			changeHotelId(rp.getHotelId());
+		}
 
 		return mView;
 	}
@@ -285,9 +272,14 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		}
 	}
 
-	private int mHotelIndex;
-
 	public void changeHotelId(int hotelIndex) {
+		if (hotelIndex == -1)
+			return;
+		
+		Log.i(TAG, "Setting hotelId to "+hotelIndex+", was "+mHotelIndex);
+		if (mHotelIndex == hotelIndex) {
+			return;
+		}
 		mHotelIndex = hotelIndex;
 		fillData();
 	}

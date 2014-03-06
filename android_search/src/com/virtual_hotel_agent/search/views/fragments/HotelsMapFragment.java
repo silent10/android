@@ -1,5 +1,6 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 
 import roboguice.event.EventManager;
@@ -49,6 +50,8 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	private View mView;
 	private Marker selectedMarker=null;
 	private String mCurrency;
+	private WeakReference<HotelData[]>  mLastPresentedHotels;
+	private int mLastPresentLength;
 	
 	private final int MAX_HOTELS = 30; 
 
@@ -58,6 +61,8 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		mLastPresentedHotels = new WeakReference<HotelData[]>(null);
+		mLastPresentLength = -1;
 		Context context = getActivity();
 		mCurrency = SettingsAPI.getCurrencySymbol(context);
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
@@ -71,6 +76,12 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+		if (mView != null) {
+			Log.w(TAG, "Fragment initialized twice");
+			((ViewGroup) mView.getParent()).removeView(mView);
+			return mView;
+		}
+		
 		mView = inflater.inflate(R.layout.hotels_map, container, false);
 		return mView;
 	}
@@ -91,6 +102,22 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		
 		// Check if we were successful in obtaining the map.
         if (mMap != null && mView != null) {
+        	
+        	HotelData[] currentHotels = null;
+        	XpediaDatabase evaDb = MyApplication.getDb();
+            if (evaDb != null)
+            	currentHotels = evaDb.mHotelData;
+            if (currentHotels == null) {
+            	// no need to update map - nothing is present
+            	return;
+            }
+            if (mLastPresentLength == currentHotels.length && mLastPresentedHotels.get() == currentHotels) {
+            	// previously presented the same hotels - no need to do again
+            	return;
+            }
+        	mLastPresentedHotels = new WeakReference<HotelData[]>(currentHotels);
+        	mLastPresentLength = currentHotels.length;
+        	
         	mView.post(new Runnable(){
 				@Override
 				public void run() {
@@ -106,12 +133,14 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         super.onResume();
         FragmentActivity activity = this.getActivity();
 		mCurrency = SettingsAPI.getCurrencySymbol(activity);
+		Log.i(TAG, "Map resumed - checking google play");
         int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
 		if (errCode != ConnectionResult.SUCCESS) {
 			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errCode, activity, 0);
 			errorDialog.show();
 		}
 		else {
+			Log.i(TAG, "Map resumed - setting map");
 			setUpMapIfNeeded();
 		}
     }
@@ -120,19 +149,22 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	
 	public void onHotelsListUpdated() {
 		Log.d(TAG, "Updating map because hotels list was updated");
-		mMap.clear();
+		mLastPresentLength = -1; // force refresh of map
 		setUpMapIfNeeded();
 	}
 	
 	private void addHotelsToMap()
-	{	    
-       
+	{	   
+		Log.d(TAG, "Adding hotels to map");
+		mMap.clear();
+		
         XpediaDatabase evaDb = MyApplication.getDb();
         
         int length= (evaDb != null && evaDb.mHotelData != null) ? evaDb.mHotelData.length : 0;
         if (length == 0) {
         	return;
         }
+    	
         int startFrom = 0;
         if(length > MAX_HOTELS) 
         	startFrom = length - MAX_HOTELS; // show the last MAX_HOTELS in map

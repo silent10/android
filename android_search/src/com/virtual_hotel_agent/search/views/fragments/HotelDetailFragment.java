@@ -54,13 +54,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	protected static final String TAG = HotelDetailFragment.class.getSimpleName();
 
 	private static final String HOTEL_INDEX = "hotelIndex";
-	int mHotelIndex;
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		outState.putInt(HOTEL_INDEX, mHotelIndex);
-		super.onSaveInstanceState(outState);
-	}
+	int mHotelIndex = -1;
 
 	private static final int WIFI_AMENITY_CODE = 8;
 	private static final int PARKING_AMENITY_CODE = 16384;
@@ -79,7 +73,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	
 	@Inject protected EventManager eventManager;
 
-	private View mView;
+	private View mView = null;
 	private HotelGalleryAdapter mHotelGalleryAdapter;
 	private Bitmap mEvaBmp;
 	private Bitmap mEvaBmpCached;
@@ -119,25 +113,11 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		// if (savedInstanceState != null) {
-		// mHotelIndex = savedInstanceState.getInt(HOTEL_INDEX, mHotelIndex);
-		// }
-
-
-		XpediaDatabase db = MyApplication.getDb();
-		if (db == null) {
-			MainActivity.LogError(TAG, "HotelDetailFragment onCreateView - no DB");
-			return super.onCreateView(inflater, container, savedInstanceState);
+		if (mView != null) {
+			((ViewGroup) mView.getParent()).removeView(mView);
+			Log.w(TAG, "Fragment create view twice");
+			return mView;
 		}
-		
-		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
-		if (rp == null) {
-			MainActivity.LogError(TAG, "HotelDetailFragment onCreateView - no RequestParams");
-			return super.onCreateView(inflater, container, savedInstanceState);
-		}
-		
-		mHotelIndex = rp.getHotelId();
-		Log.i(TAG, "onCreateView for hotel index " + mHotelIndex);
 
 //		int orientation = getResources().getConfiguration().orientation;
 //		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -166,7 +146,20 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 		mEvaBmpCached = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.hotel72);
 
-		fillData();
+
+		XpediaDatabase db = MyApplication.getDb();
+		if (db == null) {
+			MainActivity.LogError(TAG, "onCreateView - no DB");
+		}
+		else {
+			ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+			if (rp == null) {
+				MainActivity.LogError(TAG, "onCreateView - no RequestParams");
+			}
+			else {
+				changeHotelId(rp.getHotelId());
+			}
+		}
 
 		return mView;
 	}
@@ -176,6 +169,13 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	}
 	
 	public void changeHotelId(int hotelIndex) {
+		if (hotelIndex == -1)
+			return;
+		
+		Log.i(TAG, "Setting hotelId to "+hotelIndex+", was "+mHotelIndex);
+		if (mHotelIndex == hotelIndex) {
+			return;
+		}
 		mHotelIndex = hotelIndex;
 		fillData();
 	}
@@ -190,8 +190,8 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		super.onDestroy();
 	}
 	
-	@SuppressLint("ValidFragment")
 	void fillData() {
+		Log.i(TAG, "Filling data for hotel "+mHotelIndex);
 		mPropertyDescription.loadData("","text/html", "utf-8");
 		mScrollView.setScrollY(0);
 		
@@ -273,7 +273,6 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		boolean poolAvailable = false;
 		boolean breakfestAvailable = false;
 		boolean parkingAvailable = false;
-		int count = 0;
 
 		if ((mHotelData.mSummary.mAmenityMask & WIFI_AMENITY_CODE) == WIFI_AMENITY_CODE) {
 			wifiAvailable = true;
