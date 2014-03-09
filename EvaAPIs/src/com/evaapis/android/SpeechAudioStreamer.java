@@ -16,6 +16,8 @@ import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.io.FileUtils;
 
+import com.evaapis.EvaException;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioFormat;
@@ -36,7 +38,7 @@ public class SpeechAudioStreamer {
 
 	private AudioRecord mRecorder;
 	private FLACStreamEncoder mEncoder;
-	private byte[] mBuffer;
+	private byte[] mBuffer = null;
 	private boolean mIsRecording = false;
 
 	public static final int TEMP_BUFFER_SIZE = 5;
@@ -65,25 +67,31 @@ public class SpeechAudioStreamer {
 		mSampleRate = sampleRate;
 		totalTimeRecording = 0;
 		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		mDebugSavePCM = prefs.getBoolean("save_pcm", false);
+//		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//		mDebugSavePCM = prefs.getBoolean("save_pcm", false);
+		mDebugSavePCM = false;
 		
 		Log.i(TAG, "Encoder=" + mEncoder.toString());
 	}
 
-	void initRecorder() {
+	void initRecorder() throws EvaException {
 		Log.i(TAG, "<<< Starting to record");
 		
-		int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
-				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-		mBuffer = new byte[bufferSize];
 		wasNoise = false;
 		mPeakSoundLevel = 0f;
 		mMinSoundLevel = 999999f;
-		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
-				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
-				bufferSize);
-
+		if (mBuffer == null) {
+			int bufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+					AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+			if (bufferSize <= 0) {
+				throw new EvaException("bufferSize = "+bufferSize);
+			}
+			bufferSize *= 1.5;
+			mBuffer = new byte[bufferSize];
+			mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
+					AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
+					bufferSize);
+		}
 	}
 	
 	

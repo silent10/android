@@ -1,5 +1,6 @@
 package com.evaapis.android;
 
+import com.evaapis.EvaException;
 import com.evaapis.R;
 import com.evaapis.R.id;
 import com.evaapis.R.layout;
@@ -92,9 +93,16 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 		
 		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-		speechRecognition.start(this, null);
-		mUpdateLevel.sendEmptyMessageDelayed(0, 100);
-		mTimeActivityCreation = (System.nanoTime() - t0)/1000000;
+		try {
+			speechRecognition.start(this, null);
+			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
+			mTimeActivityCreation = (System.nanoTime() - t0)/1000000;
+		}
+		catch (EvaException e) {
+			Toast.makeText(this, "Failed to initialize recorder,  please try again later or report to the developers.", Toast.LENGTH_LONG).show();
+			this.finish();
+			
+		}
 	}
 	
 	@Override
