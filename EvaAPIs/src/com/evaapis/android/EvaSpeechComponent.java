@@ -1,5 +1,7 @@
 package com.evaapis.android;
 
+import com.evaapis.EvaException;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -162,7 +164,7 @@ public class EvaSpeechComponent {
 		dictationTask.mListener = null;
 	}
 
-	public void start(SpeechRecognitionResultListener listener, Object cookie) {
+	public void start(SpeechRecognitionResultListener listener, Object cookie) throws EvaException {
 		this.cookie = cookie;
 		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
 		mVoiceClient = new EvaVoiceClient(mContext, mConfig, mSpeechAudioStreamer);

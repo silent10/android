@@ -10,7 +10,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.evaapis.EvaException;
 import com.evaapis.android.EvaSpeechComponent;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.android.SoundLevelView;
@@ -227,6 +229,37 @@ public class MainView {
 		}
 	};
 
+	
+	private SpeechRecognitionResultListener mSpeechSearchListener = new SpeechRecognitionResultListener() {
+		
+		private void finishSpeech() {
+			Handler h = mUpdateLevel.get();
+			if (h != null)
+				h.removeMessages(0);
+			mSoundView.setVisibility(View.GONE);
+			hideStatus();
+		}
+		
+		@Override
+		public void speechResultError(String message, Object cookie) {
+			finishSpeech();
+			mainActivity.eva.speechResultError(message, cookie);
+			flashBadSearchButton(2);
+			Tracker defaultTracker = GoogleAnalytics.getInstance(mainActivity).getDefaultTracker();
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createEvent("speech_search", "speech_search_end_bad", message, 0l)
+					    .build()
+					   );
+		}
+
+		@Override
+		public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
+			finishSpeech();
+			mainActivity.eva.speechResultOK(evaJson, debugData, cookie);
+		}
+	};
+	
 	public void startSpeechSearch(final EvaSpeechComponent speechSearch) {
 		showStatus("Listening...");
 		
@@ -234,37 +267,14 @@ public class MainView {
 		//view.setBackgroundResource(R.drawable.custom_button_active);
 		mUpdateLevel = new WeakReference<Handler>(new SearchHandler(speechSearch, this));
 		
-		mUpdateLevel.get().sendEmptyMessageDelayed(0, 100);
-		
-		speechSearch.start(new SpeechRecognitionResultListener() {
-
-			private void finishSpeech() {
-				Handler h = mUpdateLevel.get();
-				if (h != null)
-					h.removeMessages(0);
-				mSoundView.setVisibility(View.GONE);
-				hideStatus();
-			}
-			
-			@Override
-			public void speechResultError(String message, Object cookie) {
-				finishSpeech();
-				mainActivity.eva.speechResultError(message, cookie);
-				flashBadSearchButton(2);
-				Tracker defaultTracker = GoogleAnalytics.getInstance(mainActivity).getDefaultTracker();
-				if (defaultTracker != null) 
-					defaultTracker.send(MapBuilder
-						    .createEvent("speech_search", "speech_search_end_bad", message, 0l)
-						    .build()
-						   );
-			}
-
-			@Override
-			public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
-				finishSpeech();
-				mainActivity.eva.speechResultOK(evaJson, debugData, cookie);
-			}
-		}, "voice");
+		try {
+			speechSearch.start(mSpeechSearchListener, "voice");
+			mUpdateLevel.get().sendEmptyMessageDelayed(0, 50);
+		}
+		catch (EvaException e) {
+			Toast.makeText(mainActivity, "Failed to start recorder, please try again later and contact the developers if the problem persists", Toast.LENGTH_LONG).show();
+		}
 	}
+		
 	
 }
