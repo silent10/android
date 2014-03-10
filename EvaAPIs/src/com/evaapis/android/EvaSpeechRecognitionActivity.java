@@ -1,9 +1,9 @@
 package com.evaapis.android;
 
+import java.lang.ref.WeakReference;
+
 import com.evaapis.EvaException;
 import com.evaapis.R;
-import com.evaapis.R.id;
-import com.evaapis.R.layout;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
 public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechComponent.SpeechRecognitionResultListener {
 
 	private static final String TAG = EvaSpeechRecognitionActivity.class.getSimpleName();;
@@ -33,7 +34,46 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 	private SoundLevelView mSoundView;
 
 	
-	Handler mUpdateLevel;
+	static class UpdateSoundLevel extends Handler {
+		private WeakReference<EvaSpeechRecognitionActivity> activityRef;
+
+		public UpdateSoundLevel(WeakReference<EvaSpeechRecognitionActivity> activity) {
+			this.activityRef = activity;
+		}
+		
+		@Override
+		public void handleMessage(Message msg) {
+			EvaSpeechRecognitionActivity esra = activityRef.get();
+			if (esra == null) {
+				return;
+			}
+					
+			SpeechAudioStreamer  speechAudioStreamer = esra.speechRecognition.getSpeechAudioStreamer();
+			int level = speechAudioStreamer.getSoundLevel();
+			esra.mLevel.setText(""+level);
+			if (speechAudioStreamer.wasNoise) {
+				if (speechAudioStreamer.getIsRecording() == false) {
+					esra.mLevel.setText("");
+					esra.mStatusText.setText("Processing...");
+					esra.mProgressBar.setVisibility(View.VISIBLE);
+				}
+				else {
+					esra.mSoundView.setSoundData(
+							speechAudioStreamer.getSoundLevelBuffer(), 
+							speechAudioStreamer.getBufferIndex(),
+							speechAudioStreamer.getPeakLevel(),
+							speechAudioStreamer.getMinSoundLevel()
+					);
+					esra.mSoundView.invalidate();
+				}
+			}
+			sendEmptyMessageDelayed(0, 200);
+			super.handleMessage(msg);
+		}
+	}
+		
+	
+	UpdateSoundLevel mUpdateLevel;
 
 	private long mTimeActivityCreation;
 
@@ -64,32 +104,8 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 			}
 		});
 		
-		mUpdateLevel = new Handler()  {
-			@Override
-			public void handleMessage(Message msg) {
-				SpeechAudioStreamer  speechAudioStreamer = speechRecognition.getSpeechAudioStreamer();
-				int level = speechAudioStreamer.getSoundLevel();
-				mLevel.setText(""+level);
-				if (speechAudioStreamer.wasNoise) {
-					if (speechAudioStreamer.getIsRecording() == false) {
-						mLevel.setText("");
-						mStatusText.setText("Processing...");
-						mProgressBar.setVisibility(View.VISIBLE);
-					}
-					else {
-						mSoundView.setSoundData(
-								speechAudioStreamer.getSoundLevelBuffer(), 
-								speechAudioStreamer.getBufferIndex(),
-								speechAudioStreamer.getPeakLevel(),
-								speechAudioStreamer.getMinSoundLevel()
-						);
-						mSoundView.invalidate();
-					}
-				}
-				sendEmptyMessageDelayed(0, 200);
-				super.handleMessage(msg);
-			}
-		};
+		WeakReference<EvaSpeechRecognitionActivity> _this = new WeakReference<EvaSpeechRecognitionActivity>(this);
+		mUpdateLevel = new UpdateSoundLevel(_this);
 		
 		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);

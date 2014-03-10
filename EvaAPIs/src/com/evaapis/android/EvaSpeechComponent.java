@@ -65,7 +65,7 @@ public class EvaSpeechComponent {
 		return dictationTask != null && dictationTask.mListener != null;
 	}
 	
-	private class EvaHttpDictationTask extends AsyncTask
+	private class EvaHttpDictationTask extends AsyncTask<Object, Object, Object>
 	{
 		public SpeechRecognitionResultListener mListener;
 		private EvaVoiceClient  mVoiceClient;

@@ -188,6 +188,12 @@ public class MainView {
 		mProgressBar.setVisibility(View.GONE);
 		mStatusPanel.setVisibility(View.GONE);
 	}
+	public void hideSpeechWave() {
+		Handler h = mUpdateLevel.get();
+		if (h != null)
+			h.removeMessages(0);
+		mSoundView.setVisibility(View.GONE);
+	}
 	
 	static class SearchHandler extends Handler {
 		private boolean processing = false;
@@ -233,10 +239,7 @@ public class MainView {
 	private SpeechRecognitionResultListener mSpeechSearchListener = new SpeechRecognitionResultListener() {
 		
 		private void finishSpeech() {
-			Handler h = mUpdateLevel.get();
-			if (h != null)
-				h.removeMessages(0);
-			mSoundView.setVisibility(View.GONE);
+			hideSpeechWave();
 			hideStatus();
 		}
 		
@@ -268,11 +271,18 @@ public class MainView {
 		mUpdateLevel = new WeakReference<Handler>(new SearchHandler(speechSearch, this));
 		
 		try {
-			speechSearch.start(mSpeechSearchListener, "voice");
-			mUpdateLevel.get().sendEmptyMessageDelayed(0, 50);
+			Handler handler = mUpdateLevel.get();
+			if (handler != null) {
+				speechSearch.start(mSpeechSearchListener, "voice");
+				handler.sendEmptyMessageDelayed(0, 50);
+			}
+			else {
+				throw new EvaException("updateVolume Level is null");
+			}
 		}
 		catch (EvaException e) {
 			Toast.makeText(mainActivity, "Failed to start recorder, please try again later and contact the developers if the problem persists", Toast.LENGTH_LONG).show();
+			MainActivity.LogError(TAG, "Exception starting recorder", e);
 		}
 	}
 		
