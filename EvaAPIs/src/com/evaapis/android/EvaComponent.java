@@ -232,6 +232,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	// this is the entry point for handling response
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
+		mEvaTextClient = null;
 		if (reply.sessionId != null) {
 			if (reply.sessionId.equals(getSessionId()) == false) {
 				// not same as previous session = new session
@@ -352,6 +353,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	}
 	
 	private Object voiceActivityCookie;
+	private EvaTextClient mEvaTextClient;
 	public void searchWithVoice(Object cookie)
 	{
 		// stop the TTS speech - so that we don't record the generated speech
@@ -389,6 +391,13 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_GOOGLE);
 	}
 	
+	public void stopSearch() {
+		if (mEvaTextClient != null) {
+			mEvaTextClient.cancel(true);
+			mEvaTextClient = null;
+		}
+	}
+	
 	public void searchWithText(String searchString) {
 		searchWithText(searchString, null);
 	}
@@ -396,17 +405,23 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void searchWithText(String searchString, Object cookie) {
 		mLastLanguageUsed = getPreferedLanguage();
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
-		EvaTextClient callerTask = new EvaTextClient();
-		callerTask.initialize(this, searchString, -1, cookie);
-		callerTask.execute();
+		if (mEvaTextClient != null) {
+			mEvaTextClient.cancel(true);
+		}
+		mEvaTextClient = new EvaTextClient();
+		mEvaTextClient.initialize(this, searchString, -1, cookie);
+		mEvaTextClient.execute();
 	}
 	
 	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie) {
 		mLastLanguageUsed = getPreferedLanguage();
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
-		EvaTextClient callerTask = new EvaTextClient();
-		callerTask.initialize(this, nBestTexts, cookie);
-		callerTask.execute();
+		if (mEvaTextClient != null) {
+			mEvaTextClient.cancel(true);
+		}
+		mEvaTextClient = new EvaTextClient();
+		mEvaTextClient.initialize(this, nBestTexts, cookie);
+		mEvaTextClient.execute();
 	}
 	
 	public void replyToDialog(int replyIndex) {
@@ -415,9 +430,12 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public void replyToDialog(int replyIndex, Object cookie) {
 		Log.i(TAG, "replying to dialog: "+replyIndex);
-		EvaTextClient callerTask = new EvaTextClient();
-		callerTask.initialize(this, null, replyIndex, cookie);
-		callerTask.execute();
+		if (mEvaTextClient != null) {
+			mEvaTextClient.cancel(true);
+		}
+		mEvaTextClient = new EvaTextClient();
+		mEvaTextClient.initialize(this, null, replyIndex, cookie);
+		mEvaTextClient.execute();
 	}
 	
 	public boolean isNewSession() {

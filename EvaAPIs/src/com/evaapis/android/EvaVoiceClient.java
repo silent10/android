@@ -302,18 +302,29 @@ public class EvaVoiceClient {
 
 			mHttpPost = getHeader(uri, 0);	//fileSize);
 			mHttpPost.setEntity(reqEntity);		
-			
-			long t0 = System.nanoTime();
-			HttpResponse response = httpclient.execute(mHttpPost);
-			long t1 = System.nanoTime();
-			timeWaitingForServer = (t1 - uploadStream.timeOfLastBuffer) / 1000000;
-			timeSpentExecute = (t1 - t0) / 1000000;
 
-			processResponse(response);
+			if (mInTransaction) {
+				long t0 = System.nanoTime();
+				HttpResponse response = httpclient.execute(mHttpPost);
+				long t1 = System.nanoTime();
+				timeWaitingForServer = (t1 - uploadStream.timeOfLastBuffer) / 1000000;
+				timeSpentExecute = (t1 - t0) / 1000000;
+	
+				processResponse(response);
+			}
 
 			if( httpclient != null ) {
 				httpclient.getConnectionManager().shutdown();
 				httpclient = null;
+			}
+		}
+		catch (IOException e) {
+			if (e.getMessage().equals("Connection already shutdown")) {
+				Log.i(TAG, "Connection already shutdown");
+			}
+			else {
+				Log.e(TAG, "Exception sending voice request", e);
+				hadError = true;
 			}
 		}
 		catch(Exception e)	{

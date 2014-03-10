@@ -254,18 +254,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	@Override
 	public void onPause() {
 		Log.d(TAG, "onPause()");
-		if (mHotelDownloader != null) {
-			mHotelDownloader.cancel(true);
-			mHotelDownloader = null;
-		}
-		if (mRoomUpdater != null) {
-			mRoomUpdater.cancel(true);
-			mRoomUpdater = null;
-		}
-		if (mSearchExpediaTask != null) {
-			mSearchExpediaTask.cancel(true);
-			mSearchExpediaTask = null;
-		}
+		cancelBackgroundThreads();
 		eva.onPause();
 		super.onPause();
 	}
@@ -1393,6 +1382,26 @@ public class MainActivity extends RoboFragmentActivity implements
 //		}
 	}
 	
+	private void cancelBackgroundThreads() {
+		if (mSearchExpediaTask != null) {
+			mSearchExpediaTask.cancel(true);
+			mSearchExpediaTask = null;
+		}
+		if (mHotelDownloader != null) {
+			mHotelDownloader.cancel(true);
+			mHotelDownloader = null;
+		}
+		if (mRoomUpdater != null) {
+			mRoomUpdater.cancel(true);
+			mRoomUpdater = null;
+		}
+		eva.stopSearch();
+		if (speechSearch != null) {
+			speechSearch.cancel();
+		}
+		mainView.hideSpeechWave();
+	}
+	
 	
 	/****
 	 * handler for  "new session was started" event 
@@ -1400,6 +1409,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	 */
 	@Override
 	public void newSessionStarted(boolean selfTriggered) {
+		
+		cancelBackgroundThreads();
 		if (MyApplication.AcraInitialized) {
 			ErrorReporter bugReporter = ACRA.getErrorReporter();
 			String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
@@ -1417,18 +1428,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 		
-		if (mSearchExpediaTask != null) {
-			mSearchExpediaTask.cancel(true);
-			mSearchExpediaTask = null;
-		}
-		if (mHotelDownloader != null) {
-			mHotelDownloader.cancel(true);
-			mHotelDownloader = null;
-		}
-		if (mRoomUpdater != null) {
-			mRoomUpdater.cancel(true);
-			mRoomUpdater = null;
-		}
+		
 		mainView.hideStatus();
 		S3DrawableBackgroundLoader.getInstance().Reset();
 		
