@@ -15,6 +15,8 @@ public class EvatureLocationUpdater implements LocationListener {
 	private static final int UPDATE_DISTANCE = 5 * 1000; // Five kilometers
 	private static final String TAG = "EvatureLocationUpdater";
 	
+	public static final double NO_LOCATION = -9999999.0;
+	
 	private LocationManager locationManager;
 	private Location currentLocation = null;
 
@@ -71,14 +73,14 @@ public class EvatureLocationUpdater implements LocationListener {
 		if (thisInstance != null && thisInstance.currentLocation != null)
 			return thisInstance.currentLocation.getLatitude();
 		else
-			return -1;
+			return NO_LOCATION;
 	}
 
 	public static double getLongitude() {
 		if (thisInstance != null && thisInstance.currentLocation != null)
 			return thisInstance.currentLocation.getLongitude();
 		else
-			return -1;
+			return NO_LOCATION;
 	}
 
 	@Override

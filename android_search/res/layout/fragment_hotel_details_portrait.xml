@@ -112,65 +112,46 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:orientation="vertical" >
+            android:orientation="vertical" 
+             >
 
-            <RelativeLayout
-        android:id="@+id/relativeLayout0"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/hotelGallery"
-        android:layout_weight="1"
-         >
-
-     
-
-        <!-- <LinearLayout
-            android:id="@+id/tripAdvisoLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignTop="@id/starRatingLayout"
-            android:orientation="vertical"
-            android:paddingLeft="10dip" >
-
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
+    
+            <RelativeLayout 
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TripAdvisor"
-                android:textStyle="bold"
-                android:textColor="#ff000000"
-                android:paddingRight="20dp" >
-            </TextView>
+                android:background="@color/white"
+            >
 
-            <RatingBar
-                android:id="@+id/ratingBarTripAdvisor"
-                android:layout_width="118dp"
-                android:layout_height="32dp"
-                android:isIndicator="true"
-                android:paddingRight="10dp"
-                android:progressDrawable="@drawable/trip_advisor_rating_layers" >
-
-            </RatingBar>
-        </LinearLayout>
- -->    </RelativeLayout>
+<!--         	<ImageView -->
+<!--         	    android:id="@+id/tripAdvisor" -->
+<!--         	    android:layout_width="wrap_content" -->
+<!--         	    android:layout_height="wrap_content" -->
+<!--         	    android:layout_alignParentRight="true" -->
+<!--         	    android:layout_centerVertical="true" -->
+<!--         	    android:layout_gravity="center_vertical" -->
+<!--         	    android:src="@drawable/tripadvisor" /> -->
             
             <GridView
                 android:id="@+id/amenitiesGridview"
                 android:layout_width="fill_parent"
-                android:layout_height="64dip"
+                android:layout_height="wrap_content"
                 android:columnWidth="64dp"
+                android:layout_marginRight="4dp"
                 android:gravity="center"
-                android:horizontalSpacing="20dp"
-                android:numColumns="4"
-                android:stretchMode="columnWidth"
-                android:verticalSpacing="20dp" />
-
+                android:layout_alignParentLeft="true"
+                android:horizontalSpacing="5dp"
+                android:numColumns="auto_fit"
+                android:stretchMode="none"
+                android:verticalSpacing="5dp" />
+<!--                 android:layout_toLeftOf="@id/tripAdvisor" -->
+                
+            </RelativeLayout>
+            
             <WebView
                 android:id="@+id/propertyDescription"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Location" >
+                 >
             </WebView>
             
              <View
@@ -179,5 +160,6 @@
 		        android:layout_height="110dip" />
         </LinearLayout>
     </ScrollView>
+
 
 </RelativeLayout>

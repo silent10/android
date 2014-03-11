@@ -143,7 +143,7 @@ public class EvaVoiceClient {
 		try {
 			double longitude = EvatureLocationUpdater.getLongitude();
 			double latitude = EvatureLocationUpdater.getLatitude();
-			if (latitude != -1 && longitude != -1) {
+			if (latitude != EvatureLocationUpdater.NO_LOCATION) {
 				qparams.add(new BasicNameValuePair("longitude",""+longitude));
 				qparams.add(new BasicNameValuePair("latitude",""+latitude));
 			}

@@ -125,9 +125,9 @@ import com.evature.util.ExternalIpAddressGetter;
 			if (externalIpAddress != null) {
 				evatureUrl += ("&ip_addr=" + externalIpAddress);
 			}
-			double longitude = EvatureLocationUpdater.getLongitude();
 			double latitude = EvatureLocationUpdater.getLatitude();
-			if (latitude != -1 && longitude != -1) {
+			if (latitude != EvatureLocationUpdater.NO_LOCATION) {
+				double longitude = EvatureLocationUpdater.getLongitude();
 				evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
 			}
 

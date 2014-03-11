@@ -39,8 +39,6 @@ import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationD
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
-// From Arik's app
-
 public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
 
 	@Inject protected EventManager eventManager;
@@ -52,6 +50,8 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	ListView mHotelListView;
 	private HotelListAdapter mAdapter;
 	private final String TAG = "HotelListFragment";
+
+	private AnimationAdapter mAnimAdapter;
 
 	@Override
 	public void onDestroyView() {
@@ -179,9 +179,9 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 		mAdapter = new HotelListAdapter(this);
 		
-		AnimationAdapter animAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
-		animAdapter.setAbsListView(mHotelListView);
-		mHotelListView.setAdapter(animAdapter);
+		mAnimAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
+		mAnimAdapter.setAbsListView(mHotelListView);
+		mHotelListView.setAdapter(mAnimAdapter);
 		
 		mHotelListView.setOnItemClickListener(this);
 	}
@@ -227,6 +227,8 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 	private OnScrollListener mListScroll = new OnScrollListener() {
 
+		private final int distanceFromLastPositionToLoad = 5;
+		
 		@Override
 		public void onScrollStateChanged(AbsListView view, int scrollState) {
 			// TODO Auto-generated method stub
@@ -235,7 +237,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-			if ((visibleItemCount > 0) && (firstVisibleItem + visibleItemCount == totalItemCount) 
+			if ((visibleItemCount > 0) && (firstVisibleItem + visibleItemCount >= totalItemCount - distanceFromLastPositionToLoad) 
 					&& mContinuationLoader == null
 					&& mEnabledPaging) {
 				Log.d(TAG, "-Last Scroll-");
@@ -326,18 +328,19 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 				break;
 			
 			}
-			
-			
 		}
 	}
 
-	public void listResultUpdated() {
+	public void newHotelsList() {
 		if (mAdapter == null) {
 			MainActivity.LogError(TAG, "Unexpected adapter is null");
 			return;
 		}
-		Log.d(TAG, "Hotel list updated");
+		Log.d(TAG, "New Hotel list updated to size "+mAdapter.getCount());
+		mAnimAdapter.reset();
 		mHotelListView.clearChoices();
-		mAdapter.notifyDataSetChanged();
+		mHotelListView.setScrollY(0);
+		setAdapter(); // for some reason starting a new adapter is the only way to scroll to top
+		//mAdapter.notifyDataSetChanged();
 	}
 }

@@ -21,6 +21,7 @@ package com.virtual_hotel_agent.search.controllers.activities;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -733,6 +734,23 @@ public class MainActivity extends RoboFragmentActivity implements
 		mSpeechToTextWasConfigured = savedInstanceState.getBoolean("mTtsWasConfigured");
 	}
 	
+	private void clearChatList() {
+		if (mChatListModel.size() > 0) {
+			ChatFragment chatFragment = getChatFragment();
+			if (chatFragment != null && chatFragment.isReady()) {
+				chatFragment.clearChat();
+			}
+			else {
+	//			ChatItem lastItem = mChatListModel.get(mChatListModel.size()-1);
+				mChatListModel.clear();
+	//			if (lastItem.getType() == ChatType.Me) {
+	//				addChatItem(lastItem);
+	//			}
+			}
+		}
+	}
+
+	
 	private void addChatItem(ChatItem item) {
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		ChatFragment chatFragment = getChatFragment();
@@ -1055,7 +1073,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 					HotelListFragment fragment = (HotelListFragment) mTabsAdapter.instantiateItem(mViewPager, index);
 					if (fragment != null) {
-						fragment.listResultUpdated();
+						fragment.newHotelsList();
 					}
 					else {
 						MainActivity.LogError(TAG, "Unexpected hotel list fragment is null");
@@ -1361,8 +1379,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	private void startNewSession() {
 //		if (isNewSession() == false) {
 			showTab(R.string.CHAT);
-			addChatItem(new ChatItem("Start new search"));
 			eva.resetSession();
+			addChatItem(new ChatItem("Start new search"));
 			String greeting = "Starting a new search. How may I help you?";
 			
 			shownExamples = false;
@@ -1435,13 +1453,7 @@ public class MainActivity extends RoboFragmentActivity implements
 //		for (ChatItem chatItem : mChatListModel.getItemList()) {
 //			chatItem.setInSession(false);
 //		}
-		if (mChatListModel.size() > 0) {
-			ChatItem lastItem = mChatListModel.get(mChatListModel.size()-1);
-			mChatListModel.clear();
-			if (lastItem.getType() == ChatType.Me) {
-				addChatItem(lastItem);
-			}
-		}		
+		clearChatList();
 		lastFlightCompleted = null;
 		lastHotelCompleted = null;
 
@@ -1471,6 +1483,8 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 	}
 	
+
+
 	// note "onEvent" template is needed for progruard to not break roboguice
 	// this event happens after a next page of hotel list results is downloaded
 	public void onEventHotelsListUpdated( @Observes HotelsListUpdated event) {
@@ -1543,7 +1557,11 @@ public class MainActivity extends RoboFragmentActivity implements
 
 
 	private static Random randomGenerator = new Random();
-	private String tests[] = { "Hotel tonight", "Hotel in Madrid March 10th to 12th", "Hotel in Paris March 10th to 12th", "Hilton Hotel in Miami Florida March 10th to 12th" };
+	private static String nextMonth = "April";
+	private String tests[] = { "Hotel tonight", 
+			"Hotel in Madrid "+nextMonth+" 10th to 12th", 
+			"Hotel in Paris "+nextMonth+" 10th to 12th", 
+			"Hilton Hotel in Miami "+nextMonth+" 10th to 12th" };
 	
 	public void onEventChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;

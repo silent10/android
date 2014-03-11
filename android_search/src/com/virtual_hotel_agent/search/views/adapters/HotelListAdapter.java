@@ -18,10 +18,13 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.evaapis.android.EvatureLocationUpdater;
+import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
@@ -30,6 +33,7 @@ public class HotelListAdapter extends BaseAdapter {
 
 	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
 	private static final double DISTANCE_DELTA = 200;
+	private static final String TAG = "HotelListAdapter";
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
 	static Drawable mHotelIcon;
@@ -41,27 +45,43 @@ public class HotelListAdapter extends BaseAdapter {
 		mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.hotel72);
 	}
 	
-	private XpediaDatabase getDb() {
-		return MyApplication.getDb();
+	private HotelData[]  getHotels() {
+		XpediaDatabase db = MyApplication.getDb();
+		if (db != null) {
+			return db.mHotelData;
+		}
+		return null;
 	}
 
 	@Override
 	public int getCount() {
-		XpediaDatabase evaDb = getDb();
-		if (evaDb != null && evaDb.mHotelData != null && evaDb.mHotelData.length > 0) {
-			return evaDb.mHotelData.length+1;
+		HotelData[] hotels = getHotels();
+		if (hotels != null && hotels.length > 0) {
+			return hotels.length+1;
 		}
 		return 0;
+	}
+	
+	@Override
+	public int getItemViewType(int position){
+		HotelData[] hotels = getHotels();
+		if (hotels == null || position >= hotels.length) {
+			return 1;
+		}
+		return 0; 
+	}
+	
+	
+	@Override
+	public int getViewTypeCount(){
+	  return 2;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		XpediaDatabase evaDb = getDb();
-		if (evaDb != null && evaDb.mHotelData != null) {
-			if (position >= evaDb.mHotelData.length) {
-				return null;
-			}
-			return evaDb.mHotelData[position];
+		HotelData[] hotels = getHotels();
+		if (hotels != null && position < hotels.length) {
+			return hotels[position];
 		}
 		return null;
 	}
@@ -84,19 +104,20 @@ public class HotelListAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
 		
-		XpediaDatabase evaDb = getDb();
-		if (evaDb != null && evaDb.mHotelData != null && position >= evaDb.mHotelData.length) {
+		HotelData[] hotels = getHotels();
+		if (hotels == null || position >= hotels.length) {
 			return fillerView(convertView, parent);
 		}
 		if (convertView == null || convertView.getTag() == null) {
 			convertView = mInflater.inflate(R.layout.hotel_list_item, null);
 			holder = new ViewHolder();
 			holder.image = (ImageView) convertView.findViewById(R.id.hotelImage);
-			holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
+			//holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
 			holder.name = (TextView) convertView.findViewById(R.id.hotelName);
 			holder.rate = (TextView) convertView.findViewById(R.id.pricePerNight);
 			holder.layout = (LinearLayout) convertView.findViewById(R.id.hotel_list_item_layout);
 			holder.distance = (TextView) convertView.findViewById(R.id.hotelDistance);
+			holder.location = (TextView) convertView.findViewById(R.id.hotelLocation);
 			holder.rating = (RatingBar) convertView.findViewById(R.id.rating);
 			holder.layout.setTag(holder);
 			convertView.setTag(holder);
@@ -105,16 +126,14 @@ public class HotelListAdapter extends BaseAdapter {
 		}
 
 		
-		HotelData hotelData = (HotelData) getItem(position);
-		if (hotelData == null) {
+		HotelData hotel = (HotelData) hotels[position];
+		if (hotel == null) {
+			Log.w(TAG, "No hotel info for adapter position "+position);
 			return convertView;
 		}
-		holder.hotel = hotelData;
-
 		holder.setHotelIndex(position);
 
-		Spanned spannedName = Html.fromHtml(holder.hotel.mSummary.mName);
-
+		Spanned spannedName = Html.fromHtml(hotel.mSummary.mName);
 		String name = spannedName.toString();
 
 //		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -134,49 +153,46 @@ public class HotelListAdapter extends BaseAdapter {
 		holder.name.setText(name);
 
 		// Calculate hotel distance
-		double distance;
-		double hotelLatitude = holder.hotel.mSummary.mLatitude;
-		double hotelLongitude = holder.hotel.mSummary.mLongitude;
-		double myLongitude, myLatitude;
-		try {
-			float[] results = new float[3];
-			myLongitude = EvatureLocationUpdater.getLongitude();
-			myLatitude = EvatureLocationUpdater.getLatitude();
-			Location.distanceBetween(myLatitude, myLongitude, hotelLatitude, hotelLongitude, results);
-			if (results != null && results.length > 0)
-				distance = results[0] / 1000;
-			else
-				distance = -1;
-		} catch (Exception e2) {
-			distance = -1;
-		}
+		double distance = hotel.getDistanceFromMe();
 		if (distance > 0 && distance < DISTANCE_DELTA) {
 			DecimalFormat distanceFormat = new DecimalFormat("#.#");
 			String formattedDistance = distanceFormat.format(distance);
 			holder.distance.setText(formattedDistance + "km");
+			holder.distance.setVisibility(View.VISIBLE);
 		} else {
-			holder.distance.setText("");
+			holder.distance.setVisibility(View.GONE);
+		}
+		
+		String location = hotel.mSummary.mLocationDescription;
+		if (location != null && location.equals("") == false) {
+			location = Html.fromHtml(location).toString();
+			holder.location.setText(location);
+			holder.location.setVisibility(View.VISIBLE);
+		}
+		else {
+			holder.location.setVisibility(View.GONE);
 		}
 
 		// Format price
 		DecimalFormat rateFormat = new DecimalFormat("#.00");
-		String formattedRate = rateFormat.format(holder.hotel.mSummary.mLowRate);
+		String formattedRate = rateFormat.format(hotel.mSummary.mLowRate);
 		String rate = SettingsAPI.getCurrencySymbol(mParent.getActivity()) + " " + formattedRate;
 
 		holder.rate.setText(rate);
 
-		holder.rating.setRating((float) holder.hotel.mSummary.mHotelRating);
+		holder.rating.setRating((float) hotel.mSummary.mHotelRating);
 
 		S3DrawableBackgroundLoader.getInstance().loadDrawable(
-				"http://images.travelnow.com" + holder.hotel.mSummary.mThumbNailUrl, holder.image, mHotelIcon);
+				"http://images.travelnow.com" + hotel.mSummary.mThumbNailUrl, holder.image, mHotelIcon);
 
-		double trRating = holder.hotel.mSummary.mTripAdvisorRating;
-
-		if (trRating < TRIP_ADVISOR_GOOD_RATING) {
-			holder.tripAdvisorStrip.setVisibility(View.GONE);
-		} else {
-			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
-		}
+//		double trRating = hotel.mSummary.mTripAdvisorRating;
+//
+//		if (trRating < TRIP_ADVISOR_GOOD_RATING) {
+//			holder.tripAdvisorStrip.setVisibility(View.GONE);
+//		} else {
+//			// TODO: show rating instead of just strip?
+//			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
+//		}
 
 		
 		return convertView;
@@ -184,12 +200,12 @@ public class HotelListAdapter extends BaseAdapter {
 
 	public static class ViewHolder {
 		public LinearLayout layout;
-		public ImageView tripAdvisorStrip;
-		HotelData hotel;
+//		public ImageView tripAdvisorStrip;
 		ImageView image;
 		TextView name;
 		TextView rate;
 		TextView distance;
+		TextView location;
 		RatingBar rating;
 		private int hotelIndex;
 		

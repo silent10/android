@@ -202,7 +202,7 @@ public class XpediaProtocolStatic {
 				!apiReply.ean.containsKey("destinationString") 
 				) {
 			// no location returned - use the one from the phone
-			if (longitude != -1) {
+			if (longitude != EvatureLocationUpdater.NO_LOCATION) {
 				apiReply.ean.put("latitude", String.valueOf(latitude));
 				apiReply.ean.put("longitude", String.valueOf(longitude));
 			}
@@ -418,7 +418,7 @@ public class XpediaProtocolStatic {
 
 	public static JSONObject getExpediaNext(Context context, String mQueryString, String currencyCode) {
 		String urlString = HOTEL_LIST_URL;
-		urlString += "numberOfResults=10&";
+		urlString += "numberOfResults=15&";
 		urlString += getContantHttpParams() + "&currencyCode=" + currencyCode;
 		urlString += mQueryString;
 

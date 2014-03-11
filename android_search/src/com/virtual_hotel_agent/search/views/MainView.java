@@ -189,9 +189,11 @@ public class MainView {
 		mStatusPanel.setVisibility(View.GONE);
 	}
 	public void hideSpeechWave() {
-		Handler h = mUpdateLevel.get();
-		if (h != null)
-			h.removeMessages(0);
+		if (mUpdateLevel != null) {
+			Handler handler = mUpdateLevel.get();
+			if (handler != null)
+				handler.removeMessages(0);
+		}
 		mSoundView.setVisibility(View.GONE);
 	}
 	

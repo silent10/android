@@ -148,6 +148,11 @@ public class ChatFragment extends RoboFragment  implements OnItemClickListener {
 	public boolean isReady() {
 		return mChatAdapter != null;
 	}
+
+	public void clearChat() {
+		mAnimAdapter.reset();
+		mChatListModel.clear();
+	}
 	
 	
 }
