@@ -144,24 +144,26 @@ public class EvaSpeechComponent {
 
 
 	public void stop() {
-		mSpeechAudioStreamer.stop();
+		if (mSpeechAudioStreamer != null)
+			mSpeechAudioStreamer.stop();
 	}
 	
 	public void cancel() {
-		mSpeechAudioStreamer.stop();
-		if (mVoiceClient.getInTransaction())
-		{
-			Thread tr = new Thread()
+		if (mSpeechAudioStreamer != null) {
+			mSpeechAudioStreamer.stop();
+			if (mVoiceClient.getInTransaction())
 			{
-				public void run()
+				Thread tr = new Thread()
 				{
-					mVoiceClient.stopTransfer();
-				}
-			};
-			tr.start();
+					public void run()
+					{
+						mVoiceClient.stopTransfer();
+					}
+				};
+				tr.start();
+			}
+			dictationTask.mListener = null;
 		}
-		
-		dictationTask.mListener = null;
 	}
 
 	public void start(SpeechRecognitionResultListener listener, Object cookie) throws EvaException {

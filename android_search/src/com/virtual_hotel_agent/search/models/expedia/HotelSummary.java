@@ -1,5 +1,7 @@
 package com.virtual_hotel_agent.search.models.expedia;
 
+import java.util.Random;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +27,7 @@ public class HotelSummary {
 	double mConfidenceRating;
 	public int mAmenityMask;
 	public double mTripAdvisorRating;
-	String mLocationDescription;
+	public String mLocationDescription;
 	String mShortDescription;
 	double mHighRate;
 	public double mLowRate;
@@ -41,13 +43,17 @@ public class HotelSummary {
 	
 	public CurrentRoomDetails mCurrentRoomDetails;
 
+	private static Random randomGenerator = new Random();
+	
 	HotelSummary(JSONObject jHotel)
 	{
 		mHotelId = XpediaDatabase.getSafeInt(jHotel,"hotelId");
 		mName = XpediaDatabase.getSafeString(jHotel,"name");
 		mHotelRating = XpediaDatabase.getSafeDouble(jHotel, "hotelRating");
 		mConfidenceRating  = XpediaDatabase.getSafeDouble(jHotel, "confidenceRating");
-		mTripAdvisorRating  = XpediaDatabase.getSafeDouble(jHotel, "tripAdvisorRating");
+		
+		mTripAdvisorRating  = 3+randomGenerator.nextInt(4)/2.0; //XpediaDatabase.getSafeDouble(jHotel, "tripAdvisorRating");
+		
 		mHighRate = XpediaDatabase.getSafeDouble(jHotel, "highRate");
 		mLowRate  = XpediaDatabase.getSafeDouble(jHotel, "lowRate");
 		mRateCurrencyCode = XpediaDatabase.getSafeString(jHotel,"rateCurrencyCode");
