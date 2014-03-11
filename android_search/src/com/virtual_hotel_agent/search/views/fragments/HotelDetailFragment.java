@@ -75,7 +75,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 	private View mView = null;
 	private PhotoGalleryAdapter mHotelGalleryAdapter;
-	private Bitmap mEvaBmp;
+	private Bitmap mVhaBmp;
 	private Bitmap mEvaBmpCached;
 
 
@@ -93,9 +93,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			if (fragmentRef != null) {
 				HotelDetailFragment hdf = fragmentRef.get();
 				if (hdf != null) {
-					if (hdf.mEvaBmp != null) {
-						hdf.mHotelGalleryAdapter.removeBitmap(hdf.mEvaBmp);
-						hdf.mEvaBmp = null;
+					if (hdf.mVhaBmp != null) {
+						hdf.mHotelGalleryAdapter.removeBitmap(hdf.mVhaBmp);
+						hdf.mVhaBmp = null;
 					}
 					
 					hdf.mHotelGalleryAdapter.addBitmap((Bitmap) msg.obj);
@@ -232,7 +232,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		}
 		
 		description += "&lt;p&gt;\n&lt;b&gt;Note:&lt;/b&gt; It is the responsibility of the hotel chain and/or the"
-			+ " individual property to ensure the accuracy of the photos displayed. \"Eva Travel Search\" is"
+			+ " individual property to ensure the accuracy of the photos displayed. \"Virtual Hotel Agent\" is"
 			+ " not responsible for any inaccuracies in the photos. &lt;/p&gt;";
 		Spanned marked_up = Html.fromHtml("<html><body>" + description + "</body></html>");
 
@@ -249,9 +249,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			imageDownloader.stopDownload();
 		}
 		
-		mEvaBmp = mEvaBmpCached;
+		mVhaBmp = mEvaBmpCached;
 		mHotelGalleryAdapter.clear();
-		mHotelGalleryAdapter.addBitmap(mEvaBmp);
+		mHotelGalleryAdapter.addBitmap(mVhaBmp);
 
 		mHotelGallery.setAdapter(mHotelGalleryAdapter);
 

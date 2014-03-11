@@ -24,37 +24,37 @@
             android:textColor="@android:color/primary_text_light" />
          
          
-    <FrameLayout
-        android:id="@+id/right_pane"
-        android:layout_width="40dip"
-        android:layout_height="40dip"
-        android:visibility="gone"
-        >
+<!--     <FrameLayout -->
+<!--         android:id="@+id/right_pane" -->
+<!--         android:layout_width="40dip" -->
+<!--         android:layout_height="40dip" -->
+<!--         android:visibility="gone" -->
+<!--         > -->
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="match_parent"
-        	android:layout_height="match_parent"
-            android:contentDescription="@string/chat_icon_description"
-            android:padding="2dip"
-            android:src="@drawable/hotel72" />
+<!--         <ImageView -->
+<!--             android:id="@+id/icon" -->
+<!--             android:layout_width="match_parent" -->
+<!--         	android:layout_height="match_parent" -->
+<!--             android:contentDescription="@string/chat_icon_description" -->
+<!--             android:padding="2dip" -->
+<!--             android:src="@drawable/hotel72" /> -->
 
-        <ImageView
-            android:id="@+id/top_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/search_icon"
-            android:padding="2dip"
-            android:src="@drawable/search"
-            android:visibility="gone" />
+<!--         <ImageView -->
+<!--             android:id="@+id/top_icon" -->
+<!--             android:layout_width="match_parent" -->
+<!--             android:layout_height="match_parent" -->
+<!--             android:contentDescription="@string/search_icon" -->
+<!--             android:padding="2dip" -->
+<!--             android:src="@drawable/search" -->
+<!--             android:visibility="gone" /> -->
 
-        <ProgressBar
-            android:id="@+id/progressBar_search"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+<!--         <ProgressBar -->
+<!--             android:id="@+id/progressBar_search" -->
+<!--             android:visibility="gone" -->
+<!--             android:layout_width="match_parent" -->
+<!--             android:layout_height="match_parent" /> -->
 
-    </FrameLayout>
+<!--     </FrameLayout> -->
     </LinearLayout>
     
      
