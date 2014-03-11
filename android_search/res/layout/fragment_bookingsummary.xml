@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (c) 2013, Expedia Affiliate Network
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that redistributions of source code
+    retain the above copyright notice, these conditions, and the following
+    disclaimer. 
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+    ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    The views and conclusions contained in the software and documentation are those
+    of the authors and should not be interpreted as representing official policies, 
+    either expressed or implied, of the Expedia Affiliate Network or Expedia Inc.
+-->
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+        android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/palette_light_grey"
+                android:fillViewport="true">
+        <LinearLayout android:layout_width="fill_parent"
+                      android:layout_height="fill_parent"
+                      android:orientation="vertical">
+            <LinearLayout android:id="@+id/securityNoticeLayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:background="#FCF9D7">
+                <ImageView android:id="@+id/securitynoticeimage"
+                           android:layout_width="40dip"
+                           android:layout_height="40dip"
+                           android:src="@drawable/secure_icon"
+                           android:layout_gravity="center_vertical"/>
+                <LinearLayout android:id="@+id/securityNoticeTextLayout"
+                              android:layout_height="wrap_content"
+                              android:layout_width="fill_parent"
+                              android:orientation="vertical">
+                    <TextView android:id="@+id/securityNoticeTitle"
+                              android:textColor="@color/text"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:text="@string/security_notice_title"
+                              android:textSize="17dip"
+                              android:textStyle="bold"/>
+                    <TextView android:id="@+id/securityNoticeText"
+                              android:textColor="@color/text"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:text="@string/security_notice_text"/>
+                </LinearLayout>
+            </LinearLayout>
+            <TextView android:id="@+id/hotelName"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:textColor="@color/text"/>
+            <LinearLayout android:id="@+id/roomtypelayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:text="@string/room_type"
+                          android:textStyle="bold"/>
+                <TextView android:id="@+id/roomTypeDisplay"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:layout_gravity="right"
+                          android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/bedtypelayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:text="@string/bed_type"
+                          android:textStyle="bold"/>
+                <TextView android:id="@+id/bedTypeDisplay"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:layout_gravity="right"
+                          android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/checkinlayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:text="@string/arrival"
+                          android:textStyle="bold"/>
+                <TextView android:id="@+id/arrivalDisplay"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:layout_gravity="right"
+                          android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/checkoutlayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:text="@string/departure"
+                          android:textStyle="bold"/>
+                <TextView android:id="@+id/departureDisplay"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:layout_gravity="right"
+                          android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/guestslayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:text="@string/guests"
+                          android:textStyle="bold"/>
+                <TextView android:id="@+id/guestsNumberDisplay"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text"
+                          android:layout_gravity="right"
+                          android:layout_weight="1"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/pricedetaillayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
+
+                <TextView android:id="@+id/priceDetailsLabel"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="#D6D5D4"
+                          android:text="@string/price_details"
+                          android:textSize="25dip"/>
+                <!-- room type, then drrpromo img and text
+                then a list view breaking down the stay into days and individualized rates for each-->
+                <TextView android:id="@+id/priceDetailsRoomType"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:textColor="@color/text" />
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="wrap_content">
+<!--                     <ImageView android:id="@+id/drrPromoImg" -->
+<!--                                android:src="@drawable/tag_label" -->
+<!--                                android:layout_width="8dip" -->
+<!--                                android:layout_height="8dip" -->
+<!--                                android:layout_marginRight="2dip" -->
+<!--                                android:layout_gravity="bottom"/> -->
+                    <TextView android:id="@+id/drrPromoText"
+                              android:textColor="#FF6600"
+                              android:layout_height="wrap_content"
+                              android:layout_width="wrap_content"
+                              android:textSize="10dip"
+                              android:layout_gravity="bottom"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/priceDetailsBreakdown"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:orientation="vertical"/>
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="wrap_content">
+                    <TextView android:text="@string/taxes_and_fees"
+                              android:layout_width="0dip"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:layout_gravity="left"/>
+                    <TextView android:id="@+id/taxes_and_fees_display"
+                              android:layout_width="0dip"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:layout_gravity="right" />
+                </LinearLayout>
+
+            </LinearLayout>
+            <LinearLayout android:id="@+id/totallayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:background="#E4EDF7">
+                <TextView android:id="@+id/totalChargesLabel"
+                          android:layout_width="0dip"
+                          android:layout_height="fill_parent"
+                          android:layout_weight="1"
+                          android:textColor="@color/text"
+                          android:textSize="20dip"
+                          android:text="@string/total_charges" />
+                <LinearLayout android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:layout_gravity="right"
+                              android:gravity="right">
+                    <TextView android:id="@+id/lowPrice"
+                              android:layout_width="wrap_content"
+                              android:layout_height="fill_parent"
+                              android:layout_marginRight="4dip"
+                              android:gravity="right"
+                              android:textSize="20dip"
+                              android:textColor="@color/text"
+                              android:textStyle="bold"/>
+                    <TextView android:id="@+id/highPrice"
+                              android:layout_height="wrap_content"
+                              android:layout_width="fill_parent"
+                              android:layout_gravity="right"
+                              android:textSize="20dip"
+                              android:textColor="#555555"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/guestinformationlayout"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
+
+                <Button
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/choose_contact"
+                        android:id="@+id/choose_contact_button"
+                        android:layout_weight="500"
+                        android:layout_gravity="top"
+                        android:singleLine="true"
+                        android:onClick="onContactChooseButtonClick"/>
+
+                <LinearLayout android:id="@+id/guestinfolayout"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:orientation="vertical">
+
+                    <TextView android:layout_height="wrap_content"
+                              android:layout_width="fill_parent"
+                              android:text="@string/guest_information" />
+                    <LinearLayout android:layout_height="wrap_content"
+                                  android:layout_width="fill_parent">
+                        <EditText android:id="@+id/guestFirstName"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="1"
+                                  android:inputType="textPersonName"
+                                  android:hint="@string/guest_first_name"/>
+                        <EditText android:id="@+id/guestLastName"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="1"
+                                  android:inputType="textPersonName"
+                                  android:hint="@string/guest_last_name"/>
+                    </LinearLayout>
+                    <EditText android:id="@+id/guestPhoneNumber"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:inputType="phone"
+                              android:hint="@string/guest_phone"/>
+                    <EditText android:id="@+id/guestEmail"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:inputType="textEmailAddress"
+                              android:hint="@string/guest_email"/>
+                </LinearLayout>
+                <LinearLayout android:id="@+id/billinginformationlayout"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:orientation="vertical">
+                    <TextView android:id="@+id/billingInformationLabel"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:text="@string/billing_information" />
+
+                    <Button
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/load_default_billing_info"
+                            android:id="@+id/loadDefaultBillingInfoButton"
+                            android:layout_gravity="left|center_vertical"
+                            android:focusable="true"
+                            android:singleLine="true"
+                            android:onClick="onLoadDefaultBillingInfoClick"/>
+
+                    <EditText android:id="@+id/billingInformationAddress1"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:hint="@string/billing_address_1"/>
+                    <EditText android:id="@+id/billingInformationAddress2"
+                              android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:hint="@string/billing_address_2" />
+                    <LinearLayout android:layout_width="fill_parent"
+                                  android:layout_height="wrap_content">
+                        <EditText android:id="@+id/billingInformationCity"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="3"
+                                  android:hint="@string/billing_city" />
+                        <EditText android:id="@+id/billingInformationState"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="1"
+                                  android:hint="@string/billing_state"  />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="fill_parent"
+                                  android:layout_height="wrap_content">
+                        <EditText android:id="@+id/billingInformationCountry"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="3"
+                                  android:hint="@string/billing_country"  />
+                        <EditText android:id="@+id/billingInformationZip"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="1"
+                                  android:minEms="5"
+                                  android:hint="@string/billing_zip"
+                                  android:inputType="number" />
+                    </LinearLayout>
+                    <LinearLayout android:id="@+id/creditcardlayout"
+                                  android:layout_height="wrap_content"
+                                  android:layout_width="fill_parent">
+                        <EditText android:id="@+id/billingInformationCCNum"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="20"
+                                  android:hint="@string/billing_cc_num"
+                                  android:inputType="number"/>
+                        <Spinner android:id="@+id/billingInformationCCExpMo"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="8"
+                                  android:hint="@string/billing_cc_expmo"
+                                  android:inputType="number" android:entries="@array/credit_card_months"
+                                  android:focusableInTouchMode="true"/>
+                        <Spinner android:id="@+id/billingInformationCCExpYr"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="12"
+                                  android:hint="@string/billing_cc_expyr"
+                                  android:inputType="number" android:focusable="false"
+                                  android:entries="@array/credit_card_years"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="fill_parent"
+                                  android:layout_height="wrap_content">
+
+                        <Spinner
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/billingInformationCCType"
+                                android:layout_gravity="center_horizontal|top"
+                                android:entries="@array/supported_credit_cards"
+                                android:longClickable="true"/>
+
+                        <TextView android:layout_height="wrap_content"
+                                  android:layout_width="0dip"
+                                  android:layout_weight="7"
+                                  android:text="@string/billing_cc_security"
+                                  android:inputType="number"/>
+                        <EditText android:id="@+id/billingInformationCCSecurityCode"
+                                  android:layout_width="0dip"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="2" />
+                    </LinearLayout>
+                    <TextView android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:text="@string/billing_legal_disclaimer" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/complete_booking"
+                    android:id="@+id/button"
+                    android:onClick="onCompleteBookingButtonClick"/>
+        </LinearLayout>
+    </ScrollView>

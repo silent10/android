@@ -3,6 +3,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,6 +30,7 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.google.inject.Inject;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
@@ -44,7 +46,6 @@ import com.virtual_hotel_agent.search.views.adapters.RoomListAdapter;
 @SuppressLint("ValidFragment")
 public class RoomsSelectFragement extends RoboFragment {//implements OnItemClickListener {
 
-	private static final String HOTEL_INDEX = "HotelIndex";
 	private static final String TAG = "RoomsSelectFragement";
 	private View mView = null;
 	private ImageView mHotelImage;
@@ -56,6 +57,8 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
 	private int mHotelIndex = -1;
+	
+	@Inject protected EventManager eventManager;
 	
 	static class DownloadedImg extends Handler {
 		private WeakReference<RoomsSelectFragement> fragmentRef;
@@ -239,7 +242,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		mRoomListView = (ExpandableListView)mView.findViewById(R.id.roomListView);
 		
 
-		mAdapter = new RoomListAdapter(getActivity(),mHotelData);
+		mAdapter = new RoomListAdapter(getActivity(), mHotelData, eventManager);
 		mAdapter.setDisclaimer(disclaimer);
 
 		mRoomListView.setAdapter( mAdapter );
@@ -268,7 +271,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 		if(len==0)
 		{
-			Toast.makeText(getActivity(),"No rooms available for the selected dates",Toast.LENGTH_LONG).show();			
+			Toast.makeText(getActivity(), R.string.no_rooms ,Toast.LENGTH_LONG).show();			
 		}
 	}
 

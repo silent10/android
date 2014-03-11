@@ -2,6 +2,7 @@ package com.virtual_hotel_agent.search.views.adapters;
 
 import java.text.DecimalFormat;
 
+import roboguice.event.EventManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -33,6 +34,7 @@ import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
@@ -51,8 +53,9 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	protected static final String TAG = "RoomListAdapter";
 	private int selectedColor;
 	private int selectedNonRefundColor;
+	private EventManager mEventManager;
 		
-	public RoomListAdapter(Context context, HotelData hotel)
+	public RoomListAdapter(Context context, HotelData hotel, EventManager eventManager)
 	{	
 		mInflater = LayoutInflater.from(context);
 	    mParent = context;
@@ -61,7 +64,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		selectedColor = resources.getColor(R.color.selected_room_list_item);
 		selectedNonRefundColor = resources.getColor(R.color.selected_non_refundable_room_list_item);
 		disclaimer = "";
-		
+		mEventManager = eventManager;
 		mEvaBmpCached = BitmapFactory.decodeResource(resources, R.drawable.hotel72);
 	}
 	
@@ -248,6 +251,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);
 		
 		
+		View photoContainer = convertView.findViewById(R.id.roomImage_container);
 		ImageView photoHolder = (ImageView) convertView.findViewById(R.id.roomImage);
 		if (room.mImageUrls != null && room.mImageUrls.length > 0) {
 			 XpediaDatabase db = MyApplication.getDb();
@@ -259,7 +263,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			 else {
 				 photoHolder.setImageBitmap(mEvaBmpCached);
 			 }
-			 photoHolder.setVisibility(View.VISIBLE);
+			 photoContainer.setVisibility(View.VISIBLE);
 			 photoHolder.setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -275,7 +279,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			});
 		 }
 		 else {
-			 photoHolder.setVisibility(View.GONE);
+			 photoContainer.setVisibility(View.GONE);
 		 }
 		
 		
@@ -367,38 +371,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			
 			@Override
 			public void onClick(View v) {
-				ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
-				String newUrl = room.buildTravelUrl(mHotel.mSummary.mHotelId, 
-						mHotel.mSummary.mSupplierType,
-						mHotel.mSummary.mCurrentRoomDetails.mArrivalDate, 
-						mHotel.mSummary.mCurrentRoomDetails.mDepartureDate, 
-						db.mNumberOfAdultsParam,
-						db.getNumberOfChildrenParam(),
-						db.getAgeChild1(),
-						db.getAgeChild2(),
-						db.getAgeChild3());
-
-				
-				Tracker defaultTracker = GoogleAnalytics.getInstance(mParent).getDefaultTracker();
-				if (defaultTracker != null) {
-					defaultTracker.send(MapBuilder
-						    .createAppView()
-						    .set(Fields.SCREEN_NAME, "Booking Screen")
-						    .build()
-						);
-					
-					defaultTracker.send(MapBuilder
-						    .createEvent("ui_action", "room_checkout", newUrl, 0l)
-						    .build()
-						   );
-				}
-				
-				//String url = mHotel.mSummary.roomDetails[arg2].mDeepLink;
-				Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());
-				Intent i = new Intent(Intent.ACTION_VIEW);
-				i.setData(uri);
-				Log.i(TAG, "Setting Browser to url:  "+uri);
-				mParent.startActivity(i);
+				mEventManager.fire(new RoomSelectedEvent(room, mHotel));
 			}
 		});
 		

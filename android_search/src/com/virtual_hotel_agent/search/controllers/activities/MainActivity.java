@@ -21,7 +21,6 @@ package com.virtual_hotel_agent.search.controllers.activities;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -45,14 +44,12 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.SpannableString;
@@ -91,6 +88,7 @@ import com.virtual_hotel_agent.search.controllers.events.ChatItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
+import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
@@ -102,8 +100,10 @@ import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.MainView;
+import com.virtual_hotel_agent.search.views.fragments.BookingFragement;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment.DialogClickHandler;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
@@ -143,6 +143,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	private String mHotelsTabName;
 	private String mHotelTabName;
 	private String mRoomsTabName;
+	private String mBookingTabName;
 	private String mMapTabName;
 
 	static private HotelListDownloaderTask mSearchExpediaTask = null;
@@ -297,6 +298,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mHotelsTabName = getString(R.string.HOTELS);
 		mHotelTabName = getString(R.string.HOTEL);
 		mRoomsTabName = getString(R.string.ROOMS);
+		mBookingTabName = getString(R.string.BOOKING);
 		mMapTabName = getString(R.string.MAP);
 
 		
@@ -462,6 +464,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		private Fragment mHotelsListFragment;
 		private Fragment mHotelDetailFragment;
 		private Fragment mRoomSelectFragment;
+		private Fragment mBookingFragment;
 
 		public TabsPagerAdapter( FragmentManager fm) {
 			super(fm);
@@ -471,6 +474,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			mHotelsListFragment = injector.getInstance(HotelListFragment.class);
 			mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
 			mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
+			mBookingFragment = injector.getInstance(BookingFragement.class);
 		}
 		
 
@@ -505,10 +509,16 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			else if (tabTitle.equals(mHotelsTabName)) { // Hotel list window
 				Log.i(TAG, "Hotels Fragment");
+				if (mHotelsListFragment == null) {
+					mHotelsListFragment = injector.getInstance(HotelListFragment.class);
+				}
 				return mHotelsListFragment;
 			}
 			else if (tabTitle.equals(mMapTabName)) { // Hotel list window
 				Log.i(TAG, "HotelsMap Fragment");
+				if (mMapFragment == null) {
+					mMapFragment = injector.getInstance(HotelsMapFragment.class);
+				}
 				return mMapFragment;
 			}
 			
@@ -519,12 +529,25 @@ public class MainActivity extends RoboFragmentActivity implements
 			else if (tabTitle.equals(mHotelTabName)) { // Single hotel
 				int hotelIndex = MyApplication.getExpediaRequestParams().getHotelId();
 				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
+				if (mHotelDetailFragment == null) {
+					mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
+				}
 				return mHotelDetailFragment;
 			}
 			else if (tabTitle.equals(mRoomsTabName)) {
 				int hotelIndex = MyApplication.getExpediaRequestParams().getHotelId();
 				Log.i(TAG, "starting Rooms Fragment for hotel # " + hotelIndex);
+				if (mRoomSelectFragment == null) {
+					mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
+				}
 				return mRoomSelectFragment;
+			}
+			else if (tabTitle.equals(mBookingTabName)) {
+				Log.i(TAG, "starting booking fragment");
+				if (mBookingFragment == null) {
+					mBookingFragment = injector.getInstance(BookingFragement.class);
+				}
+				return mBookingFragment;
 			}
 //			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 //				Log.i(TAG, "Trains Fragment");
@@ -1495,6 +1518,43 @@ public class MainActivity extends RoboFragmentActivity implements
 				frag.onHotelsListUpdated();
 			}
 		}
+	}
+	
+	public void onEventRoomSelected( @Observes RoomSelectedEvent event) {
+
+		HotelData hotel = event.hotel;
+		ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
+		String newUrl = event.room.buildTravelUrl(hotel.mSummary.mHotelId, 
+				hotel.mSummary.mSupplierType,
+				hotel.mSummary.mCurrentRoomDetails.mArrivalDate, 
+				hotel.mSummary.mCurrentRoomDetails.mDepartureDate, 
+				db.mNumberOfAdultsParam,
+				db.getNumberOfChildrenParam(),
+				db.getAgeChild1(),
+				db.getAgeChild2(),
+				db.getAgeChild3());
+
+		
+		Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+		if (defaultTracker != null) {
+			defaultTracker.send(MapBuilder
+				    .createAppView()
+				    .set(Fields.SCREEN_NAME, "Booking Screen")
+				    .build()
+				);
+			
+			defaultTracker.send(MapBuilder
+				    .createEvent("ui_action", "room_checkout", newUrl, 0l)
+				    .build()
+				   );
+		}
+		
+		//String url = mHotel.mSummary.roomDetails[arg2].mDeepLink;
+		Uri uri = Uri.parse(Html.fromHtml(newUrl).toString());
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setData(uri);
+		Log.i(TAG, "Setting Browser to url:  "+uri);
+		startActivity(i);
 	}
 	
 	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
