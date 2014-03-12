@@ -38,6 +38,7 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
@@ -176,34 +177,41 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         selectedMarker = null;
         HotelData selectedHotel = null;
         
+        int selectedIndex = -1;
+        ExpediaAppState rp = MyApplication.getExpediaAppState();
+		if (rp != null) {
+			selectedIndex = rp.getHotelId();
+			if (selectedIndex != -1) {
+				selectedHotel = evaDb.mHotelData[selectedIndex];
+			}
+		}
+        
         for(int i=startFrom;i<length;i++)
         {
 	        HotelData hotelData = evaDb.mHotelData[i];
-	        if (hotelData.isSelected()) {
-	        	selectedHotel = hotelData;
-	        }
-	        else {
+	        if (i != selectedIndex) {
 	        	addMapPoint(hotelData, hotelIcon, boundsBuilder);
 	        }
         }
-        if (selectedHotel != null) {
+        mMap.setOnInfoWindowClickListener(this);
+        
+        if (selectedHotel == null) {
+	        LatLngBounds bounds = boundsBuilder.build();
+	        
+	        try{
+	        	//This line will cause the exception first times when map is still not "inflated"
+	        	mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+	        	Log.d(TAG, "Camera moved successfully");
+	        } catch(IllegalStateException e) {
+	        	Log.w(TAG, "Camera move exception", e);
+	            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,400,400,10));
+	            Log.d(TAG, "Camera moved to hardcoded width height");
+	        }
+        }
+        else {
         	selectedMarker = addMapPoint(selectedHotel, hotelIconSelected, boundsBuilder);
             selectedMarker.showInfoWindow();
             mMap.animateCamera(CameraUpdateFactory.newLatLng(selectedMarker.getPosition()));
-        }
-        
-        mMap.setOnInfoWindowClickListener(this);
-        
-        LatLngBounds bounds = boundsBuilder.build();
-        
-        try{
-        	//This line will cause the exception first times when map is still not "inflated"
-        	mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-        	Log.d(TAG, "Camera moved successfully");
-        } catch(IllegalStateException e) {
-        	Log.w(TAG, "Camera move exception", e);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,400,400,10));
-            Log.d(TAG, "Camera moved to hardcoded width height");
         }
 	}
 

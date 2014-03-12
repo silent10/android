@@ -62,82 +62,99 @@
             <TextView android:id="@+id/hotelName"
                       android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
+                      android:textStyle="bold"
                       android:textColor="@color/text"/>
-            <LinearLayout android:id="@+id/roomtypelayout"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content">
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:text="@string/room_type"
-                          android:textStyle="bold"/>
-                <TextView android:id="@+id/roomTypeDisplay"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:layout_gravity="right"
-                          android:layout_weight="1"/>
-            </LinearLayout>
-            <LinearLayout android:id="@+id/bedtypelayout"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content">
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:text="@string/bed_type"
-                          android:textStyle="bold"/>
-                <TextView android:id="@+id/bedTypeDisplay"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:layout_gravity="right"
-                          android:layout_weight="1"/>
-            </LinearLayout>
-            <LinearLayout android:id="@+id/checkinlayout"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content">
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:text="@string/arrival"
-                          android:textStyle="bold"/>
-                <TextView android:id="@+id/arrivalDisplay"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:layout_gravity="right"
-                          android:layout_weight="1"/>
-            </LinearLayout>
-            <LinearLayout android:id="@+id/checkoutlayout"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content">
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:text="@string/departure"
-                          android:textStyle="bold"/>
-                <TextView android:id="@+id/departureDisplay"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:layout_gravity="right"
-                          android:layout_weight="1"/>
-            </LinearLayout>
-            <LinearLayout android:id="@+id/guestslayout"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content">
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:text="@string/guests"
-                          android:textStyle="bold"/>
-                <TextView android:id="@+id/guestsNumberDisplay"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:textColor="@color/text"
-                          android:layout_gravity="right"
-                          android:layout_weight="1"/>
-            </LinearLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/room_type"
+                        android:textColor="@color/text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/roomTypeDisplay"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/arrival"
+                        android:textColor="@color/text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/arrivalDisplay"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/departure"
+                        android:textColor="@color/text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/departureDisplay"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text" />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/guests"
+                        android:textColor="@color/text"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/guestsNumberDisplay"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/text" />
+
+                </TableRow>
+            </TableLayout>
+            
+            
             <LinearLayout android:id="@+id/pricedetaillayout"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
@@ -234,7 +251,7 @@
                         android:layout_weight="500"
                         android:layout_gravity="top"
                         android:singleLine="true"
-                        android:onClick="onContactChooseButtonClick"/>
+                        />
 
                 <LinearLayout android:id="@+id/guestinfolayout"
                               android:layout_width="fill_parent"

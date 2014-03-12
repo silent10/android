@@ -39,7 +39,7 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
 import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
@@ -152,7 +152,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			MainActivity.LogError(TAG, "onCreateView - no DB");
 		}
 		else {
-			ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+			ExpediaAppState rp = MyApplication.getExpediaAppState();
 			if (rp == null) {
 				MainActivity.LogError(TAG, "onCreateView - no RequestParams");
 			}

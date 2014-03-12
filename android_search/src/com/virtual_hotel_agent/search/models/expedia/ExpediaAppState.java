@@ -1,8 +1,7 @@
 package com.virtual_hotel_agent.search.models.expedia;
 
-public class ExpediaRequestParameters {
-	public int mNumberOfAdultsParam;
-
+public class ExpediaAppState {
+	private int mNumberOfAdultsParam;
 	private int mNumberOfChildrenParam;
 	private int mAgeChild1;
 	private int mAgeChild2;
@@ -73,8 +72,8 @@ public class ExpediaRequestParameters {
 	}
 
 	
-	public void setNumberOfAdults(int paramFromUI) {
-		mNumberOfAdultsParam = paramFromUI;
+	public void setNumberOfAdults(int numOfAdults) {
+		mNumberOfAdultsParam = numOfAdults;
 	}
 	
 	public int getNumberOfAdults() {

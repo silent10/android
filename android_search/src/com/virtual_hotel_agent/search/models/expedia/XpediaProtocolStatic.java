@@ -145,21 +145,13 @@ public class XpediaProtocolStatic {
 		return urlString;
 	}
 	
-	// save the last 5 recently used Hotel-Information
-	static LruCache<String, JSONObject>  hotelInformationCache = new LruCache<String, JSONObject>(5);
-
 	static public JSONObject getExpediaHotelInformation(Context context, int hotelId, String currencyCode) {
 		String key = "hotel_info_"+hotelId+"_"+currencyCode;
-		JSONObject cached = hotelInformationCache.get(key);
-		if (cached != null) {
-			Log.d(TAG, "Hotel info "+hotelId+" found in cache");
-			return cached;
-		}
 		String urlString = HOTEL_INFO_URL;
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";
 		urlString += "&hotelId=" + hotelId;
-		//urlString += "&options=0";
+		urlString += "&options=HOTEL_SUMMARY,HOTEL_DETAILS,PROPERTY_AMENITIES,HOTEL_IMAGES";
 
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 		if (defaultTracker != null) 
@@ -169,13 +161,10 @@ public class XpediaProtocolStatic {
 				   );
 
 		JSONObject result = executeWithTimeout(context, urlString);
-		if (result != null) {
-			hotelInformationCache.put(key, result);
-		}
 		return result;
 	}
 
-	public static JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaRequestParameters db, String currencyCode) {
+	public static JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaAppState db, String currencyCode) {
 		Log.i(TAG, "getExpediaAnswer()");
 		if (apiReply == null) {
 			Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
@@ -262,7 +251,7 @@ public class XpediaProtocolStatic {
 		urlString += "&currencyCode=" + currencyCode;
 		urlString += params;
 		
-		urlString += "&room1="+db.mNumberOfAdultsParam;
+		urlString += "&room1="+db.getNumberOfAdults();
 		int numOfChildren = db.getNumberOfChildrenParam();
 		if (numOfChildren > 0) {
 			urlString += ","+db.getAgeChild1();
@@ -376,11 +365,11 @@ public class XpediaProtocolStatic {
 		} 
 	}
 
-	public static JSONObject getRoomInformationForHotel(Context context, int hotelId, ExpediaRequestParameters db,
+	public static JSONObject getRoomInformationForHotel(Context context, int hotelId, ExpediaAppState db,
 			String currencyCode) {
 		String arrivalDateParam = db.mArrivalDateParam;
 		String departureDateParam = db.mDepartureDateParam;
-		int numOfAdults = db.mNumberOfAdultsParam;
+		int numOfAdults = db.getNumberOfAdults();
 		String urlString = HOTEL_AVAILABILITY_URL;
 		urlString += getContantHttpParams();
 		urlString += "&currencyCode=" + currencyCode + "&_type=json";

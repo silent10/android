@@ -39,7 +39,7 @@ public class RoomsUpdaterTask extends DownloaderTask {
 	@Override
 	protected JSONObject doInBackground(Void... params) {
 		JSONObject result= XpediaProtocolStatic.getRoomInformationForHotel(mContext, mHotelData.mSummary.mHotelId,
-				MyApplication.getExpediaRequestParams(),
+				MyApplication.getExpediaAppState(),
 				SettingsAPI.getCurrencyCode(mContext));
 
 		mHotelData.mSummary.updateRoomDetails(result);

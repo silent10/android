@@ -24,11 +24,11 @@ public class XpediaProtocol {
 		return XpediaProtocolStatic.getExpediaHotelInformation(context, hotelId, currencyCode);
 	}
 
-	public JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaRequestParameters db,String currencyCode) {
+	public JSONObject getExpediaAnswer(Context context, EvaApiReply apiReply, ExpediaAppState db,String currencyCode) {
 		return XpediaProtocolStatic.getExpediaAnswer(context, apiReply, db, currencyCode);
 	}
 
-	public JSONObject getRoomInformationForHotel(Context context, int hotelId, ExpediaRequestParameters db,
+	public JSONObject getRoomInformationForHotel(Context context, int hotelId, ExpediaAppState db,
 			String currencyCode) {
 		return XpediaProtocolStatic.getRoomInformationForHotel(context, hotelId, db, currencyCode);
 	}

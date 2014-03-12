@@ -35,7 +35,7 @@ import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
 import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
@@ -121,7 +121,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 		mStarRatingBar = (RatingBar)mView.findViewById(R.id.starRating);
 		
-		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+		ExpediaAppState rp = MyApplication.getExpediaAppState();
 		if (rp == null) {
 			MainActivity.LogError(TAG, "onCreateView - no RequestParams");
 		}
@@ -210,8 +210,8 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		else {
 			// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
 			disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString();
-			ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
-			if (rp.mNumberOfAdultsParam > 2 || rp.getNumberOfChildrenParam() > 0) {
+			ExpediaAppState rp = MyApplication.getExpediaAppState();
+			if (rp.getNumberOfAdults() > 2 || rp.getNumberOfChildrenParam() > 0) {
 				disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
 								"accommodate your entire party.";
 			}
