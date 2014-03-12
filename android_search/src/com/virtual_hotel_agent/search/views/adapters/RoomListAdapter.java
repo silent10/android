@@ -248,6 +248,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);
 		
 		
+		View photoContainer = convertView.findViewById(R.id.roomImage_container);
 		ImageView photoHolder = (ImageView) convertView.findViewById(R.id.roomImage);
 		if (room.mImageUrls != null && room.mImageUrls.length > 0) {
 			 XpediaDatabase db = MyApplication.getDb();
@@ -259,7 +260,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			 else {
 				 photoHolder.setImageBitmap(mEvaBmpCached);
 			 }
-			 photoHolder.setVisibility(View.VISIBLE);
+			 photoContainer.setVisibility(View.VISIBLE);
 			 photoHolder.setOnClickListener(new OnClickListener() {
 				
 				@Override
@@ -275,7 +276,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			});
 		 }
 		 else {
-			 photoHolder.setVisibility(View.GONE);
+			 photoContainer.setVisibility(View.GONE);
 		 }
 		
 		
