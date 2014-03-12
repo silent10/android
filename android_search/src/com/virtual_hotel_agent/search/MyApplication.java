@@ -13,14 +13,14 @@ import android.content.res.Resources;
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {
 
 	static XpediaDatabase mEvaDb = null;
-	static ExpediaRequestParameters  requestParams = new ExpediaRequestParameters();
+	static ExpediaAppState  expediaAppState = new ExpediaAppState();
 	//static EvaVayantDatabase mVayantDb = null;
 	static String mExpediaSecret = null;
 	static String mExpediaApiKey = null;
@@ -61,8 +61,8 @@ public class MyApplication extends Application {
 		mEvaDb = db;
 	}
 	
-	public static ExpediaRequestParameters getExpediaRequestParams() {
-		return requestParams;
+	public static ExpediaAppState getExpediaAppState() {
+		return expediaAppState;
 	}
 
 	public static String getExpediaApiKey() {

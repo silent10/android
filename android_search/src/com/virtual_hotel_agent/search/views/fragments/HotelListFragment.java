@@ -36,7 +36,7 @@ import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
@@ -141,7 +141,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.clearChoices();
-		ExpediaRequestParameters rp = MyApplication.getExpediaRequestParams();
+		ExpediaAppState rp = MyApplication.getExpediaAppState();
 		if (rp != null) {
 			mHotelListView.setSelection(rp.getHotelId());
 		}

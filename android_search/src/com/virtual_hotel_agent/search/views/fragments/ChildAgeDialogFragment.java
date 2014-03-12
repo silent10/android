@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.evaapis.crossplatform.EvaTravelers;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaRequestParameters;
+import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 
 public class ChildAgeDialogFragment extends RoboDialogFragment {
 
@@ -84,7 +84,7 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 
 								int intNumAdults = toInt(mNumAdults);
 
-								ExpediaRequestParameters db = MyApplication.getExpediaRequestParams();
+								ExpediaAppState db = MyApplication.getExpediaAppState();
 								db.setNumberOfAdults(intNumAdults);
 
 								int numChildren = toInt(mNumChildren);

@@ -68,7 +68,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
 		Log.i(TAG, "doInBackground: Calling Expedia");
-		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(context, apiReply, MyApplication.getExpediaRequestParams(), mCurrencyCode);
+		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(context, apiReply, MyApplication.getExpediaAppState(), mCurrencyCode);
 		if (hotelListResponse == null) {
 			Log.w(TAG, "null hotelist response!");
 		}
@@ -90,8 +90,8 @@ public class HotelListDownloaderTask extends DownloaderTask {
 			
 			Log.i(TAG, "doInBackground: All OK");
 			mProgress = DownloaderStatus.Finished;
-			MyApplication.getExpediaRequestParams().setArrivalDate(apiReply.ean.get("arrivalDate"));
-			MyApplication.getExpediaRequestParams().setDepartueDate(apiReply.ean.get("departureDate"));
+			MyApplication.getExpediaAppState().setArrivalDate(apiReply.ean.get("arrivalDate"));
+			MyApplication.getExpediaAppState().setDepartueDate(apiReply.ean.get("departureDate"));
 			//MyApplication.getDb().setNumberOfAdults(1);
 			Log.i(TAG, "doInBackground: end");
 		}	

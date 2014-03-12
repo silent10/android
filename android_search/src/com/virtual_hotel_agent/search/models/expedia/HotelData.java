@@ -11,7 +11,6 @@ import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 public class HotelData {
 	private static final String TAG = "HotelData";
 
-	private boolean selected;
 	private double distance = -2; 
 	
 	// summary is filled by both hotel-list and hotel-info
@@ -24,17 +23,9 @@ public class HotelData {
 	public HotelData(JSONObject jHotel) {
 		mSummary = new HotelSummary(jHotel);
 //		Ln.d("Hotel %s   price= %s - %s",mSummary.mName, mSummary.mLowRate, mSummary.mHighRate);
-		selected = false;
 	}
 
 	
-	public void setSelected(boolean val) {
-		selected = val;
-	}
-	
-	public boolean isSelected() {
-		return selected;
-	}
 
 	public double getDistanceFromMe() {
 		if (distance == -2) {

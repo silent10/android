@@ -16,9 +16,9 @@ public class HotelSummary {
 	private static final String TAG = "HotelSummary";
 	public int mHotelId = -1;
 	public String mName;
-	String mAddress1;
+	public String mAddress1;
 	public String mCity;
-	String mPostalCode;
+	public String mPostalCode;
 	public String mCountryCode;
 	String mAirportCode;
 	public String mSupplierType;

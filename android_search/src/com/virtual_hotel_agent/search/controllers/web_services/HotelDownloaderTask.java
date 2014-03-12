@@ -52,8 +52,6 @@ public class HotelDownloaderTask extends DownloaderTask {
 		}
 		HotelData hotelData = db.mHotelData[mHotelIndex];
 
-		db.setHotelSelected(mHotelIndex);
-		
 		if (isCancelled()) {
 			Log.w(TAG, "thread was canceled!");
 		}
