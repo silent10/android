@@ -153,8 +153,8 @@
                 android:layout_height="wrap_content"
                  >
             </WebView>
-            
-             <View
+
+            <View
 		        android:id="@+id/view1"
 		        android:layout_width="fill_parent"
 		        android:layout_height="110dip" />

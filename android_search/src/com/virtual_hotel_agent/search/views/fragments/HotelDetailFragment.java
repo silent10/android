@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,7 +47,6 @@ import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
 
-@SuppressLint("ValidFragment")
 public class HotelDetailFragment extends RoboFragment implements OnItemClickListener {
 
 	protected static final String TAG = HotelDetailFragment.class.getSimpleName();

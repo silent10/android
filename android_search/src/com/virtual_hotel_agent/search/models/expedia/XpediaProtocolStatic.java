@@ -62,6 +62,7 @@ public class XpediaProtocolStatic {
 	private final static String HOTEL_LIST_URL = EXPEDIA_URL + "list?";
 	private final static String HOTEL_INFO_URL = EXPEDIA_URL + "info?";
 	private final static String HOTEL_AVAILABILITY_URL = EXPEDIA_URL + "avail?";
+	private static final String PAYMENT_METHOD_URL = EXPEDIA_URL + "paymentInfo?";
 	private static final String CONSTANT_HTTP_PARAMS = "locale=en_US&"
 			+ "customerUserAgent=MOBILE_APP"
 			+ "&minorRev=" + minorRev;
@@ -423,4 +424,10 @@ public class XpediaProtocolStatic {
 	}
 
 
+	public static JSONObject getPaymentTypes(Context context, String currencyCode, String hotelId, String supplierType) {
+		String urlString = PAYMENT_METHOD_URL;
+		urlString += getContantHttpParams() + "&currencyCode=" + currencyCode;
+		urlString += "&hotelId="+hotelId+"&supplierType="+supplierType;
+		return executeWithTimeout(context, urlString);
+	}
 }

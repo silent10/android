@@ -125,12 +125,6 @@
         <item>tr</item>  <!-- Turkish -->
     </string-array>
     
-    <string-array name="supported_credit_cards">
-        <item>Visa</item>
-        <item>Master Card</item>
-        <item>American Express</item>
-    </string-array>
-    
     <string-array name="credit_card_months">
         <item>01</item>
         <item>02</item>
