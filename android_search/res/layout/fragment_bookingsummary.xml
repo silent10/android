@@ -23,8 +23,8 @@
     of the authors and should not be interpreted as representing official policies, 
     either expressed or implied, of the Expedia Affiliate Network or Expedia Inc.
 -->
-
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
+
         android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:background="@color/palette_light_grey"
@@ -297,14 +297,14 @@
                               android:text="@string/billing_information" />
 
                     <Button
+                            android:id="@+id/button_load_default_billing_info"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:text="@string/load_default_billing_info"
-                            android:id="@+id/loadDefaultBillingInfoButton"
                             android:layout_gravity="left|center_vertical"
                             android:focusable="true"
                             android:singleLine="true"
-                            android:onClick="onLoadDefaultBillingInfoClick"/>
+                            />
 
                     <EditText android:id="@+id/billingInformationAddress1"
                               android:layout_width="fill_parent"
@@ -374,7 +374,6 @@
                                 android:layout_height="wrap_content"
                                 android:id="@+id/billingInformationCCType"
                                 android:layout_gravity="center_horizontal|top"
-                                android:entries="@array/supported_credit_cards"
                                 android:longClickable="true"/>
 
                         <TextView android:layout_height="wrap_content"
@@ -394,10 +393,17 @@
             </LinearLayout>
 
             <Button
+                    android:id="@+id/button_complete_booking"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/complete_booking"
-                    android:id="@+id/button"
-                    android:onClick="onCompleteBookingButtonClick"/>
+                    />
+            <View
+		        android:id="@+id/view1"
+		        android:layout_width="fill_parent"
+		        android:layout_height="110dip" />
+        
         </LinearLayout>
+        
+        
     </ScrollView>
