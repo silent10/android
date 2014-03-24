@@ -235,7 +235,9 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		Intent intent = this.getIntent();
 	    Uri uri = intent.getData();
-		MapBuilder.createAppView().setAll(getReferrerMapFromUri(uri));
+	    if (uri != null) {
+	    	MapBuilder.createAppView().setAll(getReferrerMapFromUri(uri));
+	    }
 	    EasyTracker.getInstance(this).activityStart(this);
 	}
 	
@@ -1164,16 +1166,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			// ??? mViewPager.setAdapter(null);
 			//mTabs.setAdapter(null);
 			
-			// clear the hotel, flights and map
-			int index = mTabTitles.indexOf(mHotelsTabName);
-			if (index != -1)
-				mTabTitles.remove(index);
-			index = mTabTitles.indexOf(mHotelTabName);
-			if (index != -1)
-				mTabTitles.remove(index);
-			index = mTabTitles.indexOf(mMapTabName);
-			if (index != -1)
-				mTabTitles.remove(index);
+			removeTabs();
 			
 			//mSwipeyAdapter.stuffChanged(mTabTitles.indexOf(mChatTabName));
 			

@@ -10,14 +10,17 @@ public class ChargeableRateInfo {
 
 	private double mCommissionableUsdTotal;
 	public double mTotal;
-	private double mSurchargeTotal;
-	private double mNightlyRateTotal;
+	public double mSurchargeTotal;
+	public double mNightlyRateTotal;
 	public double mAverageBaseRate;
 	public double mAverageRate;
 	private double mMaxNightlyRate;
 	public String mCurrencyCode;	
 	public NightlyRate[] mNightlyRatesPerRoom;
 	public Surcharge[] mSurcharges;
+	
+	public double mTotalBaseRate;
+	public double mTotalDiscountRate;
 
 	public ChargeableRateInfo(JSONObject jChargeableRateInfo) {
 		mCommissionableUsdTotal= XpediaDatabase.getSafeDouble(jChargeableRateInfo,"@commissionableUsdTotal");
@@ -44,6 +47,8 @@ public class ChargeableRateInfo {
 				size = 1;
 			}
 			
+			mTotalBaseRate = 0;
+			mTotalDiscountRate = 0;
 			mNightlyRatesPerRoom = new NightlyRate[size];
 			
 			if(size>1)
@@ -54,6 +59,9 @@ public class ChargeableRateInfo {
 					JSONObject jRate = jNightlyRates.getJSONObject(i);
 				
 					mNightlyRatesPerRoom[i] = new NightlyRate(jRate);
+					
+					mTotalBaseRate += mNightlyRatesPerRoom[i].mBaseRate;
+					mTotalDiscountRate += mNightlyRatesPerRoom[i].mRate;
 				}
 			}
 			else

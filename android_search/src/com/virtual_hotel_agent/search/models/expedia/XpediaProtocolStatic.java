@@ -430,4 +430,10 @@ public class XpediaProtocolStatic {
 		urlString += "&hotelId="+hotelId+"&supplierType="+supplierType;
 		return executeWithTimeout(context, urlString);
 	}
+	
+	public static JSONObject submitBooking(Context context, String currencyCode, String hotelId) {
+		final String BOOKING_URL = "https://book.api.ean.com/ean-services/rs/hotel/v3/res?";
+		
+		return null;
+	}
 }
