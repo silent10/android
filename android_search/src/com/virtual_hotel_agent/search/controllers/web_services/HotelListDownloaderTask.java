@@ -88,11 +88,16 @@ public class HotelListDownloaderTask extends DownloaderTask {
 		else {
 			createHotelData(result);
 			
-			Log.i(TAG, "doInBackground: All OK");
-			mProgress = DownloaderStatus.Finished;
-			MyApplication.getExpediaAppState().setArrivalDate(apiReply.ean.get("arrivalDate"));
-			MyApplication.getExpediaAppState().setDepartueDate(apiReply.ean.get("departureDate"));
-			//MyApplication.getDb().setNumberOfAdults(1);
+			if (MyApplication.getDb().unrecoverableError) {
+				mProgress = DownloaderStatus.FinishedWithError;
+			}
+			else {
+				Log.i(TAG, "doInBackground: All OK");
+				mProgress = DownloaderStatus.Finished;
+				MyApplication.getExpediaAppState().setArrivalDate(apiReply.ean.get("arrivalDate"));
+				MyApplication.getExpediaAppState().setDepartueDate(apiReply.ean.get("departureDate"));
+				//MyApplication.getDb().setNumberOfAdults(1);
+			}
 			Log.i(TAG, "doInBackground: end");
 		}	
 		super.onPostExecute(result);

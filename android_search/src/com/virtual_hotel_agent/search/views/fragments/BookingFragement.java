@@ -1,7 +1,9 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Currency;
 
 import roboguice.fragment.RoboFragment;
 import android.content.Context;
@@ -76,6 +78,12 @@ public class BookingFragement extends RoboFragment {
 		return mView;
 	}
 
+	private NumberFormat getCurrencyFormat(final String currencyCode) {
+        final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+        currencyFormat.setCurrency(Currency.getInstance(currencyCode));
+        return currencyFormat;
+    }
+	
 	private void fillData() {
         final TextView hotelName = (TextView) mView.findViewById(R.id.hotelName);
         final TextView checkIn = (TextView) mView.findViewById(R.id.arrivalDisplay);
@@ -98,13 +106,14 @@ public class BookingFragement extends RoboFragment {
         roomType.setText(mRoom.mRoomTypeDescription);
         //bedType.setText(mRoom.bedTypes.get(0).description);
 
-//        final NumberFormat currencyFormat = getCurrencyFormat(hotel.currencyCode);
+        final NumberFormat currencyFormat = getCurrencyFormat(mRoom.mRateInfo.mChargableRateInfo.mCurrencyCode);
 //
 //        taxesAndFees.setText(currencyFormat.format(hotelRoom.getTaxesAndFees()));
+        taxesAndFees.setText(currencyFormat.format(mRoom.mRateInfo.mChargableRateInfo.mSurchargeTotal));
 //
-//        totalLowPrice.setText(currencyFormat.format(hotelRoom.getTotalRate()));
+         totalLowPrice.setText(currencyFormat.format(mRoom.mRateInfo.mChargableRateInfo.mNightlyRateTotal));
 //
-//        displayTotalHighPrice(hotelRoom, hotel.highPrice, currencyFormat);
+        displayTotalHighPrice();
 //        populatePriceBreakdownList(currencyFormat);
 	}
 	
@@ -114,7 +123,8 @@ public class BookingFragement extends RoboFragment {
         //final ImageView drrIcon = (ImageView) mView.findViewById(R.id.drrPromoImg);
         final TextView drrPromoText = (TextView) mView.findViewById(R.id.drrPromoText);
 
-        if (true) {//hotelRoom.getTotalRate().equals(hotelRoom.getTotalBaseRate())) {
+        if (mRoom.mRateInfo.mChargableRateInfo.mTotalBaseRate == 
+        		mRoom.mRateInfo.mChargableRateInfo.mTotalDiscountRate) {
             // if there's no promo, then we make the promo stuff disappear.
             totalHighPrice.setVisibility(TextView.GONE);
             //drrIcon.setVisibility(ImageView.GONE);
@@ -125,7 +135,8 @@ public class BookingFragement extends RoboFragment {
             totalHighPrice.setVisibility(TextView.VISIBLE);
             //drrIcon.setVisibility(ImageView.VISIBLE);
             drrPromoText.setVisibility(ImageView.VISIBLE);
-            //totalHighPrice.setText(currencyFormat.format(highPrice));
+            final NumberFormat currencyFormat = getCurrencyFormat(mRoom.mRateInfo.mChargableRateInfo.mCurrencyCode);
+            totalHighPrice.setText(currencyFormat.format(mRoom.mRateInfo.mChargableRateInfo.mTotalBaseRate));
             totalHighPrice.setPaintFlags(totalHighPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
     }
@@ -197,31 +208,31 @@ public class BookingFragement extends RoboFragment {
 	        final int cardExpirationFullYear = Integer.parseInt(cardExpirationYear);
 	        final int cardExpirationFullMonth = Integer.parseInt(cardExpirationMonth);
 
-//		        final YearMonth expirationDate = new YearMonth(cardExpirationFullYear, cardExpirationFullMonth);
-	//
-//		        final BookingRequest.ReservationInformation reservationInfo = new BookingRequest.ReservationInformation(
-//		            email, firstName, lastName, phone, null, cardType, cardNumber, cardSecurityCode, expirationDate);
-	//
-//		        final ReservationRoom reservationRoom = new ReservationRoom(
-//		            reservationInfo.individual.name,
-//		            SampleApp.selectedRoom,
-//		            SampleApp.selectedRoom.bedTypes.get(0).id,
-//		            SampleApp.occupancy());
-	//
-//		        final Address reservationAddress
-//		            = new Address(Arrays.asList(addressLine1, addressLine2), city, state, country, zip);
-	//
-//		        final BookingRequest request = new BookingRequest(
-//		            SampleApp.selectedHotel.hotelId,
-//		            SampleApp.arrivalDate,
-//		            SampleApp.departureDate,
-//		            SampleApp.selectedHotel.supplierType,
-//		            Collections.singletonList(reservationRoom),
-//		            reservationInfo,
-//		            reservationAddress);
-	//
-	//
-//		        new BookingRequestTask().execute(request);
+	        final YearMonth expirationDate = new YearMonth(cardExpirationFullYear, cardExpirationFullMonth);
+
+	        final BookingRequest.ReservationInformation reservationInfo = new BookingRequest.ReservationInformation(
+	            email, firstName, lastName, phone, null, cardType, cardNumber, cardSecurityCode, expirationDate);
+
+	        final ReservationRoom reservationRoom = new ReservationRoom(
+	            reservationInfo.individual.name,
+	            SampleApp.selectedRoom,
+	            SampleApp.selectedRoom.bedTypes.get(0).id,
+	            SampleApp.occupancy());
+
+	        final Address reservationAddress
+	            = new Address(Arrays.asList(addressLine1, addressLine2), city, state, country, zip);
+
+	        final BookingRequest request = new BookingRequest(
+	            SampleApp.selectedHotel.hotelId,
+	            SampleApp.arrivalDate,
+	            SampleApp.departureDate,
+	            SampleApp.selectedHotel.supplierType,
+	            Collections.singletonList(reservationRoom),
+	            reservationInfo,
+	            reservationAddress);
+
+
+	        new BookingRequestTask().execute(request);
 	        Toast.makeText(getActivity(), "Booking room...", Toast.LENGTH_LONG).show();
 	    }
 	};

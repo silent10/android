@@ -41,7 +41,6 @@ public class RateInfo {
 		mGuaranteeRequired = XpediaDatabase.getSafeBool(jRateInfo, "guaranteeRequired");
 		mDepositRequired = XpediaDatabase.getSafeBool(jRateInfo, "depositRequired");
 
-		
 		try {
 			JSONObject jChargeableRateInfo = jRateInfo.getJSONObject("ChargeableRateInfo");
 			

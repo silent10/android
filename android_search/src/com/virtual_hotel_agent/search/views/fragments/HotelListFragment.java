@@ -292,9 +292,6 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		if (mContinuationLoader != null && id== mContinuationLoader.getId()) {
 			mContinuationLoader = null;
 			
-			if (MyApplication.getDb() == null) {
-				
-			}
 			// error may be because too much time has passed - so cache will not work
 			((MainActivity) getActivity()).clearExpediaCache();
 		}
