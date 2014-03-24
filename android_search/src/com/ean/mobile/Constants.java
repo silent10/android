@@ -37,7 +37,7 @@ public final class Constants {
     /**
      * The minor revision to use for all API calls.
      */
-    public static final String MINOR_REV = "21";
+    public static final String MINOR_REV = "26";
 
     /**
      * Private, no-op constructor to prevent instantiation.

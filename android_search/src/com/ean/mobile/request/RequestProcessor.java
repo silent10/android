@@ -27,11 +27,14 @@ package com.ean.mobile.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -97,11 +100,18 @@ public final class RequestProcessor {
         }
         // force application/json
         connection.setRequestProperty("Accept", "application/json, */*");
+        connection.addRequestProperty("Accept-Encoding","gzip");
 
         Log.d(Constants.LOG_TAG, "request endpoint: " + connection.getURL().getHost());
         final String jsonString;
         try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        	InputStream inputStream = connection.getInputStream();
+        	String contentEncoding = connection.getContentEncoding();
+			if (contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip")) {
+				inputStream = new GZIPInputStream(inputStream);
+			}
+        	
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             //before we go further, we must check to see if we were redirected.
             if (!request.getUri().getHost().equals(connection.getURL().getHost())
                     && !request.isTolerantOfUriRedirections()) {
