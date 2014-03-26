@@ -36,8 +36,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
-
 /**
  * Holds the information about rates for a particular availability. Has information about both nightly rates
  * and surcharges, as well as the specified currency code and whether or not the rate is a promo.

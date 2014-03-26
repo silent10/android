@@ -36,8 +36,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.expedia.ValueAdd;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 /**
  * The data holder for information about a particular hotel room.
@@ -135,33 +133,33 @@ public final class HotelRoom {
         this.bedTypes = extractBedTypesFromJsonObject(roomRateDetail);
         this.rate = Rate.parseFromRateInformations(roomRateDetail).get(0);
         this.cancellationPolicy = new CancellationPolicy(roomRateDetail, arrivalDate);
-        
+
+		imageUrls = null;
         if (roomRateDetail.has("RoomImages")) {
         	try {
 				JSONObject jRoomImages;
 					jRoomImages = roomRateDetail.getJSONObject("RoomImages");
-				int size = XpediaDatabase.getSafeInt(jRoomImages, "@size");
+				int size = jRoomImages.optInt("@size", -1);
 				
-				if(size==-1) size =1;
-				imageUrls = new String[size];
-				if (size == 1) {
-					JSONObject jImg = roomRateDetail.getJSONObject("RoomImage");
-					imageUrls[0] = XpediaDatabase.getSafeString(jImg, "url");
-				}
-				else {
-					JSONArray jImgs = roomRateDetail.getJSONArray("RoomImage");
-					for(int i=0;i<size;i++)	{
-						imageUrls[i] = XpediaDatabase.getSafeString(jImgs.getJSONObject(i), "url");
+				if(size==-1) 
+					size =1;
+				if (size > 0) {
+					imageUrls = new String[size];
+					if (size == 1) {
+						JSONObject jImg = roomRateDetail.getJSONObject("RoomImage");
+						imageUrls[0] = jImg.optString("url");
+					}
+					else {
+						JSONArray jImgs = roomRateDetail.getJSONArray("RoomImage");
+						for(int i=0;i<size;i++)	{
+							imageUrls[i] = jImgs.getJSONObject(i).optString("url");
+						}
 					}
 				}
         	} catch (JSONException e) {
         		MainActivity.LogError(TAG, "Error parsing hotel room", e);
-        		imageUrls = null;
         	}
 		}
-        else {
-        	imageUrls = null;
-        }
         
         JSONObject jValueAdds = roomRateDetail.optJSONObject("ValueAdds");
         if (jValueAdds != null) {

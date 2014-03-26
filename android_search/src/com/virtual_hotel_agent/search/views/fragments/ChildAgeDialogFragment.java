@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.evaapis.crossplatform.EvaTravelers;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 
 public class ChildAgeDialogFragment extends RoboDialogFragment {
 

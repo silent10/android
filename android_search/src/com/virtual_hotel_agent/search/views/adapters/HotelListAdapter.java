@@ -3,15 +3,12 @@ package com.virtual_hotel_agent.search.views.adapters;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,16 +16,11 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.ean.mobile.hotel.Hotel;
-import com.evaapis.android.EvatureLocationUpdater;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.chat.ChatItem;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
 public class HotelListAdapter extends BaseAdapter {
