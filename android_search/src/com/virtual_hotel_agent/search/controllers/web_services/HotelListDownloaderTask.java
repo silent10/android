@@ -13,6 +13,7 @@ import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.HotelList;
 import com.ean.mobile.hotel.request.ListRequest;
+import com.ean.mobile.request.CommonParameters;
 import com.ean.mobile.request.Request;
 import com.ean.mobile.request.RequestProcessor;
 import com.evaapis.crossplatform.EvaApiReply;
@@ -88,6 +89,8 @@ public class HotelListDownloaderTask extends DownloaderTask {
 				String value = apiReply.ean.get(key);
 				requestParams.add(new BasicNameValuePair(key, value));
 			}
+			
+			CommonParameters.customerSessionId = null;
 			requestParams.addAll(Request.getBasicUrlParameters());
             final ListRequest request = new ListRequest(requestParams);
 
@@ -96,6 +99,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
 
               
 			MyApplication.departureDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("departureDate"));
+			MyApplication.arrivalDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("arrivalDate"));
 
             mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {

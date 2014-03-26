@@ -62,8 +62,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
+import com.ean.mobile.hotel.HotelRoom;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
@@ -1085,7 +1087,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			
 			if (id == R.string.HOTELS && (MyApplication.FOUND_HOTELS.size() == 0)) {
 				removeTabs();
-				Toast.makeText(MainActivity.this, "No hotels available, please try searching for a different location or date", Toast.LENGTH_LONG ).show();
+				Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
 			}
 			else {
 				int index = mTabTitles.indexOf(tabName);
@@ -1202,6 +1204,14 @@ public class MainActivity extends RoboFragmentActivity implements
 //		}
 	}
 	
+	private Handler mFlashButton = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			mainView.flashSearchButton(3);
+			super.handleMessage(msg);
+		}
+	}; 
+	
 	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem, boolean switchToResult) {
 //		chatItem.setActivated(true);
 		
@@ -1245,7 +1255,7 @@ public class MainActivity extends RoboFragmentActivity implements
 					
 					@Override
 					public void onDialogNegativeClick(ChildAgeDialogFragment dialog) {
-						Toast.makeText(MainActivity.this, "Children ages are required for searching hotels", Toast.LENGTH_LONG).show();
+						Toast.makeText(MainActivity.this, R.string.children_ages_required, Toast.LENGTH_LONG).show();
 					}
 				});
 		        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
@@ -1286,15 +1296,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			Log.d(TAG, "Question asked");
 			// give some delay to the flashing - to happen while question is asked
 			
-			Handler flash = new Handler() {
-				@Override
-				public void handleMessage(Message msg) {
-					mainView.flashSearchButton(3);
-					super.handleMessage(msg);
-				}
-			}; 
-			
-			flash.sendEmptyMessageDelayed(1, 2000);
+			mFlashButton.sendEmptyMessageDelayed(1, 2000);
 			break;
 		
 		}
@@ -1336,6 +1338,21 @@ public class MainActivity extends RoboFragmentActivity implements
 		public void endProgressDialogWithError(int id, Object result) {
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			mainView.hideStatus();
+			if (mRoomUpdater.eanWsError != null) {
+				EanWsError err = mRoomUpdater.eanWsError;
+				if ("SOLD_OUT".equals(err.category)) {
+					int index = mTabTitles.indexOf(mHotelTabName);
+					if (index != -1) {
+						HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.instantiateItem(mViewPager, index);
+						if (fragment != null) // could be null if not instantiated yet
+						{
+							fragment.hotelSoldOut();
+						}
+					}
+					if (err.presentationMessage.equals("") == false)
+						Toast.makeText(MainActivity.this, err.presentationMessage, Toast.LENGTH_LONG).show();
+				}
+			}
 			mRoomUpdater = null;
 		}
 
@@ -1388,6 +1405,12 @@ public class MainActivity extends RoboFragmentActivity implements
 		public void endProgressDialogWithError(int id, Object result) {
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			mainView.hideStatus();
+			if (mHotelDownloader.eanWsError != null) {
+				EanWsError err = mHotelDownloader.eanWsError;
+				if (err.recoverable && err.presentationMessage.equals("") == false) {
+					Toast.makeText(MainActivity.this, err.presentationMessage, Toast.LENGTH_LONG).show();
+				}
+			}
 			mHotelDownloader = null;
 		}
 		
@@ -1605,11 +1628,17 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		mTabsAdapter.removeTab(mRoomsTabName);
 		mTabsAdapter.removeTab(mBookingTabName);
-		mainView.showStatus("Getting Rooms info for hotel");
 		mRoomUpdater = new RoomsUpdaterTask(hotelId);
 		mRoomUpdater.attach(mRoomUpdaterListener);
-
-		mRoomUpdater.execute();	
+		List<HotelRoom> rooms = MyApplication.HOTEL_ROOMS.get(hotelId);
+		if (rooms != null) {
+			// restored from cache - fake downloader progress
+			mRoomUpdaterListener.endProgressDialog(-1, null);
+		}
+		else {
+			mainView.showStatus("Getting Rooms info for hotel");
+			mRoomUpdater.execute();
+		}
 	}
 
 

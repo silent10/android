@@ -346,6 +346,8 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			mAmenitiesGridView.setAdapter(amenitiesImageAdapter);
 		}
 		mBookButton.setOnClickListener(mBookButtonListener);
+		mBookButton.setEnabled(true);
+		mBookButton.setText(R.string.select);
 		
 		mMapButton.setOnClickListener(mMapButtonLisener);
 		
@@ -361,5 +363,10 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			intent.putExtra(ImageGalleryActivity.HOTEL_ID, mHotelId);
 			startActivity(intent);
 		}
+	}
+
+	public void hotelSoldOut() {
+		mBookButton.setText(R.string.sold_out);
+		mBookButton.setEnabled(false);
 	}
 }

@@ -1,7 +1,5 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
-import org.json.JSONObject;
-
 import roboguice.event.EventManager;
 import roboguice.event.Observes;
 import roboguice.fragment.RoboFragment;
@@ -36,7 +34,6 @@ import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
 public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
@@ -278,7 +275,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 	@Override
 	public void endProgressDialogWithError(int id, Object result) {
-		Toast.makeText(getActivity(), "Error getting hotel information, please try again", Toast.LENGTH_LONG).show();
+		Toast.makeText(getActivity(), "Error getting hotels information, please try again", Toast.LENGTH_LONG).show();
 
 		if (mProgressDialog != null) {
 			mProgressDialog.dismiss();
@@ -291,6 +288,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		if (mContinuationLoader != null && id== mContinuationLoader.getId()) {
 			mContinuationLoader = null;
 			
+			// TODO: check error type
 			// error may be because too much time has passed - so cache will not work
 			((MainActivity) getActivity()).clearExpediaCache();
 		}

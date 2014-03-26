@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 
-import android.content.Context;
-
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.HotelRoom;
@@ -21,6 +19,7 @@ public class RoomsUpdaterTask extends DownloaderTask {
 	public final long hotelId;
     private final LocalDate arrivalDate;
     private final LocalDate departureDate;
+    public EanWsError eanWsError;
 
     public RoomsUpdaterTask(final long hotelId,
             final LocalDate arrivalDate, final LocalDate departureDate) {
@@ -47,6 +46,7 @@ public class RoomsUpdaterTask extends DownloaderTask {
 //		mHotelData.mSummary.updateRoomDetails(result);
 		
 		 try {
+			 eanWsError = null;
              final RoomAvailabilityRequest request
                  = new RoomAvailabilityRequest(hotelId, MyApplication.occupancy(), arrivalDate, departureDate);
              List<HotelRoom> hotelRooms = RequestProcessor.run(request);
@@ -55,6 +55,7 @@ public class RoomsUpdaterTask extends DownloaderTask {
              return hotelRooms;
          } catch (EanWsError ewe) {
              MainActivity.LogError(TAG, "An error occurred in the api", ewe);
+             eanWsError = ewe;
              mProgress = DownloaderStatus.FinishedWithError;
          } catch (UrlRedirectionException ure) {
              MyApplication.sendRedirectionToast();

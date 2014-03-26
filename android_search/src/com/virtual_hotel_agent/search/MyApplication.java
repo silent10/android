@@ -62,7 +62,7 @@ public class MyApplication extends Application {
         CommonParameters.cid = "352395";
         CommonParameters.apiKey = "kg9fd64ndnfw4nggggp543e3";
         CommonParameters.signatureSecret = "CfyYPjmE";
-        CommonParameters.customerUserAgent = "Android";
+        CommonParameters.customerUserAgent = "MOBILE_APP";
         CommonParameters.locale = Locale.US.toString();
         CommonParameters.currencyCode = Currency.getInstance(Locale.US).getCurrencyCode();
 		
@@ -289,6 +289,8 @@ public class MyApplication extends Application {
             }
             cacheKey = hotelList.cacheKey;
             cacheLocation = hotelList.cacheLocation;
+            Log.d(TAG, "Added "+hotelList.hotels.size()+" hotels, list now at "+FOUND_HOTELS.size()+" / "
+            			+hotelList.totalNumberOfResults+"  cacheKey="+cacheKey+"  cacheLoc="+cacheLocation);
             moreResultsAvailable = hotelList.moreResults;
         }
     }

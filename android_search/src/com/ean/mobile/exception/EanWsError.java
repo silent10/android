@@ -42,16 +42,19 @@ public class EanWsError extends Exception {
      */
     public final String presentationMessage;
 
+	public boolean recoverable;
+
     /**
      * The main constructor. The verbose message is used as the exception's main message.
      * @param verboseMessage The message for the exception.
      * @param category The "category" of the error.
      * @param presentationMessage The localized, simplified version of verboseMessage.
      */
-    public EanWsError(final String verboseMessage, final String category, final String presentationMessage) {
+    public EanWsError(final String verboseMessage, final String category, final String presentationMessage, final boolean recoverable) {
         super(verboseMessage);
         this.category = category;
         this.presentationMessage = presentationMessage;
+        this.recoverable = recoverable;
     }
 
     /**
@@ -69,6 +72,7 @@ public class EanWsError extends Exception {
         return new EanWsError(
             error.optString("verboseMessage"),
             error.optString("category"),
-            error.optString("presentationMessage"));
+            error.optString("presentationMessage"),
+            error.optString("handling").equals("RECOVERABLE"));
     }
 }
