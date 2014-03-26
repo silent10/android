@@ -135,7 +135,6 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 			MainActivity.LogError(TAG, "showing hotel id "+mHotelId +" but not found");
 			return;
 		}
-
 		
 		Drawable drawable = S3DrawableBackgroundLoader.getInstance().getDrawableFromCache(hotel.mainHotelImageTuple.thumbnailUrl.toString());
 		if (drawable != null) {

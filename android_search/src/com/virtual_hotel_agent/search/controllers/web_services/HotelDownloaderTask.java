@@ -14,6 +14,7 @@ import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskLis
 public class HotelDownloaderTask extends DownloaderTask {
 	private static final String TAG = HotelDownloaderTask.class.getSimpleName();
 	private long mHotelId;
+	public EanWsError eanWsError;
 
 	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, long hotelId) {
 		super( R.string.HOTEL);
@@ -35,12 +36,14 @@ public class HotelDownloaderTask extends DownloaderTask {
 		publishProgress();
 
 		try {
+			eanWsError = null;
 			final Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
 			HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel));
 			MyApplication.EXTENDED_INFOS.put(mHotelId, hotelInformation);
 			mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
             Log.d(TAG, "Unexpected error occurred within the api", ewe);
+            eanWsError = ewe;
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
         	MyApplication.sendRedirectionToast();

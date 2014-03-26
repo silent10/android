@@ -38,6 +38,6 @@ public final class DataValidationException extends EanWsError {
      */
     public DataValidationException(final String verboseMessage,
             final String category, final String presentationMessage) {
-        super(verboseMessage, category, presentationMessage);
+        super(verboseMessage, category, presentationMessage, false);
     }
 }

@@ -30,10 +30,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-
 
 import android.util.Log;
 
@@ -128,9 +128,10 @@ public final class CommonParameters {
         if (customerIpAddress != null) {
             nameValuePairs.add(new BasicNameValuePair("customerIpAddress", customerIpAddress));
         }
-        if (customerSessionId != null) {
-            nameValuePairs.add(new BasicNameValuePair("customerSessionId", customerSessionId));
+        if (customerSessionId == null || "".equals(customerSessionId)) {
+        	customerSessionId = UUID.randomUUID().toString();
         }
+        nameValuePairs.add(new BasicNameValuePair("customerSessionId", customerSessionId));
         if (minorRev != null) {
             nameValuePairs.add(new BasicNameValuePair("minorRev", minorRev));
         }

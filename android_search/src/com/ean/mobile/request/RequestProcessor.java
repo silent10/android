@@ -43,6 +43,7 @@ import android.util.Log;
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
+import com.virtual_hotel_agent.search.MyApplication;
 
 /**
  * Responsible for the logic that executes requests through the EAN API.
@@ -70,6 +71,7 @@ public final class RequestProcessor {
             return request.consume(jsonResponse);
         } catch (JSONException jsone) {
             Log.e(Constants.LOG_TAG, "Unable to process JSON", jsone);
+            CommonParameters.customerSessionId = null;
         } catch (IOException ioe) {
             Log.e(Constants.LOG_TAG, "Could not read response from API", ioe);
         } catch (URISyntaxException use) {
@@ -105,7 +107,7 @@ public final class RequestProcessor {
         }
         // force application/json
         connection.setRequestProperty("Accept", "application/json, */*");
-        //connection.addRequestProperty("Accept-Encoding","gzip");
+        connection.addRequestProperty("Accept-Encoding","gzip");
 
         final String jsonString;
         try {
@@ -151,7 +153,8 @@ public final class RequestProcessor {
             throws IOException, JSONException, EanWsError, UrlRedirectionException, URISyntaxException {
         final JSONObject response = new JSONObject(performApiRequestForString(request));
         if (response.has("EanWsError")) {
-            throw EanWsError.fromJson(response.getJSONObject("EanWsError"));
+        	CommonParameters.customerSessionId = null;
+        	throw EanWsError.fromJson(response.getJSONObject("EanWsError"));
         }
         return response;
     }
