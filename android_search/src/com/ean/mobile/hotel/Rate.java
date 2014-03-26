@@ -36,6 +36,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
+
 /**
  * Holds the information about rates for a particular availability. Has information about both nightly rates
  * and surcharges, as well as the specified currency code and whether or not the rate is a promo.
@@ -62,6 +64,12 @@ public final class Rate {
      */
     public final List<Room> roomGroup;
 
+    public final String promoDescription; 
+    public final String promoDetailText;
+    public final boolean nonRefundable;
+    public final String cancelllationPolicy;
+    public final boolean guaranteeRequired;
+    public final boolean depositRequired;
 
     /**
      * Constructs a Rate from a JSONObject.
@@ -91,6 +99,14 @@ public final class Rate {
 
         promo = rateInformationJson.optBoolean("@promo");
         roomGroup = Collections.unmodifiableList(localRooms);
+        
+		promoDescription = rateInformationJson.optString("promoDescription");
+		promoDetailText = rateInformationJson.optString("promoDetailText");
+		nonRefundable = rateInformationJson.optBoolean("nonRefundable");
+		cancelllationPolicy = rateInformationJson.optString("cancellationPolicy");
+		guaranteeRequired = rateInformationJson.optBoolean("guaranteeRequired");
+		depositRequired = rateInformationJson.optBoolean("depositRequired");
+
     }
 
     /**

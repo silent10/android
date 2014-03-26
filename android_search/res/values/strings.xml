@@ -19,6 +19,7 @@
     <string name="microphone_button">Microphone Button</string>
     <string name="chat_icon_description">chat icon</string>
     <string name="network_error">Network Error - Sorry!</string>
+    <string name="redirected">Couldn\'t connect to EAN API network.</string>
     <string name="error_tts_init">Could not initialize text-to-speech</string>
     <string name="CHAT">CHAT</string>
     <string name="HOTELS">HOTELS</string>
@@ -125,4 +126,5 @@
     <string name="hotel_address">Hotel Address</string>
     <string name="taxes_and_fees">Taxes &amp; Fees</string>
     <string name="choose_contact">Choose from contacts</string>
+    <string name="adults_comma_children">%1$d Adult(s), %2$d Child(ren)</string>
 </resources>

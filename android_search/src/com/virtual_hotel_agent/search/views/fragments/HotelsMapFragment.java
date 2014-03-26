@@ -2,6 +2,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
+import java.util.List;
 
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
@@ -10,11 +11,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.ean.mobile.hotel.Hotel;
 import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -38,10 +39,6 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.HotelSummary;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 
 public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClickListener  {
@@ -51,7 +48,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	private View mView;
 	private Marker selectedMarker=null;
 	private String mCurrency;
-	private WeakReference<HotelData[]>  mLastPresentedHotels;
+	private WeakReference<Hotel>  mLastPresentedHotel;
 	private int mLastPresentLength;
 	
 	private final int MAX_HOTELS = 30; 
@@ -62,7 +59,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		mLastPresentedHotels = new WeakReference<HotelData[]>(null);
+		mLastPresentedHotel = new WeakReference<Hotel>(null);
 		mLastPresentLength = -1;
 		Context context = getActivity();
 		mCurrency = SettingsAPI.getCurrencySymbol(context);
@@ -104,20 +101,18 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		// Check if we were successful in obtaining the map.
         if (mMap != null && mView != null) {
         	
-        	HotelData[] currentHotels = null;
-        	XpediaDatabase evaDb = MyApplication.getDb();
-            if (evaDb != null)
-            	currentHotels = evaDb.mHotelData;
-            if (currentHotels == null) {
+        	List<Hotel> currentHotels = MyApplication.FOUND_HOTELS;
+            if (currentHotels.size() == 0) {
             	// no need to update map - nothing is present
             	return;
             }
-            if (mLastPresentLength == currentHotels.length && mLastPresentedHotels.get() == currentHotels) {
+            int startFrom = getFirstIndexToDisplay();
+            if (mLastPresentLength == currentHotels.size() && mLastPresentedHotel.get() == currentHotels.get(startFrom)) {
             	// previously presented the same hotels - no need to do again
             	return;
             }
-        	mLastPresentedHotels = new WeakReference<HotelData[]>(currentHotels);
-        	mLastPresentLength = currentHotels.length;
+        	mLastPresentedHotel = new WeakReference<Hotel>(currentHotels.get(startFrom));
+        	mLastPresentLength = currentHotels.size();
         	
         	mView.post(new Runnable(){
 				@Override
@@ -154,42 +149,35 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		setUpMapIfNeeded();
 	}
 	
+	private int getFirstIndexToDisplay() {
+		int length= MyApplication.FOUND_HOTELS.size();
+        if (length == 0) {
+        	return 0;
+        }
+    	
+        if(length > MAX_HOTELS) 
+        	return length - MAX_HOTELS; // show only the last MAX_HOTELS in map
+        return 0;
+	}
+	
 	private void addHotelsToMap()
 	{	   
 		Log.d(TAG, "Adding hotels to map");
 		mMap.clear();
 		
-        XpediaDatabase evaDb = MyApplication.getDb();
-        
-        int length= (evaDb != null && evaDb.mHotelData != null) ? evaDb.mHotelData.length : 0;
-        if (length == 0) {
-        	return;
-        }
-    	
-        int startFrom = 0;
-        if(length > MAX_HOTELS) 
-        	startFrom = length - MAX_HOTELS; // show the last MAX_HOTELS in map
+		int startFrom = getFirstIndexToDisplay();
         
         BitmapDescriptor hotelIcon = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag);
         BitmapDescriptor hotelIconSelected = BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag_selected);
         Builder boundsBuilder = new LatLngBounds.Builder();
         
         selectedMarker = null;
-        HotelData selectedHotel = null;
+        Hotel selectedHotel = MyApplication.selectedHotel;
         
-        int selectedIndex = -1;
-        ExpediaAppState rp = MyApplication.getExpediaAppState();
-		if (rp != null) {
-			selectedIndex = rp.getHotelId();
-			if (selectedIndex != -1) {
-				selectedHotel = evaDb.mHotelData[selectedIndex];
-			}
-		}
-        
-        for(int i=startFrom;i<length;i++)
+        for(int i=startFrom;i<MyApplication.FOUND_HOTELS.size();i++)
         {
-	        HotelData hotelData = evaDb.mHotelData[i];
-	        if (i != selectedIndex) {
+	        Hotel hotelData = MyApplication.FOUND_HOTELS.get(i);
+	        if (hotelData != selectedHotel) {
 	        	addMapPoint(hotelData, hotelIcon, boundsBuilder);
 	        }
         }
@@ -215,12 +203,10 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         }
 	}
 
-	private Marker addMapPoint(HotelData hotelData, BitmapDescriptor icon, Builder boundsBuilder) {
-		HotelSummary hotelSummary = hotelData.mSummary;
-		String name = hotelSummary.mName;
-		name = Html.fromHtml(name).toString();
+	private Marker addMapPoint(Hotel hotelSummary, BitmapDescriptor icon, Builder boundsBuilder) {
+		String name = hotelSummary.name;
 		
-		double rating = hotelSummary.mHotelRating;
+		double rating = hotelSummary.starRating.doubleValue();
 		String formattedRating = Integer.toString((int)rating);
 		if (Math.round(rating) != Math.floor(rating)) {
 			formattedRating += "½";
@@ -228,10 +214,10 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		
 
 		DecimalFormat rateFormat = new DecimalFormat("#.00");
-		String formattedRate = rateFormat.format(hotelSummary.mLowRate);
+		String formattedRate = rateFormat.format(hotelSummary.lowPrice);
 		String rate = formattedRate+" "+mCurrency;
 		
-		LatLng point = new LatLng(hotelSummary.mLatitude, hotelSummary.mLongitude);
+		LatLng point = new LatLng(hotelSummary.address.latitude.doubleValue(), hotelSummary.address.longitude.doubleValue());
 		Marker marker = mMap.addMarker(new MarkerOptions()
 			            .position(point)
 			            .title(name)
@@ -247,14 +233,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 
 	@Override
 	public void onInfoWindowClick(Marker marker) {
-		XpediaDatabase evaDb = MyApplication.getDb();
-		int length= (evaDb != null && evaDb.mHotelData != null) ? evaDb.mHotelData.length : 0;
-        if (length == 0) {
-        	return;
-        }
-        int startFrom = 0;
-        if(length > MAX_HOTELS) 
-        	startFrom = length - MAX_HOTELS;
+        int startFrom = getFirstIndexToDisplay();
 
         if (selectedMarker != null) {
 			selectedMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.hotel_small_flag));
@@ -266,14 +245,14 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         mMap.animateCamera(CameraUpdateFactory.newLatLng(selectedMarker.getPosition()));
 
         
-        for(int i=startFrom; i<length; i++)
+        for(int i=startFrom; i<MyApplication.FOUND_HOTELS.size(); i++)
         {
-	        HotelSummary hotel = evaDb.mHotelData[i].mSummary;
-			String name = Html.fromHtml(hotel.mName).toString();
+	        Hotel hotel = MyApplication.FOUND_HOTELS.get(i);
+			String name = hotel.name;
 	        if (name.equals(marker.getTitle())){ 
 	        	LatLng position = marker.getPosition();
-	        	if (Math.abs(position.latitude - hotel.mLatitude) < 0.001
-	        		&& Math.abs(position.longitude - hotel.mLongitude) < 0.001) {
+	        	if (Math.abs(position.latitude - hotel.address.latitude.doubleValue()) < 0.001
+	        		&& Math.abs(position.longitude - hotel.address.longitude.doubleValue()) < 0.001) {
 	        		
 	        		Log.d(TAG, "Hotel "+i+" clicked in map");
 	        		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();

@@ -32,17 +32,26 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.models.expedia.ValueAdd;
+import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 /**
  * The data holder for information about a particular hotel room.
  */
 public final class HotelRoom {
 
-    /**
+    private static final String TAG = "HotelRoom";
+
+	/**
      * The description of the room.
      */
-    public final String description;
+    public String description;
+    
+    public String longDescription;
 
     /**
      * The description of the promo, if applicable.
@@ -57,10 +66,11 @@ public final class HotelRoom {
     /**
      * The room type code. Also used as part of the booking process.
      */
-    public final String roomTypeCode;
+    public String roomTypeCode;
 
     /**
      * The string representing the smoking preference allowed in this room.
+     * use getSmokingPreference  for human friendly text
      */
     public final String smokingPreference;
 
@@ -80,21 +90,124 @@ public final class HotelRoom {
     public final CancellationPolicy cancellationPolicy;
 
     /**
+     * Urls to photos of room
+     */
+    public String[] imageUrls;
+
+    /**
+     * Array of "added value" items
+     */
+	public ValueAdd[] valueAdds;
+	
+	
+	public final String policy;
+	public final String otherInformation;
+	public final String checkInInstructions; 
+    
+    /**
      * The main constructor that creates HotelRooms from JSONObjects.
      * @param roomRateDetail The JSON information about this hotel room.
      * @param arrivalDate The arrival date of the room. Used to calculate the cancellation policy.
      */
     public HotelRoom(final JSONObject roomRateDetail, final LocalDate arrivalDate) {
-        this.description = roomRateDetail.optString("roomTypeDescription");
-        this.rateCode = roomRateDetail.optString("rateCode");
-        this.roomTypeCode = roomRateDetail.optString("roomTypeCode");
+        
+		description = null;
+		if (roomRateDetail.has("RoomType")) {
+			JSONObject roomType;
+			try {
+				roomType = roomRateDetail.getJSONObject("RoomType");
+				description =  roomType.optString("description");
+				roomTypeCode = roomType.optString("@roomCode");
+				longDescription = roomType.optString("descriptionLong");
+			} catch (JSONException e) {
+			}
+		}
+		if (description == null) {
+			description =	roomRateDetail.optString("roomTypeDescription");
+			roomTypeCode = roomRateDetail.optString("roomTypeCode");
+			longDescription  = roomRateDetail.optString("roomDescription");
+		}
+		
+		rateCode = roomRateDetail.optString("rateCode");
+		
         this.promoDescription = roomRateDetail.optString("promoDescription");
         this.smokingPreference = roomRateDetail.optString("smokingPreferences");
         this.bedTypes = extractBedTypesFromJsonObject(roomRateDetail);
         this.rate = Rate.parseFromRateInformations(roomRateDetail).get(0);
         this.cancellationPolicy = new CancellationPolicy(roomRateDetail, arrivalDate);
+        
+        if (roomRateDetail.has("RoomImages")) {
+        	try {
+				JSONObject jRoomImages;
+					jRoomImages = roomRateDetail.getJSONObject("RoomImages");
+				int size = XpediaDatabase.getSafeInt(jRoomImages, "@size");
+				
+				if(size==-1) size =1;
+				imageUrls = new String[size];
+				if (size == 1) {
+					JSONObject jImg = roomRateDetail.getJSONObject("RoomImage");
+					imageUrls[0] = XpediaDatabase.getSafeString(jImg, "url");
+				}
+				else {
+					JSONArray jImgs = roomRateDetail.getJSONArray("RoomImage");
+					for(int i=0;i<size;i++)	{
+						imageUrls[i] = XpediaDatabase.getSafeString(jImgs.getJSONObject(i), "url");
+					}
+				}
+        	} catch (JSONException e) {
+        		MainActivity.LogError(TAG, "Error parsing hotel room", e);
+        		imageUrls = null;
+        	}
+		}
+        else {
+        	imageUrls = null;
+        }
+        
+        JSONObject jValueAdds = roomRateDetail.optJSONObject("ValueAdds");
+        if (jValueAdds != null) {
+			int size = jValueAdds.optInt("@size", -1);
+			
+			if(size==-1) size =1;
+			
+			valueAdds = new ValueAdd[size];
+			try {
+				if(size==1)
+				{
+					JSONObject jValueAdd = jValueAdds.getJSONObject("ValueAdd");
+					valueAdds[0] = new ValueAdd(jValueAdd);
+				}
+				else
+				{
+					JSONArray jValueAddsArray = jValueAdds.getJSONArray("ValueAdd");
+					for(int i=0;i<size;i++)
+					{
+						JSONObject jValueAdd = jValueAddsArray.getJSONObject(i);
+						valueAdds[i] = new ValueAdd(jValueAdd);
+					}
+				}
+	        } catch (JSONException e) {
+	    		MainActivity.LogError(TAG, "Error parsing hotel room", e);
+	    		imageUrls = null;
+	    	}
+		}
+        
+		policy =  roomRateDetail.optString("policy");
+		otherInformation =  roomRateDetail.optString("otherInformation");
+		checkInInstructions =  roomRateDetail.optString("checkInInstructions");
+
     }
 
+    public static class ValueAdd {
+    	public int id;
+    	public String description;
+
+    	public ValueAdd(JSONObject jValueAdd) {
+    		id = jValueAdd.optInt("@id");
+    		description = jValueAdd.optString("description");
+    	}
+
+    }
+    
     /**
      * Parses bed types from JSON response and returns objects.
      * @param roomRateDetail Object to pull BedTypes field values from.
@@ -164,6 +277,32 @@ public final class HotelRoom {
             taxesAndFees = taxesAndFees.add(surcharge);
         }
         return taxesAndFees;
+    }
+    
+    public String getSmokingPreferences() {
+    	String result = null;
+		for (String token : smokingPreference.split(",")) {
+			String tokenStr = token;
+			if (token.equals("NS")) {
+				tokenStr = "Non-Smoking";
+			}
+			else if (token.equals("S")) {
+				tokenStr = "Smoking";
+			}
+			else if (token.equals("E")) {
+				tokenStr = "Either";
+			}
+			if (result == null) {
+				result = tokenStr;
+			}
+			else {
+				result += ", "+tokenStr;
+			}
+		}
+		if (result != null) {
+			return result;
+		}
+		return smokingPreference;
     }
 
     /**

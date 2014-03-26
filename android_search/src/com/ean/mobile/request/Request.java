@@ -38,6 +38,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.ean.mobile.exception.EanWsError;
+import com.evature.util.ExternalIpAddressGetter;
+import com.viewpagerindicator.IconPagerAdapter;
+import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.SettingsAPI;
 
 /**
  * The base class for all of the API requests that are implemented. Provides some easy-to use methods for performing
@@ -94,6 +98,10 @@ public abstract class Request<T> {
      */
     public static List<NameValuePair> getBasicUrlParameters(
             final LocalDate arrivalDate, final LocalDate departureDate) {
+    	
+    	CommonParameters.customerIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
+    	CommonParameters.currencyCode = SettingsAPI.getCurrencyCode(MyApplication.getAppContext());
+    	
         final List<NameValuePair> params = CommonParameters.asNameValuePairs();
         if (arrivalDate != null) {
             params.add(new BasicNameValuePair("arrivalDate", DATE_TIME_FORMATTER.print(arrivalDate)));

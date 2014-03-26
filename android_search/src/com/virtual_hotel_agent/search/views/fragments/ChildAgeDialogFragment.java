@@ -1,5 +1,7 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.util.ArrayList;
+
 import roboguice.fragment.RoboDialogFragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -84,8 +86,7 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 
 								int intNumAdults = toInt(mNumAdults);
 
-								ExpediaAppState db = MyApplication.getExpediaAppState();
-								db.setNumberOfAdults(intNumAdults);
+								MyApplication.numberOfAdults = intNumAdults;
 
 								int numChildren = toInt(mNumChildren);
 								int child1 = toInt(mAgeChild1);
@@ -100,11 +101,17 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 									.onDialogNegativeClick(ChildAgeDialogFragment.this);
 									return;
 								}
-								
-								db.setNumberOfChildrenParam(numChildren);
-								db.setAgeChild1(child1);
-								db.setAgeChild2(child2);
-								db.setAgeChild3(child3);
+
+								MyApplication.childAges = new ArrayList<Integer>();
+								if (numChildren > 0) {
+									MyApplication.childAges.add(child1);
+									if (numChildren > 1) {
+										MyApplication.childAges.add(child2);
+										if (numChildren > 2) {
+											MyApplication.childAges.add(child3);
+										}
+									}
+								}
 
 								// Send the positive button event back to the
 								// host activity

@@ -137,11 +137,11 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 		}
 	}
 
-	public void setSearchResults(JSONObject result) {
-		mResults = result;
-	}
-
-	public JSONObject getSearchResult() {
-		return mResults;
-	}
+//	public void setSearchResults(JSONObject result) {
+//		mResults = result;
+//	}
+//
+//	public JSONObject getSearchResult() {
+//		return mResults;
+//	}
 }

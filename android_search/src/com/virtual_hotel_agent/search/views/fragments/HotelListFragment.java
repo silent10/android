@@ -141,9 +141,8 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.clearChoices();
-		ExpediaAppState rp = MyApplication.getExpediaAppState();
-		if (rp != null) {
-			mHotelListView.setSelection(rp.getHotelId());
+		if (MyApplication.selectedHotel != null) {
+			mHotelListView.setSelection(MyApplication.FOUND_HOTELS.indexOf(MyApplication.selectedHotel));
 		}
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
@@ -164,9 +163,9 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 		mEnabledPaging = false;
 
-		if (MyApplication.getDb() != null) {
+		if (MyApplication.FOUND_HOTELS.size() > 0) {
 
-			if (MyApplication.getDb().mMoreResultsAvailable) {
+			if (MyApplication.cacheLocation != null) {
 				if (getActivity() != null) {
 					LayoutInflater li = getActivity().getLayoutInflater();
 					mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
@@ -242,15 +241,15 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 					&& mEnabledPaging) {
 				Log.d(TAG, "-Last Scroll-");
 
-				String nextQuery = MyApplication.getDb().getNextQuery();
-				mContinuationLoader = new ListContinuationDownloaderTask(HotelListFragment.this, nextQuery,
+				//String nextQuery = MyApplication.getDb().getNextQuery();
+				mContinuationLoader = new ListContinuationDownloaderTask(HotelListFragment.this, 
 						SettingsAPI.getCurrencyCode(getActivity()));
 				mContinuationLoader.execute();
 			}
 		}
 	};
 	@Override
-	public void endProgressDialog(int id, JSONObject result) {
+	public void endProgressDialog(int id, Object result) {
 //		if (mDownLoader != null && id == mDownLoader.getId()) {
 //			mDownLoader = null;
 //		}
@@ -267,7 +266,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 			mAdapter.notifyDataSetChanged();
 		}
 
-		if (!MyApplication.getDb().mMoreResultsAvailable) {
+		if (!MyApplication.moreResultsAvailable) {
 			mHotelListView.removeFooterView(mFooterView);
 			mEnabledPaging = false;
 		}
@@ -278,7 +277,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	ProgressDialog mProgressDialog = null;
 
 	@Override
-	public void endProgressDialogWithError(int id, JSONObject result) {
+	public void endProgressDialogWithError(int id, Object result) {
 		Toast.makeText(getActivity(), "Error getting hotel information, please try again", Toast.LENGTH_LONG).show();
 
 		if (mProgressDialog != null) {

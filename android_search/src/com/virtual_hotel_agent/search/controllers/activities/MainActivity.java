@@ -62,6 +62,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ean.mobile.hotel.Hotel;
+import com.ean.mobile.hotel.HotelInformation;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
@@ -305,15 +307,14 @@ public class MainActivity extends RoboFragmentActivity implements
 		mMapTabName = getString(R.string.MAP);
 
 		
-		if (savedInstanceState != null  && MyApplication.getDb() != null 
-				&& MyApplication.getDb().mHotelData != null) { // Restore state
-			// Same code as onRestoreInstanceState() ?
-			Log.d(TAG, "restoring saved instance state");
-			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
-		} else {
-			Log.d(TAG, "no saved instance state");
+//		if (savedInstanceState != null  && MyApplication.FOUND_HOTELS.size() > 0) { // Restore state
+//			// Same code as onRestoreInstanceState() ?
+//			Log.d(TAG, "restoring saved instance state");
+//			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
+//		} else {
+//			Log.d(TAG, "no saved instance state");
 			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ mChatTabName));
-		}
+//		}
 		
 		
 		
@@ -530,16 +531,14 @@ public class MainActivity extends RoboFragmentActivity implements
 //				return injector.getInstance(FlightsFragment.class);
 //			}
 			else if (tabTitle.equals(mHotelTabName)) { // Single hotel
-				int hotelIndex = MyApplication.getExpediaAppState().getHotelId();
-				Log.i(TAG, "starting hotel Fragment for hotel # " + hotelIndex);
+				Log.i(TAG, "starting hotel Fragment");
 				if (mHotelDetailFragment == null) {
 					mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
 				}
 				return mHotelDetailFragment;
 			}
 			else if (tabTitle.equals(mRoomsTabName)) {
-				int hotelIndex = MyApplication.getExpediaAppState().getHotelId();
-				Log.i(TAG, "starting Rooms Fragment for hotel # " + hotelIndex);
+				Log.i(TAG, "starting Rooms Fragment");
 				if (mRoomSelectFragment == null) {
 					mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
 				}
@@ -1057,7 +1056,11 @@ public class MainActivity extends RoboFragmentActivity implements
 	static ChatItem currentFlightSearch = null;
 	static ChatItem lastHotelCompleted = null;
 	static ChatItem lastFlightCompleted = null;
+	int retries = 0;
 
+	/***
+	 * Finished activation of chat-item  (eg. hotel search, flight search, etc...) 
+	 */
 	class ChatItemDownloaderListener extends DownloaderTaskListener {
 		
 		ChatItem currentItem;
@@ -1070,17 +1073,17 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		
 		@Override
-		public void endProgressDialog(int id, JSONObject result) {
+		public void endProgressDialog(int id, Object result) {
 			Log.i(TAG, "End search for "+currentItem.getChat());
 			mainView.hideStatus();
-			currentItem.setSearchResults(result);
+			//currentItem.setSearchResults(result);
 			currentItem.setStatus(Status.HasResults);
+			retries = 0;
 			
 			String tabName = getString(id); // Yeah, I'm using the string ID for distinguishing between downloader tasks
 			// tabName is HOTELS, FLIGHTS, etc.. depending on chatItem downloader id
 			
-			XpediaDatabase evaDb = MyApplication.getDb();
-			if (id == R.string.HOTELS && (evaDb == null || evaDb.mHotelData == null || evaDb.mHotelData.length == 0)) {
+			if (id == R.string.HOTELS && (MyApplication.FOUND_HOTELS.size() == 0)) {
 				removeTabs();
 				Toast.makeText(MainActivity.this, "No hotels available, please try searching for a different location or date", Toast.LENGTH_LONG ).show();
 			}
@@ -1143,14 +1146,14 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 
 		@Override
-		public void endProgressDialogWithError(int id, JSONObject result) {
-			Log.i(TAG, "End search with ERROR for "+currentItem.getChat());
+		public void endProgressDialogWithError(int id, Object result) {
+			Log.w(TAG, "End search with ERROR for "+currentItem.getChat());
 			mainView.hideStatus();
 			currentItem.setStatus(Status.ToSearch);
 			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
-				XpediaDatabase db = MyApplication.getDb();
-				if (db != null && db.unrecoverableError && XpediaDatabase.retries < 5) {
-					XpediaDatabase.retries++;
+				if (retries < 3) {
+					retries++;
+					Log.w(TAG, "retrying... "+retries); 
 					executeFlowElement(currentItem.getEvaReply(), currentItem.getFlowElement(), currentItem, false);
 				}
 			}
@@ -1170,11 +1173,12 @@ public class MainActivity extends RoboFragmentActivity implements
 			
 			//mSwipeyAdapter.stuffChanged(mTabTitles.indexOf(mChatTabName));
 			
-			XpediaDatabase evaDb = MyApplication.getDb();
-			if (evaDb != null) {
-				evaDb.mHotelData = null;
-				evaDb.clearImagesCache();
-			}
+			MyApplication.clearSearch();
+//			XpediaDatabase evaDb = MyApplication.getDb();
+//			if (evaDb != null) {
+//				evaDb.mHotelData = null;
+//				evaDb.clearImagesCache();
+//			}
 		}
 	}
 	
@@ -1187,7 +1191,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
 		mSearchExpediaTask.initialize(new ChatItemDownloaderListener(_chatItem, _switchToResult), 
-				MainActivity.this, _reply,  SettingsAPI.getCurrencyCode(MainActivity.this)); // TODO: change to be based on flow element, // TODO: change to use currency
+				 _reply); // TODO: change to be based on flow element, 
 //		if (currentHotelSearch.getStatus() == Status.HasResults) {
 //			// this chat item was already activated and has results - bypass the cloud service and fake results
 //			mSearchExpediaTask.setCachedResults(_chatItem.getSearchResult());
@@ -1249,15 +1253,15 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 			else {
 				 Log.d(TAG, "Running Hotel Search!");
-				 ExpediaAppState db = MyApplication.getExpediaAppState();
 				 if (reply.travelers != null) {
-					 db.setNumberOfAdults(reply.travelers.allAdults());
- 					 db.setNumberOfChildrenParam(reply.travelers.allChildren());
+					 // no children
+					 MyApplication.numberOfAdults = reply.travelers.allAdults();
+					 MyApplication.childAges = null;
 				 }
 				 else {
-					 // default 2 adults
-					 db.setNumberOfAdults(2);
-					 db.setNumberOfChildrenParam(0);
+					 // no travelers info - default 2 adults
+					 MyApplication.numberOfAdults = 2;
+					 MyApplication.childAges = null;
 				 }
 				 
 				 searchHotels(chatItem, _reply, _switchToResult);
@@ -1299,11 +1303,14 @@ public class MainActivity extends RoboFragmentActivity implements
 
 	@Inject private ChatItemList mChatListModel;
 
+	/**
+	 * Listener to Room-information request complete
+	 */
 	private class RoomTaskListener extends DownloaderTaskListener {
 		private boolean mSwitchToTab = false;
 
 		@Override
-		public void endProgressDialog(int id, JSONObject result) { // we got the hotel rooms reply successfully
+		public void endProgressDialog(int id, Object result) { // we got the hotel rooms reply successfully
 			Log.d(TAG, "endProgressDialog() for hotel rooms  ");
 			mainView.hideStatus();
 			
@@ -1313,11 +1320,10 @@ public class MainActivity extends RoboFragmentActivity implements
 				mTabsAdapter.addTab(tabName);
 				index = mTabTitles.size()-1;
 			}
-			int hotelIndex = MyApplication.getExpediaAppState().getHotelId();
 			RoomsSelectFragement fragment = (RoomsSelectFragement) mTabsAdapter.instantiateItem(mViewPager, index);
 			if (fragment != null) // could be null if not instantiated yet
 			{
-				fragment.changeHotelId(hotelIndex);
+				fragment.changeHotelId(mRoomUpdater.hotelId);
 				if (mSwitchToTab) {
 					mTabs.setCurrentItem(index);
 					mSwitchToTab  = false;
@@ -1327,7 +1333,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		
 		@Override
-		public void endProgressDialogWithError(int id, JSONObject result) {
+		public void endProgressDialogWithError(int id, Object result) {
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			mainView.hideStatus();
 			mRoomUpdater = null;
@@ -1340,16 +1346,19 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	private RoomTaskListener mRoomUpdaterListener = new RoomTaskListener(); 
 	
+	/****
+	 * Listening to end of hotel-details request
+	 */
 	private DownloaderTaskListener mHotelDownloadListener = new DownloaderTaskListener() {
 		
 		@Override
-		public void endProgressDialog(int id, JSONObject result) { // we got the hotel details reply successfully
+		public void endProgressDialog(int id, Object result) { // we got the hotel details reply successfully
 			mainView.hideStatus();
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			
-			int hotelIndex = mHotelDownloader.getHotelIndex();
-			Log.d(TAG, "endProgressDialog() Hotel # " + hotelIndex);
-			MyApplication.getExpediaAppState().setHotelId(hotelIndex);
+			long hotelId = mHotelDownloader.getHotelId();
+			Log.d(TAG, "endProgressDialog() Hotel # " + hotelId);
+			MyApplication.selectedHotel = MyApplication.HOTEL_ID_MAP.get(hotelId);
 
 			onEventHotelsListUpdated(null);
 
@@ -1364,19 +1373,19 @@ public class MainActivity extends RoboFragmentActivity implements
 				HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.instantiateItem(mViewPager, index);
 				if (fragment != null) // could be null if not instantiated yet
 				{
-					fragment.changeHotelId(hotelIndex);
+					fragment.changeHotelId(hotelId);
 				}
 			}
 
 			index = mTabTitles.indexOf(tabName);
 			mTabs.setCurrentItem(index);
 
-			startRoomSearch(hotelIndex);
+			startRoomSearch(hotelId);
 			mHotelDownloader = null;
 		}
 
 		@Override
-		public void endProgressDialogWithError(int id, JSONObject result) {
+		public void endProgressDialogWithError(int id, Object result) {
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			mainView.hideStatus();
 			mHotelDownloader = null;
@@ -1474,10 +1483,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		removeTabs();
 
-		XpediaDatabase evaDb = MyApplication.getDb();
-		if (evaDb != null) {
-			evaDb.mHotelData = null;
-		}
+		MyApplication.clearSearch();
 	}
 	
 
@@ -1494,10 +1500,10 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 	}
 	
+	
 	public void onEventRoomSelected( @Observes RoomSelectedEvent event) {
 
-		HotelData hotel = event.hotel;
-		ExpediaAppState db = MyApplication.getExpediaAppState();
+		Hotel hotel = MyApplication.HOTEL_ID_MAP.get(event.hotelId);
 		
 		int bookingIndex = mTabTitles.indexOf(mBookingTabName);
 		if (bookingIndex == -1) {
@@ -1506,7 +1512,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		BookingFragement frag = (BookingFragement)  mTabsAdapter.instantiateItem(mViewPager, bookingIndex);
 		if (frag != null) {
-			frag.changeHotelRoom(event.hotel, event.room);
+			frag.changeHotelRoom(hotel, event.room);
 		}
 		mTabs.setCurrentItem(bookingIndex);
 		
@@ -1545,9 +1551,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
 		Log.d(TAG, "onHotelItemClicked("+event.hotelIndex+")");
-		XpediaDatabase db = MyApplication.getDb();
-		if (db == null || db.mHotelData == null || db.mHotelData.length <= event.hotelIndex) {
-			LogError(TAG, "no db item for hotel "+event.hotelIndex);
+		if (MyApplication.FOUND_HOTELS.size() <= event.hotelIndex) {
+			LogError(TAG, "clicked index "+event.hotelIndex+ " but size is "+MyApplication.FOUND_HOTELS.size());
 			return;
 		}
 
@@ -1558,19 +1563,10 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 		
-		int prevHotelIndex = MyApplication.getExpediaAppState().getHotelId();
-		if (prevHotelIndex != event.hotelIndex  && db.mHotelData.length <= prevHotelIndex) {
-			HotelData prevHotelData = db.mHotelData[event.hotelIndex];
-			if (prevHotelData.mDetails != null) {
-				// allow previously viewed hotel to be freed
-				prevHotelData.mDetails.allowMemRelease();
-			}
-		}
-		
-		HotelData hotelData = db.mHotelData[event.hotelIndex];
-		mHotelDownloader = new HotelDownloaderTask(mHotelDownloadListener, this, event.hotelIndex);
-		
-		if (hotelData.mDetails != null && hotelData.mDetails.restoreFromCache()) {
+		Hotel hotel = MyApplication.FOUND_HOTELS.get(event.hotelIndex);
+		HotelInformation info = MyApplication.EXTENDED_INFOS.get(hotel.hotelId);
+		mHotelDownloader = new HotelDownloaderTask(mHotelDownloadListener, hotel.hotelId);
+		if (info != null) {
 			// restored from cache - fake downloader progress
 			mHotelDownloadListener.endProgressDialog(R.string.HOTEL, null);
 		}
@@ -1582,25 +1578,23 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 	
 	public void onEventHotelSelected( @Observes HotelSelected event) {
-		Log.d(TAG, "onHotelSelected("+event.hotelIndex+")");
-		if (MyApplication.getDb() == null) {
-			Log.w(TAG, "MyApplication.getDb() == null");
-			return;
-		}
+		Log.d(TAG, "onHotelSelected("+event.hotelId+")");
 
 		int index = mTabTitles.indexOf(mRoomsTabName);
 		if (index == -1) {
 			// no rooms tab - will be soon - so mark as switch to it
 			if (mRoomUpdater == null) {
-				startRoomSearch(event.hotelIndex);
+				startRoomSearch(event.hotelId);
 			}
 			mRoomUpdaterListener.switchToTab();
 		}
-		else 
+		else {
+			// room fragment is available - this is in sync with the selected hotel
 			mTabs.setCurrentItem(index);
+		}
 	}
 		
-	private void startRoomSearch(int hotelIndex) {
+	private void startRoomSearch(long hotelId) {
 		if (mRoomUpdater != null) {
 			if (false == mRoomUpdater.cancel(true)) {
 				Log.d(TAG, "false == mRoomUpdater.cancel(true)");
@@ -1612,7 +1606,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mTabsAdapter.removeTab(mRoomsTabName);
 		mTabsAdapter.removeTab(mBookingTabName);
 		mainView.showStatus("Getting Rooms info for hotel");
-		mRoomUpdater = new RoomsUpdaterTask(this, hotelIndex);
+		mRoomUpdater = new RoomsUpdaterTask(hotelId);
 		mRoomUpdater.attach(mRoomUpdaterListener);
 
 		mRoomUpdater.execute();	

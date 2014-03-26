@@ -32,9 +32,12 @@ import java.net.MalformedURLException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.location.Location;
 import android.text.Html;
 
 import com.ean.mobile.LatLongAddress;
+import com.evaapis.android.EvatureLocationUpdater;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 /**
  * The holder for information about a particular hotel.
@@ -95,6 +98,10 @@ public final class Hotel {
      * The low price found for the hotel, in the currency specified by {currencyCode}.
      */
     public final BigDecimal lowPrice;
+    
+    public final int amenityMask;
+    
+    private double distance = -2;
 
     /**
      * The constructor that constructs the hotel info from a JSONObject.
@@ -115,6 +122,7 @@ public final class Hotel {
         this.lowPrice = new BigDecimal(hotelSummary.getDouble("lowRate")).setScale(2, RoundingMode.HALF_EVEN);
         this.currencyCode = hotelSummary.optString("rateCurrencyCode");
         this.supplierType = SupplierType.getByCode(hotelSummary.optString("supplierType"));
+        this.amenityMask = hotelSummary.optInt("amenityMask", 0);
     }
 
     /**
@@ -135,4 +143,28 @@ public final class Hotel {
     public String toString() {
         return this.name;
     }
+
+	public double getDistanceFromMe() {
+		if (distance == -2) {
+			double hotelLatitude = address.latitude.doubleValue();
+			double hotelLongitude = address.longitude.doubleValue();
+			double myLongitude, myLatitude;
+			try {
+				myLongitude = EvatureLocationUpdater.getLongitude();
+				if (myLongitude != EvatureLocationUpdater.NO_LOCATION) {
+					myLatitude = EvatureLocationUpdater.getLatitude();
+					float[] results = new float[3];
+					Location.distanceBetween(myLatitude, myLongitude,
+							hotelLatitude, hotelLongitude, results);
+					if (results != null && results.length > 0)
+						distance = results[0] / 1000;
+				}
+	
+			} catch (Exception e2) {
+				MainActivity.LogError("Hotel", "Error calculating distance", e2);
+				distance = -1;
+			}
+		}
+		return distance;
+	}
 }

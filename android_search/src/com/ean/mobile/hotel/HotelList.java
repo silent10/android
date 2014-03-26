@@ -57,6 +57,11 @@ public final class HotelList {
      * Holds the hotel info objects from the api response.
      */
     public final List<Hotel> hotels;
+    
+    /**
+     * true if more results are available for follow-up request
+     */
+    public final boolean moreResults;
 
     /**
      * The main constructor for this class. Maps to ArrayList(Collection c) and sets the other fields
@@ -67,15 +72,18 @@ public final class HotelList {
      * @param customerSessionId The session to set.
      * @param totalNumberOfResults The total number of results that the request that created this
      *                             HotelList can return.
+     * @param moreResults True if more results are available for follow-up request                    
      */
     public HotelList(final List<Hotel> hotels,
                      final String cacheKey, final String cacheLocation,
-                     final String customerSessionId, final int totalNumberOfResults) {
+                     final String customerSessionId, final int totalNumberOfResults,
+                     final boolean moreResults) {
         this.hotels = Collections.unmodifiableList(hotels);
         this.cacheKey = cacheKey;
         this.cacheLocation = cacheLocation;
         this.customerSessionId = customerSessionId;
         this.totalNumberOfResults = totalNumberOfResults;
+        this.moreResults = moreResults;
     }
 
     /**
@@ -83,6 +91,6 @@ public final class HotelList {
      * @return An empty hotel info list whose fields are all null.
      */
     public static HotelList emptyList() {
-        return new HotelList(Collections.<Hotel>emptyList(), null, null, null, 0);
+        return new HotelList(Collections.<Hotel>emptyList(), null, null, null, 0, false);
     }
 }

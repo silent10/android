@@ -54,7 +54,7 @@ import com.ean.mobile.request.Request;
  */
 public final class ListRequest extends Request<HotelList> {
 
-    private static final String NUMBER_OF_RESULTS = "10";
+    private static final String NUMBER_OF_RESULTS = "20";
 
     /**
      * Uses the EAN API to search for hotels in the given destination using http requests.
@@ -100,6 +100,10 @@ public final class ListRequest extends Request<HotelList> {
 
         setUrlParameters(urlParameters);
     }
+    
+    public ListRequest(List<NameValuePair> urlParameters) {
+    	setUrlParameters(urlParameters);
+    }
 
     /**
      * Loads more results into a HotelList so pagination can be supported.
@@ -138,6 +142,7 @@ public final class ListRequest extends Request<HotelList> {
         final String newCacheKey = response.optString("cacheKey");
         final String newCacheLocation = response.optString("cacheLocation");
         final String outgoingCustomerSessionId = response.optString("customerSessionId");
+        final boolean hasMoreResults = response.optBoolean("moreResultsAvailable");
         final int totalNumberOfResults = response.optJSONObject("HotelList").optInt("@activePropertyCount");
 
         final JSONArray newHotelJson = response.getJSONObject("HotelList").getJSONArray("HotelSummary");
@@ -153,7 +158,7 @@ public final class ListRequest extends Request<HotelList> {
         CommonParameters.customerSessionId = outgoingCustomerSessionId;
 
         return new HotelList(newHotels,
-            newCacheKey, newCacheLocation, outgoingCustomerSessionId, totalNumberOfResults);
+            newCacheKey, newCacheLocation, outgoingCustomerSessionId, totalNumberOfResults, hasMoreResults);
     }
 
     /**

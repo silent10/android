@@ -1,12 +1,13 @@
 package com.virtual_hotel_agent.search.util;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LruCache;
 
+import com.ean.mobile.hotel.HotelImageTuple;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
 
@@ -38,7 +39,7 @@ public class ImageDownloader {
 		doneHandler = null;
 	}
 	
-	public void startDownload(final ArrayList<String> urls) {
+	public void startDownload(final List<String> urls) {
 		mRunThreads = true;
 		mImageDownloadThread = new Thread() {
 

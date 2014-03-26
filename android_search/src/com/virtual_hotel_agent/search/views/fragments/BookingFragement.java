@@ -1,14 +1,23 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.joda.time.YearMonth;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import roboguice.fragment.RoboFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
@@ -23,6 +32,17 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ean.mobile.Address;
+import com.ean.mobile.exception.EanWsError;
+import com.ean.mobile.exception.UrlRedirectionException;
+import com.ean.mobile.hotel.Hotel;
+import com.ean.mobile.hotel.HotelRoom;
+import com.ean.mobile.hotel.Reservation;
+import com.ean.mobile.hotel.ReservationRoom;
+import com.ean.mobile.hotel.RoomOccupancy;
+import com.ean.mobile.hotel.SupplierType;
+import com.ean.mobile.hotel.request.BookingRequest;
+import com.ean.mobile.request.RequestProcessor;
 import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -30,19 +50,23 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
 import com.virtual_hotel_agent.search.models.expedia.HotelData;
 import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
 
 public class BookingFragement extends RoboFragment {
 
 	private static final String TAG = "BookingFragement";
+	private static final String DATE_FORMAT_STRING = "EEEE, MMMM dd, yyyy";
+    private static final String NIGHTLY_RATE_FORMAT_STRING = "MM-dd-yyyy";
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern(DATE_FORMAT_STRING);
+    private static final DateTimeFormatter NIGHTLY_RATE_FORMATTER
+        = DateTimeFormat.forPattern(NIGHTLY_RATE_FORMAT_STRING);
 	private static final int PICK_CONTACT_INTENT = 1;
 	private View mView = null;
-	private HotelData mHotel;
-	private RoomDetails mRoom;
 	private ArrayList<String> mCreditCardTypes;
 	
+	private Hotel hotel;
+	private HotelRoom hotelRoom;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,6 +78,9 @@ public class BookingFragement extends RoboFragment {
 			return mView;
 		}
 		
+        hotel = MyApplication.selectedHotel;
+        hotelRoom = MyApplication.selectedRoom;
+
 		
 		Context context = BookingFragement.this.getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
@@ -93,63 +120,61 @@ public class BookingFragement extends RoboFragment {
         final TextView taxesAndFees = (TextView) mView.findViewById(R.id.taxes_and_fees_display);
         final TextView totalLowPrice = (TextView) mView.findViewById(R.id.lowPrice);
 		
-        ExpediaAppState expediaAppState = MyApplication.getExpediaAppState();
+        hotelName.setText(hotel.name);
+        
+        final RoomOccupancy occupancy = hotelRoom.rate.roomGroup.get(0).occupancy;
+        
+        checkIn.setText(DATE_TIME_FORMATTER.print(MyApplication.arrivalDate));
+        checkOut.setText(DATE_TIME_FORMATTER.print(MyApplication.departureDate));
+        numGuests.setText(String.format(
+            getString(R.string.adults_comma_children), occupancy.numberOfAdults, occupancy.childAges.size()));
+        roomType.setText(hotelRoom.description);
+        // bedType.setText(hotelRoom.bedTypes.get(0).description);
 
-        hotelName.setText(mHotel.mSummary.mName);
-        checkIn.setText(expediaAppState.mArrivalDateParam);
-        checkOut.setText(expediaAppState.mDepartureDateParam);
-        String guests = expediaAppState.getNumberOfAdults() + " adults";
-        if (expediaAppState.getNumberOfChildrenParam() > 0) {
-        	guests += ", "+expediaAppState.getNumberOfChildrenParam()+" children";
-        }
-        numGuests.setText(guests);
-        roomType.setText(mRoom.mRoomTypeDescription);
-        //bedType.setText(mRoom.bedTypes.get(0).description);
+        final NumberFormat currencyFormat = getCurrencyFormat(hotel.currencyCode);
 
-        final NumberFormat currencyFormat = getCurrencyFormat(mRoom.mRateInfo.mChargableRateInfo.mCurrencyCode);
-//
-//        taxesAndFees.setText(currencyFormat.format(hotelRoom.getTaxesAndFees()));
-        taxesAndFees.setText(currencyFormat.format(mRoom.mRateInfo.mChargableRateInfo.mSurchargeTotal));
-//
-         totalLowPrice.setText(currencyFormat.format(mRoom.mRateInfo.mChargableRateInfo.mNightlyRateTotal));
-//
-        displayTotalHighPrice();
-//        populatePriceBreakdownList(currencyFormat);
+        taxesAndFees.setText(currencyFormat.format(hotelRoom.getTaxesAndFees()));
+
+        totalLowPrice.setText(currencyFormat.format(hotelRoom.getTotalRate()));
+
+        displayTotalHighPrice(hotelRoom, hotel.highPrice, currencyFormat);
+        //populatePriceBreakdownList(currencyFormat);
+
 	}
 	
 
-    private void displayTotalHighPrice() {
-        final TextView totalHighPrice = (TextView) mView.findViewById(R.id.highPrice);
-        //final ImageView drrIcon = (ImageView) mView.findViewById(R.id.drrPromoImg);
-        final TextView drrPromoText = (TextView) mView.findViewById(R.id.drrPromoText);
+	private void displayTotalHighPrice(final HotelRoom hotelRoom, final BigDecimal highPrice,
+            final NumberFormat currencyFormat) {
+       final TextView totalHighPrice = (TextView) mView.findViewById(R.id.highPrice);
+       //final ImageView drrIcon = (ImageView) mView.findViewById(R.id.drrPromoImg);
+       final TextView drrPromoText = (TextView) mView.findViewById(R.id.drrPromoText);
 
-        if (mRoom.mRateInfo.mChargableRateInfo.mTotalBaseRate == 
-        		mRoom.mRateInfo.mChargableRateInfo.mTotalDiscountRate) {
-            // if there's no promo, then we make the promo stuff disappear.
-            totalHighPrice.setVisibility(TextView.GONE);
-            //drrIcon.setVisibility(ImageView.GONE);
-            drrPromoText.setVisibility(ImageView.GONE);
-        } else {
-            // if there is a promo, we make it show up.
-            drrPromoText.setText(mRoom.mRateInfo.mPromoDescription);
-            totalHighPrice.setVisibility(TextView.VISIBLE);
-            //drrIcon.setVisibility(ImageView.VISIBLE);
-            drrPromoText.setVisibility(ImageView.VISIBLE);
-            final NumberFormat currencyFormat = getCurrencyFormat(mRoom.mRateInfo.mChargableRateInfo.mCurrencyCode);
-            totalHighPrice.setText(currencyFormat.format(mRoom.mRateInfo.mChargableRateInfo.mTotalBaseRate));
-            totalHighPrice.setPaintFlags(totalHighPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        }
-    }
+       if (hotelRoom.getTotalRate().equals(hotelRoom.getTotalBaseRate())) {
+           // if there's no promo, then we make the promo stuff disappear.
+           totalHighPrice.setVisibility(TextView.GONE);
+           //drrIcon.setVisibility(ImageView.GONE);
+           drrPromoText.setVisibility(ImageView.GONE);
+       } else {
+           // if there is a promo, we make it show up.
+           drrPromoText.setText(hotelRoom.promoDescription);
+           totalHighPrice.setVisibility(TextView.VISIBLE);
+           //drrIcon.setVisibility(ImageView.VISIBLE);
+           drrPromoText.setVisibility(ImageView.VISIBLE);
+           totalHighPrice.setText(currencyFormat.format(highPrice));
+           totalHighPrice.setPaintFlags(totalHighPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+       }
+   }
+	
     
-    
-	public void changeHotelRoom(HotelData hotel, RoomDetails room) {
-		Log.i(TAG, "Setting hotelId to "+hotel.mSummary.mHotelId+ "   room: "+room.mRoomTypeDescription);
-		if (mHotel == hotel && mRoom == room) {
+	public void changeHotelRoom(Hotel hotel, HotelRoom room) {
+		Log.i(TAG, "Setting hotelId to "+hotel.hotelId+ "   room: "+room.description);
+		if (this.hotel == hotel && this.hotelRoom == room) {
 			return;
 		}
-		mHotel = hotel;
-		mRoom = room;
+		this.hotel = hotel;
+		this.hotelRoom = room;
 		
+		// TODO: credit type options should be taken from EAN response
 		mCreditCardTypes = new ArrayList<String>(Arrays.asList(new String[] { "VI", "MC", "AE" }));
 		if (mView != null) {
 			final Spinner cardType = (Spinner) mView.findViewById(R.id.billingInformationCCType);
@@ -213,20 +238,21 @@ public class BookingFragement extends RoboFragment {
 	        final BookingRequest.ReservationInformation reservationInfo = new BookingRequest.ReservationInformation(
 	            email, firstName, lastName, phone, null, cardType, cardNumber, cardSecurityCode, expirationDate);
 
+	        
 	        final ReservationRoom reservationRoom = new ReservationRoom(
 	            reservationInfo.individual.name,
-	            SampleApp.selectedRoom,
-	            SampleApp.selectedRoom.bedTypes.get(0).id,
-	            SampleApp.occupancy());
+	            MyApplication.selectedRoom,
+	            MyApplication.selectedRoom.bedTypes.get(0).id,
+	            MyApplication.occupancy());
 
 	        final Address reservationAddress
 	            = new Address(Arrays.asList(addressLine1, addressLine2), city, state, country, zip);
 
 	        final BookingRequest request = new BookingRequest(
-	            SampleApp.selectedHotel.hotelId,
-	            SampleApp.arrivalDate,
-	            SampleApp.departureDate,
-	            SampleApp.selectedHotel.supplierType,
+	        		MyApplication.selectedHotel.hotelId,
+	        		MyApplication.arrivalDate,
+	        		MyApplication.departureDate,
+	        		MyApplication.selectedHotel.supplierType,
 	            Collections.singletonList(reservationRoom),
 	            reservationInfo,
 	            reservationAddress);
@@ -236,6 +262,34 @@ public class BookingFragement extends RoboFragment {
 	        Toast.makeText(getActivity(), "Booking room...", Toast.LENGTH_LONG).show();
 	    }
 	};
+	
+	/**
+     * The task used to actually perform the booking request and pass the returned data off to the next activity.
+     */
+    private class BookingRequestTask extends AsyncTask<BookingRequest, Void, List<Reservation>> {
+        @Override
+        protected List<Reservation> doInBackground(final BookingRequest... bookingRequests) {
+            final List<Reservation> reservations = new LinkedList<Reservation>();
+            for (BookingRequest request : bookingRequests) {
+                try {
+                    reservations.add(RequestProcessor.run(request));
+                } catch (EanWsError ewe) {
+                    Log.d(TAG, "An APILevel Exception occurred.", ewe);
+                } catch (UrlRedirectionException  ure) {
+                    MyApplication.sendRedirectionToast();
+                }
+            }
+            return reservations;
+        }
+        @Override
+        protected void onPostExecute(final List<Reservation> reservations) {
+            super.onPostExecute(reservations);
+            for (Reservation reservation : reservations) {
+                MyApplication.addReservationToCache(reservation);
+            }
+            //startActivity(new Intent(BookingSummary.this, ReservationDisplay.class));
+        }
+    }
 	
 	/**
 	 * (Event handler) Contains the action to handle the load default billing info button.
@@ -311,7 +365,7 @@ public class BookingFragement extends RoboFragment {
 			state.setText("WA");
 			country.setText("US");
 			zip.setText("98004");
-			if (mHotel.mSummary.mSupplierType.equals("E")) {
+			if (hotel.supplierType == SupplierType.EXPEDIA) {
 				cardType.setSelection(mCreditCardTypes.indexOf("MC"));
 				cardNum.setText("5401999999999999");
 				// creditCardType: MC (MasterCard)

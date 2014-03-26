@@ -97,12 +97,16 @@ public final class RequestProcessor {
             connection.setDoOutput(true);
             ((HttpURLConnection) connection).setRequestMethod("POST");
             ((HttpURLConnection) connection).setFixedLengthStreamingMode(0);
+            
+            Log.d(Constants.LOG_TAG, "secure request endpoint: " + connection.getURL().getHost());
+        }
+        else {
+        	Log.d(Constants.LOG_TAG, "request endpoint: " + connection.getURL());
         }
         // force application/json
         connection.setRequestProperty("Accept", "application/json, */*");
-        connection.addRequestProperty("Accept-Encoding","gzip");
+        //connection.addRequestProperty("Accept-Encoding","gzip");
 
-        Log.d(Constants.LOG_TAG, "request endpoint: " + connection.getURL().getHost());
         final String jsonString;
         try {
         	InputStream inputStream = connection.getInputStream();
