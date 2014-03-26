@@ -94,6 +94,7 @@ public final class RequestProcessor {
         final URLConnection connection;
         final long startTime = System.currentTimeMillis();
         connection = request.getUri().toURL().openConnection();
+        connection.setUseCaches(false); // signature makes caching impossible since url changes each time
         if (request.requiresSecure()) {
             // cause booking requests to use post.
             connection.setDoOutput(true);

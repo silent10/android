@@ -22,9 +22,6 @@ import org.robolectric.shadows.ShadowLog;
 import roboguice.RoboGuice;
 import roboguice.config.DefaultRoboModule;
 import roboguice.inject.RoboInjector;
-import android.app.Application;
-import android.location.Location;
-import android.location.LocationManager;
 
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evature.util.DownloadUrl;

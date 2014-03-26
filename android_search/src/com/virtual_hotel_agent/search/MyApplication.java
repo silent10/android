@@ -3,6 +3,8 @@ package com.virtual_hotel_agent.search;
 // This class is needed so that application crashes are automatically reported back home.
 // The formKey is a Google Docs key that enables the application to fill in an online Google "Excel" form.
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import org.joda.time.LocalDate;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.support.v4.util.LruCache;
 import android.widget.Toast;
@@ -33,14 +36,10 @@ import com.evaapis.android.EvatureLocationUpdater;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class MyApplication extends Application {
 
-	static XpediaDatabase mEvaDb = null;
-	static ExpediaAppState  expediaAppState = new ExpediaAppState();
 	//static EvaVayantDatabase mVayantDb = null;
 	private static final String TAG = "MyApplication";
 	private static Context context; // http://stackoverflow.com/a/5114361/78234
@@ -185,7 +184,7 @@ public class MyApplication extends Application {
             = new LruCache<Long, List<HotelRoom>>(5);
 
     // fill up to 30% of maxMemory with images
- 	private final static int PHOTO_CACHE_SIZE = (int) (0.4 * Runtime.getRuntime().maxMemory() / 1024);
+ 	private final static int PHOTO_CACHE_SIZE = (int) (0.3 * Runtime.getRuntime().maxMemory() / 1024);
     public static LruCache<String, Bitmap> HOTEL_PHOTOS = new LruCache<String, Bitmap>(PHOTO_CACHE_SIZE) {
 		@Override
 		protected int sizeOf(final String key, final Bitmap bitmap) {
@@ -208,6 +207,7 @@ public class MyApplication extends Application {
 //            = Collections.synchronizedMap(new HotelImageDrawableMap());
 
     private static final Set<Reservation> RESERVATIONS = new TreeSet<Reservation>();
+	private static final long TEN_MEGABYTES = 10*1024*1024;
 
 
 
@@ -318,14 +318,13 @@ public class MyApplication extends Application {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {
             System.setProperty("http.keepAlive", "false");
         }
-        // signature based url makes cache useless - different URL every time
-//        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//            try {
-//                final File httpCacheDir = new File(getCacheDir(), "http");
-//                HttpResponseCache.install(httpCacheDir, TEN_MEGABYTES);
-//            } catch (IOException ioe) {
-//                Log.e(Constants.LOG_TAG, "Could not install http cache on this device.");
-//            }
-//        }
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            try {
+                final File httpCacheDir = new File(getCacheDir(), "http");
+                HttpResponseCache.install(httpCacheDir, TEN_MEGABYTES);
+            } catch (IOException ioe) {
+                Log.e(TAG, "Could not install http cache on this device.");
+            }
+        }
     }
 }

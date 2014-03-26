@@ -27,7 +27,6 @@ import java.util.Random;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
-import org.json.JSONObject;
 
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
@@ -97,16 +96,12 @@ import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskLis
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.RoomsUpdaterTask;
-import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.fragments.BookingFragement;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
