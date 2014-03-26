@@ -1,6 +1,7 @@
 package com.virtual_hotel_agent.search.views.adapters;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -17,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.ean.mobile.hotel.Hotel;
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
@@ -45,27 +47,23 @@ public class HotelListAdapter extends BaseAdapter {
 		mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.hotel72);
 	}
 	
-	private HotelData[]  getHotels() {
-		XpediaDatabase db = MyApplication.getDb();
-		if (db != null) {
-			return db.mHotelData;
-		}
-		return null;
+	private List<Hotel>  getHotels() {
+		return MyApplication.FOUND_HOTELS;
 	}
 
 	@Override
 	public int getCount() {
-		HotelData[] hotels = getHotels();
-		if (hotels != null && hotels.length > 0) {
-			return hotels.length+1;
+		List<Hotel> hotels = getHotels();
+		if (hotels != null && hotels.size() > 0) {
+			return hotels.size()+1;
 		}
 		return 0;
 	}
 	
 	@Override
 	public int getItemViewType(int position){
-		HotelData[] hotels = getHotels();
-		if (hotels == null || position >= hotels.length) {
+		List<Hotel> hotels = getHotels();
+		if (hotels == null || position >= hotels.size()) {
 			return 1;
 		}
 		return 0; 
@@ -79,9 +77,9 @@ public class HotelListAdapter extends BaseAdapter {
 
 	@Override
 	public Object getItem(int position) {
-		HotelData[] hotels = getHotels();
-		if (hotels != null && position < hotels.length) {
-			return hotels[position];
+		List<Hotel> hotels = getHotels();
+		if (hotels != null && position < hotels.size()) {
+			return hotels.get(position);
 		}
 		return null;
 	}
@@ -104,8 +102,8 @@ public class HotelListAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
 		
-		HotelData[] hotels = getHotels();
-		if (hotels == null || position >= hotels.length) {
+		List<Hotel> hotels = getHotels();
+		if (hotels == null || position >= hotels.size()) {
 			return fillerView(convertView, parent);
 		}
 		if (convertView == null || convertView.getTag() == null) {
@@ -126,14 +124,14 @@ public class HotelListAdapter extends BaseAdapter {
 		}
 
 		
-		HotelData hotel = (HotelData) hotels[position];
+		Hotel hotel = hotels.get(position);
 		if (hotel == null) {
 			Log.w(TAG, "No hotel info for adapter position "+position);
 			return convertView;
 		}
 		holder.setHotelIndex(position);
 
-		Spanned spannedName = Html.fromHtml(hotel.mSummary.mName);
+		Spanned spannedName = Html.fromHtml(hotel.name);
 		String name = spannedName.toString();
 
 //		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -163,7 +161,7 @@ public class HotelListAdapter extends BaseAdapter {
 			holder.distance.setVisibility(View.GONE);
 		}
 		
-		String location = hotel.mSummary.mLocationDescription;
+		String location = hotel.locationDescription;
 		if (location != null && location.equals("") == false) {
 			location = Html.fromHtml(location).toString();
 			holder.location.setText(location);
@@ -175,15 +173,15 @@ public class HotelListAdapter extends BaseAdapter {
 
 		// Format price
 		DecimalFormat rateFormat = new DecimalFormat("#.00");
-		String formattedRate = rateFormat.format(hotel.mSummary.mLowRate);
+		String formattedRate = rateFormat.format(hotel.lowPrice.doubleValue());
 		String rate = SettingsAPI.getCurrencySymbol(mParent.getActivity()) + " " + formattedRate;
 
 		holder.rate.setText(rate);
 
-		holder.rating.setRating((float) hotel.mSummary.mHotelRating);
+		holder.rating.setRating(hotel.starRating.floatValue());
 
 		S3DrawableBackgroundLoader.getInstance().loadDrawable(
-				"http://images.travelnow.com" + hotel.mSummary.mThumbNailUrl, holder.image, mHotelIcon);
+				hotel.mainHotelImageTuple.thumbnailUrl.toString(), holder.image, mHotelIcon);
 
 //		double trRating = hotel.mSummary.mTripAdvisorRating;
 //

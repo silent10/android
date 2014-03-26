@@ -1,15 +1,17 @@
 package com.virtual_hotel_agent.search.controllers.events;
 
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
+import com.ean.mobile.hotel.HotelRoom;
 
+/**
+ * Room was selected 
+ */
 public class RoomSelectedEvent {
-	public HotelData hotel;
-	public RoomDetails room;
+	public long hotelId;
+	public HotelRoom room;
 
-	public RoomSelectedEvent(RoomDetails room, HotelData hotel) {
+	public RoomSelectedEvent(HotelRoom room, long hotelId) {
 		this.room = room;
-		this.hotel = hotel;
+		this.hotelId = hotelId;
 	}
 
 }

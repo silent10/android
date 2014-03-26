@@ -1,6 +1,7 @@
 package com.virtual_hotel_agent.search.views.adapters;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 import roboguice.event.EventManager;
 import android.content.Context;
@@ -9,8 +10,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.support.v4.util.LruCache;
 import android.text.Html;
 import android.text.Spanned;
@@ -25,8 +24,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.evature.util.Log;
-import com.google.analytics.tracking.android.Fields;
+import com.ean.mobile.hotel.Hotel;
+import com.ean.mobile.hotel.HotelRoom;
+import com.ean.mobile.hotel.HotelRoom.ValueAdd;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
@@ -35,17 +35,12 @@ import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
-import com.virtual_hotel_agent.search.models.expedia.Surcharge;
-import com.virtual_hotel_agent.search.models.expedia.ValueAdd;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 
 public class RoomListAdapter extends BaseExpandableListAdapter {
 
-	HotelData mHotel;
+	final List<HotelRoom> mRooms;
 	private LayoutInflater mInflater;
+	private long hotelId;
 	private Context mParent;
 	static final DecimalFormat formatter = new DecimalFormat("#.##");
 	private String disclaimer;
@@ -55,11 +50,12 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	private int selectedNonRefundColor;
 	private EventManager mEventManager;
 		
-	public RoomListAdapter(Context context, HotelData hotel, EventManager eventManager)
+	public RoomListAdapter(Context context, long hotelId, List<HotelRoom> rooms, EventManager eventManager)
 	{	
 		mInflater = LayoutInflater.from(context);
 	    mParent = context;
-		mHotel = hotel;
+		mRooms = rooms;
+		this.hotelId = hotelId; 
 		Resources resources = context.getResources();
 		selectedColor = resources.getColor(R.color.selected_room_list_item);
 		selectedNonRefundColor = resources.getColor(R.color.selected_non_refundable_room_list_item);
@@ -109,10 +105,9 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		 
 		 holder.roomIndex = position;
 		 
-		 RoomDetails roomDetails = mHotel.mSummary.roomDetails[position];
-		 if (roomDetails.mRoomTypeDescription != null) {
-			 Spanned spannedName = Html.fromHtml(roomDetails.mRoomTypeDescription);
-			 
+		 HotelRoom roomDetails = mRooms.get(position);
+		 if (roomDetails.description != null) {
+			 Spanned spannedName = Html.fromHtml(roomDetails.description);
 			 String name = spannedName.toString();
 			  
 	
@@ -131,10 +126,9 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	//		 		 		 		 
 			 holder.promo.setText(name);
 			 
-			 if (roomDetails.mImageUrls != null && roomDetails.mImageUrls.length > 0) {
-				 XpediaDatabase db = MyApplication.getDb();
-				 LruCache<String, Bitmap> cache = db != null ? db.getImagesCache() : null;
-				 Bitmap cachedPhoto = cache != null ? cache.get(roomDetails.mImageUrls[0]) : null;
+			 if (roomDetails.imageUrls != null && roomDetails.imageUrls.length > 0) {
+				 LruCache<String, Bitmap> cache = MyApplication.HOTEL_PHOTOS;
+				 Bitmap cachedPhoto = cache.get(roomDetails.imageUrls[0]);
 				 if (cachedPhoto != null) {
 					 holder.photo.setImageBitmap(cachedPhoto);
 				 }
@@ -149,9 +143,9 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		 }
 
 		 
-		 if(roomDetails.mRateInfo!=null)
+		 if(roomDetails.rate != null)
 		 {
-			 if (roomDetails.mRateInfo.mNonRefundable) {
+			 if (roomDetails.rate.nonRefundable) {
 				 if (isExpanded) {
 					 holder.container.setBackgroundResource(R.drawable.non_refundable_background_selected);
 					 holder.photo.setVisibility(View.GONE);
@@ -169,8 +163,8 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 					 holder.container.setBackgroundResource(R.drawable.hotel_background);
 				 }
 			 }
-			 double fullRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageBaseRate;
-			 double promoRate = roomDetails.mRateInfo.mChargableRateInfo.mAverageRate;
+			 double fullRate = roomDetails.rate.chargeable.getAverageBaseRate().doubleValue();
+			 double promoRate = roomDetails.rate.chargeable.getAverageRate().doubleValue();
 			 String fullRateStr = formatter.format(fullRate);
 			 String promoRateStr = formatter.format(promoRate);
 			 
@@ -188,8 +182,8 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				 
 			 }
 			 
-			 if (roomDetails.mRateInfo.mPromoDescription != null && roomDetails.mRateInfo.mPromoDescription.equals("") == false) {
-				 holder.details.setText(roomDetails.mRateInfo.mPromoDescription);
+			 if (roomDetails.rate.promoDescription != null && roomDetails.rate.promoDescription.equals("") == false) {
+				 holder.details.setText(roomDetails.rate.promoDescription);
 				 holder.details.setVisibility(View.VISIBLE);
 			 }
 			 else {
@@ -227,7 +221,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public Object getChild(int groupPosition, int childPosition) {
-		return mHotel.mSummary.roomDetails[groupPosition];
+		return mRooms.get(groupPosition);
 	}
 
 
@@ -247,16 +241,15 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			convertView = mInflater.inflate(R.layout.room_list_item_expanded, null);
 		}
 
-		final RoomDetails room = mHotel.mSummary.roomDetails[groupPosition];
-		boolean nonRefundable = (room.mRateInfo != null && room.mRateInfo.mNonRefundable);
+		final HotelRoom room = mRooms.get(groupPosition);
+		boolean nonRefundable = (room.rate != null && room.rate.nonRefundable);
 		
 		
 		View photoContainer = convertView.findViewById(R.id.roomImage_container);
 		ImageView photoHolder = (ImageView) convertView.findViewById(R.id.roomImage);
-		if (room.mImageUrls != null && room.mImageUrls.length > 0) {
-			 XpediaDatabase db = MyApplication.getDb();
-			 LruCache<String, Bitmap> cache = db != null ? db.getImagesCache() : null;
-			 Bitmap cachedPhoto = cache != null ? cache.get(room.mImageUrls[0]) : null;
+		if (room.imageUrls != null && room.imageUrls.length > 0) {
+			 LruCache<String, Bitmap> cache = MyApplication.HOTEL_PHOTOS;
+			 Bitmap cachedPhoto = cache.get(room.imageUrls[0]);
 			 if (cachedPhoto != null) {
 				 photoHolder.setImageBitmap(cachedPhoto);
 			 }
@@ -269,8 +262,8 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent(mParent, ImageGalleryActivity.class);
-					intent.putExtra(ImageGalleryActivity.PHOTO_URLS, room.mImageUrls);
-					Spanned spannedName = Html.fromHtml(room.mRoomTypeDescription);
+					intent.putExtra(ImageGalleryActivity.PHOTO_URLS, room.imageUrls);
+					Spanned spannedName = Html.fromHtml(room.description);
 					String name = spannedName.toString();
 					 
 					intent.putExtra(ImageGalleryActivity.TITLE, name);
@@ -294,62 +287,62 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 				+ "&lt;meta charset=\"UTF-8\"&gt;&lt;/head&gt;&lt;body&gt;&lt;font color=\"black\"&gt;");
 		if (disclaimer.equals("") == false)
 			text.append("&lt;p&gt;"+disclaimer+"&lt;/p&gt;");
-		if (room.mRateInfo != null && room.mRateInfo.mPromoDetailText != null) {
-			text.append("&lt;p&gt; "+TextUtils.htmlEncode(room.mRateInfo.mPromoDetailText) + "&lt;/p&gt; ");
+		if (room.rate != null && room.rate.promoDetailText != null) {
+			text.append("&lt;p&gt; "+TextUtils.htmlEncode(room.rate.promoDetailText) + "&lt;/p&gt; ");
 		}
-		if (room.mRoomDescription != null) {
+		if (room.longDescription != null) {
 			text.append("&lt;p&gt; &lt;b&gt;Room Description &lt;/b&gt; &lt;br&gt;");
-			text.append(TextUtils.htmlEncode(room.mRoomDescription) + "&lt;/p&gt; ");
+			text.append(TextUtils.htmlEncode(room.longDescription) + "&lt;/p&gt; ");
 		}
-		if (room.mValueAdds != null && room.mValueAdds.length > 0) {
+		if (room.valueAdds != null && room.valueAdds.length > 0) {
 			text.append("&lt;b&gt;You also get:&lt;/b&gt; &lt;ul&gt;");
-			for (ValueAdd va: room.mValueAdds) {
+			for (ValueAdd va: room.valueAdds) {
 				text.append("&lt;li&gt;")
-					.append(va.mDescription)
+					.append(va.description)
 					.append("&lt;/li&gt;");
 			}
 			text.append("&lt;/ul&gt;");
 		}
-		if (room.mRateInfo != null && room.mRateInfo.mChargableRateInfo != null  &&
-				room.mRateInfo.mChargableRateInfo.mSurcharges != null && room.mRateInfo.mChargableRateInfo.mSurcharges.length > 0) {
-			String dollar = " "+SettingsAPI.getCurrencySymbol(mParent);
+		if (room.rate != null && room.rate.chargeable != null  &&
+				room.rate.chargeable.surcharges != null && room.rate.chargeable.surcharges.size() > 0) {
+			String dollar = " "+SettingsAPI.getCurrencySymbol(mParent); // TODO: change same as booking page room.rate.chargeable.currencyCode
 			text.append("&lt;b&gt;Surcharges&lt;/b&gt; &lt;ul&gt;");
-			for (Surcharge surcharge: room.mRateInfo.mChargableRateInfo.mSurcharges) {
+			for (String surchargeType: room.rate.chargeable.surcharges.keySet()) {
 				text.append("&lt;li&gt;")
-					.append(surcharge.mType)
+					.append(surchargeType)
 					.append(": ")
-					.append(surcharge.mAmount)
+					.append(room.rate.chargeable.surcharges.get(surchargeType)) // TODO: formatting
 					.append(dollar)
 					.append("&lt;/li&gt;");
 			}
 			text.append("&lt;/ul&gt;");
 		}
-		if (room.mCheckInInstructions != null && room.mCheckInInstructions.equals("") == false) {
+		if (room.checkInInstructions != null && room.checkInInstructions.equals("") == false) {
 			text.append("&lt;p&gt; &lt;b&gt;Check In Instructions &lt;/b&gt; &lt;br&gt;")
-				.append(room.mCheckInInstructions)
+				.append(room.checkInInstructions)
 				.append("&lt;/p&gt;");
 		}
-		if (room.mRateInfo != null &&  room.mRateInfo.mCancelllationPolicy != null && room.mRateInfo.mCancelllationPolicy.equals("") == false) {
+		if (room.rate != null &&  room.rate.cancelllationPolicy != null && room.rate.cancelllationPolicy.equals("") == false) {
 			text.append("&lt;p&gt; &lt;b&gt;Cancelation Policy&lt;/b&gt; &lt;br&gt;")
-				.append(room.mRateInfo.mCancelllationPolicy)
+				.append(room.rate.cancelllationPolicy)
 				.append("&lt;/p&gt;");
 		}
-		if (room.mPolicy != null && room.mPolicy.equals("") == false) {
+		if (room.policy != null && room.policy.equals("") == false) {
 			text.append("&lt;p&gt; &lt;b&gt;Policy&lt;/b&gt; &lt;br&gt;")
-				.append(room.mPolicy)
+				.append(room.policy)
 				.append("&lt;/p&gt;");
 		}
-		if (room.mOtherInformation != null && room.mOtherInformation.equals("") == false) {
+		if (room.otherInformation != null && room.otherInformation.equals("") == false) {
 			text.append("&lt;p&gt; &lt;b&gt;Other Information&lt;/b&gt; &lt;br&gt;");
-			text.append(room.mOtherInformation)
+			text.append(room.otherInformation)
 				.append("&lt;br&gt;");
 		}
 		
 		text.append("&lt;p&gt; &lt;b&gt; Refundable: &lt;/b&gt; ").append(nonRefundable ? "No" : "Yes").append("&lt;br&gt;");
-		text.append("&lt;p&gt; &lt;b&gt; Smoking Policy: &lt;/b&gt; ").append(room.mSmoking).append("&lt;br&gt;");
-		if (room.mRateInfo != null) {
-			text.append("&lt;p&gt; &lt;b&gt; Guarantee Required: &lt;/b&gt; ").append(room.mRateInfo.mGuaranteeRequired ? "Yes" : "No").append("&lt;br&gt;");
-			text.append("&lt;p&gt; &lt;b&gt; Deposit Required: &lt;/b&gt; ").append(room.mRateInfo.mDepositRequired ? "Yes" : "No").append("&lt;br&gt;");
+		text.append("&lt;p&gt; &lt;b&gt; Smoking Policy: &lt;/b&gt; ").append(room.getSmokingPreferences()).append("&lt;br&gt;");
+		if (room.rate!= null) {
+			text.append("&lt;p&gt; &lt;b&gt; Guarantee Required: &lt;/b&gt; ").append(room.rate.guaranteeRequired ? "Yes" : "No").append("&lt;br&gt;");
+			text.append("&lt;p&gt; &lt;b&gt; Deposit Required: &lt;/b&gt; ").append(room.rate.depositRequired ? "Yes" : "No").append("&lt;br&gt;");
 		}
 		text.append("&lt;/p&gt;");
 		
@@ -362,7 +355,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		Tracker defaultTracker = GoogleAnalytics.getInstance(mParent).getDefaultTracker();
 		if (defaultTracker != null) 
 			defaultTracker.send(MapBuilder
-				    .createEvent("ui_action", "room_expanded", String.valueOf(mHotel.mSummary.mHotelId), (long)groupPosition)
+				    .createEvent("ui_action", "room_expanded", String.valueOf(hotelId), (long)groupPosition)
 				    .build()
 				   );
 		
@@ -371,7 +364,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			
 			@Override
 			public void onClick(View v) {
-				mEventManager.fire(new RoomSelectedEvent(room, mHotel));
+				mEventManager.fire(new RoomSelectedEvent(room, hotelId));
 			}
 		});
 		
@@ -409,17 +402,17 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public Object getGroup(int groupPosition) {
-		return mHotel.mSummary.roomDetails[groupPosition];
+		return mRooms.get(groupPosition);
 	}
 
 
 
 	@Override
 	public int getGroupCount() {
-		if (mHotel.mSummary.roomDetails == null) {
+		if (mRooms == null || mRooms.size() == 0) {
 			return 0;
 		}
-		return mHotel.mSummary.roomDetails.length + 1;
+		return mRooms.size() + 1;
 	}
 
 
@@ -436,7 +429,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	
 	@Override
 	public int getGroupType(int groupPosition) {
-		if (groupPosition >= mHotel.mSummary.roomDetails.length) {
+		if (groupPosition >= mRooms.size()) {
 			// filler row
 			return 1;
 		}

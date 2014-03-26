@@ -1,90 +1,82 @@
 package com.virtual_hotel_agent.search.controllers.web_services;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.content.Context;
-
+import com.ean.mobile.exception.EanWsError;
+import com.ean.mobile.exception.UrlRedirectionException;
+import com.ean.mobile.hotel.Hotel;
+import com.ean.mobile.hotel.HotelInformation;
+import com.ean.mobile.hotel.request.InformationRequest;
+import com.ean.mobile.request.RequestProcessor;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.SettingsAPI;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.HotelDetails;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
-import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
 
 public class HotelDownloaderTask extends DownloaderTask {
 	private static final String TAG = HotelDownloaderTask.class.getSimpleName();
+	private long mHotelId;
 
-	public String lastResponse = null;
-	
-
-	@Override
-	protected void onProgressUpdate(Integer... values) {
-
-		super.onProgressUpdate(values);
-	}
-
-	int mHotelIndex;
-	Context mContext;
-
-	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, Context context, int hotelndex) {
+	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, long hotelId) {
 		super( R.string.HOTEL);
 		Log.d(TAG, "CTOR");
 		attach(listener);
-		mContext = context;
-		mHotelIndex = hotelndex;
+		mHotelId = hotelId;
 	}
 
 	@Override
-	protected JSONObject doInBackground(Void... params) {
+	protected Object doInBackground(Void... params) {
 		Log.d(TAG, "doInBackground()");
-
-		mProgress = DownloaderStatus.Started;
-		XpediaDatabase db = MyApplication.getDb();
-		if (db == null || db.mHotelData == null || db.mHotelData.length <= mHotelIndex) {
-			MainActivity.LogError(TAG, "No info for hotel downloader");
-			mProgress = DownloaderStatus.FinishedWithError;
-			return null;
-		}
-		HotelData hotelData = db.mHotelData[mHotelIndex];
 
 		if (isCancelled()) {
 			Log.w(TAG, "thread was canceled!");
+			return null;
 		}
+		mProgress = DownloaderStatus.Started;
 		
 		publishProgress();
 
-		JSONObject jHotel = XpediaProtocolStatic.getExpediaHotelInformation(mContext, hotelData.mSummary.mHotelId,
-				SettingsAPI.getCurrencyCode(mContext));
-
-		if (jHotel == null) {
-			mProgress = DownloaderStatus.FinishedWithError;
-			return null;
-		}
-		
 		try {
-
-			JSONObject jHotelInfo = jHotel.getJSONObject("HotelInformationResponse");
-
-			hotelData.mDetails = new HotelDetails(jHotelInfo);
-
+			final Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+			HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel));
+			MyApplication.EXTENDED_INFOS.put(mHotelId, hotelInformation);
 			mProgress = DownloaderStatus.Finished;
+        } catch (EanWsError ewe) {
+            Log.d(TAG, "Unexpected error occurred within the api", ewe);
+            mProgress = DownloaderStatus.FinishedWithError;
+        } catch (UrlRedirectionException ure) {
+        	MyApplication.sendRedirectionToast();
+        	mProgress = DownloaderStatus.FinishedWithError;
+        }
 
-			
-			return jHotel;
-
-		} catch (JSONException e) {
-			MainActivity.LogError(TAG, "JSON exception getting hotel details", e);
-			return jHotel;
-		}
+        return null;
 	}
+        
+//		JSONObject jHotel = XpediaProtocolStatic.getExpediaHotelInformation(mContext, hotelData.mSummary.mHotelId,
+//				SettingsAPI.getCurrencyCode(mContext));
 
-	public int getHotelIndex() {
-		return mHotelIndex;
+//		if (jHotel == null) {
+//			mProgress = DownloaderStatus.FinishedWithError;
+//			return null;
+//		}
+		
+//		try {
+//
+//			JSONObject jHotelInfo = jHotel.getJSONObject("HotelInformationResponse");
+//
+//			hotelData.mDetails = new HotelDetails(jHotelInfo);
+//
+//			mProgress = DownloaderStatus.Finished;
+//
+//			
+//			return jHotel;
+//
+//		} catch (JSONException e) {
+//			MainActivity.LogError(TAG, "JSON exception getting hotel details", e);
+//			return jHotel;
+//		}
+//	}
+
+	public long getHotelId() {
+		return mHotelId;
 	}
 
 }

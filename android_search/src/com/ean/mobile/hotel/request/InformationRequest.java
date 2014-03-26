@@ -44,10 +44,12 @@ import android.util.Log;
 
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.EanWsError;
+import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.request.CommonParameters;
 import com.ean.mobile.request.Request;
+import com.virtual_hotel_agent.search.MyApplication;
 
 /**
  * Uses getHotelInformation to get the rest of the hotel's information, including images
@@ -55,15 +57,16 @@ import com.ean.mobile.request.Request;
  */
 public final class InformationRequest extends Request<HotelInformation> {
 
+	private Hotel hotel;
     /**
      * Gets the rest of the information about a hotel not included in previous calls.
      * @param hotelId The hotelId for which to gather more information.
      */
-    public InformationRequest(final long hotelId) {
-
+    public InformationRequest(final Hotel hotel) {
+    	this.hotel = hotel;
         final List<NameValuePair> requestParameters = Arrays.<NameValuePair>asList(
-            new BasicNameValuePair("hotelId", Long.toString(hotelId)),
-            new BasicNameValuePair("options", "HOTEL_DETAILS,HOTEL_IMAGES")
+            new BasicNameValuePair("hotelId", Long.toString(hotel.hotelId)),
+            new BasicNameValuePair("options", "HOTEL_SUMMARY,HOTEL_DETAILS,PROPERTY_AMENITIES,HOTEL_IMAGES")
         );
 
         final List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
@@ -72,6 +75,50 @@ public final class InformationRequest extends Request<HotelInformation> {
         setUrlParameters(urlParameters);
     }
 
+    
+    private void optionalAppend(StringBuilder sb, JSONObject jObj, String element, String title) {
+		String value = jObj.optString(element, "").trim();
+		if (value.equals("") == false) {
+			sb.append("&lt;p&gt; &lt;b&gt;")
+			  .append(title)
+			  .append("&lt;/b&gt; &lt;br /&gt;")
+			  .append(value)
+			  .append("&lt;/p&gt;");
+		}
+	}
+	
+	private String getHotelDescription(JSONObject jHotelDetails) {
+		StringBuilder descriptionStr = new StringBuilder();
+		
+		descriptionStr.append( jHotelDetails.optString("propertyDescription", ""));
+		
+		optionalAppend(descriptionStr, jHotelDetails, "drivingDirections", "Driving Directions" );
+		optionalAppend(descriptionStr, jHotelDetails, "hotelPolicy", "Hotel Policy" );
+		optionalAppend(descriptionStr, jHotelDetails, "checkInInstructions", "Check In Instructions" );
+		optionalAppend(descriptionStr, jHotelDetails, "roomInformation", "Room Information" );
+		optionalAppend(descriptionStr, jHotelDetails, "propertyInformation", "Property Information" );
+		
+		if (hotel.address != null && hotel.address.lines.isEmpty() == false) {
+			descriptionStr.append("&lt;p&gt; &lt;b&gt;Address &lt;/b&gt; &lt;br /&gt;");
+			for (String line : hotel.address.lines) {
+				descriptionStr.append(line).append("&lt;br /&gt;");
+			}
+			descriptionStr.append(hotel.address.city);
+			if (hotel.address.stateProvinceCode.equals("") == false) {
+				descriptionStr.append(", ").append(hotel.address.stateProvinceCode);
+			}
+			descriptionStr.append("&lt;br /&gt;");
+			descriptionStr.append(hotel.address.postalCode).append(", ");
+			descriptionStr.append(hotel.address.countryCode).append("&lt;br /&gt;");
+			
+		}
+		
+		optionalAppend(descriptionStr, jHotelDetails, "areaInformation", "Area Information" );
+		
+		
+		return descriptionStr.toString();
+	}
+    
     /**
      * {@inheritDoc}
      */
@@ -85,7 +132,7 @@ public final class InformationRequest extends Request<HotelInformation> {
         final JSONObject details = infoResp.getJSONObject("HotelDetails");
         final JSONArray images = infoResp.getJSONObject("HotelImages").getJSONArray("HotelImage");
 
-        final String longDescription = Html.fromHtml(details.optString("propertyDescription")).toString();
+        final String longDescription = getHotelDescription(details);
 
         final List<HotelImageTuple> imageTuples = new ArrayList<HotelImageTuple>();
 

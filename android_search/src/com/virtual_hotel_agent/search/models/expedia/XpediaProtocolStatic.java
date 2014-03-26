@@ -34,6 +34,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.util.LruCache;
 
+import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvatureLocationUpdater;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.RequestAttributes.SortOrderEnum;
@@ -73,15 +74,15 @@ public class XpediaProtocolStatic {
 	// Create client and set our specific user-agent string
 
 	static String getApiKey() {
-		return MyApplication.getExpediaApiKey();
+		return CommonParameters.apiKey;
 	}
 
 	static String getSecret() {
-		return MyApplication.getExpediaSecret();
+		return CommonParameters.signatureSecret;
 	}
 
 	static String getClientId() {
-		return MyApplication.getExpediaClientId();
+		return CommonParameters.cid;
 	}
 
 	public static Bitmap download_Image(String path) {

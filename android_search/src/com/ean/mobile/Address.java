@@ -100,9 +100,9 @@ public class Address {
 
         this.lines = Collections.unmodifiableList(localLines);
         this.city = object.optString("city");
-        this.stateProvinceCode = object.optString("stateProvinceCode");
-        this.countryCode = object.optString("countryCode");
-        this.postalCode = object.optString("postalCode");
+        this.stateProvinceCode = object.optString("stateProvinceCode", "");
+        this.countryCode = object.optString("countryCode", "");
+        this.postalCode = object.optString("postalCode", "");
     }
 
     /**

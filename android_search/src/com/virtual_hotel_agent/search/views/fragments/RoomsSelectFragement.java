@@ -2,6 +2,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
 
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
@@ -12,8 +13,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.text.Html;
-import android.text.Spanned;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +24,11 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ean.mobile.hotel.Hotel;
+import com.ean.mobile.hotel.HotelImageTuple;
+import com.ean.mobile.hotel.HotelInformation;
+import com.ean.mobile.hotel.HotelRoom;
+import com.ean.mobile.hotel.SupplierType;
 import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -35,11 +39,6 @@ import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.expedia.ExpediaAppState;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
-import com.virtual_hotel_agent.search.models.expedia.RoomDetails;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.RoomListAdapter;
 
@@ -53,10 +52,9 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private TextView mNoticeText;
 	private TextView mLocation;
 	private RatingBar mStarRatingBar;
-	private HotelData mHotelData;
 	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
-	private int mHotelIndex = -1;
+	private long mHotelId = -1;
 	
 	@Inject protected EventManager eventManager;
 	
@@ -121,26 +119,25 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 		mStarRatingBar = (RatingBar)mView.findViewById(R.id.starRating);
 		
-		ExpediaAppState rp = MyApplication.getExpediaAppState();
-		if (rp == null) {
-			MainActivity.LogError(TAG, "onCreateView - no RequestParams");
+		if (MyApplication.selectedHotel == null) {
+			MainActivity.LogError(TAG, "onCreateView - no selectedHotel");
 		}
 		else {
-			changeHotelId(rp.getHotelId());
+			changeHotelId(MyApplication.selectedHotel.hotelId);
 		}
 
 		return mView;
 	}
 
 	private void fillData() {
-		XpediaDatabase db = MyApplication.getDb();
-		if (db == null || db.mHotelData == null ||  mHotelIndex >= db.mHotelData.length) {
-			MainActivity.LogError(TAG, "DB error fetching rooms for hotel "+mHotelIndex);
+		Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+		if (hotel == null) {
+			MainActivity.LogError(TAG, "showing hotel id "+mHotelId +" but not found");
 			return;
 		}
-		mHotelData = db.mHotelData[mHotelIndex];
+
 		
-		Drawable drawable = S3DrawableBackgroundLoader.getInstance().getDrawableFromCache(mHotelData.mSummary.mThumbNailUrl);
+		Drawable drawable = S3DrawableBackgroundLoader.getInstance().getDrawableFromCache(hotel.mainHotelImageTuple.thumbnailUrl.toString());
 		if (drawable != null) {
 			Log.d(TAG, "Showing thumbnail from cache");
 			mHotelImage.setImageDrawable(drawable);
@@ -148,41 +145,36 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		
 		WeakReference<RoomsSelectFragement> fragmentRef = new WeakReference<RoomsSelectFragement>(this);
 		mHandlerFinish = new DownloadedImg(fragmentRef);
-		imageDownloader = new ImageDownloader(db.getImagesCache(), mHandlerFinish);
+		imageDownloader = new ImageDownloader(MyApplication.HOTEL_PHOTOS, mHandlerFinish);
 		
 		// if already loaded full image - no need for downloader thread
-		if (mHotelData != null) {
-			ArrayList<String> urls = new ArrayList<String>();
-			if (mHotelData.mDetails != null && mHotelData.mDetails.hotelImages != null) {
-				for (HotelImage hotel : mHotelData.mDetails.hotelImages) {
-					if (hotel.url != null) {
-						urls.add(hotel.url);
-						break;
-					}
+		ArrayList<String> urls = new ArrayList<String>();
+		HotelInformation info = MyApplication.EXTENDED_INFOS.get(hotel.hotelId);
+		if (info != null && info.images.size() > 0) {
+			for (HotelImageTuple photo : info.images) {
+				if (photo.mainUrl != null) {
+					urls.add(photo.mainUrl.toString());
+					break;
 				}
 			}
-		
-			if (mHotelData.mSummary != null && mHotelData.mSummary.roomDetails != null) {
-				for (RoomDetails rd : mHotelData.mSummary.roomDetails) {
-					if (rd.mImageUrls != null) {
-						for (String url : rd.mImageUrls) {
-							urls.add(url);
-							break;
-						}
-					}
-				}
-			}
-			Bitmap fullImage = db.getImagesCache().get(urls.get(0));
-			if (fullImage != null) {
-				Log.d(TAG, "Showing full Image from cache");
-				mHotelImage.setImageBitmap(fullImage);
-			}
-			imageDownloader.startDownload(urls);
 		}
+	
+		List<HotelRoom> rooms = MyApplication.HOTEL_ROOMS.get(hotel.hotelId);
+		if (rooms != null && rooms.size() > 0) {
+			for (HotelRoom rd : rooms) {
+				if (rd.imageUrls != null && rd.imageUrls.length > 0) {
+					urls.add(rd.imageUrls[0]);
+				}
+			}
+		}
+		Bitmap fullImage = MyApplication.HOTEL_PHOTOS.get(urls.get(0));
+		if (fullImage != null) {
+			Log.d(TAG, "Showing full Image from cache");
+			mHotelImage.setImageBitmap(fullImage);
+		}
+		imageDownloader.startDownload(urls);
 
-		Spanned spannedName = Html.fromHtml(mHotelData.mSummary.mName);
-
-		String name = spannedName.toString();
+		String name = hotel.name;
 
 //				Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -201,26 +193,25 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		mHotelName.setText(name);
 		
 		
-		mLocation.setText(mHotelData.mSummary.mCity+","+mHotelData.mSummary.mCountryCode);
+		mLocation.setText(hotel.address.city+", "+hotel.address.countryCode);
 		
 		String disclaimer = "";
-		if (mHotelData.mSummary.mSupplierType != null && mHotelData.mSummary.mSupplierType.equals("E")) {
+		if (hotel.supplierType != null && hotel.supplierType == SupplierType.EXPEDIA) {
 			disclaimer = getText(R.string.room_price_disclaimer).toString();
 		}
 		else {
 			// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
 			disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString();
-			ExpediaAppState rp = MyApplication.getExpediaAppState();
-			if (rp.getNumberOfAdults() > 2 || rp.getNumberOfChildrenParam() > 0) {
+			if (MyApplication.numberOfAdults > 2 || MyApplication.childAges.size() > 0) {
 				disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
 								"accommodate your entire party.";
 			}
 		}
 		
 		boolean hasNoRefund = false;
-		if (mHotelData.mSummary.roomDetails != null) {
-			for (RoomDetails room : mHotelData.mSummary.roomDetails) {
-				if (room.mRateInfo != null && room.mRateInfo.mNonRefundable) {
+		if (rooms != null) {
+			for (HotelRoom room : rooms) {
+				if (room.rate != null && room.rate.nonRefundable) {
 					hasNoRefund = true;
 					break;
 				}
@@ -237,12 +228,12 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 		
 
-		mStarRatingBar.setRating((float)mHotelData.mSummary.mHotelRating);
+		mStarRatingBar.setRating((float)hotel.starRating.floatValue());
 
 		mRoomListView = (ExpandableListView)mView.findViewById(R.id.roomListView);
 		
 
-		mAdapter = new RoomListAdapter(getActivity(), mHotelData, eventManager);
+		mAdapter = new RoomListAdapter(getActivity(), hotel.hotelId, rooms, eventManager);
 		mAdapter.setDisclaimer(disclaimer);
 
 		mRoomListView.setAdapter( mAdapter );
@@ -275,15 +266,15 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		}
 	}
 
-	public void changeHotelId(int hotelIndex) {
-		if (hotelIndex == -1)
+	public void changeHotelId(long hotelId) {
+		if (hotelId == -1)
 			return;
 		
-		Log.i(TAG, "Setting hotelId to "+hotelIndex+", was "+mHotelIndex);
-		if (mHotelIndex == hotelIndex) {
+		Log.i(TAG, "Setting hotelId to "+hotelId+", was "+mHotelId);
+		if (mHotelId == hotelId) {
 			return;
 		}
-		mHotelIndex = hotelIndex;
+		mHotelId = hotelId;
 		fillData();
 	}
 
