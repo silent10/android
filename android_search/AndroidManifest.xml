@@ -38,6 +38,7 @@
             android:name="com.virtual_hotel_agent.search.controllers.activities.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/StyledIndicators"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait" > <!-- android:theme="@android:style/Theme.Black" -->
             <!-- android:theme="@android:style/Theme.NoTitleBar"> -->
             <intent-filter>

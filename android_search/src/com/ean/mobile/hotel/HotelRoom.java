@@ -142,15 +142,15 @@ public final class HotelRoom {
 				int size = jRoomImages.optInt("@size", -1);
 				
 				if(size==-1) 
-					size =1;
+					size = 1;
 				if (size > 0) {
 					imageUrls = new String[size];
 					if (size == 1) {
-						JSONObject jImg = roomRateDetail.getJSONObject("RoomImage");
+						JSONObject jImg = jRoomImages.getJSONObject("RoomImage");
 						imageUrls[0] = jImg.optString("url");
 					}
 					else {
-						JSONArray jImgs = roomRateDetail.getJSONArray("RoomImage");
+						JSONArray jImgs = jRoomImages.getJSONArray("RoomImage");
 						for(int i=0;i<size;i++)	{
 							imageUrls[i] = jImgs.getJSONObject(i).optString("url");
 						}

@@ -126,7 +126,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	//		 		 		 		 
 			 holder.promo.setText(name);
 			 
-			 if (roomDetails.imageUrls != null && roomDetails.imageUrls.length > 0) {
+			 if (roomDetails.imageUrls != null && roomDetails.imageUrls.length > 0 && roomDetails.imageUrls[0] != null) {
 				 LruCache<String, Bitmap> cache = MyApplication.HOTEL_PHOTOS;
 				 Bitmap cachedPhoto = cache.get(roomDetails.imageUrls[0]);
 				 if (cachedPhoto != null) {

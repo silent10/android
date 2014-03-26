@@ -84,7 +84,8 @@ public final class RoomAvailabilityRequest extends Request<List<HotelRoom>> {
 
         final List<NameValuePair> requestParameters = Arrays.<NameValuePair>asList(
             new BasicNameValuePair("hotelId", Long.toString(hotelId)),
-            new BasicNameValuePair("includeDetails", "true")
+            new BasicNameValuePair("includeDetails", "true"),
+            new BasicNameValuePair("includeRoomImages", "true")
         );
 
         final List<NameValuePair> roomPairs = new ArrayList<NameValuePair>(rooms.size());
