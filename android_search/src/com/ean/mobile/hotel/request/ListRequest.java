@@ -176,5 +176,9 @@ public final class ListRequest extends Request<HotelList> {
     public boolean requiresSecure() {
         return false;
     }
+	@Override
+	public String getName() {
+		return "ListRequest";
+	}
 
 }

@@ -94,4 +94,9 @@ public final class DestinationRequest extends Request<List<Destination>> {
     public boolean isTolerantOfUriRedirections() {
         return true;
     }
+
+	@Override
+	public String getName() {
+		return "DestinationRequest";
+	}
 }

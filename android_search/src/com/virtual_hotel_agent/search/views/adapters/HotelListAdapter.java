@@ -36,7 +36,7 @@ public class HotelListAdapter extends BaseAdapter {
 
 		mInflater = LayoutInflater.from(parent.getActivity());
 		mParent = parent;
-		mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.hotel72);
+		mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_72);
 	}
 	
 	private List<Hotel>  getHotels() {

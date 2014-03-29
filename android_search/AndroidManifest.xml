@@ -49,8 +49,11 @@
         </activity>
         <activity
             android:name="com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
             android:label="Hotel Area" />
-        <activity android:name="com.virtual_hotel_agent.search.controllers.activities.MyPreferences" >
+        
+        <activity android:name="com.virtual_hotel_agent.search.controllers.activities.MyPreferences" 
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
         </activity>
 
         <uses-library android:name="com.google.android.maps" />
@@ -60,7 +63,8 @@
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Dialog" />
+            android:theme="@android:style/Theme.Holo.Dialog"
+             />
 
         <service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
 
@@ -93,6 +97,7 @@
             android:label="@string/title_activity_image_gallery"
             android:theme="@style/FullscreenTheme" >
         </activity>
+        
     </application>
 
 </manifest>

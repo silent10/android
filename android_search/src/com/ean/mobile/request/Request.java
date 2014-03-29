@@ -89,6 +89,10 @@ public abstract class Request<T> {
      * @return true if secure, false if not
      */
     public abstract boolean requiresSecure();
+    
+    
+	public abstract String getName();
+
 
     /**
      * Gets the url parameters that will need to be present for every request.

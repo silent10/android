@@ -273,6 +273,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		if (mHotelId == hotelId) {
 			return;
 		}
+		MyApplication.selectedRoom = null;
 		mHotelId = hotelId;
 		fillData();
 	}

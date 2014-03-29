@@ -29,6 +29,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 		if (isCancelled()) {
 			Log.w(TAG, "thread was canceled!");
+			mProgress = DownloaderStatus.FinishedWithError;
 			return null;
 		}
 		mProgress = DownloaderStatus.Started;

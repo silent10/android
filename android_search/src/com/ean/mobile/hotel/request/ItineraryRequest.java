@@ -99,4 +99,9 @@ public class ItineraryRequest extends Request<Itinerary> {
         return false;
     }
 
+	@Override
+	public String getName() {
+		return "ItineraryRequest";
+	}
+
 }

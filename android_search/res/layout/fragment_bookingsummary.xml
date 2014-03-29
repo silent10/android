@@ -24,50 +24,52 @@
     either expressed or implied, of the Expedia Affiliate Network or Expedia Inc.
 -->
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android" 
-
         android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:background="@color/palette_light_grey"
-                android:fillViewport="true">
+                android:background="@drawable/search_background"
+                android:fillViewport="true"
+                >
+                
         <LinearLayout android:layout_width="fill_parent"
-                      android:layout_height="fill_parent"
-                      android:orientation="vertical">
-            <LinearLayout android:id="@+id/securityNoticeLayout"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:background="#FCF9D7">
-                <ImageView android:id="@+id/securitynoticeimage"
-                           android:layout_width="40dip"
-                           android:layout_height="40dip"
-                           android:src="@drawable/secure_icon"
-                           android:layout_gravity="center_vertical"/>
-                <LinearLayout android:id="@+id/securityNoticeTextLayout"
-                              android:layout_height="wrap_content"
-                              android:layout_width="fill_parent"
-                              android:orientation="vertical">
-                    <TextView android:id="@+id/securityNoticeTitle"
-                              android:textColor="@color/text"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:text="@string/security_notice_title"
-                              android:textSize="17dip"
-                              android:textStyle="bold"/>
-                    <TextView android:id="@+id/securityNoticeText"
-                              android:textColor="@color/text"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:text="@string/security_notice_text"/>
-                </LinearLayout>
-            </LinearLayout>
-            <TextView android:id="@+id/hotelName"
-                      android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
-                      android:textStyle="bold"
-                      android:textColor="@color/text"/>
-
+                      android:orientation="vertical"
+                      android:animateLayoutChanges="true"
+                      android:padding="4dp"
+                      >
+            
+            <RelativeLayout
+		        android:id="@+id/titleLayout"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:background="@drawable/vha_background"
+		        android:padding="4dp" >
+		
+		        <TextView
+		            android:id="@+id/hotelName"
+		            android:layout_width="fill_parent"
+		            android:layout_height="wrap_content"
+		            android:layout_centerInParent="true"
+		            android:text="..."
+		            android:textColor="#fff"
+		            android:textSize="24dip"
+		            android:textStyle="bold" >
+		
+			    </TextView>
+		    
+		        <!-- <ImageView
+		            android:id="@+id/imageView1"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_centerInParent="true"
+		            android:src="@drawable/top_logo" /> -->
+		        
+		    </RelativeLayout>
+		    
+            
             <TableLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:padding="4dp" >
 
                 <TableRow
                     android:id="@+id/tableRow1"
@@ -78,7 +80,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/room_type"
-                        android:textColor="@color/text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -86,30 +87,22 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/text" />
-
+                         />
                 </TableRow>
-
-                <TableRow
-                    android:id="@+id/tableRow2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/arrival"
-                        android:textColor="@color/text"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/arrivalDisplay"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textColor="@color/text" />
-
-                </TableRow>
+                
+                <TableRow android:id="@+id/tableRow2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content">
+	                <TextView android:layout_width="wrap_content"
+	                          android:layout_height="wrap_content"
+	                          android:text="@string/bed_type"
+	                          android:textStyle="bold"/>
+	                <TextView android:id="@+id/bedTypeDisplay"
+	                          android:layout_width="fill_parent"
+	                          android:layout_height="wrap_content"
+	                          android:layout_weight="1"/>
+            	</TableRow>
+                
 
                 <TableRow
                     android:id="@+id/tableRow3"
@@ -119,16 +112,15 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/departure"
-                        android:textColor="@color/text"
+                        android:text="@string/arrival"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/departureDisplay"
+                        android:id="@+id/arrivalDisplay"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/text" />
+                         />
 
                 </TableRow>
 
@@ -140,8 +132,27 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:text="@string/departure"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/departureDisplay"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                         />
+
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:text="@string/guests"
-                        android:textColor="@color/text"
                         android:textStyle="bold" />
 
                     <TextView
@@ -149,7 +160,7 @@
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/text" />
+                         />
 
                 </TableRow>
             </TableLayout>
@@ -158,20 +169,21 @@
             <LinearLayout android:id="@+id/pricedetaillayout"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
-                          android:orientation="vertical">
+                          android:orientation="vertical"
+                          android:background="#EAEFF8"
+                          >
 
                 <TextView android:id="@+id/priceDetailsLabel"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
-                          android:textColor="#D6D5D4"
                           android:text="@string/price_details"
-                          android:textSize="25dip"/>
+                          android:textSize="25sp"/>
                 <!-- room type, then drrpromo img and text
                 then a list view breaking down the stay into days and individualized rates for each-->
-                <TextView android:id="@+id/priceDetailsRoomType"
+           mCreditCardTypes     <TextView android:id="@+id/priceDetailsRoomType"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
-                          android:textColor="@color/text" />
+                           />
                 <LinearLayout android:layout_width="fill_parent"
                               android:layout_height="wrap_content">
 <!--                     <ImageView android:id="@+id/drrPromoImg" -->
@@ -181,16 +193,16 @@
 <!--                                android:layout_marginRight="2dip" -->
 <!--                                android:layout_gravity="bottom"/> -->
                     <TextView android:id="@+id/drrPromoText"
-                              android:textColor="#FF6600"
                               android:layout_height="wrap_content"
                               android:layout_width="wrap_content"
-                              android:textSize="10dip"
+                              android:textSize="10sp"
                               android:layout_gravity="bottom"/>
                 </LinearLayout>
                 <LinearLayout android:id="@+id/priceDetailsBreakdown"
                               android:layout_width="fill_parent"
                               android:layout_height="wrap_content"
-                              android:orientation="vertical"/>
+                              android:orientation="vertical"
+                              android:background="#EAEFF8"/>
                 <LinearLayout android:layout_width="fill_parent"
                               android:layout_height="wrap_content">
                     <TextView android:text="@string/taxes_and_fees"
@@ -206,6 +218,7 @@
                 </LinearLayout>
 
             </LinearLayout>
+            
             <LinearLayout android:id="@+id/totallayout"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
@@ -214,9 +227,9 @@
                           android:layout_width="0dip"
                           android:layout_height="fill_parent"
                           android:layout_weight="1"
-                          android:textColor="@color/text"
-                          android:textSize="20dip"
+                          android:textSize="20sp"
                           android:text="@string/total_charges" />
+                
                 <LinearLayout android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
                               android:layout_weight="1"
@@ -227,171 +240,215 @@
                               android:layout_height="fill_parent"
                               android:layout_marginRight="4dip"
                               android:gravity="right"
-                              android:textSize="20dip"
-                              android:textColor="@color/text"
+                              android:textSize="20sp"
                               android:textStyle="bold"/>
                     <TextView android:id="@+id/highPrice"
                               android:layout_height="wrap_content"
                               android:layout_width="fill_parent"
                               android:layout_gravity="right"
-                              android:textSize="20dip"
+                              android:textSize="20sp"
                               android:textColor="#555555"/>
                 </LinearLayout>
             </LinearLayout>
-            <LinearLayout android:id="@+id/guestinformationlayout"
+            
+           
+
+            <Button
+                    android:id="@+id/button_show_guests"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/guests_info_button"
+                    />
+            
+            
+           <LinearLayout android:id="@+id/guestinfolayout"
+                         android:layout_width="fill_parent"
+                         android:layout_height="wrap_content"
+                         android:orientation="vertical"
+                         android:visibility="gone">
+
+               <TextView android:layout_height="wrap_content"
+                         android:layout_width="fill_parent"
+                         android:text="@string/guest_information" />
+               <LinearLayout android:layout_height="wrap_content"
+                             android:layout_width="fill_parent">
+                   <EditText android:id="@+id/guestFirstName"
+                             android:layout_width="0dip"
+                             android:layout_height="wrap_content"
+                             android:layout_weight="1"
+                             android:inputType="textPersonName"
+                             android:hint="@string/guest_first_name"/>
+                   <EditText android:id="@+id/guestLastName"
+                             android:layout_width="0dip"
+                             android:layout_height="wrap_content"
+                             android:layout_weight="1"
+                             android:inputType="textPersonName"
+                             android:hint="@string/guest_last_name"/>
+               </LinearLayout>
+               <EditText android:id="@+id/guestPhoneNumber"
+                         android:layout_width="fill_parent"
+                         android:layout_height="wrap_content"
+                         android:inputType="phone"
+                         android:hint="@string/guest_phone"/>
+               <EditText android:id="@+id/guestEmail"
+                         android:layout_width="fill_parent"
+                         android:layout_height="wrap_content"
+                         android:inputType="textEmailAddress"
+                         android:hint="@string/guest_email"/>
+
+               <Button
+                   android:id="@+id/choose_contact_button"
+                   android:layout_width="fill_parent"
+                   android:layout_height="wrap_content"
+                   android:singleLine="true"
+                   android:text="@string/choose_contact" />
+
+           </LinearLayout>
+               
+            
+            <Button
+                    android:id="@+id/button_billing_info"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/billing_info_button"
+                    />
+            
+            
+            <LinearLayout android:id="@+id/billinginformationlayout"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
-                          android:orientation="vertical">
+                          android:orientation="vertical"
+                          android:visibility="gone"
+                          >
+                <TextView android:id="@+id/billingInformationLabel"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:text="@string/billing_information" />
 
-                <Button
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/choose_contact"
-                        android:id="@+id/choose_contact_button"
-                        android:layout_weight="500"
-                        android:layout_gravity="top"
-                        android:singleLine="true"
-                        />
-
-                <LinearLayout android:id="@+id/guestinfolayout"
-                              android:layout_width="fill_parent"
+                <EditText android:id="@+id/billingInformationAddress1"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:hint="@string/billing_address_1"/>
+                <EditText android:id="@+id/billingInformationAddress2"
+                          android:layout_width="fill_parent"
+                          android:layout_height="wrap_content"
+                          android:hint="@string/billing_address_2" />
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="wrap_content">
+                    <EditText android:id="@+id/billingInformationCity"
+                              android:layout_width="0dip"
                               android:layout_height="wrap_content"
-                              android:orientation="vertical">
+                              android:layout_weight="3"
+                              android:hint="@string/billing_city" />
+                    <EditText android:id="@+id/billingInformationState"
+                              android:layout_width="0dip"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:hint="@string/billing_state"  />
+                </LinearLayout>
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="wrap_content">
+                    <EditText android:id="@+id/billingInformationCountry"
+                              android:layout_width="0dip"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="3"
+                              android:hint="@string/billing_country"  />
+                    <EditText android:id="@+id/billingInformationZip"
+                              android:layout_width="0dip"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:minEms="5"
+                              android:hint="@string/billing_zip"
+                              android:inputType="number" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/creditcardlayout"
+                              android:layout_height="wrap_content"
+                              android:layout_width="fill_parent">
+
+                    <TextView 
+                        android:text="Credit card type:"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:labelFor="@+id/billingInformationCCType"
+                        />
+                    <Spinner
+                        android:id="@+id/billingInformationCCType"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:longClickable="true" 
+                        />
+				 </LinearLayout>
+                <RelativeLayout android:id="@+id/creditcardlayout2"
+                              android:layout_height="wrap_content"
+                              android:layout_width="fill_parent">
+	                <EditText android:id="@+id/billingInformationCCNum"
+	                              android:layout_width="wrap_content"
+	                              android:layout_height="wrap_content"
+	                              android:layout_toLeftOf="@+id/billingInformationCCExpMo"
+	                              android:layout_alignParentLeft="true"
+	                              android:hint="@string/billing_cc_num"
+	                              android:inputType="number"/>
+                    <Spinner android:id="@+id/billingInformationCCExpMo"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_toLeftOf="@+id/billingInformationCCExpYr"
+                              android:hint="@string/billing_cc_expmo"
+                              android:inputType="number" android:entries="@array/credit_card_months"
+                              android:focusableInTouchMode="true"/>
+                    <Spinner android:id="@+id/billingInformationCCExpYr"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:hint="@string/billing_cc_expyr"
+                              android:layout_alignParentRight="true"
+                              android:inputType="number" android:focusable="false"
+                              android:entries="@array/credit_card_years"/>
+                </RelativeLayout>
+                <RelativeLayout android:layout_width="fill_parent"
+                              android:layout_height="wrap_content">
 
                     <TextView android:layout_height="wrap_content"
-                              android:layout_width="fill_parent"
-                              android:text="@string/guest_information" />
-                    <LinearLayout android:layout_height="wrap_content"
-                                  android:layout_width="fill_parent">
-                        <EditText android:id="@+id/guestFirstName"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="1"
-                                  android:inputType="textPersonName"
-                                  android:hint="@string/guest_first_name"/>
-                        <EditText android:id="@+id/guestLastName"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="1"
-                                  android:inputType="textPersonName"
-                                  android:hint="@string/guest_last_name"/>
-                    </LinearLayout>
-                    <EditText android:id="@+id/guestPhoneNumber"
-                              android:layout_width="fill_parent"
+                              android:layout_width="wrap_content"
+                              android:layout_alignParentLeft="true"
+                              android:layout_toLeftOf="@+id/billingInformationCCSecurityCode"
+                              android:text="@string/billing_cc_security"
+                              android:labelFor="@+id/billingInformationCCSecurityCode"
+                               />
+                    
+                    <EditText android:id="@+id/billingInformationCCSecurityCode"
+                              android:layout_width="60dp"
                               android:layout_height="wrap_content"
-                              android:inputType="phone"
-                              android:hint="@string/guest_phone"/>
-                    <EditText android:id="@+id/guestEmail"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:inputType="textEmailAddress"
-                              android:hint="@string/guest_email"/>
-                </LinearLayout>
-                <LinearLayout android:id="@+id/billinginformationlayout"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:orientation="vertical">
-                    <TextView android:id="@+id/billingInformationLabel"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:text="@string/billing_information" />
+                              android:layout_alignParentRight="true"
+                              android:inputType="number" />
+                </RelativeLayout>
 
-                    <Button
-                            android:id="@+id/button_load_default_billing_info"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/load_default_billing_info"
-                            android:layout_gravity="left|center_vertical"
-                            android:focusable="true"
-                            android:singleLine="true"
-                            />
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/billing_legal_disclaimer" />
 
-                    <EditText android:id="@+id/billingInformationAddress1"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:hint="@string/billing_address_1"/>
-                    <EditText android:id="@+id/billingInformationAddress2"
-                              android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:hint="@string/billing_address_2" />
-                    <LinearLayout android:layout_width="fill_parent"
-                                  android:layout_height="wrap_content">
-                        <EditText android:id="@+id/billingInformationCity"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="3"
-                                  android:hint="@string/billing_city" />
-                        <EditText android:id="@+id/billingInformationState"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="1"
-                                  android:hint="@string/billing_state"  />
-                    </LinearLayout>
-                    <LinearLayout android:layout_width="fill_parent"
-                                  android:layout_height="wrap_content">
-                        <EditText android:id="@+id/billingInformationCountry"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="3"
-                                  android:hint="@string/billing_country"  />
-                        <EditText android:id="@+id/billingInformationZip"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="1"
-                                  android:minEms="5"
-                                  android:hint="@string/billing_zip"
-                                  android:inputType="number" />
-                    </LinearLayout>
-                    <LinearLayout android:id="@+id/creditcardlayout"
-                                  android:layout_height="wrap_content"
-                                  android:layout_width="fill_parent">
-                        <EditText android:id="@+id/billingInformationCCNum"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="20"
-                                  android:hint="@string/billing_cc_num"
-                                  android:inputType="number"/>
-                        <Spinner android:id="@+id/billingInformationCCExpMo"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="8"
-                                  android:hint="@string/billing_cc_expmo"
-                                  android:inputType="number" android:entries="@array/credit_card_months"
-                                  android:focusableInTouchMode="true"/>
-                        <Spinner android:id="@+id/billingInformationCCExpYr"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="12"
-                                  android:hint="@string/billing_cc_expyr"
-                                  android:inputType="number" android:focusable="false"
-                                  android:entries="@array/credit_card_years"/>
-                    </LinearLayout>
-                    <LinearLayout android:layout_width="fill_parent"
-                                  android:layout_height="wrap_content">
-
-                        <Spinner
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/billingInformationCCType"
-                                android:layout_gravity="center_horizontal|top"
-                                android:longClickable="true"/>
-
-                        <TextView android:layout_height="wrap_content"
-                                  android:layout_width="0dip"
-                                  android:layout_weight="7"
-                                  android:text="@string/billing_cc_security"
-                                  android:inputType="number"/>
-                        <EditText android:id="@+id/billingInformationCCSecurityCode"
-                                  android:layout_width="0dip"
-                                  android:layout_height="wrap_content"
-                                  android:layout_weight="2" />
-                    </LinearLayout>
-                    <TextView android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:text="@string/billing_legal_disclaimer" />
+                <Button
+                    android:id="@+id/button_load_default_billing_info"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:singleLine="true"
+                    android:text="@string/load_default_billing_info" />
+            </LinearLayout>
+            
+             <LinearLayout android:id="@+id/securityNoticeLayout" android:layout_width="fill_parent" 
+                android:layout_height="wrap_content" android:background="#FCF9D7" android:visibility="gone">
+                <ImageView android:id="@+id/securitynoticeimage" android:layout_width="40dip" android:layout_height="40dip" android:src="@drawable/secure_icon" android:layout_gravity="center_vertical" />
+                
+                <LinearLayout android:id="@+id/securityNoticeTextLayout" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical">
+                    <TextView android:id="@+id/securityNoticeTitle" 
+                        android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/security_notice_title" android:textSize="17dip" android:textStyle="bold" />
+                    <TextView android:id="@+id/securityNoticeText" 
+                        android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/security_notice_text" />
                 </LinearLayout>
             </LinearLayout>
 
+            
             <Button
                     android:id="@+id/button_complete_booking"
                     android:layout_width="fill_parent"

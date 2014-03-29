@@ -65,6 +65,7 @@ import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
+import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
@@ -87,6 +88,7 @@ import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.controllers.events.BookingCompletedEvent;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
@@ -111,6 +113,7 @@ import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
+import com.virtual_hotel_agent.search.views.fragments.ReservationDisplayFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
@@ -145,6 +148,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	private String mRoomsTabName;
 	private String mBookingTabName;
 	private String mMapTabName;
+	private String mReservationsTabName; 
 
 	static private HotelListDownloaderTask mSearchExpediaTask = null;
 	static private RoomsUpdaterTask mRoomUpdater = null;
@@ -301,8 +305,10 @@ public class MainActivity extends RoboFragmentActivity implements
 		mHotelTabName = getString(R.string.HOTEL);
 		mRoomsTabName = getString(R.string.ROOMS);
 		mBookingTabName = getString(R.string.BOOKING);
+		mReservationsTabName = getString(R.string.RESERVATIONS);
 		mMapTabName = getString(R.string.MAP);
 
+		CommonParameters.currencyCode = SettingsAPI.getCurrencyCode(this);
 		
 //		if (savedInstanceState != null  && MyApplication.FOUND_HOTELS.size() > 0) { // Restore state
 //			// Same code as onRestoreInstanceState() ?
@@ -461,21 +467,25 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		//private final ViewPager mViewPager;
 		private final String TAG = TabsPagerAdapter.class.getSimpleName();
-		private Fragment mMapFragment;
-		private Fragment mHotelsListFragment;
-		private Fragment mHotelDetailFragment;
-		private Fragment mRoomSelectFragment;
-		private Fragment mBookingFragment;
+		Fragment mMapFragment;
+		Fragment mHotelsListFragment;
+		Fragment mHotelDetailFragment;
+		Fragment mRoomSelectFragment;
+		Fragment mBookingFragment;
+		Fragment mReservationFragment;
+		ChatFragment mChatFragment;
 
 		public TabsPagerAdapter( FragmentManager fm) {
 			super(fm);
 			Log.i(TAG, "CTOR");
 			// optimization - create before needed
+			mChatFragment = null; 
 			mMapFragment = injector.getInstance(HotelsMapFragment.class);
 			mHotelsListFragment = injector.getInstance(HotelListFragment.class);
 			mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
 			mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
 			mBookingFragment = injector.getInstance(BookingFragement.class);
+			mReservationFragment = null;
 		}
 		
 
@@ -496,17 +506,19 @@ public class MainActivity extends RoboFragmentActivity implements
 			String tabTitle = mTabTitles.get(position);
 			if (tabTitle.equals(mChatTabName)) { // Main Chat window
 				Log.d(TAG, "Chat Fragment");
-				ChatFragment chatFragment = injector.getInstance(ChatFragment.class);
-				chatFragment.setDialogHandler(new DialogClickHandler() {
-					
-					@Override
-					public void onClick(SpannableString dialogResponse, int responseIndex) {
-						MainActivity.this.addChatItem(new ChatItem(dialogResponse));
-						MainActivity.this.eva.replyToDialog(responseIndex);
-						//MainActivity.this.searchWithText(dialogResponse);
-					}
-				});
-				return chatFragment;
+				if (mChatFragment == null) {
+					mChatFragment = injector.getInstance(ChatFragment.class);
+					mChatFragment.setDialogHandler(new DialogClickHandler() {
+						
+						@Override
+						public void onClick(SpannableString dialogResponse, int responseIndex) {
+							MainActivity.this.addChatItem(new ChatItem(dialogResponse));
+							MainActivity.this.eva.replyToDialog(responseIndex);
+							//MainActivity.this.searchWithText(dialogResponse);
+						}
+					});
+				}
+				return mChatFragment;
 			}
 			else if (tabTitle.equals(mHotelsTabName)) { // Hotel list window
 				Log.i(TAG, "Hotels Fragment");
@@ -547,6 +559,13 @@ public class MainActivity extends RoboFragmentActivity implements
 					mBookingFragment = injector.getInstance(BookingFragement.class);
 				}
 				return mBookingFragment;
+			}
+			if (mTabTitles.equals(mReservationsTabName)) {
+				Log.i(TAG, "starting reservation fragment");
+				if (mReservationFragment == null) {
+					mReservationFragment = injector.getInstance(ReservationDisplayFragment.class);
+				}
+				return mReservationFragment;
 			}
 //			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 //				Log.i(TAG, "Trains Fragment");
@@ -803,7 +822,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			index = mTabTitles.size() - 1;
 		}
 		// http://stackoverflow.com/a/8886019/78234
-		ChatFragment fragment = (ChatFragment) mTabsAdapter.instantiateItem(mViewPager, index);
+		ChatFragment fragment = (ChatFragment) mTabsAdapter.mChatFragment;//instantiateItem(mViewPager, index);
 		if (fragment == null) // could be null if not instantiated yet
 		{
 			Log.w(TAG, "chat fragment == null!?");
@@ -890,7 +909,23 @@ public class MainActivity extends RoboFragmentActivity implements
 	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		eva.onSharedPreferenceChanged(sharedPreferences, key);
+
+		if ("vha_preference_currency".equals(key)) {
+			
+			int currencyIndex = Integer.parseInt(sharedPreferences.getString("vha_preference_currency", "-1"));
+			String[] entries = getResources().getStringArray(R.array.entries_currency_preference);
+	
+			String currencyCode;
+			if (currencyIndex < entries.length)
+				currencyCode = entries[currencyIndex];
+			else {
+				LogError(TAG, "currencyIndex = "+currencyIndex+"  but entries.size = "+entries.length);
+				currencyCode = entries[0];
+			}
+			CommonParameters.currencyCode = currencyCode;
+		}
+
+		
 //		if (EvaComponent.DEBUG_PREF_KEY.equals(key)) {
 //			ActivityCompat.invalidateOptionsMenu(this);
 //		}
@@ -1038,7 +1073,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 	
 	private void removeTabs() {
-		final String [] tabsToRemove = { mHotelsTabName, mHotelTabName, mMapTabName, mRoomsTabName, mBookingTabName };
+		final String [] tabsToRemove = { mHotelsTabName, mHotelTabName, mMapTabName, mRoomsTabName, mBookingTabName, mReservationsTabName };
 		for (String tab : tabsToRemove) {
 			int index = mTabTitles.indexOf(tab);
 			if (index != -1)
@@ -1050,9 +1085,9 @@ public class MainActivity extends RoboFragmentActivity implements
 
 
 	static ChatItem currentHotelSearch = null;
-	static ChatItem currentFlightSearch = null;
+//	static ChatItem currentFlightSearch = null;
 	static ChatItem lastHotelCompleted = null;
-	static ChatItem lastFlightCompleted = null;
+//	static ChatItem lastFlightCompleted = null;
 	int retries = 0;
 
 	/***
@@ -1097,14 +1132,14 @@ public class MainActivity extends RoboFragmentActivity implements
 						mTabsAdapter.addTab(mMapTabName);
 						mapIndex = mTabTitles.size()-1;
 					}
-					HotelsMapFragment mapFragment = (HotelsMapFragment) mTabsAdapter.instantiateItem(mViewPager, mapIndex);
+					HotelsMapFragment mapFragment = (HotelsMapFragment) mTabsAdapter.mMapFragment;// instantiateItem(mViewPager, mapIndex);
 					mapFragment.onHotelsListUpdated();
 					
 					mTabsAdapter.removeTab(mHotelTabName);
 					mTabsAdapter.removeTab(mRoomsTabName);
 					mTabsAdapter.removeTab(mBookingTabName);
 
-					HotelListFragment fragment = (HotelListFragment) mTabsAdapter.instantiateItem(mViewPager, index);
+					HotelListFragment fragment = (HotelListFragment) mTabsAdapter.mHotelsListFragment; //instantiateItem(mViewPager, index);
 					if (fragment != null) {
 						fragment.newHotelsList();
 					}
@@ -1125,12 +1160,12 @@ public class MainActivity extends RoboFragmentActivity implements
 				}
 				lastHotelCompleted = currentItem;
 			}
-			if (currentItem.getFlowElement().Type == TypeEnum.Flight) {
-				if (lastFlightCompleted != null && lastFlightCompleted != currentItem) {
-					lastFlightCompleted.setStatus(Status.ToSearch);
-				}
-				lastFlightCompleted = currentItem;
-			}
+//			if (currentItem.getFlowElement().Type == TypeEnum.Flight) {
+//				if (lastFlightCompleted != null && lastFlightCompleted != currentItem) {
+//					lastFlightCompleted.setStatus(Status.ToSearch);
+//				}
+//				lastFlightCompleted = currentItem;
+//			}
 			// if chat items change when search is done - update chat list 
 			//invalidateChatFragment();
 		}
@@ -1308,7 +1343,7 @@ public class MainActivity extends RoboFragmentActivity implements
 
 		@Override
 		public void endProgressDialog(int id, Object result) { // we got the hotel rooms reply successfully
-			Log.d(TAG, "endProgressDialog() for hotel rooms  ");
+			Log.d(TAG, "endProgressDialog() for hotel rooms for hotel "+mRoomUpdater.hotelId);
 			mainView.hideStatus();
 			
 			String tabName = mRoomsTabName; 
@@ -1317,7 +1352,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				mTabsAdapter.addTab(tabName);
 				index = mTabTitles.size()-1;
 			}
-			RoomsSelectFragement fragment = (RoomsSelectFragement) mTabsAdapter.instantiateItem(mViewPager, index);
+			RoomsSelectFragement fragment = (RoomsSelectFragement) mTabsAdapter.mRoomSelectFragment; //instantiateItem(mViewPager, index);
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				fragment.changeHotelId(mRoomUpdater.hotelId);
@@ -1338,7 +1373,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				if ("SOLD_OUT".equals(err.category)) {
 					int index = mTabTitles.indexOf(mHotelTabName);
 					if (index != -1) {
-						HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.instantiateItem(mViewPager, index);
+						HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
 						if (fragment != null) // could be null if not instantiated yet
 						{
 							fragment.hotelSoldOut();
@@ -1369,8 +1404,8 @@ public class MainActivity extends RoboFragmentActivity implements
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			
 			long hotelId = mHotelDownloader.getHotelId();
-			Log.d(TAG, "endProgressDialog() Hotel # " + hotelId);
 			MyApplication.selectedHotel = MyApplication.HOTEL_ID_MAP.get(hotelId);
+			Log.d(TAG, "endProgressDialog() Hotel # " + hotelId+ " - "+MyApplication.selectedHotel.name);
 
 			onEventHotelsListUpdated(null);
 
@@ -1379,14 +1414,13 @@ public class MainActivity extends RoboFragmentActivity implements
 			int index = mTabTitles.indexOf(tabName);
 			if (index == -1) {
 				mTabsAdapter.addTab(tabName);
+				index = mTabTitles.size() - 1;
 			}
-			else {
 	
-				HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.instantiateItem(mViewPager, index);
-				if (fragment != null) // could be null if not instantiated yet
-				{
-					fragment.changeHotelId(hotelId);
-				}
+			HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
+			if (fragment != null) // could be null if not instantiated yet
+			{
+				fragment.changeHotelId(hotelId);
 			}
 
 			index = mTabTitles.indexOf(tabName);
@@ -1492,7 +1526,7 @@ public class MainActivity extends RoboFragmentActivity implements
 //			chatItem.setInSession(false);
 //		}
 		clearChatList();
-		lastFlightCompleted = null;
+//		lastFlightCompleted = null;
 		lastHotelCompleted = null;
 
 		mTabsAdapter.showTab(mChatTabName);
@@ -1511,24 +1545,39 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void onEventHotelsListUpdated( @Observes HotelsListUpdated event) {
 		int mapTabIndex = mTabTitles.indexOf(mMapTabName);
 		if (mapTabIndex != -1) {
-			HotelsMapFragment frag = (HotelsMapFragment)  mTabsAdapter.instantiateItem(mViewPager, mapTabIndex);
+			HotelsMapFragment frag = (HotelsMapFragment)  mTabsAdapter.mMapFragment; //instantiateItem(mViewPager, mapTabIndex);
 			if (frag != null) {
 				frag.onHotelsListUpdated();
 			}
 		}
 	}
 	
+	public void onEventBookingCompleted( @Observes BookingCompletedEvent event) {
+		int reservationTabIndex = mTabTitles.indexOf(mReservationsTabName);
+		if (reservationTabIndex == -1) {
+			mTabsAdapter.addTab(mReservationsTabName);
+			reservationTabIndex = mTabTitles.size() - 1;
+		}
+		
+		ReservationDisplayFragment frag = (ReservationDisplayFragment)  mTabsAdapter.mReservationFragment; //instantiateItem(mViewPager, reservationTabIndex);
+		if (frag != null) {
+			frag.showLatestReservation();
+		}
+		mTabs.setCurrentItem(reservationTabIndex);
+	}
+	
 	
 	public void onEventRoomSelected( @Observes RoomSelectedEvent event) {
 
 		Hotel hotel = MyApplication.HOTEL_ID_MAP.get(event.hotelId);
+		MyApplication.selectedRoom = event.room;
 		
 		int bookingIndex = mTabTitles.indexOf(mBookingTabName);
 		if (bookingIndex == -1) {
 			mTabsAdapter.addTab(mBookingTabName);
 			bookingIndex = mTabTitles.size() - 1;
 		}
-		BookingFragement frag = (BookingFragement)  mTabsAdapter.instantiateItem(mViewPager, bookingIndex);
+		BookingFragement frag = (BookingFragement)  mTabsAdapter.mBookingFragment; //instantiateItem(mViewPager, bookingIndex);
 		if (frag != null) {
 			frag.changeHotelRoom(hotel, event.room);
 		}
@@ -1585,11 +1634,13 @@ public class MainActivity extends RoboFragmentActivity implements
 		HotelInformation info = MyApplication.EXTENDED_INFOS.get(hotel.hotelId);
 		mHotelDownloader = new HotelDownloaderTask(mHotelDownloadListener, hotel.hotelId);
 		if (info != null) {
+			Log.d(TAG, "Loaded info for hotel "+hotel.name+" from cache");
 			// restored from cache - fake downloader progress
 			mHotelDownloadListener.endProgressDialog(R.string.HOTEL, null);
 		}
 		else {
 			mainView.showStatus("Getting Hotel info...");
+			Log.d(TAG, "Getting info for hotel "+hotel.name);
 			//this.endProgressDialog(R.string.HOTEL, "fake response");
 			mHotelDownloader.execute();
 		}
@@ -1623,6 +1674,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		mTabsAdapter.removeTab(mRoomsTabName);
 		mTabsAdapter.removeTab(mBookingTabName);
+		mTabsAdapter.removeTab(mReservationsTabName);
 		mRoomUpdater = new RoomsUpdaterTask(hotelId);
 		mRoomUpdater.attach(mRoomUpdaterListener);
 		List<HotelRoom> rooms = MyApplication.HOTEL_ROOMS.get(hotelId);
@@ -1638,11 +1690,11 @@ public class MainActivity extends RoboFragmentActivity implements
 
 
 	private static Random randomGenerator = new Random();
-	private static String nextMonth = "April";
+	private static String exampleMonth = "June";
 	private String tests[] = { "Hotel tonight", 
-			"Hotel in Madrid "+nextMonth+" 10th to 12th", 
-			"Hotel in Paris "+nextMonth+" 10th to 12th", 
-			"Hilton Hotel in Miami "+nextMonth+" 10th to 12th" };
+			"Hotel in Madrid "+exampleMonth+" 22nd to 24th", 
+			"Hotel in Paris "+exampleMonth+" 22nd to 24th", 
+			"Hilton Hotel in Miami "+exampleMonth+" 22nd to 24th" };
 	
 	public void onEventChatItemClicked( @Observes ChatItemClicked  event) {
 		ChatItem chatItem = event.chatItem;
@@ -1672,16 +1724,16 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 	}
-
-	public void flightsFragmentVisible() {
-		if (currentFlightSearch != null && currentFlightSearch.sayitActivated == false) {
-			String sayIt = currentFlightSearch.getFlowElement().getSayIt();
-			if (sayIt != null && !"".equals(sayIt) ) {
-				eva.speak(sayIt);
-				currentFlightSearch.sayitActivated = true;
-			}
-		}
-	}
+//
+//	public void flightsFragmentVisible() {
+//		if (currentFlightSearch != null && currentFlightSearch.sayitActivated == false) {
+//			String sayIt = currentFlightSearch.getFlowElement().getSayIt();
+//			if (sayIt != null && !"".equals(sayIt) ) {
+//				eva.speak(sayIt);
+//				currentFlightSearch.sayitActivated = true;
+//			}
+//		}
+//	}
 
 	
 

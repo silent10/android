@@ -1,20 +1,24 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
-import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.AsyncTask;
@@ -24,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,8 +53,11 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.controllers.events.BookingCompletedEvent;
 
 public class BookingFragement extends RoboFragment {
 
@@ -60,11 +68,14 @@ public class BookingFragement extends RoboFragment {
     private static final DateTimeFormatter NIGHTLY_RATE_FORMATTER
         = DateTimeFormat.forPattern(NIGHTLY_RATE_FORMAT_STRING);
 	private static final int PICK_CONTACT_INTENT = 1;
-	private View mView = null;
 	private ArrayList<String> mCreditCardTypes;
+	private ArrayList<String> mCreditCardValues;
+	
+	@Inject protected EventManager eventManager;
 	
 	private Hotel hotel;
 	private HotelRoom hotelRoom;
+	private View mView = null;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -76,9 +87,6 @@ public class BookingFragement extends RoboFragment {
 			return mView;
 		}
 		
-        hotel = MyApplication.selectedHotel;
-        hotelRoom = MyApplication.selectedRoom;
-
 		
 		Context context = BookingFragement.this.getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
@@ -100,6 +108,19 @@ public class BookingFragement extends RoboFragment {
 		Button completeBooking = (Button) mView.findViewById(R.id.button_complete_booking);
 		completeBooking.setOnClickListener(mCompleteBooking);
 		
+		Button toggleBilling = (Button) mView.findViewById(R.id.button_billing_info);
+		toggleBilling.setOnClickListener(mToggleBilling);
+		
+		Button toggleGuests = (Button) mView.findViewById(R.id.button_show_guests);
+		toggleGuests.setOnClickListener(mToggleGuests);
+		
+        if (MyApplication.selectedHotel == null || MyApplication.selectedRoom == null) {
+        	MainActivity.LogError(TAG, "Null hotel/room");
+        	return mView;
+        }
+
+        changeHotelRoom(MyApplication.selectedHotel, MyApplication.selectedRoom);
+
 		return mView;
 	}
 
@@ -115,6 +136,7 @@ public class BookingFragement extends RoboFragment {
         final TextView checkOut = (TextView) mView.findViewById(R.id.departureDisplay);
         final TextView numGuests = (TextView) mView.findViewById(R.id.guestsNumberDisplay);
         final TextView roomType = (TextView) mView.findViewById(R.id.roomTypeDisplay);
+        final TextView bedType = (TextView) mView.findViewById(R.id.bedTypeDisplay);
         final TextView taxesAndFees = (TextView) mView.findViewById(R.id.taxes_and_fees_display);
         final TextView totalLowPrice = (TextView) mView.findViewById(R.id.lowPrice);
 		
@@ -124,10 +146,10 @@ public class BookingFragement extends RoboFragment {
         
         checkIn.setText(DATE_TIME_FORMATTER.print(MyApplication.arrivalDate));
         checkOut.setText(DATE_TIME_FORMATTER.print(MyApplication.departureDate));
-        numGuests.setText(String.format(
-            getString(R.string.adults_comma_children), occupancy.numberOfAdults, occupancy.childAges.size()));
+        
+        numGuests.setText(getGuestsText(occupancy));
         roomType.setText(hotelRoom.description);
-        // bedType.setText(hotelRoom.bedTypes.get(0).description);
+        bedType.setText(hotelRoom.bedTypes.get(0).description);
 
         final NumberFormat currencyFormat = getCurrencyFormat(hotel.currencyCode);
 
@@ -135,14 +157,38 @@ public class BookingFragement extends RoboFragment {
 
         totalLowPrice.setText(currencyFormat.format(hotelRoom.getTotalRate()));
 
-        displayTotalHighPrice(hotelRoom, hotel.highPrice, currencyFormat);
+        displayTotalHighPrice(currencyFormat);
         //populatePriceBreakdownList(currencyFormat);
 
 	}
 	
 
-	private void displayTotalHighPrice(final HotelRoom hotelRoom, final BigDecimal highPrice,
-            final NumberFormat currencyFormat) {
+	private static String getGuestsText(RoomOccupancy occupancy) {
+		StringBuilder guests = new StringBuilder();
+		int childNum = occupancy.childAges.size();
+        if (occupancy.numberOfAdults > 0) {
+        	if (occupancy.numberOfAdults > 1) {
+        		guests.append(occupancy.numberOfAdults).append(" Adults");
+        	}
+        	else {
+        		guests.append("One Adult");
+        	}
+        	if (childNum > 0) {
+        		guests.append(", ");
+        	}
+        }
+		if (childNum > 0) {
+        	if (childNum > 0) {
+        		guests.append(childNum).append(" Children");
+        	}
+        	else {
+        		guests.append("One Child"); 
+        	}
+        }
+        return guests.toString();
+	}
+
+	private void displayTotalHighPrice(final NumberFormat currencyFormat) {
        final TextView totalHighPrice = (TextView) mView.findViewById(R.id.highPrice);
        //final ImageView drrIcon = (ImageView) mView.findViewById(R.id.drrPromoImg);
        final TextView drrPromoText = (TextView) mView.findViewById(R.id.drrPromoText);
@@ -158,7 +204,7 @@ public class BookingFragement extends RoboFragment {
            totalHighPrice.setVisibility(TextView.VISIBLE);
            //drrIcon.setVisibility(ImageView.VISIBLE);
            drrPromoText.setVisibility(ImageView.VISIBLE);
-           totalHighPrice.setText(currencyFormat.format(highPrice));
+           totalHighPrice.setText(currencyFormat.format(hotelRoom.getTotalBaseRate()));
            totalHighPrice.setPaintFlags(totalHighPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
        }
    }
@@ -173,7 +219,8 @@ public class BookingFragement extends RoboFragment {
 		this.hotelRoom = room;
 		
 		// TODO: credit type options should be taken from EAN response
-		mCreditCardTypes = new ArrayList<String>(Arrays.asList(new String[] { "VI", "MC", "AE" }));
+		mCreditCardTypes = new ArrayList<String>(Arrays.asList(new String[] { "Visa", "MasterCard", "American Express" }));
+		mCreditCardValues = new ArrayList<String>(Arrays.asList(new String[] { "VI", "MC", "AE" }));
 		if (mView != null) {
 			final Spinner cardType = (Spinner) mView.findViewById(R.id.billingInformationCCType);
 			ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(this.getActivity(), 
@@ -199,6 +246,82 @@ public class BookingFragement extends RoboFragment {
 	};
 	
 	
+	private void showBillingInfo(int show) {
+		final View guestsInfo = mView.findViewById(R.id.guestinfolayout);
+		final View securityNotice = mView.findViewById(R.id.securityNoticeLayout);
+		final View billingInfo = mView.findViewById(R.id.billinginformationlayout);
+		
+		billingInfo.setVisibility(show);
+		securityNotice.setVisibility(show);
+		
+		guestsInfo.setVisibility(View.GONE);
+	}
+	
+	private OnClickListener mToggleBilling = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			final View billingInfo = mView.findViewById(R.id.billinginformationlayout);
+			int show = billingInfo.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+			showBillingInfo(show);
+		}
+	};
+
+	private void showGuestInfo(int show) {
+		final View guestsInfo = mView.findViewById(R.id.guestinfolayout);
+		final View securityNotice = mView.findViewById(R.id.securityNoticeLayout);
+		final View billingInfo = mView.findViewById(R.id.billinginformationlayout);
+		
+		
+		guestsInfo.setVisibility(show);
+		securityNotice.setVisibility(show);
+		
+		billingInfo.setVisibility(View.GONE);
+	}
+
+	
+	private OnClickListener mToggleGuests = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			final View guestsInfo = mView.findViewById(R.id.guestinfolayout);
+			int show = guestsInfo.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+			showGuestInfo(show);
+		}
+	};
+	
+	
+	@SuppressWarnings("serial")
+	static class InvalidInputException extends Exception {
+		View offendingView;
+		String message;
+
+		public InvalidInputException(View offendingView, String message) {
+			this.message = message;
+			this.offendingView = offendingView;
+		}
+		
+	}
+	
+	/***
+	 * Check EditText for valid string -
+	 * throws InvalidInputException exception in case of error value
+	 * returns string  
+	 * @throws InvalidInputException 
+	 */
+	private String validateInput(int redId, int minLen, int maxLen) throws InvalidInputException {
+		EditText editText = (EditText) mView.findViewById(redId);
+		final String text = editText.getText().toString();
+		if (text.length() == 0 && minLen > 0) {
+			throw new InvalidInputException(editText, "{} cannot be empty.");
+		}
+		if (text.length() < minLen) {
+			throw new InvalidInputException(editText, "{} should be at least "+ minLen + " characters long.");
+		}
+		if (text.length() > maxLen) {
+			throw new InvalidInputException(editText, "{} should be at most "+ minLen + " characters long.");
+		}
+		return text;
+	}
+	
 	/**
 	 * (Event hanlder) Handles the complete booking button click. Loads the information from the inputs and
 	 * creates a new booking request based on that.
@@ -206,86 +329,159 @@ public class BookingFragement extends RoboFragment {
 	private OnClickListener mCompleteBooking = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-	        final String firstName = ((EditText) mView.findViewById(R.id.guestFirstName)).getText().toString();
-	        final String lastName = ((EditText) mView.findViewById(R.id.guestLastName)).getText().toString();
-	        final String phone = ((EditText) mView.findViewById(R.id.guestPhoneNumber)).getText().toString();
-	        final String email = ((EditText) mView.findViewById(R.id.guestEmail)).getText().toString();
+			try {
+				final String firstName = validateInput(R.id.guestFirstName, 2, 25);
+				final String lastName = validateInput(R.id.guestLastName, 2, 40);
+				final String phone = validateInput(R.id.guestPhoneNumber, 7, 16);
+		        final String email = validateInput(R.id.guestEmail, 6, 40);
+	
+		        final String addressLine1 = validateInput(R.id.billingInformationAddress1, 1, 100);
+		        final String addressLine2 = validateInput(R.id.billingInformationAddress2, -1, 100);
+		        final String city = validateInput(R.id.billingInformationCity, 2, 40);
+		        final String state = validateInput(R.id.billingInformationState, 2, 30);
+		        final String country = validateInput(R.id.billingInformationCountry, 2, 30);
+		        final String zip = validateInput(R.id.billingInformationZip, 5, 16);
+	
+		        final String cardTypeStr = ((Spinner) mView.findViewById(R.id.billingInformationCCType)).getSelectedItem().toString();
+		        final String cardType = mCreditCardValues.get(mCreditCardTypes.indexOf(cardTypeStr));
+		        final String cardNumber = validateInput(R.id.billingInformationCCNum, 9, 20);
+		        final String cardExpirationMonth
+		            = ((Spinner) mView.findViewById(R.id.billingInformationCCExpMo)).getSelectedItem().toString();
+		        final String cardExpirationYear
+		            = ((Spinner) mView.findViewById(R.id.billingInformationCCExpYr)).getSelectedItem().toString();
+		        final String cardSecurityCode
+		            = validateInput(R.id.billingInformationCCSecurityCode, 3, 6);
+	
+	
+		        final int cardExpirationFullYear = Integer.parseInt(cardExpirationYear);
+		        final int cardExpirationFullMonth = Integer.parseInt(cardExpirationMonth);
+	
+		        final YearMonth expirationDate = new YearMonth(cardExpirationFullYear, cardExpirationFullMonth);
+	
+		        final BookingRequest.ReservationInformation reservationInfo = new BookingRequest.ReservationInformation(
+		            email, firstName, lastName, phone, null, cardType, cardNumber, cardSecurityCode, expirationDate);
+	
+		        
+		        final ReservationRoom reservationRoom = new ReservationRoom(
+		            reservationInfo.individual.name,
+		            hotelRoom,
+		            hotelRoom.bedTypes.get(0).id,
+		            MyApplication.occupancy());
+	
+		        final Address reservationAddress
+		            = new Address(Arrays.asList(addressLine1, addressLine2), city, state, country, zip);
+	
+		        final List<NameValuePair> extraParameters = Arrays.<NameValuePair>asList(
+		                new BasicNameValuePair("sendReservationEmail", "true"),
+		                new BasicNameValuePair("affiliateCustomerId", UUID.randomUUID().toString())
+		            );
 
-	        final String addressLine1 = ((EditText) mView.findViewById(R.id.billingInformationAddress1)).getText().toString();
-	        final String addressLine2 = ((EditText) mView.findViewById(R.id.billingInformationAddress2)).getText().toString();
-	        final String city = ((EditText) mView.findViewById(R.id.billingInformationCity)).getText().toString();
-	        final String state = ((EditText) mView.findViewById(R.id.billingInformationState)).getText().toString();
-	        final String country = ((EditText) mView.findViewById(R.id.billingInformationCountry)).getText().toString();
-	        final String zip = ((EditText) mView.findViewById(R.id.billingInformationZip)).getText().toString();
-
-	        final String cardType = ((Spinner) mView.findViewById(R.id.billingInformationCCType)).getSelectedItem().toString();
-	        final String cardNumber = ((EditText) mView.findViewById(R.id.billingInformationCCNum)).getText().toString();
-	        final String cardExpirationMonth
-	            = ((Spinner) mView.findViewById(R.id.billingInformationCCExpMo)).getSelectedItem().toString();
-	        final String cardExpirationYear
-	            = ((Spinner) mView.findViewById(R.id.billingInformationCCExpYr)).getSelectedItem().toString();
-	        final String cardSecurityCode
-	            = ((EditText) mView.findViewById(R.id.billingInformationCCSecurityCode)).getText().toString();
-
-
-	        final int cardExpirationFullYear = Integer.parseInt(cardExpirationYear);
-	        final int cardExpirationFullMonth = Integer.parseInt(cardExpirationMonth);
-
-	        final YearMonth expirationDate = new YearMonth(cardExpirationFullYear, cardExpirationFullMonth);
-
-	        final BookingRequest.ReservationInformation reservationInfo = new BookingRequest.ReservationInformation(
-	            email, firstName, lastName, phone, null, cardType, cardNumber, cardSecurityCode, expirationDate);
-
-	        
-	        final ReservationRoom reservationRoom = new ReservationRoom(
-	            reservationInfo.individual.name,
-	            MyApplication.selectedRoom,
-	            MyApplication.selectedRoom.bedTypes.get(0).id,
-	            MyApplication.occupancy());
-
-	        final Address reservationAddress
-	            = new Address(Arrays.asList(addressLine1, addressLine2), city, state, country, zip);
-
-	        final BookingRequest request = new BookingRequest(
-	        		MyApplication.selectedHotel.hotelId,
+		        
+		        final BookingRequest request = new BookingRequest(
+	        		hotel.hotelId,
 	        		MyApplication.arrivalDate,
 	        		MyApplication.departureDate,
-	        		MyApplication.selectedHotel.supplierType,
-	            Collections.singletonList(reservationRoom),
-	            reservationInfo,
-	            reservationAddress);
+	        		hotel.supplierType,
+		            Collections.singletonList(reservationRoom),
+		            reservationInfo,
+		            reservationAddress, 
+		            extraParameters);
+	
+		        
+		        final NumberFormat currencyFormat = getCurrencyFormat(hotel.currencyCode);
+		        
+		        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			    builder.setMessage("Are you sure?\nYour card will be charged "+currencyFormat.format(hotelRoom.getTotalRate()))
+			            .setTitle("Book Hotel");
+			    builder.setNegativeButton(R.string.cancel, null);
+			    builder.setPositiveButton("Purchase", new DialogInterface.OnClickListener() {
+			           public void onClick(DialogInterface dialog, int id) {
+			               // User clicked OK button
+	
+				        	Toast.makeText(getActivity(), "Booking...", Toast.LENGTH_LONG).show();
+					        new BookingRequestTask().execute(request);
+			           }
+			       });
+	
+			    AlertDialog dialog = builder.create();
+			    dialog.show();
+	        
 
-
-	        new BookingRequestTask().execute(request);
-	        Toast.makeText(getActivity(), "Booking room...", Toast.LENGTH_LONG).show();
+			} catch (InvalidInputException e) {
+				View offending = e.offendingView;
+				String message = e.message;
+				if (offending instanceof EditText) {
+					EditText et = (EditText) offending;
+					message = message.replace("{}", et.getHint());
+				}
+				Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+				
+				// climb up from offending view until reach containr - show that container and focus view
+				ViewParent parent = offending.getParent() ;
+				while (parent != null) {
+					if (parent instanceof View == false) {
+						break;
+					}
+					View vParent = (View) parent;
+					if (vParent.getId() == R.id.guestinfolayout) {
+						showGuestInfo(View.VISIBLE);
+						break;
+					}
+					if (vParent.getId() == R.id.billinginformationlayout) {
+						showBillingInfo(View.VISIBLE);
+						break;
+					}
+					parent = parent.getParent();
+				}
+				offending.requestFocus();
+			}
 	    }
 	};
 	
 	/**
      * The task used to actually perform the booking request and pass the returned data off to the next activity.
      */
-    private class BookingRequestTask extends AsyncTask<BookingRequest, Void, List<Reservation>> {
+    private class BookingRequestTask extends AsyncTask<BookingRequest, Void, Boolean> {
         @Override
-        protected List<Reservation> doInBackground(final BookingRequest... bookingRequests) {
-            final List<Reservation> reservations = new LinkedList<Reservation>();
+        protected Boolean doInBackground(final BookingRequest... bookingRequests) {
+        	Tracker defaultTracker = GoogleAnalytics.getInstance(BookingFragement.this.getActivity()).getDefaultTracker();
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createEvent("booking", "booking_start", "", hotel.hotelId)
+					    .build()
+					   );
             for (BookingRequest request : bookingRequests) {
                 try {
-                    reservations.add(RequestProcessor.run(request));
+                    final Reservation reservation = RequestProcessor.run(request);
+                    MyApplication.addReservationToCache(reservation);
+                    
+                    if (defaultTracker != null) 
+        				defaultTracker.send(MapBuilder
+        					    .createEvent("booking", "booking_completed", "", hotel.hotelId)
+        					    .build()
+        					   );
                 } catch (EanWsError ewe) {
-                    Log.d(TAG, "An APILevel Exception occurred.", ewe);
+                    MainActivity.LogError(TAG, "An APILevel Exception occurred.", ewe);
+                    return Boolean.FALSE;
                 } catch (UrlRedirectionException  ure) {
                     MyApplication.sendRedirectionToast();
+                    return Boolean.FALSE;
                 }
             }
-            return reservations;
+            return Boolean.TRUE;
         }
         @Override
-        protected void onPostExecute(final List<Reservation> reservations) {
-            super.onPostExecute(reservations);
-            for (Reservation reservation : reservations) {
-                MyApplication.addReservationToCache(reservation);
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+            
+            if (!success ) { 
+            	Toast errorToast = Toast.makeText(BookingFragement.this.getActivity(), "There was an error, please try again later.", Toast.LENGTH_LONG);
+            	errorToast.show();
             }
-            //startActivity(new Intent(BookingSummary.this, ReservationDisplay.class));
+            else {
+	            //startActivity(new Intent(getActivity(), ReservationDisplayFragment.class));
+	            eventManager.fire(new BookingCompletedEvent());
+            }
         }
     }
 	
@@ -364,13 +560,13 @@ public class BookingFragement extends RoboFragment {
 			country.setText("US");
 			zip.setText("98004");
 			if (hotel.supplierType == SupplierType.EXPEDIA) {
-				cardType.setSelection(mCreditCardTypes.indexOf("MC"));
+				cardType.setSelection(mCreditCardValues.indexOf("MC"));
 				cardNum.setText("5401999999999999");
 				// creditCardType: MC (MasterCard)
 				// creditCardNumber: 5401999999999999
 
 			} else {
-				cardType.setSelection(mCreditCardTypes.indexOf("VI"));
+				cardType.setSelection(mCreditCardValues.indexOf("VI"));
 				cardNum.setText("4005550000000019");
 			}
 

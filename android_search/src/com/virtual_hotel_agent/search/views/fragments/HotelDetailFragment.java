@@ -139,7 +139,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		mHotelGallery.setOnItemClickListener(this);
 		
-		mEvaBmpCached = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.hotel72);
+		mEvaBmpCached = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.slanted_icon_72);
 
 
 		if (MyApplication.selectedHotel == null) {
@@ -165,6 +165,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			return;
 		}
 		mHotelId = hotelId;
+		MyApplication.selectedRoom = null;
 		fillData();
 	}
 

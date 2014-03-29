@@ -61,7 +61,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		selectedNonRefundColor = resources.getColor(R.color.selected_non_refundable_room_list_item);
 		disclaimer = "";
 		mEventManager = eventManager;
-		mEvaBmpCached = BitmapFactory.decodeResource(resources, R.drawable.hotel72);
+		mEvaBmpCached = BitmapFactory.decodeResource(resources, R.drawable.slanted_icon_72);
 	}
 	
 	public void setDisclaimer(String disclaimer) {
