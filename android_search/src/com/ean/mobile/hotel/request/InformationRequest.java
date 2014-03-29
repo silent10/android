@@ -169,4 +169,10 @@ public final class InformationRequest extends Request<HotelInformation> {
     public boolean requiresSecure() {
         return false;
     }
+
+
+	@Override
+	public String getName() {
+		return "InformationRequest";
+	}
 }

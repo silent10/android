@@ -103,4 +103,9 @@ public class CancellationRequest extends Request<Cancellation> {
     public boolean requiresSecure() {
         return false;
     }
+
+	@Override
+	public String getName() {
+		return "CancellationRequest";
+	}
 }

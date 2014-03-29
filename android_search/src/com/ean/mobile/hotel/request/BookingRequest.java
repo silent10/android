@@ -34,7 +34,6 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-
 import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
@@ -290,5 +289,10 @@ public final class BookingRequest extends Request<Reservation> {
                 new BasicNameValuePair("creditCardExpirationYear", YEAR_FORMATTER.print(expirationDate)));
         }
     }
+
+	@Override
+	public String getName() {
+		return "BookingRequest";
+	}
 
 }

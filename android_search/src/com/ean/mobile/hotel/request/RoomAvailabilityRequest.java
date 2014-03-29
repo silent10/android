@@ -34,7 +34,6 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -154,4 +153,8 @@ public final class RoomAvailabilityRequest extends Request<List<HotelRoom>> {
     public boolean requiresSecure() {
         return false;
     }
+	@Override
+	public String getName() {
+		return "RoomAvailabilityRequest";
+	}
 }

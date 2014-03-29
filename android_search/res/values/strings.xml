@@ -26,11 +26,12 @@
     <string name="HOTEL">HOTEL</string>
     <string name="ROOMS">ROOMS</string>
     <string name="BOOKING">BOOKING</string>
+    <string name="RESERVATIONS">RESERVATIONS</string>
     <string name="MAP">MAP</string>
     <string name="button_stop">Stop</string>
     <string name="people_per_room">Adults per room:</string>
     <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
-    <string name="EXAMPLES">EXAMPLES</string>
+<!--     <string name="EXAMPLES">EXAMPLES</string> -->
     <string name="hotel_image">Hotel Image</string>
     <string name="from">From</string>
     <string name="per_night">/night</string>
@@ -125,9 +126,11 @@
     <string name="hotel_address">Hotel Address</string>
     <string name="taxes_and_fees">Taxes &amp; Fees</string>
     <string name="choose_contact">Choose from contacts</string>
-    <string name="adults_comma_children">%1$d Adult(s), %2$d Child(ren)</string>
     <string name="select">Select</string>
     <string name="sold_out">Sold Out</string>
     <string name="no_hotels">No hotels available, please try searching for a different location or date</string>
     <string name="children_ages_required">Children ages are required for searching hotels</string>
+    <string name="guests_info_button">Guests Info</string>
+    <string name="billing_info_button">Billing Info</string>
+    <string name="room_description">Room Description</string>
 </resources>

@@ -34,7 +34,6 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,6 +42,11 @@ import android.util.Log;
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
+import com.google.analytics.tracking.android.Fields;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.MapBuilder;
+import com.google.analytics.tracking.android.Tracker;
+import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.MyApplication;
 
 /**
@@ -93,6 +97,7 @@ public final class RequestProcessor {
         //Build the url
         final URLConnection connection;
         final long startTime = System.currentTimeMillis();
+        final String endpoint;
         connection = request.getUri().toURL().openConnection();
         connection.setUseCaches(false); // signature makes caching impossible since url changes each time
         if (request.requiresSecure()) {
@@ -101,10 +106,12 @@ public final class RequestProcessor {
             ((HttpURLConnection) connection).setRequestMethod("POST");
             ((HttpURLConnection) connection).setFixedLengthStreamingMode(0);
             
-            Log.d(Constants.LOG_TAG, "secure request endpoint: " + connection.getURL().getHost());
+            endpoint = connection.getURL().getHost();
+            Log.d(Constants.LOG_TAG, request.getName()+": secure endpoint (host only): " + endpoint);
         }
         else {
-        	Log.d(Constants.LOG_TAG, "request endpoint: " + connection.getURL());
+        	endpoint = connection.getURL().toString();
+        	Log.d(Constants.LOG_TAG, request.getName()+": endpoint: " + endpoint);
         }
         // force application/json
         connection.setRequestProperty("Accept", "application/json, */*");
@@ -136,7 +143,17 @@ public final class RequestProcessor {
             ((HttpURLConnection) connection).disconnect();
         }
         final long timeTaken = System.currentTimeMillis() - startTime;
-        Log.d(Constants.LOG_TAG, "Took " + timeTaken + " milliseconds.");
+        Log.d(Constants.LOG_TAG, request.getName()+ " took " + timeTaken + " milliseconds.");
+        
+        if (BuildConfig.DEBUG == false) {
+			Tracker defaultTracker = GoogleAnalytics.getInstance(MyApplication.getAppContext()).getDefaultTracker();
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createEvent("expedia_search", request.getName(), endpoint, (MyApplication.selectedHotel == null) ? -1l: MyApplication.selectedHotel.hotelId)
+					    .set(Fields.CURRENCY_CODE, CommonParameters.currencyCode)
+					    .build()
+					   );
+		}
         return jsonString;
     }
 

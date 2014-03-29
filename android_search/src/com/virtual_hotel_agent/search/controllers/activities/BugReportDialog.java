@@ -155,6 +155,6 @@ public class BugReportDialog extends Activity implements
 	}
 
 	public void onDismiss(DialogInterface dialog) {
-//		finish();
+		finish();
 	}
 }
