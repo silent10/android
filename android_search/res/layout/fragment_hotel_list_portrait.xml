@@ -12,6 +12,7 @@
         android:drawSelectorOnTop="true"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
+        android:background="@drawable/chat_background"
         android:choiceMode="singleChoice"
         android:divider="@null"
         android:cacheColorHint="#00000000" >

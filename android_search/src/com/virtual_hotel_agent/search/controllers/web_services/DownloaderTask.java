@@ -2,14 +2,12 @@ package com.virtual_hotel_agent.search.controllers.web_services;
 
 import java.util.ArrayList;
 
-import org.json.JSONObject;
-
 import android.os.AsyncTask;
 
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
-abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject> {
+abstract public class DownloaderTask extends AsyncTask<Void, Integer, Object> {
 
 	static private final String TAG = DownloaderTask.class.getSimpleName();
 	
@@ -35,7 +33,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 	}
 
 	@Override
-	protected JSONObject doInBackground(Void... params) {
+	protected Object doInBackground(Void... params) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -48,7 +46,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, JSONObject
 	
 
 	@Override
-	protected void onPostExecute(JSONObject result) {
+	protected void onPostExecute(Object result) {
 
 		Log.d(TAG, "onPostExecute");
 

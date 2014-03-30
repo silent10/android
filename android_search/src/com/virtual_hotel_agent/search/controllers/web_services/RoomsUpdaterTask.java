@@ -1,50 +1,67 @@
 package com.virtual_hotel_agent.search.controllers.web_services;
 
-import org.json.JSONObject;
+import java.util.List;
 
-import android.content.Context;
+import org.joda.time.LocalDate;
 
-import com.evature.util.Log;
-import com.virtual_hotel_agent.search.SettingsAPI;
+import com.ean.mobile.exception.EanWsError;
+import com.ean.mobile.exception.UrlRedirectionException;
+import com.ean.mobile.hotel.HotelRoom;
+import com.ean.mobile.hotel.request.RoomAvailabilityRequest;
+import com.ean.mobile.request.RequestProcessor;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
-import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
 
 public class RoomsUpdaterTask extends DownloaderTask {
 	private static final String TAG = "RoomUpdaterTask";
-	private HotelData mHotelData;
-	private Context mContext;
 
-	public RoomsUpdaterTask(Context context, int hotelIndex) {
-		super(-1);
-		XpediaDatabase db = MyApplication.getDb();
-		if (db != null && db.mHotelData != null && db.mHotelData.length > hotelIndex)
-			mHotelData = db.mHotelData[hotelIndex];
-		else {
-			MainActivity.LogError(TAG, "Attempting to update rooms without hotelData");
-		}
-		mContext= context;
-	}
-	
+	public final long hotelId;
+    private final LocalDate arrivalDate;
+    private final LocalDate departureDate;
+    public EanWsError eanWsError;
+
+    public RoomsUpdaterTask(final long hotelId,
+            final LocalDate arrivalDate, final LocalDate departureDate) {
+    	super(-1);
+        this.hotelId = hotelId;
+        this.arrivalDate = arrivalDate;
+        this.departureDate = departureDate;
+    }
+    
+    public RoomsUpdaterTask(final long hotelId) {
+    	super(-1);
+        this.hotelId = hotelId;
+        this.arrivalDate = MyApplication.arrivalDate;
+        this.departureDate = MyApplication.departureDate;
+    }
+
 	
 	@Override
-	protected void onPostExecute(JSONObject result) {
-		mProgress = DownloaderStatus.Finished;
-		super.onPostExecute(result);
-	}
-
-	@Override
-	protected JSONObject doInBackground(Void... params) {
-		JSONObject result= XpediaProtocolStatic.getRoomInformationForHotel(mContext, mHotelData.mSummary.mHotelId,
-				MyApplication.getExpediaRequestParams(),
-				SettingsAPI.getCurrencyCode(mContext));
-
-		mHotelData.mSummary.updateRoomDetails(result);
-
-		return result;
+	protected Object doInBackground(Void... params) {
+//		JSONObject result= XpediaProtocolStatic.getRoomInformationForHotel(mContext, mHotelData.mSummary.mHotelId,
+//				MyApplication.getExpediaAppState(),
+//				SettingsAPI.getCurrencyCode(mContext));
+//
+//		mHotelData.mSummary.updateRoomDetails(result);
+		
+		 try {
+			 eanWsError = null;
+             final RoomAvailabilityRequest request
+                 = new RoomAvailabilityRequest(hotelId, MyApplication.occupancy(), arrivalDate, departureDate);
+             List<HotelRoom> hotelRooms = RequestProcessor.run(request);
+             MyApplication.HOTEL_ROOMS.put(hotelId, hotelRooms);
+             mProgress = DownloaderStatus.Finished;
+             return hotelRooms;
+         } catch (EanWsError ewe) {
+             MainActivity.LogError(TAG, "An error occurred in the api", ewe);
+             eanWsError = ewe;
+             mProgress = DownloaderStatus.FinishedWithError;
+         } catch (UrlRedirectionException ure) {
+             MyApplication.sendRedirectionToast();
+             mProgress = DownloaderStatus.FinishedWithError;
+         }
+         return null;
 	}
 
 }

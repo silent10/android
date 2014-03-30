@@ -1,6 +1,5 @@
 package com.virtual_hotel_agent.search.controllers.web_services;
 
-import org.json.JSONObject;
 
 public interface DownloaderTaskListenerInterface {
 
@@ -12,11 +11,11 @@ public interface DownloaderTaskListenerInterface {
 		FinishedWithError
 	}
 
-	void endProgressDialog(int id, JSONObject result);
+	void endProgressDialog(int id, Object result);
 
 	void startProgressDialog(int id);
 
-	void endProgressDialogWithError(int id, JSONObject result);
+	void endProgressDialogWithError(int id, Object result);
 
 	void updateProgress(int id, DownloaderStatus mProgress);
 

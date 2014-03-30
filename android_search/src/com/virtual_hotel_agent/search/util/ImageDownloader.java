@@ -1,14 +1,20 @@
 package com.virtual_hotel_agent.search.util;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LruCache;
 
 import com.evature.util.Log;
-import com.virtual_hotel_agent.search.models.expedia.XpediaProtocolStatic;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 public class ImageDownloader {
 
@@ -38,7 +44,39 @@ public class ImageDownloader {
 		doneHandler = null;
 	}
 	
-	public void startDownload(final ArrayList<String> urls) {
+	public static Bitmap download_Image(String path) {
+		URL url = null;
+		Bitmap bmp;
+
+		try {
+			url = new URL(path);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		URLConnection connection = null;
+
+		Object response = null;
+		try {
+			connection = url.openConnection();
+			connection.setUseCaches(true);
+			response = connection.getContent();
+			bmp = BitmapFactory.decodeStream((InputStream) response);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			MainActivity.LogError(TAG, "IOException loading bitmap", e);
+			return null;
+		} catch (OutOfMemoryError e) {
+			MainActivity.LogError(TAG, "Out of memory loading bmp", e);
+			return null;
+		}
+
+		return bmp;
+	}
+	
+	
+	public void startDownload(final List<String> urls) {
 		mRunThreads = true;
 		mImageDownloadThread = new Thread() {
 
@@ -59,7 +97,7 @@ public class ImageDownloader {
 							bmp = cache.get(url);
 							if (bmp == null) {
 								//Log.d(TAG, url+" not found - downloading");
-								bmp = XpediaProtocolStatic.download_Image(url);
+								bmp = download_Image(url);
 								if (bmp != null) {
 									synchronized (cache) {
 										if (cache.get(url) == null) {
