@@ -560,7 +560,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				}
 				return mBookingFragment;
 			}
-			if (mTabTitles.equals(mReservationsTabName)) {
+			else if (tabTitle.equals(mReservationsTabName)) {
 				Log.i(TAG, "starting reservation fragment");
 				if (mReservationFragment == null) {
 					mReservationFragment = injector.getInstance(ReservationDisplayFragment.class);
