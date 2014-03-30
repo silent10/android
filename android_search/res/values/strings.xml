@@ -101,12 +101,6 @@
     <string name="billing_cc_expmo">MM</string>
     <string name="billing_cc_expyr">YY</string>
     <string name="billing_cc_security">Security Code (See back of credit card)</string>
-    <string name="billing_legal_disclaimer">Legal stuff and junk goes here that includes links to the
-        <u>Privacy Policy</u>
-        and
-        <u>Terms of Use</u>
-        on a web page. Those pages will need to be built.
-    </string>
     
         <string name="complete_booking">Complete Booking</string>
     <string name="incorrect_expiration_year">

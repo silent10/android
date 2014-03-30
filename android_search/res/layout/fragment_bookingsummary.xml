@@ -184,12 +184,13 @@
                           android:textSize="25sp"/>
                 <!-- room type, then drrpromo img and text
                 then a list view breaking down the stay into days and individualized rates for each-->
-                <TextView android:id="@+id/priceDetailsRoomType"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                           />
-                <LinearLayout android:layout_width="fill_parent"
-                              android:layout_height="wrap_content">
+<!--                 <TextView android:id="@+id/priceDetailsRoomType" -->
+<!--                           android:layout_width="fill_parent" -->
+<!--                           android:layout_height="wrap_content" -->
+<!--                            /> -->
+                
+<!--                 <LinearLayout android:layout_width="fill_parent" -->
+<!--                               android:layout_height="wrap_content"> -->
 <!--                     <ImageView android:id="@+id/drrPromoImg" -->
 <!--                                android:src="@drawable/tag_label" -->
 <!--                                android:layout_width="8dip" -->
@@ -201,7 +202,7 @@
                               android:layout_width="wrap_content"
                               android:textSize="12sp"
                               android:layout_gravity="bottom"/>
-                </LinearLayout>
+<!--                 </LinearLayout> -->
                 <LinearLayout android:id="@+id/priceDetailsBreakdown"
                               android:layout_width="fill_parent"
                               android:layout_height="wrap_content"
@@ -258,30 +259,43 @@
                     android:layout_weight="1"
                     android:gravity="right" >
                     
-                    <TextView
-                        android:id="@+id/lowPrice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="18dp"
-                        android:gravity="right"
-                        android:text="$98"
-                        android:textColor="@color/low_price_color"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
+                   
                     <TextView android:id="@+id/highPrice"
                               android:layout_height="wrap_content"
                               android:layout_width="wrap_content"
                               android:layout_gravity="right"
+                              android:layout_marginRight="18dp"
                               android:gravity="right"
                               android:textSize="18sp"
                               android:textColor="@color/high_price_color"
                               android:text="$123"
                               />
+                    
+                    <TextView
+                        android:id="@+id/lowPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        
+                        android:gravity="right"
+                        android:text="$98"
+                        android:textColor="@color/low_price_color"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                    
                 </LinearLayout>
             </LinearLayout>
             
-           
+           <LinearLayout android:id="@+id/securityNoticeLayout" android:layout_width="fill_parent" 
+                android:layout_height="wrap_content" android:background="#FCF9D7" android:visibility="gone">
+                <ImageView android:id="@+id/securitynoticeimage" android:layout_width="40dip" android:layout_height="40dip" android:src="@drawable/secure_icon" android:layout_gravity="center_vertical" />
+                
+                <LinearLayout android:id="@+id/securityNoticeTextLayout" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical">
+                    <TextView android:id="@+id/securityNoticeTitle" 
+                        android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/security_notice_title" android:textSize="17dip" android:textStyle="bold" />
+                    <TextView android:id="@+id/securityNoticeText" 
+                        android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/security_notice_text" />
+                </LinearLayout>
+            </LinearLayout>
 
             <Button
                     android:id="@+id/button_show_guests"
@@ -453,9 +467,10 @@
                 </RelativeLayout>
 
                 <TextView
+                    android:id="@+id/legal_text"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/billing_legal_disclaimer" />
+                     />
 
                 <Button
                     android:id="@+id/button_load_default_billing_info"
@@ -466,17 +481,7 @@
                     android:text="@string/load_default_billing_info" />
             </LinearLayout>
             
-             <LinearLayout android:id="@+id/securityNoticeLayout" android:layout_width="fill_parent" 
-                android:layout_height="wrap_content" android:background="#FCF9D7" android:visibility="gone">
-                <ImageView android:id="@+id/securitynoticeimage" android:layout_width="40dip" android:layout_height="40dip" android:src="@drawable/secure_icon" android:layout_gravity="center_vertical" />
-                
-                <LinearLayout android:id="@+id/securityNoticeTextLayout" android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical">
-                    <TextView android:id="@+id/securityNoticeTitle" 
-                        android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/security_notice_title" android:textSize="17dip" android:textStyle="bold" />
-                    <TextView android:id="@+id/securityNoticeText" 
-                        android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/security_notice_text" />
-                </LinearLayout>
-            </LinearLayout>
+
 
             
             <Button
