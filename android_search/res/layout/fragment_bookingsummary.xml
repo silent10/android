@@ -33,8 +33,6 @@
         <LinearLayout android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
                       android:orientation="vertical"
-                      android:animateLayoutChanges="true"
-                      android:padding="4dp"
                       >
             
             <RelativeLayout
@@ -65,7 +63,13 @@
 		        
 		    </RelativeLayout>
 		    
-            
+          
+            <LinearLayout 
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
+                android:padding="4dp"
+                android:orientation="vertical">
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -180,7 +184,7 @@
                           android:textSize="25sp"/>
                 <!-- room type, then drrpromo img and text
                 then a list view breaking down the stay into days and individualized rates for each-->
-           mCreditCardTypes     <TextView android:id="@+id/priceDetailsRoomType"
+                <TextView android:id="@+id/priceDetailsRoomType"
                           android:layout_width="fill_parent"
                           android:layout_height="wrap_content"
                            />
@@ -195,7 +199,7 @@
                     <TextView android:id="@+id/drrPromoText"
                               android:layout_height="wrap_content"
                               android:layout_width="wrap_content"
-                              android:textSize="10sp"
+                              android:textSize="12sp"
                               android:layout_gravity="bottom"/>
                 </LinearLayout>
                 <LinearLayout android:id="@+id/priceDetailsBreakdown"
@@ -203,6 +207,9 @@
                               android:layout_height="wrap_content"
                               android:orientation="vertical"
                               android:background="#EAEFF8"/>
+                
+                
+                
                 <LinearLayout android:layout_width="fill_parent"
                               android:layout_height="wrap_content">
                     <TextView android:text="@string/taxes_and_fees"
@@ -210,13 +217,27 @@
                               android:layout_height="wrap_content"
                               android:layout_weight="1"
                               android:layout_gravity="left"/>
-                    <TextView android:id="@+id/taxes_and_fees_display"
-                              android:layout_width="0dip"
-                              android:layout_height="wrap_content"
-                              android:layout_weight="1"
-                              android:layout_gravity="right" />
-                </LinearLayout>
+    
+                    <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="right" >
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text" />
+
+                        <TextView
+                            android:id="@+id/taxes_and_fees_display"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right" 
+                            android:text="$45"/>
+                    </LinearLayout>
+                </LinearLayout>
+    
             </LinearLayout>
             
             <LinearLayout android:id="@+id/totallayout"
@@ -225,29 +246,38 @@
                           android:background="#E4EDF7">
                 <TextView android:id="@+id/totalChargesLabel"
                           android:layout_width="0dip"
-                          android:layout_height="fill_parent"
+                          android:layout_height="wrap_content"
                           android:layout_weight="1"
+                          android:layout_gravity="left"
                           android:textSize="20sp"
                           android:text="@string/total_charges" />
                 
-                <LinearLayout android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:layout_weight="1"
-                              android:layout_gravity="right"
-                              android:gravity="right">
-                    <TextView android:id="@+id/lowPrice"
-                              android:layout_width="wrap_content"
-                              android:layout_height="fill_parent"
-                              android:layout_marginRight="4dip"
-                              android:gravity="right"
-                              android:textSize="20sp"
-                              android:textStyle="bold"/>
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="right" >
+                    
+                    <TextView
+                        android:id="@+id/lowPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="18dp"
+                        android:gravity="right"
+                        android:text="$98"
+                        android:textColor="@color/low_price_color"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
                     <TextView android:id="@+id/highPrice"
                               android:layout_height="wrap_content"
-                              android:layout_width="fill_parent"
+                              android:layout_width="wrap_content"
                               android:layout_gravity="right"
-                              android:textSize="20sp"
-                              android:textColor="#555555"/>
+                              android:gravity="right"
+                              android:textSize="18sp"
+                              android:textColor="@color/high_price_color"
+                              android:text="$123"
+                              />
                 </LinearLayout>
             </LinearLayout>
             
@@ -461,6 +491,6 @@
 		        android:layout_height="110dip" />
         
         </LinearLayout>
-        
+        </LinearLayout>
         
     </ScrollView>

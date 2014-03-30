@@ -254,7 +254,8 @@ public final class HotelRoom {
      * @return The base total.
      */
     public BigDecimal getTotalBaseRate() {
-        return rate.chargeable.getBaseRateTotal();
+        return rate.chargeable.getBaseRateTotal()
+        		.add(getTaxesAndFees());
     }
 
     /**
@@ -262,7 +263,8 @@ public final class HotelRoom {
      * @return The net total.
      */
     public BigDecimal getTotalRate() {
-        return rate.chargeable.getRateTotal();
+        return rate.chargeable.getRateTotal()
+        			.add(getTaxesAndFees());
     }
 
     /**
