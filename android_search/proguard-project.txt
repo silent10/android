@@ -170,3 +170,7 @@ void *(roboguice.activity.event.*);
 {
     public void handleSilentException(java.lang.Throwable);
 }
+
+
+# Joda ToString and FromString 
+-dontwarn org.joda.convert.**
