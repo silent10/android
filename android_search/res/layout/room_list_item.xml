@@ -57,7 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rate"
-                android:textColor="#FF7777CC"
+                android:textColor="@color/high_price_color"
                 android:textSize="18dip" />
 
             <TextView
@@ -73,7 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Rate"
-                android:textColor="#FF0000FF"
+                android:textColor="@color/low_price_color"
                 android:textSize="24dip" />
 
             <TextView

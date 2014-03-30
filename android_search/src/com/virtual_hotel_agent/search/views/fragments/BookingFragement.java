@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.joda.time.LocalDate;
 import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -33,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +44,7 @@ import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelRoom;
+import com.ean.mobile.hotel.NightlyRate;
 import com.ean.mobile.hotel.Reservation;
 import com.ean.mobile.hotel.ReservationRoom;
 import com.ean.mobile.hotel.RoomOccupancy;
@@ -54,6 +57,7 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
+import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.MyApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
@@ -103,7 +107,12 @@ public class BookingFragement extends RoboFragment {
 		chooseContact.setOnClickListener(mChooseContact);
 		
 		Button loadDefault = (Button) mView.findViewById(R.id.button_load_default_billing_info);
-		loadDefault.setOnClickListener(mDefaultBilling);
+		if (BuildConfig.DEBUG) {
+			loadDefault.setOnClickListener(mDefaultBilling);
+		}
+		else {
+			loadDefault.setVisibility(View.GONE);
+		}
 		
 		Button completeBooking = (Button) mView.findViewById(R.id.button_complete_booking);
 		completeBooking.setOnClickListener(mCompleteBooking);
@@ -158,11 +167,40 @@ public class BookingFragement extends RoboFragment {
         totalLowPrice.setText(currencyFormat.format(hotelRoom.getTotalRate()));
 
         displayTotalHighPrice(currencyFormat);
-        //populatePriceBreakdownList(currencyFormat);
+        populatePriceBreakdownList(currencyFormat);
 
 	}
 	
 
+	private void populatePriceBreakdownList(final NumberFormat currencyFormat) {
+        final LinearLayout priceBreakdownList = (LinearLayout) mView.findViewById(R.id.priceDetailsBreakdown);
+        View view;
+        final LayoutInflater inflater = getLayoutInflater(null);
+
+        priceBreakdownList.removeAllViews();
+        
+        LocalDate currentDate = MyApplication.arrivalDate.minusDays(1);
+        for (NightlyRate rate : hotelRoom.rate.chargeable.nightlyRates) {
+            view = inflater.inflate(R.layout.pricebreakdownlayout, null);
+            final TextView date = (TextView) view.findViewById(R.id.priceBreakdownDate);
+            final TextView highPrice = (TextView) view.findViewById(R.id.priceBreakdownHighPrice);
+            final TextView lowPrice = (TextView) view.findViewById(R.id.priceBreakdownLowPrice);
+
+            currentDate = currentDate.plusDays(1);
+            date.setText(NIGHTLY_RATE_FORMATTER.print(currentDate));
+
+            lowPrice.setText(currencyFormat.format(rate.rate));
+            if (rate.rate.equals(rate.baseRate)) {
+                highPrice.setVisibility(TextView.GONE);
+            } else {
+                highPrice.setVisibility(TextView.VISIBLE);
+                highPrice.setText(currencyFormat.format(rate.baseRate));
+                highPrice.setPaintFlags(highPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+            priceBreakdownList.addView(view);
+        }
+    }
+	
 	private static String getGuestsText(RoomOccupancy occupancy) {
 		StringBuilder guests = new StringBuilder();
 		int childNum = occupancy.childAges.size();
