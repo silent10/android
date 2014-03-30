@@ -13,14 +13,18 @@ import org.acra.sender.ReportSenderException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
@@ -33,6 +37,27 @@ public class BugReportDialog extends Activity implements
 	String mReportFileName;
 	AlertDialog mDialog;
 
+
+	// allow pressing "OK" without dismissing the dialog... http://stackoverflow.com/questions/6142308/android-dialog-keep-dialog-open-when-button-is-pressed
+	class CustomListener implements View.OnClickListener {
+	    private final Dialog dialog;
+		private Context context;
+	    public CustomListener(Dialog dialog, Context ctx) {
+	        this.dialog = dialog;
+	        this.context = ctx;
+	    }
+	    @Override
+	    public void onClick(View v) {
+	    	// clicked ok
+			if (userComment.getText().toString().equals("")) {
+				Toast.makeText(context, "Please enter some description of the bug", Toast.LENGTH_LONG).show();
+				return;
+			}
+			sendBugReport();
+			dialog.dismiss();
+	    }
+	};
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -40,12 +65,15 @@ public class BugReportDialog extends Activity implements
 		dialogBuilder.setTitle(R.string.bugreport_dialog_title);
 		dialogBuilder.setIcon(android.R.drawable.ic_dialog_info);
 		dialogBuilder.setView(buildCustomView(savedInstanceState));
-		dialogBuilder.setPositiveButton(17039370, this);
-		dialogBuilder.setNegativeButton(17039360, this);
+		dialogBuilder.setPositiveButton(R.string._ok, this);
+		dialogBuilder.setNegativeButton(R.string.cancel, this);
 		this.mDialog = dialogBuilder.create();
 		this.mDialog.setCanceledOnTouchOutside(false);
 		this.mDialog.setOnDismissListener(this);
 		this.mDialog.show();
+		
+		Button theButton = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+		theButton.setOnClickListener(new CustomListener(mDialog, this));
 	}
 
 	private View buildCustomView(Bundle savedInstanceState) {
@@ -88,10 +116,11 @@ public class BugReportDialog extends Activity implements
 
 
 	public void onClick(DialogInterface dialog, int which) {
-		if (which == -1) {
-			sendBugReport();
+		if (which == DialogInterface.BUTTON_NEGATIVE) {
+			// canceled
+			dialog.cancel();
+			return;
 		}
-		finish();
 	}
 
 	private void sendBugReport() {

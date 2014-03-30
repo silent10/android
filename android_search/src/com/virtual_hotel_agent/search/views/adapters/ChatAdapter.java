@@ -163,13 +163,13 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			break;
 			
 		default:
-			View right_pane = row.findViewById(R.id.right_pane);
-			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
-			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
-			progress.setVisibility(View.GONE);
-			topImg.setVisibility(View.GONE);
-			FlowElement flow = chatItem.getFlowElement();
-			ImageView img = (ImageView) row.findViewById(R.id.icon);
+//			View right_pane = row.findViewById(R.id.right_pane);
+//			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
+//			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
+//			progress.setVisibility(View.GONE);
+//			topImg.setVisibility(View.GONE);
+//			FlowElement flow = chatItem.getFlowElement();
+//			ImageView img = (ImageView) row.findViewById(R.id.icon);
 			/*if (flow == null) {
 				img.setImageResource(R.drawable.hotel72);
 			}

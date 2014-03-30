@@ -1,12 +1,14 @@
 package com.virtual_hotel_agent.search.controllers.events;
 
-
+/****
+ * At the hotel details page - the "select" button was pressed
+ */
 public class HotelSelected {
 
-	public int hotelIndex;
+	public long hotelId;
 	
-	public HotelSelected(int item) {
-		hotelIndex = item;
+	public HotelSelected(long hotelId) {
+		this.hotelId = hotelId;
 	}
 
 }

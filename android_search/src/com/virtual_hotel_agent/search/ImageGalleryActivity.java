@@ -3,7 +3,6 @@ package com.virtual_hotel_agent.search;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,16 +13,15 @@ import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ean.mobile.hotel.Hotel;
+import com.ean.mobile.hotel.HotelImageTuple;
+import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
-import com.virtual_hotel_agent.search.models.expedia.HotelData;
-import com.virtual_hotel_agent.search.models.expedia.HotelDetails.HotelImage;
-import com.virtual_hotel_agent.search.models.expedia.XpediaDatabase;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.BitmapAdapter;
 
@@ -80,31 +78,27 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 
 		setContentView(R.layout.activity_image_gallery);
 
-
 		Intent intent = getIntent();
 		
 		String[] urlsArray = intent.getStringArrayExtra(PHOTO_URLS);
 		
-		int hotelId = intent.getIntExtra(HOTEL_ID, -1);
+		long hotelId = intent.getLongExtra(HOTEL_ID, -1l);
 		if (hotelId == -1 && urlsArray == null) {
 			MainActivity.LogError(TAG, "No hotel ID and no urls");
 			this.finish();
 			return;
 		}
 
-		XpediaDatabase db = MyApplication.getDb();
-		HotelData hotelData = null;
+		Hotel hotelData = null;
 		if (hotelId != -1) {
-			if (db != null && db.mHotelData != null && db.mHotelData.length > hotelId) {
-				hotelData = db.mHotelData[hotelId];
-			}
-			else {
+			hotelData = MyApplication.HOTEL_ID_MAP.get(hotelId);
+			if (hotelData == null) {
 				MainActivity.LogError(TAG, "No DB - hotelId = "+hotelId);
 				this.finish();
 				return;
 			}
 			
-			mTitle = hotelData.mSummary.mName;
+			mTitle = hotelData.name;
 		}
 		else {
 			mTitle = intent.getStringExtra(TITLE);
@@ -126,7 +120,7 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
 		mIndicator.setViewPager(contentView);
 		
-		imageDownloader = new ImageDownloader(db.getImagesCache(), mHandlerImgDownloaded);//, mHandlerAllDone);
+		imageDownloader = new ImageDownloader(MyApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
 		
 		ArrayList<String> urls;
 		if (urlsArray != null) {
@@ -136,15 +130,18 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		else {
 			captions = new ArrayList<String>();
 			urls = new ArrayList<String>();
-			if (hotelData != null && hotelData.mDetails != null && hotelData.mDetails.hotelImages != null) {
-				for (HotelImage hotelImage : hotelData.mDetails.hotelImages) {
-					if (hotelImage.url != null) {
-						urls.add(hotelImage.url);
-						if (hotelImage.caption != null) {
-							captions.add(hotelImage.caption);
-						}
-						else {
-							captions.add(hotelImage.name);
+			if (hotelData != null) {
+				HotelInformation info = MyApplication.EXTENDED_INFOS.get(hotelData.hotelId);
+				if (info != null && info.images.size() > 0 ) {
+					for (HotelImageTuple hotelImage : info.images) {
+						if (hotelImage.mainUrl != null) {
+							urls.add(hotelImage.mainUrl.toString());
+							if (hotelImage.caption != null) {
+								captions.add(hotelImage.caption);
+							}
+							else {
+								captions.add("");
+							}
 						}
 					}
 				}

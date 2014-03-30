@@ -2,15 +2,15 @@
 <resources>
 
     <string name="app_name">Virtual Hotel Agent</string>
-    <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\n
-We will, someday.\n
-We promise.\n
-\n
-Using:\n
-  Expedia API for hotel search.\n
-\n
-Check us out at\n
-\nhttp://www.evature.com\n</string> <!-- Vayant API for travel search.\n -->
+<!--     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\n -->
+<!-- We will, someday.\n -->
+<!-- We promise.\n -->
+<!-- \n -->
+<!-- Using:\n -->
+<!--   Expedia API for hotel search.\n -->
+<!-- \n -->
+<!-- Check us out at\n -->
+<!-- \nhttp://www.evature.com\n</string> Vayant API for travel search.\n -->
     <string name="help_text">	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".</string>
     <string name="ok_button">OK, got it.</string>
     <string name="_ok">OK</string>
@@ -19,16 +19,19 @@ Check us out at\n
     <string name="microphone_button">Microphone Button</string>
     <string name="chat_icon_description">chat icon</string>
     <string name="network_error">Network Error - Sorry!</string>
+    <string name="redirected">Couldn\'t connect to EAN API network.</string>
     <string name="error_tts_init">Could not initialize text-to-speech</string>
     <string name="CHAT">CHAT</string>
     <string name="HOTELS">HOTELS</string>
     <string name="HOTEL">HOTEL</string>
     <string name="ROOMS">ROOMS</string>
+    <string name="BOOKING">BOOKING</string>
+    <string name="RESERVATIONS">RESERVATIONS</string>
     <string name="MAP">MAP</string>
     <string name="button_stop">Stop</string>
     <string name="people_per_room">Adults per room:</string>
     <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
-    <string name="EXAMPLES">EXAMPLES</string>
+<!--     <string name="EXAMPLES">EXAMPLES</string> -->
     <string name="hotel_image">Hotel Image</string>
     <string name="from">From</string>
     <string name="per_night">/night</string>
@@ -46,6 +49,7 @@ Check us out at\n
     <string name="currency_pref_title">Default Currency</string>
     <string name="internalization_title">Internalization</string>
     <string name="currency_summary">Show results using this currency</string>
+    <string name="no_rooms">There are no rooms available for the selected dates.</string>
     <string name="search_icon">Search</string>
     <string name="save_encoded">Save Encoded</string>
     <string name="room_price_disclaimer">The room rates listed are for double occupancy per room unless 
@@ -65,7 +69,62 @@ Check us out at\n
     <string name="checkout">Checkout</string>
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
     <string name="show_fullscreen">Show Fullscreen</string>
-    <string name="no_rooms_available">No rooms available</string>
     <string name="room_photo">Room Photo</string>
 
+    <string name="arrival">Check in:</string>
+    <string name="departure">Check out:</string>
+    <string name="adults">Adults:</string>
+    <string name="children">Children:</string>
+    <string name="guests">Guests:</string>
+    <string name="room_type">Room Type:</string>
+    <string name="bed_type">Bed Type:</string>
+    <string name="book">Book</string>
+    <string name="price_details">Price Details</string>
+    <string name="total_charges">Total Charges</string>
+    <string name="security_notice_title">Secure Booking</string>
+    <string name="security_notice_text">We keep all your personal information secure and encrypted.\nWe won\'t share or
+        sell your personal information.
+    </string>
+    <string name="guest_information">Guest Information:</string>
+    <string name="guest_first_name">First Name</string>
+    <string name="guest_last_name">Last Name</string>
+    <string name="guest_phone">Phone</string>
+    <string name="guest_email">Email for Confirmation</string>
+    <string name="billing_information">Billing Information:</string>
+    <string name="billing_address_1">Address Line 1</string>
+    <string name="billing_address_2">Address Line 2</string>
+    <string name="billing_city">City</string>
+    <string name="billing_state">State</string>
+    <string name="billing_country">Country</string>
+    <string name="billing_zip">Zip</string>
+    <string name="billing_cc_num">Credit Card Num</string>
+    <string name="billing_cc_expmo">MM</string>
+    <string name="billing_cc_expyr">YY</string>
+    <string name="billing_cc_security">Security Code (See back of credit card)</string>
+    
+        <string name="complete_booking">Complete Booking</string>
+    <string name="incorrect_expiration_year">
+        Incorrect credit card expiration year detected. Ensure that you use a
+        two-digit number for the year.</string>
+    <string name="incorrect_expiration_month">
+        Incorrect credit card expiration month detected. Ensure that you use
+        a two-digit month between 01 and 12.
+    </string>
+    <string name="load_default_billing_info">Load Default Billing Info</string>
+    <string name="itinerary_id">Itinerary ID</string>
+    <string name="confirmation_numbers">Confirmation Numbers</string>
+    <string name="checkin_instructions">Check-In Instructions</string>
+    <string name="arrival_date">Arrival Date</string>
+    <string name="departure_date">Departure Date</string>
+    <string name="hotel_name">Hotel Name</string>
+    <string name="hotel_address">Hotel Address</string>
+    <string name="taxes_and_fees">Taxes &amp; Fees</string>
+    <string name="choose_contact">Choose from contacts</string>
+    <string name="select">Select</string>
+    <string name="sold_out">Sold Out</string>
+    <string name="no_hotels">No hotels available, please try searching for a different location or date</string>
+    <string name="children_ages_required">Children ages are required for searching hotels</string>
+    <string name="guests_info_button">Guests Info</string>
+    <string name="billing_info_button">Billing Info</string>
+    <string name="room_description">Room Description</string>
 </resources>

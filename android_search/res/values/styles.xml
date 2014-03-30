@@ -272,8 +272,7 @@
 
     <style name="ButtonBarButton" />
 
-    <style name="StyledIndicators"> 
-<!--         parent="@android:style/Theme.Black"> -->
+    <style name="StyledIndicators"   parent="@android:style/Theme.Holo.Light.DarkActionBar">
         <item name="vpiCirclePageIndicatorStyle">@style/CustomCirclePageIndicator</item>
         <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item>
         <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
