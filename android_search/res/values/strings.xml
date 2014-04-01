@@ -100,7 +100,7 @@
     <string name="billing_cc_num">Credit Card Num</string>
     <string name="billing_cc_expmo">MM</string>
     <string name="billing_cc_expyr">YY</string>
-    <string name="billing_cc_security">Security Code (See back of credit card)</string>
+    <string name="billing_cc_security">Security Code (See back of credit card):</string>
     
         <string name="complete_booking">Complete Booking</string>
     <string name="incorrect_expiration_year">
@@ -127,4 +127,5 @@
     <string name="guests_info_button">Guests Info</string>
     <string name="billing_info_button">Billing Info</string>
     <string name="room_description">Room Description</string>
+    <string name="credit_card_type_">Credit card type:</string>
 </resources>

@@ -136,6 +136,28 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 			mResults = null;
 		}
 	}
+	
+
+	@Override
+	public String toString() {
+		String chatTypeStr = "";
+		String string = chatType.name();
+		for (int i=0; i<string.length(); i++) {
+			char charAt = string.charAt(i);
+			if (charAt >= 'A' && charAt <= 'Z') {
+				chatTypeStr += charAt;
+			}
+		}
+		String statusStr = "";
+		string = status.name();
+		for (int i=0; i<string.length(); i++) {
+			char charAt = string.charAt(i);
+			if (charAt >= 'A' && charAt <= 'Z') {
+				statusStr += charAt;
+			}
+		}
+		return chatTypeStr +": "+statusStr+": "+chat;
+	}
 
 //	public void setSearchResults(JSONObject result) {
 //		mResults = result;
