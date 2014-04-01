@@ -326,7 +326,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mViewPager.setAdapter(mTabsAdapter);
 		mTabs.setViewPager(mViewPager);
 		mViewPager.setOffscreenPageLimit(5);
-		mTabs.setOnPageChangeListener(mTabsAdapter);
+		//mTabs.setOnPageChangeListener(mTabsAdapter);
 		
 
 		//getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -359,8 +359,8 @@ public class MainActivity extends RoboFragmentActivity implements
 		// a_bundle.putStringArrayList(RecognizerIntent.EXTRA_RESULTS, sentences);
 		// data.putExtras(a_bundle);
 		// onActivityResult(VOICE_RECOGNITION_REQUEST_CODE, RESULT_OK, data);
-		
-		// if starting from empty 
+
+		clearChatList();
 		showIntro();
 	}
 	
@@ -417,7 +417,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	public void onBackPressed() {
 	   Log.d(TAG, "onBackPressed Called");
 	   int chatInd = mTabTitles.indexOf(mChatTabName);
-	   if (mTabsAdapter.lastShown == chatInd) {
+	   if (mTabs.getCurrentPage() == chatInd) {
 		   super.onBackPressed();
 	   }
 	   else {
@@ -463,7 +463,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			
 	}
 
-	public class TabsPagerAdapter  extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
+	public class TabsPagerAdapter  extends FragmentPagerAdapter /*implements ViewPager.OnPageChangeListener */ {
 		
 		//private final ViewPager mViewPager;
 		private final String TAG = TabsPagerAdapter.class.getSimpleName();
@@ -586,37 +586,37 @@ public class MainActivity extends RoboFragmentActivity implements
             return mTabTitles.get(position % mTabTitles.size());
         }
 	 
-		@Override
-		public void onPageScrollStateChanged(int arg0) {
-		}
+//		@Override
+//		public void onPageScrollStateChanged(int arg0) {
+//		}
 
-		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-			if (positionOffset > 0) {
-				lastShown = position+1;
-			}
-			else {
-				lastShown = position;
-			}
-		}
-
-		@Override
-		public void onPageSelected(int position) {
-			lastShown = position;
-		}
-		
+//		@Override
+//		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//			if (positionOffset > 0) {
+//				lastShown = position+1;
+//			}
+//			else {
+//				lastShown = position;
+//			}
+//		}
+//
+//		@Override
+//		public void onPageSelected(int position) {
+//			lastShown = position;
+//		}
+//		
 		@Override
 		public void notifyDataSetChanged() {
 			mTabs.notifyDataSetChanged();
 			super.notifyDataSetChanged();
 		}
 		
-		int lastShown = -1;
+//		int lastShown = -1;
 
 		// Internal helper function
 		public void showTab(int position) {
 			Log.d(TAG, "showTab "+position);
-			lastShown = position;
+//			lastShown = position;
 			mViewPager.setCurrentItem(position, true);
 //			mTabs.onPageSelected(position);
 //			this.notifyDataSetChanged();
@@ -770,7 +770,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			MainActivity.LogError(TAG, "Illegal state while saving instance state in main activity", e);
 		}
 
-		savedInstanceState.putBoolean("mTtsWasConfigured", mSpeechToTextWasConfigured);
+		// savedInstanceState.putBoolean("mTtsWasConfigured", mSpeechToTextWasConfigured);
 		// savedInstanceState.putString("mExternalIpAddress", mExternalIpAddress);
 		savedInstanceState.putStringArrayList("mTabTitles", (ArrayList<String>) mTabTitles);
 	}
@@ -782,7 +782,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		// This bundle has also been passed to onCreate.
 		// restore state:
 		// mExternalIpAddress = savedInstanceState.getString("mExternalIpAddress");
-		mSpeechToTextWasConfigured = savedInstanceState.getBoolean("mTtsWasConfigured");
+		// mSpeechToTextWasConfigured = savedInstanceState.getBoolean("mTtsWasConfigured");
 	}
 	
 	private void clearChatList() {
@@ -1703,6 +1703,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			showExamples();
 		}
 		
+		// only on debug build - click examples runs a random example
 		if (chatItem.getType() == ChatType.VirtualAgentContinued && BuildConfig.DEBUG) {
 			String t = tests[randomGenerator.nextInt(tests.length)];
 			addChatItem(new ChatItem(t));

@@ -133,8 +133,10 @@ public class BookingFragement extends RoboFragment {
         changeHotelRoom(MyApplication.selectedHotel, MyApplication.selectedRoom);
         
         TextView legal = (TextView) mView.findViewById(R.id.legal_text);
-        legal.setText(Html.fromHtml("Your credit card will be charged for the full payment upon submitting your reservation request.\n"
-			+"See <a href=\"http://www.travelnow.com/templates/352395/terms-of-use?lang=en&currency=USD&secureUrlFromDataBridge=https://www.travelnow.com&requestVersion=V2&source=g3\">User Agreement</a>\n"
+        // Expedia collect credit card charged on the spot -
+        // TODO: change text for hotel collect
+        legal.setText(Html.fromHtml("Your credit card will be charged for the full payment upon submitting your reservation request.<br>\n"
+			+"See <a href=\"http://www.travelnow.com/templates/352395/terms-of-use?lang=en&currency=USD&secureUrlFromDataBridge=https://www.travelnow.com&requestVersion=V2&source=g3\">User Agreement</a><br>\n"
 			+"We protect your credit card information.\n" 
 			+"See <a href=\"http://www.travelnow.com/templates/352395/privacy-policy?lang=en&currency=USD&secureUrlFromDataBridge=https://www.travelnow.com&requestVersion=V2\">Privacy Statement</a>"));
         legal.setMovementMethod(LinkMovementMethod.getInstance());

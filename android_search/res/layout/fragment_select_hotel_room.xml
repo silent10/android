@@ -21,7 +21,7 @@
             android:layout_alignParentTop="true"
             android:minHeight="64dp"
             android:padding="4dip"
-            android:src="@drawable/slanted_icon_72" />
+            android:src="@drawable/slanted_icon_512" />
 
         <TextView
             android:id="@+id/hotelName"

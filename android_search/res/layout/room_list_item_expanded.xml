@@ -49,7 +49,7 @@
 	            
   	            android:layout_gravity="center"
 	            android:background="@android:drawable/picture_frame"
-	            android:src="@drawable/slanted_icon_72"
+	            android:src="@drawable/slanted_icon_512"
 	            android:contentDescription="@string/room_photo"/>
     	    </LinearLayout>
     
