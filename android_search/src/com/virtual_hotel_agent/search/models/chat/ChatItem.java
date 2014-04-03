@@ -21,6 +21,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	
 	public enum Status {
 		None,
+		InEdit,
 		ToSearch,
 		InSearch,
 		HasResults
@@ -34,7 +35,6 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	
 	private Status status;
 	
-	private JSONObject mResults = null;
 	protected FlowElement flow;
 	protected EvaApiReply evaReply;
 	public boolean sayitActivated = false;
@@ -70,6 +70,9 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 	
 	public void setChat(SpannableString chat) {
 		this.chat = chat;
+	}
+	public void setChat(String chat) {
+		this.chat = new SpannableString(chat);
 	}
 
 	
@@ -132,9 +135,9 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 
 	public void setStatus(Status status) {
 		this.status = status;
-		if (status != Status.HasResults ) {
-			mResults = null;
-		}
+//		if (status != Status.HasResults ) {
+//			mResults = null;
+//		}
 	}
 	
 

@@ -26,7 +26,7 @@ import com.google.inject.Inject;
 import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.ScaleInAnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
@@ -138,8 +138,8 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.clearChoices();
-		if (MyApplication.selectedHotel != null) {
-			mHotelListView.setSelection(MyApplication.FOUND_HOTELS.indexOf(MyApplication.selectedHotel));
+		if (VHAApplication.selectedHotel != null) {
+			mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
 		}
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
@@ -160,9 +160,9 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 		mEnabledPaging = false;
 
-		if (MyApplication.FOUND_HOTELS.size() > 0) {
+		if (VHAApplication.FOUND_HOTELS.size() > 0) {
 
-			if (MyApplication.cacheLocation != null) {
+			if (VHAApplication.cacheLocation != null) {
 				if (getActivity() != null) {
 					LayoutInflater li = getActivity().getLayoutInflater();
 					mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
@@ -199,22 +199,16 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	public void onItemClick(AdapterView<?> parent, View view, int position,	long id) {		
 		Log.d(TAG, "onItemClick "+position);
 
-		HotelListAdapter.ViewHolder holder = (HotelListAdapter.ViewHolder) view.getTag();
-
-		if (holder == null) {
-			MainActivity.LogError(TAG, "Got null holder");
-			return;
-		}
 
 		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();
 		if (defaultTracker != null) 
 			defaultTracker.send(MapBuilder
-				    .createEvent("ui_action", "hotel_click", "hotel_list", (long) holder.getHotelIndex())
+				    .createEvent("ui_action", "hotel_click", "hotel_list", (long) position)
 				    .build()
 				   );
 		
-		mHotelListView.setItemChecked(holder.getHotelIndex(), true);
-		eventManager.fire(new HotelItemClicked(holder.getHotelIndex()));
+		mHotelListView.setItemChecked(position, true);
+		eventManager.fire(new HotelItemClicked(position));
 		Log.d(TAG, "running showHotelDetails()");
 
 	}
@@ -263,7 +257,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 			mAdapter.notifyDataSetChanged();
 		}
 
-		if (!MyApplication.moreResultsAvailable) {
+		if (!VHAApplication.moreResultsAvailable) {
 			mHotelListView.removeFooterView(mFooterView);
 			mEnabledPaging = false;
 		}
@@ -327,7 +321,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 	public void newHotelsList() {
 		if (mAdapter == null) {
-			MainActivity.LogError(TAG, "Unexpected adapter is null");
+			VHAApplication.logError(TAG, "Unexpected adapter is null");
 			return;
 		}
 		Log.d(TAG, "New Hotel list updated to size "+mAdapter.getCount());

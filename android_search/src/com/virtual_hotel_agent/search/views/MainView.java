@@ -22,6 +22,7 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
 /****
@@ -35,22 +36,19 @@ public class MainView {
 	private ProgressBar mProgressBar;
 	private SoundLevelView mSoundView;
 	private ImageButton mSearchButton;
+	private View mBottomBar;
 	private final int search_button_padding = 24;
 
 	private WeakReference<Handler> mUpdateLevel;
 	
-	private MainActivity mainActivity;
-
 	
 	public MainView(MainActivity mainActivity) {
-		this.mainActivity = mainActivity;
 		mStatusPanel = mainActivity.findViewById(R.id.status_panel);
 		mStatusText = (TextView)mainActivity.findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)mainActivity.findViewById(R.id.progressBar1);
 		mSoundView = (SoundLevelView)mainActivity.findViewById(R.id.surfaceView_sound_wave);
 		mSearchButton = (ImageButton) mainActivity.findViewById(R.id.search_button);
-
-		
+		mBottomBar = mainActivity.findViewById(R.id.bottom_bar);
 	}
 	
 	public void activateSearchButton() {
@@ -248,9 +246,9 @@ public class MainView {
 		@Override
 		public void speechResultError(String message, Object cookie) {
 			finishSpeech();
-			mainActivity.eva.speechResultError(message, cookie);
+			VHAApplication.EVA.speechResultError(message, cookie);
 			flashBadSearchButton(2);
-			Tracker defaultTracker = GoogleAnalytics.getInstance(mainActivity).getDefaultTracker();
+			Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
 			if (defaultTracker != null) 
 				defaultTracker.send(MapBuilder
 					    .createEvent("speech_search", "speech_search_end_bad", message, 0l)
@@ -261,11 +259,11 @@ public class MainView {
 		@Override
 		public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
 			finishSpeech();
-			mainActivity.eva.speechResultOK(evaJson, debugData, cookie);
+			VHAApplication.EVA.speechResultOK(evaJson, debugData, cookie);
 		}
 	};
 	
-	public void startSpeechSearch(final EvaSpeechComponent speechSearch) {
+	public void startSpeechSearch(final EvaSpeechComponent speechSearch, boolean editLastUtterance) {
 		showStatus("Listening...");
 		
 		activateSearchButton();
@@ -275,7 +273,7 @@ public class MainView {
 		try {
 			Handler handler = mUpdateLevel.get();
 			if (handler != null) {
-				speechSearch.start(mSpeechSearchListener, "voice");
+				speechSearch.start(mSpeechSearchListener, "voice", editLastUtterance);
 				handler.sendEmptyMessageDelayed(0, 50);
 			}
 			else {
@@ -283,9 +281,13 @@ public class MainView {
 			}
 		}
 		catch (EvaException e) {
-			Toast.makeText(mainActivity, "Failed to start recorder, please try again later and contact the developers if the problem persists", Toast.LENGTH_LONG).show();
-			MainActivity.LogError(TAG, "Exception starting recorder", e);
+			Toast.makeText(VHAApplication.getAppContext(), "Failed to start recorder, please try again later and contact the developers if the problem persists", Toast.LENGTH_LONG).show();
+			VHAApplication.logError(TAG, "Exception starting recorder", e);
 		}
+	}
+
+	public void toggleMainButtons(boolean showMainButtons) {
+		mBottomBar.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
 	}
 		
 	

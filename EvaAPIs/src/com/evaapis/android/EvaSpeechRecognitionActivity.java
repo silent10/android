@@ -84,6 +84,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 		super.onCreate(savedInstanceState);
 		
 		Intent intent = getIntent();
+		boolean editLastUtterance= intent.getBooleanExtra("editLastUtterance", false);
 		EvaComponent.EvaConfig config = (EvaComponent.EvaConfig)intent.getSerializableExtra("evaConfig");
 		speechRecognition = new EvaSpeechComponent(this, config);
 		
@@ -110,7 +111,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 		try {
-			speechRecognition.start(this, null);
+			speechRecognition.start(this, null, editLastUtterance);
 			mUpdateLevel.sendEmptyMessageDelayed(0, 100);
 			mTimeActivityCreation = (System.nanoTime() - t0)/1000000;
 		}

@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.ean.mobile.hotel.Hotel;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
@@ -40,7 +40,7 @@ public class HotelListAdapter extends BaseAdapter {
 	}
 	
 	private List<Hotel>  getHotels() {
-		return MyApplication.FOUND_HOTELS;
+		return VHAApplication.FOUND_HOTELS;
 	}
 
 	@Override
@@ -121,7 +121,6 @@ public class HotelListAdapter extends BaseAdapter {
 			Log.w(TAG, "No hotel info for adapter position "+position);
 			return convertView;
 		}
-		holder.setHotelIndex(position);
 
 		Spanned spannedName = Html.fromHtml(hotel.name);
 		String name = spannedName.toString();
@@ -188,7 +187,7 @@ public class HotelListAdapter extends BaseAdapter {
 		return convertView;
 	}
 
-	public static class ViewHolder {
+	private static class ViewHolder {
 		public LinearLayout layout;
 //		public ImageView tripAdvisorStrip;
 		ImageView image;
@@ -197,17 +196,9 @@ public class HotelListAdapter extends BaseAdapter {
 		TextView distance;
 		TextView location;
 		RatingBar rating;
-		private int hotelIndex;
-		
-		public int getHotelIndex() {
-			return hotelIndex;
-		}
-		public void setHotelIndex(int hotelIndex) {
-			this.hotelIndex = hotelIndex;
-		}
 	}
 
-	public void stopBackgroundLoader() {
+	public static void stopBackgroundLoader() {
 		S3DrawableBackgroundLoader.getInstance().Reset();
 	}
 

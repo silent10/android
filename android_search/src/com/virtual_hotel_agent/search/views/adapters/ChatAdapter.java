@@ -1,39 +1,43 @@
 // Relevant example: http://windrealm.org/tutorials/android/listview-with-checkboxes-without-listactivity.php
 package com.virtual_hotel_agent.search.views.adapters;
 
-import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.evaapis.crossplatform.flow.FlowElement;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
+import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
 public class ChatAdapter extends ArrayAdapter<ChatItem> {
 
 	private static final String TAG = "ChatAdapter";
 	private static final int VIEW_TYPE_COUNT = ChatType.values().length+1;
 	
-	private ChatItemList mChatList;
-	LayoutInflater mInflater;
+	private final ChatItemList mChatList;
+	private final ChatFragment chatFragment;
+	private final LayoutInflater mInflater;
 
 	int  myChatInSessionText,  myChatNoSessionText;
 	int  vhaChatInSessionText,  vhaChatNoSessionText;
 	
-	public ChatAdapter(Activity activity, int resource, int textViewResourceId, ChatItemList chatList) {
+	public ChatAdapter(final ChatFragment chatFragment, int resource, int textViewResourceId, final ChatItemList chatList) {
 		super(chatList, false);
 		mChatList = chatList;
+		this.chatFragment = chatFragment;
+		FragmentActivity activity = chatFragment.getActivity();
 		mInflater = LayoutInflater.from(activity);
 		
 		Resources resources = activity.getResources();
@@ -62,7 +66,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	public ChatItem getItem(int position) {
 		// todo: if some items are collapsed then count from start and skip them
 		if (position > mChatList.size()) {
-			MainActivity.LogError(TAG, "Accessing chat item "+position+" but size is "+mChatList.size());
+			VHAApplication.logError(TAG, "Accessing chat item "+position+" but size is "+mChatList.size());
 		}
 		ChatItem chatItem = mChatList.get(position);
 		return chatItem;
@@ -71,7 +75,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	@Override public int getCount() {
 		// todo: if some items are collapsed then count from start and skip them
 		if (mChatList == null) {
-			MainActivity.LogError(TAG, "null chatList");
+			VHAApplication.logError(TAG, "null chatList");
 			return 0;
 		}
 		return mChatList.size()+1;
@@ -95,6 +99,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		return view;
 	}
 	
+	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (position >= mChatList.size()) {
@@ -108,6 +113,17 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			switch (viewType) {
 			case Me:
 				row = mInflater.inflate(R.layout.row_mychat, parent, false);
+				MeRowHolder holder = new MeRowHolder();
+				holder.editText = (EditText) row.findViewById(R.id.editText);
+				holder.editText.setOnFocusChangeListener(chatFragment.focusChangedHandler);
+				holder.editText.setOnEditorActionListener(chatFragment.editorActionHandler);
+				holder.deleteButton = (ImageButton) row.findViewById(R.id.buttonDelete);
+				holder.deleteButton.setOnClickListener(chatFragment.deleteHandler);
+				holder.microphoneButton = (ImageButton) row.findViewById(R.id.buttonMicrophone);
+				holder.microphoneButton.setOnClickListener(chatFragment.micButtonHandler);
+				holder.label = (TextView) row.findViewById(R.id.label);
+				holder.inEdit = row.findViewById(R.id.edit_chat_item);
+				row.setTag(R.id.chat_row_holder, holder);
 				break;
 			case DialogQuestion:
 			case VirtualAgent:
@@ -126,7 +142,13 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 //			Ln.d("reusing view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
 		}
 		
-		TextView label = (TextView) row.findViewById(R.id.label);
+		RowHolder holder = (RowHolder) row.getTag(R.id.chat_row_holder);
+		if (holder == null) {
+			holder = new RowHolder();
+			holder.label = (TextView) row.findViewById(R.id.label);
+			row.setTag(R.id.chat_row_holder, holder);
+		}
+		TextView label = holder.label;
 		label.setText(chatItem.getChat());
 		
 		
@@ -159,6 +181,18 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			else {
 				label.setTextColor(myChatNoSessionText);
 //				icon.setTextColor(myChatNoSessionText);
+			}
+			
+			MeRowHolder meHolder = (MeRowHolder) row.getTag(R.id.chat_row_holder); 
+			
+			if (chatItem.getStatus() == Status.InEdit) {
+				meHolder.editText.setText(chatItem.getChat());
+				label.setVisibility(View.GONE);
+				meHolder.inEdit.setVisibility(View.VISIBLE);
+			}
+			else {
+				label.setVisibility(View.VISIBLE);
+				meHolder.inEdit.setVisibility(View.GONE);
 			}
 			break;
 			
@@ -212,21 +246,18 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				label.setTextColor(vhaChatNoSessionText);
 			}
 		}
-//		if (chatItem.isActivated()) {
-//			if (viewType == ChatType.Me) {
-//				if (label.getVisibility() != View.GONE) {
-//					label.setVisibility(View.GONE);
-//					EditText editBox = (EditText)row.findViewById(R.id.editText);
-//					editBox.setText(chatItem.getChat(), TextView.BufferType.EDITABLE);
-//					editBox.setVisibility(View.VISIBLE);
-//				}
-//			}
-//			else {
-//				row.setBackgroundColor(SelectedBackgroundColor);
-//				label.setTextColor(SelectedTextColor);
-//			}
-//		}
 		row.setTag(chatItem);
 		return row;
+	}
+	
+	private static class RowHolder {
+		TextView label;
+	}
+	
+	public static class MeRowHolder extends RowHolder {
+		public View inEdit;
+		public EditText editText;
+		public ImageButton microphoneButton;
+		public ImageButton deleteButton;
 	}
 }

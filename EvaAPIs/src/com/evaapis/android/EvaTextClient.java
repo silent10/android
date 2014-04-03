@@ -26,12 +26,13 @@ import com.evature.util.ExternalIpAddressGetter;
 
 		private static final String TAG = "EvaCallerTask";
 		
-		EvaComponent mEva;
-		private Object mCookie;  
-		private String mInputText;
-		private ArrayList<String> mNBest;
-		int mResponseId;
+		private final EvaComponent mEva;
+		private final Object mCookie;  
+		private final String mInputText;
+		private final ArrayList<String> mNBest;
+		private int mResponseId;
 		private long startOfTextSearch;
+		private boolean mEditLastUtterance;
 		
 		/****
 		 * 
@@ -39,15 +40,17 @@ import com.evature.util.ExternalIpAddressGetter;
 		 * @param responseId - response to send to Eva, ignored if -1
 		 * @param cookie   - will be returned to the listener on callback
 		 */
-		public void initialize(EvaComponent eva,
-								String inputText, 
-								int responseId, 
-								Object cookie) {
+		public EvaTextClient( final EvaComponent eva,
+								final String inputText, 
+								final int responseId, 
+								final Object cookie, 
+								final boolean editLastUtterance) {
 			mResponseId = responseId;
 			mEva = eva;
 			mInputText = inputText;
 			mNBest = null;
 			mCookie = cookie;
+			mEditLastUtterance = editLastUtterance;
 		}
 		
 		/****
@@ -56,14 +59,16 @@ import com.evature.util.ExternalIpAddressGetter;
 		 * @param responseId - response to send to Eva, ignored if -1
 		 * @param cookie   - will be returned to the listener on callback
 		 */
-		public void initialize(EvaComponent eva,
-								ArrayList<String> nBestText, 
-								Object cookie) {
+		public EvaTextClient(final EvaComponent eva,
+								final ArrayList<String> nBestText, 
+								final Object cookie,
+								final boolean editLastUtterance) {
 			mResponseId = -1;
 			mEva = eva;
 			mNBest = nBestText;
 			mInputText = null;
 			mCookie = cookie;
+			mEditLastUtterance = editLastUtterance;
 		}
 
 		@Override
@@ -130,7 +135,9 @@ import com.evature.util.ExternalIpAddressGetter;
 				double longitude = EvatureLocationUpdater.getLongitude();
 				evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
 			}
-
+			if (mEditLastUtterance) {
+				evatureUrl += "&edit_last_utterance=true";
+			}
 			Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
 			try {
 				return DownloadUrl.sget(evatureUrl);

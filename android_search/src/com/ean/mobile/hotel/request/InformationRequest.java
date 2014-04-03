@@ -39,9 +39,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.text.Html;
-import android.util.Log;
-
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
@@ -49,7 +46,8 @@ import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.request.CommonParameters;
 import com.ean.mobile.request.Request;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.evature.util.Log;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
  * Uses getHotelInformation to get the rest of the hotel's information, including images
@@ -144,7 +142,7 @@ public final class InformationRequest extends Request<HotelInformation> {
                     new HotelImageTuple(new URL(image.optString("thumbnailUrl")),
                         new URL(image.optString("url")), image.optString("caption")));
             } catch (MalformedURLException me) {
-                Log.e(Constants.LOG_TAG, "Unable to process JSON", me);
+                VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON", me);
             }
         }
 

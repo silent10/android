@@ -40,7 +40,7 @@ import org.json.JSONObject;
 import com.ean.mobile.exception.EanWsError;
 import com.evature.util.ExternalIpAddressGetter;
 import com.viewpagerindicator.IconPagerAdapter;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.SettingsAPI;
 
 /**
@@ -104,7 +104,7 @@ public abstract class Request<T> {
             final LocalDate arrivalDate, final LocalDate departureDate) {
     	
     	CommonParameters.customerIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
-    	CommonParameters.currencyCode = SettingsAPI.getCurrencyCode(MyApplication.getAppContext());
+    	CommonParameters.currencyCode = SettingsAPI.getCurrencyCode(VHAApplication.getAppContext());
     	
         final List<NameValuePair> params = CommonParameters.asNameValuePairs();
         if (arrivalDate != null) {

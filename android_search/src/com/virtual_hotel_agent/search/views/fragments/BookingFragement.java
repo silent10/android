@@ -60,7 +60,7 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.BuildConfig;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.BookingCompletedEvent;
@@ -125,12 +125,12 @@ public class BookingFragement extends RoboFragment {
 		Button toggleGuests = (Button) mView.findViewById(R.id.button_show_guests);
 		toggleGuests.setOnClickListener(mToggleGuests);
 		
-        if (MyApplication.selectedHotel == null || MyApplication.selectedRoom == null) {
-        	MainActivity.LogError(TAG, "Null hotel/room");
+        if (VHAApplication.selectedHotel == null || VHAApplication.selectedRoom == null) {
+        	VHAApplication.logError(TAG, "Null hotel/room");
         	return mView;
         }
 
-        changeHotelRoom(MyApplication.selectedHotel, MyApplication.selectedRoom);
+        changeHotelRoom(VHAApplication.selectedHotel, VHAApplication.selectedRoom);
         
         TextView legal = (TextView) mView.findViewById(R.id.legal_text);
         // Expedia collect credit card charged on the spot -
@@ -164,8 +164,8 @@ public class BookingFragement extends RoboFragment {
         
         final RoomOccupancy occupancy = hotelRoom.rate.roomGroup.get(0).occupancy;
         
-        checkIn.setText(DATE_TIME_FORMATTER.print(MyApplication.arrivalDate));
-        checkOut.setText(DATE_TIME_FORMATTER.print(MyApplication.departureDate));
+        checkIn.setText(DATE_TIME_FORMATTER.print(VHAApplication.arrivalDate));
+        checkOut.setText(DATE_TIME_FORMATTER.print(VHAApplication.departureDate));
         
         numGuests.setText(getGuestsText(occupancy));
         roomType.setText(hotelRoom.description);
@@ -190,7 +190,7 @@ public class BookingFragement extends RoboFragment {
 
         priceBreakdownList.removeAllViews();
         
-        LocalDate currentDate = MyApplication.arrivalDate.minusDays(1);
+        LocalDate currentDate = VHAApplication.arrivalDate.minusDays(1);
         for (NightlyRate rate : hotelRoom.rate.chargeable.nightlyRates) {
             view = inflater.inflate(R.layout.pricebreakdownlayout, null);
             final TextView date = (TextView) view.findViewById(R.id.priceBreakdownDate);
@@ -423,7 +423,7 @@ public class BookingFragement extends RoboFragment {
 		            reservationInfo.individual.name,
 		            hotelRoom,
 		            hotelRoom.bedTypes.get(0).id,
-		            MyApplication.occupancy());
+		            VHAApplication.occupancy());
 	
 		        final Address reservationAddress
 		            = new Address(Arrays.asList(addressLine1, addressLine2), city, state, country, zip);
@@ -436,8 +436,8 @@ public class BookingFragement extends RoboFragment {
 		        
 		        final BookingRequest request = new BookingRequest(
 	        		hotel.hotelId,
-	        		MyApplication.arrivalDate,
-	        		MyApplication.departureDate,
+	        		VHAApplication.arrivalDate,
+	        		VHAApplication.departureDate,
 	        		hotel.supplierType,
 		            Collections.singletonList(reservationRoom),
 		            reservationInfo,
@@ -510,7 +510,7 @@ public class BookingFragement extends RoboFragment {
             for (BookingRequest request : bookingRequests) {
                 try {
                     final Reservation reservation = RequestProcessor.run(request);
-                    MyApplication.addReservationToCache(reservation);
+                    VHAApplication.addReservationToCache(reservation);
                     
                     if (defaultTracker != null) 
         				defaultTracker.send(MapBuilder
@@ -518,10 +518,10 @@ public class BookingFragement extends RoboFragment {
         					    .build()
         					   );
                 } catch (EanWsError ewe) {
-                    MainActivity.LogError(TAG, "An APILevel Exception occurred.", ewe);
+                    VHAApplication.logError(TAG, "An APILevel Exception occurred.", ewe);
                     return Boolean.FALSE;
                 } catch (UrlRedirectionException  ure) {
-                    MyApplication.sendRedirectionToast();
+                    VHAApplication.sendRedirectionToast();
                     return Boolean.FALSE;
                 }
             }

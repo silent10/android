@@ -35,7 +35,7 @@ import com.google.android.gms.maps.model.LatLngBounds.Builder;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.inject.Inject;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
@@ -101,7 +101,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 		// Check if we were successful in obtaining the map.
         if (mMap != null && mView != null) {
         	
-        	List<Hotel> currentHotels = MyApplication.FOUND_HOTELS;
+        	List<Hotel> currentHotels = VHAApplication.FOUND_HOTELS;
             if (currentHotels.size() == 0) {
             	// no need to update map - nothing is present
             	return;
@@ -150,7 +150,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	}
 	
 	private int getFirstIndexToDisplay() {
-		int length= MyApplication.FOUND_HOTELS.size();
+		int length= VHAApplication.FOUND_HOTELS.size();
         if (length == 0) {
         	return 0;
         }
@@ -172,11 +172,11 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         Builder boundsBuilder = new LatLngBounds.Builder();
         
         selectedMarker = null;
-        Hotel selectedHotel = MyApplication.selectedHotel;
+        Hotel selectedHotel = VHAApplication.selectedHotel;
         
-        for(int i=startFrom;i<MyApplication.FOUND_HOTELS.size();i++)
+        for(int i=startFrom;i<VHAApplication.FOUND_HOTELS.size();i++)
         {
-	        Hotel hotelData = MyApplication.FOUND_HOTELS.get(i);
+	        Hotel hotelData = VHAApplication.FOUND_HOTELS.get(i);
 	        if (hotelData != selectedHotel) {
 	        	addMapPoint(hotelData, hotelIcon, boundsBuilder);
 	        }
@@ -245,9 +245,9 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
         mMap.animateCamera(CameraUpdateFactory.newLatLng(selectedMarker.getPosition()));
 
         
-        for(int i=startFrom; i<MyApplication.FOUND_HOTELS.size(); i++)
+        for(int i=startFrom; i<VHAApplication.FOUND_HOTELS.size(); i++)
         {
-	        Hotel hotel = MyApplication.FOUND_HOTELS.get(i);
+	        Hotel hotel = VHAApplication.FOUND_HOTELS.get(i);
 			String name = hotel.name;
 	        if (name.equals(marker.getTitle())){ 
 	        	LatLng position = marker.getPosition();

@@ -119,7 +119,7 @@ public class EvaSpeechComponent {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						Log.e(TAG, "Exception waiting for transfer to complete", e);
 					}
 					count++;
 				}
@@ -130,7 +130,7 @@ public class EvaSpeechComponent {
 			try {
 				mVoiceClient.startVoiceRequest();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.e(TAG, "Exception starting voice request", e);
 			}
 			return null;
 		}
@@ -166,10 +166,10 @@ public class EvaSpeechComponent {
 		}
 	}
 
-	public void start(SpeechRecognitionResultListener listener, Object cookie) throws EvaException {
+	public void start(SpeechRecognitionResultListener listener, Object cookie, boolean editLastUtterance) throws EvaException {
 		this.cookie = cookie;
 		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
-		mVoiceClient = new EvaVoiceClient(mContext, mConfig, mSpeechAudioStreamer);
+		mVoiceClient = new EvaVoiceClient(mContext, mConfig, mSpeechAudioStreamer, editLastUtterance);
 		mSpeechAudioStreamer.initRecorder();
 		dictationTask = new EvaHttpDictationTask(mVoiceClient, listener);
 		dictationTask.execute((Object[])null);

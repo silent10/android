@@ -31,7 +31,7 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
@@ -127,7 +127,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			 holder.promo.setText(name);
 			 
 			 if (roomDetails.imageUrls != null && roomDetails.imageUrls.length > 0 && roomDetails.imageUrls[0] != null) {
-				 LruCache<String, Bitmap> cache = MyApplication.HOTEL_PHOTOS;
+				 LruCache<String, Bitmap> cache = VHAApplication.HOTEL_PHOTOS;
 				 Bitmap cachedPhoto = cache.get(roomDetails.imageUrls[0]);
 				 if (cachedPhoto != null) {
 					 holder.photo.setImageBitmap(cachedPhoto);
@@ -248,7 +248,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		View photoContainer = convertView.findViewById(R.id.roomImage_container);
 		ImageView photoHolder = (ImageView) convertView.findViewById(R.id.roomImage);
 		if (room.imageUrls != null && room.imageUrls.length > 0) {
-			 LruCache<String, Bitmap> cache = MyApplication.HOTEL_PHOTOS;
+			 LruCache<String, Bitmap> cache = VHAApplication.HOTEL_PHOTOS;
 			 Bitmap cachedPhoto = cache.get(room.imageUrls[0]);
 			 if (cachedPhoto != null) {
 				 photoHolder.setImageBitmap(cachedPhoto);

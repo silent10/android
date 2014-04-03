@@ -35,7 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
  * The data holder for information about a particular hotel room.
@@ -157,7 +157,7 @@ public final class HotelRoom {
 					}
 				}
         	} catch (JSONException e) {
-        		MainActivity.LogError(TAG, "Error parsing hotel room", e);
+        		VHAApplication.logError(TAG, "Error parsing hotel room", e);
         	}
 		}
         
@@ -184,7 +184,7 @@ public final class HotelRoom {
 					}
 				}
 	        } catch (JSONException e) {
-	    		MainActivity.LogError(TAG, "Error parsing hotel room", e);
+	    		VHAApplication.logError(TAG, "Error parsing hotel room", e);
 	    		imageUrls = null;
 	    	}
 		}

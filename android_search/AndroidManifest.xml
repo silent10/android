@@ -31,7 +31,7 @@
 
 <!--         android:icon="@drawable/original_icon_512" -->
     <application
-        android:name="com.virtual_hotel_agent.search.MyApplication"
+        android:name="com.virtual_hotel_agent.search.VHAApplication"
         android:icon="@drawable/hotel_icon512"
         android:label="@string/app_name" >
         <activity
@@ -39,7 +39,7 @@
             android:label="@string/app_name"
             android:theme="@style/StyledIndicators"
             android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait" > <!-- android:theme="@android:style/Theme.Black" -->
+            android:screenOrientation="portrait" > 
             <!-- android:theme="@android:style/Theme.NoTitleBar"> -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

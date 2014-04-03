@@ -37,7 +37,7 @@ import android.text.Html;
 
 import com.ean.mobile.LatLongAddress;
 import com.evaapis.android.EvatureLocationUpdater;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
  * The holder for information about a particular hotel.
@@ -161,7 +161,7 @@ public final class Hotel {
 				}
 	
 			} catch (Exception e2) {
-				MainActivity.LogError("Hotel", "Error calculating distance", e2);
+				VHAApplication.logError("Hotel", "Error calculating distance", e2);
 				distance = -1;
 			}
 		}

@@ -37,17 +37,16 @@ import java.util.zip.GZIPInputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
+import com.evature.util.Log;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.BuildConfig;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
  * Responsible for the logic that executes requests through the EAN API.
@@ -74,12 +73,12 @@ public final class RequestProcessor {
             final JSONObject jsonResponse = performApiRequest(request);
             return request.consume(jsonResponse);
         } catch (JSONException jsone) {
-            Log.e(Constants.LOG_TAG, "Unable to process JSON", jsone);
+        	VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON", jsone);
             CommonParameters.customerSessionId = null;
         } catch (IOException ioe) {
-            Log.e(Constants.LOG_TAG, "Could not read response from API", ioe);
+        	VHAApplication.logError(Constants.LOG_TAG, "Could not read response from API", ioe);
         } catch (URISyntaxException use) {
-            Log.e(Constants.LOG_TAG, "Improper URI syntax", use);
+        	VHAApplication.logError(Constants.LOG_TAG, "Improper URI syntax", use);
         }
         return null;
     }
@@ -146,10 +145,10 @@ public final class RequestProcessor {
         Log.d(Constants.LOG_TAG, request.getName()+ " took " + timeTaken + " milliseconds.");
         
         if (BuildConfig.DEBUG == false) {
-			Tracker defaultTracker = GoogleAnalytics.getInstance(MyApplication.getAppContext()).getDefaultTracker();
+			Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
 			if (defaultTracker != null) 
 				defaultTracker.send(MapBuilder
-					    .createEvent("expedia_search", request.getName(), endpoint, (MyApplication.selectedHotel == null) ? -1l: MyApplication.selectedHotel.hotelId)
+					    .createEvent("expedia_search", request.getName(), endpoint, (VHAApplication.selectedHotel == null) ? -1l: VHAApplication.selectedHotel.hotelId)
 					    .set(Fields.CURRENCY_CODE, CommonParameters.currencyCode)
 					    .build()
 					   );

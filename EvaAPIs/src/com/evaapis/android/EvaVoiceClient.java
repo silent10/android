@@ -59,12 +59,12 @@ public class EvaVoiceClient {
 
 	private String mEvaResponse;
 
-	private SpeechAudioStreamer mSpeechAudioStreamer;
+	private final SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 	HttpPost mHttpPost = null;
 	
-	private EvaComponent.EvaConfig mConfig;
+	private final EvaComponent.EvaConfig mConfig;
 
 	// debug time measurements
 	public long timeSpentReadingResponse;
@@ -74,6 +74,7 @@ public class EvaVoiceClient {
 	DebugStream uploadStream;
 	
 	boolean hadError;
+	private final boolean editLastUtterance;
 
 	private Context mContext;
 
@@ -85,11 +86,12 @@ public class EvaVoiceClient {
 	 * @param config 
 	 * @param speechAudioStreamer
 	 */
-	public EvaVoiceClient(Context context, EvaComponent.EvaConfig config,
-			SpeechAudioStreamer speechAudioStreamer) {
+	public EvaVoiceClient(Context context, final EvaComponent.EvaConfig config,
+			final SpeechAudioStreamer speechAudioStreamer, final boolean editLastUtterance) {
 		mConfig = config;
 		mContext = context;
 		mSpeechAudioStreamer = speechAudioStreamer;	
+		this.editLastUtterance = editLastUtterance; 
 	}
 
 	private HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyManagementException
@@ -161,6 +163,10 @@ public class EvaVoiceClient {
 		
 		if (mConfig.locale != null) {
 			qparams.add(new BasicNameValuePair("locale", mConfig.locale));
+		}
+		
+		if (editLastUtterance) {
+			qparams.add(new BasicNameValuePair("edit_last_utterance", "true"));
 		}
 		
 		String host = mConfig.vproxyHost.toLowerCase();
