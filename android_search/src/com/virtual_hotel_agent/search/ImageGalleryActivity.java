@@ -84,16 +84,16 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		
 		long hotelId = intent.getLongExtra(HOTEL_ID, -1l);
 		if (hotelId == -1 && urlsArray == null) {
-			MainActivity.LogError(TAG, "No hotel ID and no urls");
+			VHAApplication.logError(TAG, "No hotel ID and no urls");
 			this.finish();
 			return;
 		}
 
 		Hotel hotelData = null;
 		if (hotelId != -1) {
-			hotelData = MyApplication.HOTEL_ID_MAP.get(hotelId);
+			hotelData = VHAApplication.HOTEL_ID_MAP.get(hotelId);
 			if (hotelData == null) {
-				MainActivity.LogError(TAG, "No DB - hotelId = "+hotelId);
+				VHAApplication.logError(TAG, "No DB - hotelId = "+hotelId);
 				this.finish();
 				return;
 			}
@@ -120,7 +120,7 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
 		mIndicator.setViewPager(contentView);
 		
-		imageDownloader = new ImageDownloader(MyApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
+		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
 		
 		ArrayList<String> urls;
 		if (urlsArray != null) {
@@ -131,7 +131,7 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 			captions = new ArrayList<String>();
 			urls = new ArrayList<String>();
 			if (hotelData != null) {
-				HotelInformation info = MyApplication.EXTENDED_INFOS.get(hotelData.hotelId);
+				HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotelData.hotelId);
 				if (info != null && info.images.size() > 0 ) {
 					for (HotelImageTuple hotelImage : info.images) {
 						if (hotelImage.mainUrl != null) {
@@ -149,7 +149,7 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		}
 
 		if (urls.size() == 0) {
-			MainActivity.LogError(TAG, "No images");
+			VHAApplication.logError(TAG, "No images");
 			this.finish();
 			return;
 		}

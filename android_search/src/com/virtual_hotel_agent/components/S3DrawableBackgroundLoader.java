@@ -18,8 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.ImageView;
 
-import com.evature.util.Log;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 public class S3DrawableBackgroundLoader {
 	private final Map<String, SoftReference<Drawable>> mCache = new HashMap<String, SoftReference<Drawable>>();
@@ -104,10 +103,10 @@ public class S3DrawableBackgroundLoader {
 				response = connection.getContent();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				MainActivity.LogError(TAG, "IO exception", e);
+				VHAApplication.logError(TAG, "IO exception", e);
 				return null;
 			} catch (OutOfMemoryError e) {
-				MainActivity.LogError(TAG, "Out of memory", e);
+				VHAApplication.logError(TAG, "Out of memory", e);
 				return null;
 			}
 

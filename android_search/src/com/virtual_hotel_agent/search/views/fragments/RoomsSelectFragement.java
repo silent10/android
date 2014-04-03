@@ -36,7 +36,7 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
@@ -119,20 +119,20 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 
 		mStarRatingBar = (RatingBar)mView.findViewById(R.id.starRating);
 		
-		if (MyApplication.selectedHotel == null) {
-			MainActivity.LogError(TAG, "onCreateView - no selectedHotel");
+		if (VHAApplication.selectedHotel == null) {
+			VHAApplication.logError(TAG, "onCreateView - no selectedHotel");
 		}
 		else {
-			changeHotelId(MyApplication.selectedHotel.hotelId);
+			changeHotelId(VHAApplication.selectedHotel.hotelId);
 		}
 
 		return mView;
 	}
 
 	private void fillData() {
-		Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+		Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 		if (hotel == null) {
-			MainActivity.LogError(TAG, "showing hotel id "+mHotelId +" but not found");
+			VHAApplication.logError(TAG, "showing hotel id "+mHotelId +" but not found");
 			return;
 		}
 		
@@ -144,11 +144,11 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		
 		WeakReference<RoomsSelectFragement> fragmentRef = new WeakReference<RoomsSelectFragement>(this);
 		mHandlerFinish = new DownloadedImg(fragmentRef);
-		imageDownloader = new ImageDownloader(MyApplication.HOTEL_PHOTOS, mHandlerFinish);
+		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish);
 		
 		// if already loaded full image - no need for downloader thread
 		ArrayList<String> urls = new ArrayList<String>();
-		HotelInformation info = MyApplication.EXTENDED_INFOS.get(hotel.hotelId);
+		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotel.hotelId);
 		if (info != null && info.images.size() > 0) {
 			for (HotelImageTuple photo : info.images) {
 				if (photo.mainUrl != null) {
@@ -158,7 +158,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 			}
 		}
 	
-		List<HotelRoom> rooms = MyApplication.HOTEL_ROOMS.get(hotel.hotelId);
+		List<HotelRoom> rooms = VHAApplication.HOTEL_ROOMS.get(hotel.hotelId);
 		if (rooms != null && rooms.size() > 0) {
 			for (HotelRoom rd : rooms) {
 				if (rd.imageUrls != null && rd.imageUrls.length > 0) {
@@ -166,7 +166,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 				}
 			}
 		}
-		Bitmap fullImage = MyApplication.HOTEL_PHOTOS.get(urls.get(0));
+		Bitmap fullImage = VHAApplication.HOTEL_PHOTOS.get(urls.get(0));
 		if (fullImage != null) {
 			Log.d(TAG, "Showing full Image from cache");
 			mHotelImage.setImageBitmap(fullImage);
@@ -201,7 +201,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		else {
 			// http://developer.ean.com/docs/launch-requirements/agency-hotels/#roomratedisclaimer
 			disclaimer = getText(R.string.room_price_disclaimer_hotel_collect).toString();
-			if (MyApplication.numberOfAdults > 2 || MyApplication.childAges.size() > 0) {
+			if (VHAApplication.numberOfAdults > 2 || VHAApplication.childAges.size() > 0) {
 				disclaimer += " Carefully review the room descriptions and rate rules to ensure the room you select can "+ 
 								"accommodate your entire party.";
 			}
@@ -273,7 +273,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		if (mHotelId == hotelId) {
 			return;
 		}
-		MyApplication.selectedRoom = null;
+		VHAApplication.selectedRoom = null;
 		mHotelId = hotelId;
 		fillData();
 	}

@@ -35,7 +35,7 @@ import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
@@ -142,11 +142,11 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mEvaBmpCached = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.slanted_icon_512);
 
 
-		if (MyApplication.selectedHotel == null) {
-			MainActivity.LogError(TAG, "onCreateView - null selectedHotel");
+		if (VHAApplication.selectedHotel == null) {
+			VHAApplication.logError(TAG, "onCreateView - null selectedHotel");
 		}
 		else {
-			changeHotelId(MyApplication.selectedHotel.hotelId);
+			changeHotelId(VHAApplication.selectedHotel.hotelId);
 		}
 
 		return mView;
@@ -165,7 +165,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			return;
 		}
 		mHotelId = hotelId;
-		MyApplication.selectedRoom = null;
+		VHAApplication.selectedRoom = null;
 		fillData();
 	}
 
@@ -187,9 +187,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 //				intent.putExtra(SelectRoomActivity.HOTEL_INDEX, mHotelIndex);
 //				getActivity().startActivityForResult(intent, 0);
 //			
-			final Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 			if (hotel == null) {
-				MainActivity.LogError(TAG, "selecting hotel id "+mHotelId +" but not found");
+				VHAApplication.logError(TAG, "selecting hotel id "+mHotelId +" but not found");
 				return;
 			}
 			
@@ -201,9 +201,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		@Override
 		public void onClick(View v) {
-			final Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 			if (hotel == null) {
-				MainActivity.LogError(TAG, "showing map for hotel id "+mHotelId +" but not found");
+				VHAApplication.logError(TAG, "showing map for hotel id "+mHotelId +" but not found");
 				return;
 			}
 
@@ -238,9 +238,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mPropertyDescription.loadData("","text/html", "utf-8");
 		mScrollView.setScrollY(0);
 		
-		final Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+		final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 		if (hotel == null) {
-			MainActivity.LogError(TAG, "showing hotel id "+mHotelId +" but not found");
+			VHAApplication.logError(TAG, "showing hotel id "+mHotelId +" but not found");
 			return;
 		}
 		String name = hotel.name;
@@ -263,9 +263,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 
 		mHotelName.setText(name);
 		Log.i(TAG, "hotel name = " + name);
-		HotelInformation info = MyApplication.EXTENDED_INFOS.get(MyApplication.selectedHotel.hotelId);
+		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(VHAApplication.selectedHotel.hotelId);
 		if (info == null) {
-			MainActivity.LogError(TAG, "No extended info for hotel "+MyApplication.selectedHotel.name);
+			VHAApplication.logError(TAG, "No extended info for hotel "+VHAApplication.selectedHotel.name);
 			return;
 		}
 
@@ -295,7 +295,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mHotelGallery.setAdapter(mHotelGalleryAdapter);
 
 
-		imageDownloader = new ImageDownloader(MyApplication.HOTEL_PHOTOS, mHandlerFinish);
+		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish);
 		
 		if (info.images.size() > 0 ) {
 			Log.i(TAG, "gallery showing "+info.images.size()+" imgs for hotel "+mHotelId);

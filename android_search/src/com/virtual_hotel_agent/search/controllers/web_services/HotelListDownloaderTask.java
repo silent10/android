@@ -18,7 +18,7 @@ import com.ean.mobile.request.Request;
 import com.ean.mobile.request.RequestProcessor;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.Log;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
@@ -95,11 +95,11 @@ public class HotelListDownloaderTask extends DownloaderTask {
             final ListRequest request = new ListRequest(requestParams);
 
             HotelList listResponse = RequestProcessor.run(request);
-			MyApplication.updateFoundHotels(listResponse, true);
+			VHAApplication.updateFoundHotels(listResponse, true);
 
               
-			MyApplication.departureDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("departureDate"));
-			MyApplication.arrivalDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("arrivalDate"));
+			VHAApplication.departureDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("departureDate"));
+			VHAApplication.arrivalDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("arrivalDate"));
 
             mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
@@ -107,7 +107,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
             Log.d(TAG, "An APILevel Exception occurred.", ewe);
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
-            MyApplication.sendRedirectionToast();
+            VHAApplication.sendRedirectionToast();
             mProgress = DownloaderStatus.FinishedWithError;
         }
 		

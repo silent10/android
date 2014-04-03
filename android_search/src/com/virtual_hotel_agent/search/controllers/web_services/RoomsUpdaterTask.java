@@ -9,7 +9,7 @@ import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.hotel.request.RoomAvailabilityRequest;
 import com.ean.mobile.request.RequestProcessor;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
@@ -32,8 +32,8 @@ public class RoomsUpdaterTask extends DownloaderTask {
     public RoomsUpdaterTask(final long hotelId) {
     	super(-1);
         this.hotelId = hotelId;
-        this.arrivalDate = MyApplication.arrivalDate;
-        this.departureDate = MyApplication.departureDate;
+        this.arrivalDate = VHAApplication.arrivalDate;
+        this.departureDate = VHAApplication.departureDate;
     }
 
 	
@@ -48,17 +48,17 @@ public class RoomsUpdaterTask extends DownloaderTask {
 		 try {
 			 eanWsError = null;
              final RoomAvailabilityRequest request
-                 = new RoomAvailabilityRequest(hotelId, MyApplication.occupancy(), arrivalDate, departureDate);
+                 = new RoomAvailabilityRequest(hotelId, VHAApplication.occupancy(), arrivalDate, departureDate);
              List<HotelRoom> hotelRooms = RequestProcessor.run(request);
-             MyApplication.HOTEL_ROOMS.put(hotelId, hotelRooms);
+             VHAApplication.HOTEL_ROOMS.put(hotelId, hotelRooms);
              mProgress = DownloaderStatus.Finished;
              return hotelRooms;
          } catch (EanWsError ewe) {
-             MainActivity.LogError(TAG, "An error occurred in the api", ewe);
+             VHAApplication.logError(TAG, "An error occurred in the api", ewe);
              eanWsError = ewe;
              mProgress = DownloaderStatus.FinishedWithError;
          } catch (UrlRedirectionException ure) {
-             MyApplication.sendRedirectionToast();
+             VHAApplication.sendRedirectionToast();
              mProgress = DownloaderStatus.FinishedWithError;
          }
          return null;

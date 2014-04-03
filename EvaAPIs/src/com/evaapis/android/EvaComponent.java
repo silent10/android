@@ -277,7 +277,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 				if (data != null && data.getExtras() != null) {
 					Bundle bundle = data.getExtras();
 					ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
-					searchWithMultipleText(matches, "google voice");
+					searchWithMultipleText(matches, "google voice", false); // TODO: pass editLastUtterance
 				}
 				break;
 		}
@@ -398,29 +398,23 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		}
 	}
 	
-	public void searchWithText(String searchString) {
-		searchWithText(searchString, null);
-	}
-
-	public void searchWithText(String searchString, Object cookie) {
+	public void searchWithText(String searchString, Object cookie, boolean editLastUtterance) {
 		mLastLanguageUsed = getPreferedLanguage();
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 		}
-		mEvaTextClient = new EvaTextClient();
-		mEvaTextClient.initialize(this, searchString, -1, cookie);
+		mEvaTextClient = new EvaTextClient(this, searchString, -1, cookie, editLastUtterance);
 		mEvaTextClient.execute();
 	}
 	
-	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie) {
+	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie, boolean editLastUtterance) {
 		mLastLanguageUsed = getPreferedLanguage();
 		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 		}
-		mEvaTextClient = new EvaTextClient();
-		mEvaTextClient.initialize(this, nBestTexts, cookie);
+		mEvaTextClient = new EvaTextClient(this, nBestTexts, cookie, editLastUtterance);
 		mEvaTextClient.execute();
 	}
 	
@@ -433,8 +427,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 		}
-		mEvaTextClient = new EvaTextClient();
-		mEvaTextClient.initialize(this, null, replyIndex, cookie);
+		mEvaTextClient = new EvaTextClient(this, null, replyIndex, cookie, false);
 		mEvaTextClient.execute();
 	}
 	

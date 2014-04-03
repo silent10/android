@@ -7,7 +7,7 @@ import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.request.InformationRequest;
 import com.ean.mobile.request.RequestProcessor;
 import com.evature.util.Log;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
@@ -38,16 +38,16 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 		try {
 			eanWsError = null;
-			final Hotel hotel = MyApplication.HOTEL_ID_MAP.get(mHotelId);
+			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 			HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel));
-			MyApplication.EXTENDED_INFOS.put(mHotelId, hotelInformation);
+			VHAApplication.EXTENDED_INFOS.put(mHotelId, hotelInformation);
 			mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
             Log.d(TAG, "Unexpected error occurred within the api", ewe);
             eanWsError = ewe;
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
-        	MyApplication.sendRedirectionToast();
+        	VHAApplication.sendRedirectionToast();
         	mProgress = DownloaderStatus.FinishedWithError;
         }
 
@@ -74,7 +74,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 //			return jHotel;
 //
 //		} catch (JSONException e) {
-//			MainActivity.LogError(TAG, "JSON exception getting hotel details", e);
+//			VHAApplication.logError(TAG, "JSON exception getting hotel details", e);
 //			return jHotel;
 //		}
 //	}

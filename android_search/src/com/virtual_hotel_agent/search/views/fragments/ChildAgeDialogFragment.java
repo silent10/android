@@ -16,7 +16,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.evaapis.crossplatform.EvaTravelers;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 
 public class ChildAgeDialogFragment extends RoboDialogFragment {
@@ -85,7 +85,7 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 
 								int intNumAdults = toInt(mNumAdults);
 
-								MyApplication.numberOfAdults = intNumAdults;
+								VHAApplication.numberOfAdults = intNumAdults;
 
 								int numChildren = toInt(mNumChildren);
 								int child1 = toInt(mAgeChild1);
@@ -101,13 +101,13 @@ public class ChildAgeDialogFragment extends RoboDialogFragment {
 									return;
 								}
 
-								MyApplication.childAges = new ArrayList<Integer>();
+								VHAApplication.childAges = new ArrayList<Integer>();
 								if (numChildren > 0) {
-									MyApplication.childAges.add(child1);
+									VHAApplication.childAges.add(child1);
 									if (numChildren > 1) {
-										MyApplication.childAges.add(child2);
+										VHAApplication.childAges.add(child2);
 										if (numChildren > 2) {
-											MyApplication.childAges.add(child3);
+											VHAApplication.childAges.add(child3);
 										}
 									}
 								}

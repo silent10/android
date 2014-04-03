@@ -19,8 +19,9 @@
         android:scrollbarStyle="outsideOverlay"
         android:drawSelectorOnTop="true"
         android:stackFromBottom="false"
+        android:transcriptMode="alwaysScroll" 
         android:background="@drawable/chat_background"
-        android:transcriptMode="alwaysScroll" >
+        >
     </ListView>
 
     <!-- android:visibility="gone" -->

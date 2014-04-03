@@ -44,7 +44,7 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 
@@ -117,10 +117,10 @@ public class ReservationDisplayFragment extends RoboFragment {
 
 	public void showLatestReservation() {
 
-        final Reservation reservationToDisplay = MyApplication.getLatestReservation();
+        final Reservation reservationToDisplay = VHAApplication.getLatestReservation();
 
         if (reservationToDisplay == null) {
-        	MainActivity.LogError(TAG, "No reservation to display");
+        	VHAApplication.logError(TAG, "No reservation to display");
         	return;
         }
 

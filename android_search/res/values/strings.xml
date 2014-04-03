@@ -16,7 +16,7 @@
     <string name="_ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="fatal_error">Fatal Error</string>
-    <string name="microphone_button">Microphone Button</string>
+    <string name="microphone_button">Microphone button</string>
     <string name="chat_icon_description">chat icon</string>
     <string name="network_error">Network Error - Sorry!</string>
     <string name="redirected">Couldn\'t connect to EAN API network.</string>
@@ -41,7 +41,7 @@
     <string name="settings">Settings</string>
     <string name="report_a_bug">Report a bug</string>
     <string name="about">About</string>
-    <string name="bugreport_toast_text">Please wait...</string>
+    <string name="bugreport_toast_text">Please wait&#8230;</string>
     <string name="bugreport_dialog_text">Please leave a comment describing what went wrong.</string>
     <string name="bugreport_dialog_title">Bug Report</string>
     <string name="bugreport_dialog_comment_prompt">Comment:</string>
@@ -128,4 +128,5 @@
     <string name="billing_info_button">Billing Info</string>
     <string name="room_description">Room Description</string>
     <string name="credit_card_type_">Credit card type:</string>
+    <string name="delete_utterance_button">Delete button</string>
 </resources>

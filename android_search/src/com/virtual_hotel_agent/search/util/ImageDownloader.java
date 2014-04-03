@@ -14,7 +14,7 @@ import android.os.Message;
 import android.support.v4.util.LruCache;
 
 import com.evature.util.Log;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 public class ImageDownloader {
 
@@ -65,10 +65,10 @@ public class ImageDownloader {
 			bmp = BitmapFactory.decodeStream((InputStream) response);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			MainActivity.LogError(TAG, "IOException loading bitmap", e);
+			VHAApplication.logError(TAG, "IOException loading bitmap", e);
 			return null;
 		} catch (OutOfMemoryError e) {
-			MainActivity.LogError(TAG, "Out of memory loading bmp", e);
+			VHAApplication.logError(TAG, "Out of memory loading bmp", e);
 			return null;
 		}
 

@@ -7,7 +7,7 @@ import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.request.ListRequest;
 import com.ean.mobile.request.RequestProcessor;
 import com.evature.util.Log;
-import com.virtual_hotel_agent.search.MyApplication;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
@@ -41,7 +41,7 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 //
 //		JSONObject hotelListResponse = XpediaProtocolStatic.getExpediaNext(hotelFragment.getActivity(), mNextQuery, mCurrencyCode);
 //		if (hotelListResponse == null)
-//			MainActivity.LogError(TAG, "Response for next null");
+//			VHAApplication.logError(TAG, "Response for next null");
 //		mProgress = DownloaderStatus.MadeSomeProgress;
 //		onProgressUpdate();
 //		
@@ -53,16 +53,16 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 
 		try {
             final ListRequest request = new ListRequest(
-                MyApplication.cacheKey,
-                MyApplication.cacheLocation);
+                VHAApplication.cacheKey,
+                VHAApplication.cacheLocation);
 
-            MyApplication.updateFoundHotels(RequestProcessor.run(request));
+            VHAApplication.updateFoundHotels(RequestProcessor.run(request));
             mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
             Log.d(TAG, "An APILevel Exception occurred.", ewe);
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
-        	MyApplication.sendRedirectionToast();
+        	VHAApplication.sendRedirectionToast();
         	mProgress = DownloaderStatus.FinishedWithError;
         }
 		

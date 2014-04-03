@@ -35,10 +35,9 @@ import java.util.UUID;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
-import android.util.Log;
-
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.CommonParameterValidationException;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
  * Contains elements that (1) are common to all requests and (2) typically remain the same across multiple requests.
@@ -164,7 +163,7 @@ public final class CommonParameters {
                 messageDigest.update(signatureInput.getBytes());
                 return String.format("%032x", new BigInteger(1, messageDigest.digest()));
             } catch (NoSuchAlgorithmException e) {
-                Log.e(Constants.LOG_TAG, "Couldn't get MD5 hashing working.", e);
+            	VHAApplication.logError(Constants.LOG_TAG, "Couldn't get MD5 hashing working.", e);
             }
         }
         return null;
