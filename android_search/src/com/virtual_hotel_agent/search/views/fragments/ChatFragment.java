@@ -16,7 +16,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -120,6 +119,10 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 	}
 
 	public void addChatItem(ChatItem chatItem) {
+		if (editedChatItemIndex != -1 && chatItem.getType() == ChatType.Me) {
+			// adding a "me" chat - close the editted me-chat
+			closeEditChatItem(false);
+		}
 		if (mChatAdapter != null) {
 			mChatAdapter.add(chatItem);
 		}
@@ -267,6 +270,10 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			}
 		}
 		
+		if (editedChatItemIndex != -1) {
+			closeEditChatItem(false);
+		}
+		
 		// finished loop - no "Me" chat was found - add one and edit it
 		ChatItem editChat = new ChatItem("");
 		editChat.setStatus(Status.InEdit);
@@ -368,7 +375,9 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		else {
 			// not submitting - just canceling edit
 			// if this chat was empty text (new chat) - cancel adding it
-			mAnimAdapter.animateDismiss(editedChatItemIndex);
+			if (editedChatItem.getChat().toString().equals("")) {
+				mAnimAdapter.animateDismiss(editedChatItemIndex);
+			}
 		}
 		
 		editedChatItemIndex = -1;
@@ -395,15 +404,6 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			editedChatItemIndex = -1;
 			eventManager.fire(new ChatItemModified(null, false));
 			eventManager.fire(new ToggleMainButtonsEvent(true));
-		}
-	};
-
-	public final OnFocusChangeListener focusChangedHandler = new OnFocusChangeListener() {
-		
-		@Override
-		public void onFocusChange(View v, boolean hasFocus) {
-			EditText et = (EditText) v;
-			Log.d(TAG, "Focus: "+hasFocus+"  text: "+et.getText());
 		}
 	};
 
