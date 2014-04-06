@@ -162,7 +162,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 
 		if (VHAApplication.FOUND_HOTELS.size() > 0) {
 
-			if (VHAApplication.cacheLocation != null) {
+			if (VHAApplication.cacheLocation != null && VHAApplication.moreResultsAvailable) {
 				if (getActivity() != null) {
 					LayoutInflater li = getActivity().getLayoutInflater();
 					mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);

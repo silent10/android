@@ -115,7 +115,6 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				row = mInflater.inflate(R.layout.row_mychat, parent, false);
 				MeRowHolder holder = new MeRowHolder();
 				holder.editText = (EditText) row.findViewById(R.id.editText);
-				holder.editText.setOnFocusChangeListener(chatFragment.focusChangedHandler);
 				holder.editText.setOnEditorActionListener(chatFragment.editorActionHandler);
 				holder.deleteButton = (ImageButton) row.findViewById(R.id.buttonDelete);
 				holder.deleteButton.setOnClickListener(chatFragment.deleteHandler);

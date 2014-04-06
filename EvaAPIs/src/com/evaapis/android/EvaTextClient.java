@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.evaapis.BuildConfig;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;
 import com.evature.util.ExternalIpAddressGetter;
@@ -79,7 +80,9 @@ import com.evature.util.ExternalIpAddressGetter;
 				evatureUrl = mEva.mConfig.vproxyHost;
 			}
 			
-			//evatureUrl = "http://10.0.0.52:8008"; 
+//			// TODO REMOVE!!!!!!!!!!!
+//			if (BuildConfig.DEBUG)
+//				evatureUrl = "http://10.0.0.52:8008"; 
 			
 			evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());

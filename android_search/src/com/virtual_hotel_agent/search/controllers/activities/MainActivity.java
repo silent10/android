@@ -38,6 +38,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -125,8 +126,6 @@ public class MainActivity extends RoboFragmentActivity implements
 	private static final String TAG = MainActivity.class.getSimpleName();
 	// private static String mExternalIpAddress = null;
 	
-	
-	private static boolean mSpeechToTextWasConfigured = false;
 	private List<String> mTabTitles;
 	@Inject Injector injector;
 	
@@ -180,6 +179,9 @@ public class MainActivity extends RoboFragmentActivity implements
 	// This examples assumes the use of Google Analytics campaign
 	// "utm" parameters, like "utm_source"
 	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
+
+
+	private static final Object DELETED_UTTERANCE = new Object();
 	 /*
 	   * Given a URI, returns a map of campaign data that can be sent with
 	   * any GA hit.
@@ -270,6 +272,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		eva.onCreate(savedInstanceState);
 		super.onCreate(savedInstanceState);
 		
+		setVolumeControlStream(AudioManager.STREAM_MUSIC); // TODO: move to EvaComponent?
 		speechSearch = new EvaSpeechComponent(eva);
 		setContentView(R.layout.new_main);
 		
@@ -929,6 +932,24 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 		
+		if (DELETED_UTTERANCE == cookie) {
+			// this is a response of a "delete last utterance" request -
+			// if the reply is the same as the previous 
+			if (mChatListModel.size() > 0) {
+				ChatItem lastChatItem = mChatListModel.get(mChatListModel.size()-1);
+				EvaApiReply oldReply = lastChatItem.getEvaReply();
+				if (oldReply != null) {
+					ArrayList<ChatItem> itemsToRemove = new ArrayList<ChatItem>();
+					for (ChatItem itemInList : mChatListModel) {
+						if (itemInList.getEvaReply() == oldReply) {
+							itemsToRemove.add(itemInList);
+						}
+					}
+					mChatListModel.removeAll(itemsToRemove);
+				}
+			}
+		}
+		
 //		if (reply.JSONReply != null) {
 //			setDebugData(DebugTextType.EvaDebug, reply.JSONReply);
 //		}
@@ -1558,7 +1579,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			else {
 				searchText = event.chatItem.getChat().toString();
 			}
-			VHAApplication.EVA.searchWithText(searchText, null, true);
+			VHAApplication.EVA.searchWithText(searchText, DELETED_UTTERANCE, true);
 		}
 	}
 	
