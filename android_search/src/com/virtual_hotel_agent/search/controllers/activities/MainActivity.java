@@ -782,7 +782,7 @@ public class MainActivity extends RoboFragmentActivity implements
 	/***
 	 * Start a voice recognition - and place the results in the chatItem (or add a new one if null)
 	 */
-	private void voiceRecognitionSearch(ChatItem chatItem) {
+	private void voiceRecognitionSearch(ChatItem chatItem, boolean editLastUtterance) {
 		// simplest method:  default 
 		// MainActivity.this.eva.searchWithVoice("voice");
 		
@@ -797,7 +797,6 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 		
 		storeVoiceResultInChatItem = chatItem;
-		boolean editLastUtterance = chatItem != null;
 		
 		VHAApplication.EVA.speak("");
 		Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
@@ -817,10 +816,15 @@ public class MainActivity extends RoboFragmentActivity implements
 		switch (view.getId()) {
 		case R.id.restart_button:
 			startNewSession();
-			return;
+			break;
 
 		case R.id.search_button:
-			voiceRecognitionSearch(null);
+			voiceRecognitionSearch(null, false);
+			break;
+			
+		case R.id.add_utterance_button:
+			ChatFragment chatFragment = getChatFragment();
+			chatFragment.addUtterance();
 			break;
 		}
 	}
@@ -1568,18 +1572,20 @@ public class MainActivity extends RoboFragmentActivity implements
 				VHAApplication.logError(TAG, "Unexpected chatItem=null startRecord");
 				return;
 			}
-			voiceRecognitionSearch(event.chatItem);
+			voiceRecognitionSearch(event.chatItem, event.editLastUtterance);
 		}
 		else {
 			String searchText;
+			Object cookie = null;
 			if (event.chatItem == null) {
 				// removed last item
 				searchText = "";
+				cookie = DELETED_UTTERANCE;
 			}
 			else {
 				searchText = event.chatItem.getChat().toString();
 			}
-			VHAApplication.EVA.searchWithText(searchText, DELETED_UTTERANCE, true);
+			VHAApplication.EVA.searchWithText(searchText, cookie, event.editLastUtterance);
 		}
 	}
 	

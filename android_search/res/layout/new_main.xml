@@ -118,5 +118,21 @@
          android:src="@drawable/session_restart"
          android:padding="3dp"
            />
+     
+        <ImageButton
+         android:id="@+id/add_utterance_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="48dp"
+         android:layout_height="48dp"
+         android:layout_alignParentTop="true"
+         android:layout_alignParentLeft="true"
+         android:layout_marginTop="30dp"
+         android:layout_marginLeft="28dp"
+         android:background="@drawable/custom_button"
+         android:onClick="myClickHandler"
+         android:contentDescription="Restart"
+         android:src="@drawable/add_utterance"
+         android:padding="3dp"
+           />
      </RelativeLayout>
 </RelativeLayout>
