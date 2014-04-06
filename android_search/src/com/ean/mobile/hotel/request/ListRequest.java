@@ -81,7 +81,8 @@ public final class ListRequest extends Request<HotelList> {
 
         final List<NameValuePair> requestParameters = Arrays.<NameValuePair>asList(
             new BasicNameValuePair("destinationString", destination),
-            new BasicNameValuePair("numberOfResults", NUMBER_OF_RESULTS)
+            new BasicNameValuePair("numberOfResults", NUMBER_OF_RESULTS),
+            new BasicNameValuePair("supplierType", "E")  // Temporary until Hotel collect handling is finished
         );
 
         final List<NameValuePair> roomParameters = new ArrayList<NameValuePair>(occupancies.size());

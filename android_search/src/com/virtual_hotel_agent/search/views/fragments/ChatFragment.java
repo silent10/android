@@ -43,7 +43,6 @@ import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.views.adapters.ChatAdapter;
-import com.virtual_hotel_agent.search.views.adapters.ChatAdapter.MeRowHolder;
 import com.virtual_hotel_agent.search.views.adapters.ChatAnimAdapter;
 
 public class ChatFragment extends RoboFragment implements OnItemClickListener {
@@ -269,17 +268,9 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				return;
 			}
 		}
-		
-		if (editedChatItemIndex != -1) {
-			closeEditChatItem(false);
-		}
-		
+
 		// finished loop - no "Me" chat was found - add one and edit it
-		ChatItem editChat = new ChatItem("");
-		editChat.setStatus(Status.InEdit);
-		eventManager.fire(new ToggleMainButtonsEvent(false));
-		addChatItem(editChat);
-		editedChatItemIndex = mChatListModel.size()-1;
+		//addUtterance();
 	}
 
 	private void editMeChat(ChatItem current, int position) {
@@ -338,8 +329,8 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			return;
 		}
 		chatItem.setChat(chat);
-		closeEditChatItem(false);
 		dismissItemsFromPosition(editedChatItemIndex+1);
+		closeEditChatItem(false);
 	}
 
 	private void closeEditChatItem(boolean isSubmitted) {
@@ -366,11 +357,13 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				VHAApplication.logError(TAG, "Unexpected editText not found");
 				return;
 			}
+			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
+			boolean editLastUtterance = false == editedChatItem.getChat().toString().isEmpty();
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
 	
 			dismissItemsFromPosition(editedChatItemIndex+1);
-			eventManager.fire(new ChatItemModified(editedChatItem, false));
+			eventManager.fire(new ChatItemModified(editedChatItem, false, editLastUtterance));
 		}
 		else {
 			// not submitting - just canceling edit
@@ -402,7 +395,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			}
 			dismissItemsFromPosition(editedChatItemIndex);
 			editedChatItemIndex = -1;
-			eventManager.fire(new ChatItemModified(null, false));
+			eventManager.fire(new ChatItemModified(null, false, true));
 			eventManager.fire(new ToggleMainButtonsEvent(true));
 		}
 	};
@@ -429,8 +422,11 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				VHAApplication.logError(TAG, "Unexpected microphone no edit chat item");
 				return;
 			}
-			ChatItem chatItem = mChatListModel.get(editedChatItemIndex);
-			eventManager.fire(new ChatItemModified(chatItem, true));
+			ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);
+			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
+			boolean editLastUtterance = false == editedChatItem.getChat().toString().isEmpty();
+
+			eventManager.fire(new ChatItemModified(editedChatItem, true, editLastUtterance));
 		}
 	};
 
@@ -444,6 +440,19 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		}
 		closeEditChatItem(false);
 		return true;
+	}
+
+	public void addUtterance() {
+		if (editedChatItemIndex != -1) {
+			closeEditChatItem(false);
+		}
+		
+		ChatItem editChat = new ChatItem("");
+		editChat.setStatus(Status.InEdit);
+		eventManager.fire(new ToggleMainButtonsEvent(false));
+		addChatItem(editChat);
+		editedChatItemIndex = mChatListModel.size()-1;
+
 	}
 	
 }
