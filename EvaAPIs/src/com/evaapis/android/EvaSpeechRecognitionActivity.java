@@ -2,22 +2,22 @@ package com.evaapis.android;
 
 import java.lang.ref.WeakReference;
 
-import com.evaapis.EvaException;
-import com.evaapis.R;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.evaapis.EvaException;
+import com.evaapis.R;
+import com.evature.util.Log;
 
 
 

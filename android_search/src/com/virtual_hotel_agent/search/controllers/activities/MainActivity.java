@@ -181,7 +181,10 @@ public class MainActivity extends RoboFragmentActivity implements
 	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
 
 
-	private static final Object DELETED_UTTERANCE = new Object();
+	// cookies are returned onEvaReply are those passed to the search query 
+	private static final Object DELETED_UTTERANCE_COOKIE = new Object();
+	private static final Object VOICE_COOKIE = new Object();
+	private static final Object TEXT_TYPED_COOKIE = new Object();
 	 /*
 	   * Given a URI, returns a map of campaign data that can be sent with
 	   * any GA hit.
@@ -807,7 +810,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				   );
 		
 		
-		mainView.startSpeechSearch(speechSearch, editLastUtterance);
+		mainView.startSpeechSearch(speechSearch, VOICE_COOKIE, editLastUtterance);
 	}
 	
 	// search button click handler ("On Click property" of the button in the xml)
@@ -824,12 +827,12 @@ public class MainActivity extends RoboFragmentActivity implements
 			
 		case R.id.add_utterance_button:
 			ChatFragment chatFragment = getChatFragment();
-			chatFragment.addUtterance();
+			if (chatFragment != null)
+				chatFragment.addUtterance();
+			mTabsAdapter.showTab(mChatTabName);
 			break;
 		}
 	}
-
-
 
 	
 	@Override
@@ -862,6 +865,18 @@ public class MainActivity extends RoboFragmentActivity implements
 //		}
 	}
 	
+	@Override
+	public void onEvaError(String message, boolean isServerError, Object cookie) {
+		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+		mainView.flashBadSearchButton(2);
+		Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
+		if (defaultTracker != null) 
+			defaultTracker.send(MapBuilder
+				    .createEvent("speech_search", "speech_search_end_bad", message, 0l)
+				    .build()
+				   );
+
+	}
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
@@ -885,7 +900,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 			}
 		}
-		if ("voice".equals(cookie)) {
+		if (VOICE_COOKIE == cookie) {
 			if (reply.errorMessage != null) {
 				mainView.flashBadSearchButton(2);
 				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
@@ -936,21 +951,48 @@ public class MainActivity extends RoboFragmentActivity implements
 			}
 		}
 		
-		if (DELETED_UTTERANCE == cookie) {
-			// this is a response of a "delete last utterance" request -
-			// if the reply is the same as the previous 
-			if (mChatListModel.size() > 0) {
-				ChatItem lastChatItem = mChatListModel.get(mChatListModel.size()-1);
-				EvaApiReply oldReply = lastChatItem.getEvaReply();
-				if (oldReply != null) {
-					ArrayList<ChatItem> itemsToRemove = new ArrayList<ChatItem>();
-					for (ChatItem itemInList : mChatListModel) {
-						if (itemInList.getEvaReply() == oldReply) {
-							itemsToRemove.add(itemInList);
+		if (cookie == DELETED_UTTERANCE_COOKIE) {
+			if (reply.errorMessage != null) {
+				mainView.flashBadSearchButton(2);
+				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createEvent("text_search", "text_search_end_bad", reply.errorMessage, 0l)
+						    .build()
+						   );
+				
+				// TODO: there was an error - restore the removed items
+			}
+			else {
+				// this is a response of a "delete last utterance" request -
+				// if the reply is the same as the previous 
+				if (mChatListModel.size() > 0) {
+					ChatItem lastChatItem = mChatListModel.get(mChatListModel.size()-1);
+					EvaApiReply oldReply = lastChatItem.getEvaReply();
+					if (oldReply != null) {
+						ArrayList<ChatItem> itemsToRemove = new ArrayList<ChatItem>();
+						for (ChatItem itemInList : mChatListModel) {
+							if (itemInList.getEvaReply() == oldReply) {
+								itemsToRemove.add(itemInList);
+							}
 						}
+						mChatListModel.removeAll(itemsToRemove);
 					}
-					mChatListModel.removeAll(itemsToRemove);
 				}
+			}
+		}
+		
+		if (cookie == TEXT_TYPED_COOKIE) {
+			if (reply.errorMessage != null) {
+				mainView.flashBadSearchButton(2);
+				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+				if (defaultTracker != null) 
+					defaultTracker.send(MapBuilder
+						    .createEvent("text_search", "text_search_end_bad", reply.errorMessage, 0l)
+						    .build()
+						   );
+				
+				// TODO: there was an error - restore the pre-modified text
 			}
 		}
 		
@@ -1580,10 +1622,11 @@ public class MainActivity extends RoboFragmentActivity implements
 			if (event.chatItem == null) {
 				// removed last item
 				searchText = "";
-				cookie = DELETED_UTTERANCE;
+				cookie = DELETED_UTTERANCE_COOKIE;
 			}
 			else {
 				searchText = event.chatItem.getChat().toString();
+				cookie = TEXT_TYPED_COOKIE;
 			}
 			VHAApplication.EVA.searchWithText(searchText, cookie, event.editLastUtterance);
 		}
@@ -1658,7 +1701,6 @@ public class MainActivity extends RoboFragmentActivity implements
 //		}
 //	}
 
-	
 
 	
 }

@@ -110,9 +110,9 @@ public class EvaVoiceClient {
 		try {
 			sf = new EvatureSSLSocketFactory(null);
 		} catch (UnrecoverableKeyException e) {
-			e.printStackTrace();
+			Log.e(TAG, "UnrecoverableKeyException", e);
 		} catch (KeyStoreException e) {
-			e.printStackTrace();
+			Log.e(TAG, "KeyStoreException", e);
 		}
 		sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 		Scheme sch = new Scheme("https", sf, PORT);
@@ -150,7 +150,7 @@ public class EvaVoiceClient {
 				qparams.add(new BasicNameValuePair("latitude",""+latitude));
 			}
 		} catch (Exception e1) {
-			e1.printStackTrace();
+			Log.e(TAG, "Exception setting location", e1);
 		}
 		
 		if (mConfig.vrService != null && !"none".equals(mConfig.vrService)) {
@@ -216,6 +216,9 @@ public class EvaVoiceClient {
 	private InputStreamEntity setAudioContent(SpeechAudioStreamer speechAudioStreamer) throws NumberFormatException, Exception
 	{
 		InputStream encodedStream = speechAudioStreamer.start();
+		if (encodedStream == null) {
+			throw new Exception("Failed getting audio content");
+		}
 		String filepath = null;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
 		boolean saveEncoded = prefs.getBoolean("save_encoded", false);
@@ -246,7 +249,7 @@ public class EvaVoiceClient {
 				total.append(line); 
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, "IOError reading inputStream", e);
 		}
 
 		// Return full string

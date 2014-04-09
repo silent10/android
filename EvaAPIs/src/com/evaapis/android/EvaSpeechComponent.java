@@ -1,11 +1,11 @@
 package com.evaapis.android;
 
-import com.evaapis.EvaException;
-
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+
+import com.evaapis.EvaException;
+import com.evature.util.Log;
 
 
 
@@ -96,7 +96,7 @@ public class EvaSpeechComponent {
 			else
 			{
  				if (mVoiceClient.hadError) {
- 					mListener.speechResultError("There was an error contacting the server, please check your internet connection or try again later", cookie);
+ 					mListener.speechResultError(EvaComponent.NETWORK_ERROR, cookie);
 				}
 				else {
 					mListener.speechResultError("No result found", cookie);

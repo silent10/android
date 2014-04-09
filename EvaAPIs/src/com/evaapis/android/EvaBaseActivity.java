@@ -52,11 +52,6 @@ abstract public class EvaBaseActivity extends FragmentActivity implements EvaSea
 	}
 	
 	
-	public void searchWithVoice()
-	{
-		eva.searchWithVoice();
-	}
-	
 	public void searchWithVoice(Object cookie)
 	{
 		eva.searchWithVoice(cookie);

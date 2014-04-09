@@ -19,12 +19,12 @@ import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.ExternalIpAddressGetter;
+import com.evature.util.Log;
 
 
 
@@ -77,6 +77,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private static final String DefaultApiVersion = "v1.0";
 	public static final String SDK_VERSION = "android_1.53";
 
+	
+	final static String NETWORK_ERROR = "There was an error contacting the server, please check your internet connection or try again later";
+	
 	/*****
 	 * This class simplifies passing all the needed parameters down the levels of abstraction
 	 */
@@ -229,7 +232,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 
 
-	// this is the entry point for handling response
+	// this is the entry point for handling response - of a text-search request
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 		mEvaTextClient = null;
@@ -245,14 +248,21 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		else {
 			if (reply.errorMessage != null) {
 				Log.w(TAG, "Error from Eva: "+reply.errorMessage);
+				onEvaError(reply.errorMessage, true, cookie);
+				return;
 			}
-			else {
-				// no session support - every reply starts a new session
-				resetSession();
-			}
+			
+			// no session support - every reply starts a new session
+			resetSession();
 		}
 		
 		replyListener.onEvaReply(reply, cookie);
+	}
+	
+	// handling errors
+	@Override
+	public void onEvaError(String message, boolean isServerError, Object cookie) {
+		replyListener.onEvaError(message, isServerError, cookie);
 	}
 	
 	// Handle the results from the speech recognition activity
@@ -315,7 +325,8 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 
 	@Override
 	public void speechResultError(String message, Object cookie) {
-		Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();		
+		//Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+		onEvaError(message, false, cookie);
 	}
 	
 	public String getDeviceId() {
@@ -347,10 +358,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		mTts = new TextToSpeech(activity, this);
 	}
 	
-	
-	public void searchWithVoice() {
-		searchWithVoice(null);
-	}
 	
 	private Object voiceActivityCookie;
 	private EvaTextClient mEvaTextClient;

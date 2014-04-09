@@ -67,7 +67,7 @@ public class QuestionElement extends FlowElement {
 			try {
 				Log.i(TAG, jFlowElement.toString(4));
 			} catch (JSONException e1) {
-				e1.printStackTrace();
+				Log.e(TAG, "JSON exception parsing question element", e);
 			}
 		}
 

@@ -69,27 +69,5 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 		//return hotelListResponse;
 		return null;
 	}
-//
-//	boolean addHotelData(JSONObject hotelListResponseJSON) {
-//
-//		Log.i(TAG, "Add Hotel Data");
-//
-//		try {
-//			XpediaDatabase db = new XpediaDatabase(hotelListResponseJSON);
-//			if (db.unrecoverableError) {
-//				MyApplication.setDb(db);
-//				return false;
-//			}
-//			if (MyApplication.getDb() == null) {
-//				MyApplication.setDb(db);
-//			} else {
-//				MyApplication.getDb().addData(db);
-//			}
-//			return true;
-//		} catch (NullPointerException e) {
-//			e.printStackTrace();
-//			return false;
-//		}
-//	}
 
 }
