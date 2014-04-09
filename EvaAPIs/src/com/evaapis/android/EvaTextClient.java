@@ -5,17 +5,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.evaapis.BuildConfig;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;
 import com.evature.util.ExternalIpAddressGetter;
+import com.evature.util.Log;
 
 
     //Uses AsyncTask to create a task away from the main UI thread. This task takes a
@@ -23,7 +21,7 @@ import com.evature.util.ExternalIpAddressGetter;
 	// has been established, the AsyncTask downloads the contents of the webpage as
 	// an InputStream. Finally, the InputStream is converted into a string,
 	// which is displayed in the UI by the AsyncTask's onPostExecute method.
-	public class EvaTextClient extends AsyncTask<Void, Integer, String> {
+	public class EvaTextClient extends AsyncTask<Void, Integer, EvaApiReply> {
 
 		private static final String TAG = "EvaCallerTask";
 		
@@ -73,7 +71,7 @@ import com.evature.util.ExternalIpAddressGetter;
 		}
 
 		@Override
-		protected String doInBackground(Void... non) {
+		protected EvaApiReply doInBackground(Void... non) {
 			startOfTextSearch = System.nanoTime();
 			String evatureUrl = mEva.mConfig.webServiceHost;
 			if (mNBest != null) {
@@ -118,7 +116,7 @@ import com.evature.util.ExternalIpAddressGetter;
 					try {
 						evatureUrl += ("&input_text=" + URLEncoder.encode(input, "UTF-8"));
 					} catch (UnsupportedEncodingException e) {
-						e.printStackTrace(); 
+						Log.e(TAG, "UnsupportedEncodingException", e);
 					}
 				}
 			}
@@ -126,7 +124,7 @@ import com.evature.util.ExternalIpAddressGetter;
 				try {
 					evatureUrl += ("&input_text=" + URLEncoder.encode(mInputText, "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace(); 
+					Log.e(TAG, "UnsupportedEncodingException", e); 
 				}
 			}
 			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
@@ -143,16 +141,21 @@ import com.evature.util.ExternalIpAddressGetter;
 			}
 			Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
 			try {
-				return DownloadUrl.sget(evatureUrl);
+				String result = DownloadUrl.sget(evatureUrl);
+				EvaApiReply apiReply = new EvaApiReply(result);	
+				return apiReply;
 			} catch (IOException e) {
-				return "Unable to retrieve web page. URL may be invalid.";
+				EvaApiReply errorReply = new EvaApiReply(
+						  "{\"status\": false, \"message\":\""
+							+ EvaComponent.NETWORK_ERROR
+							+"\" }");
+				return errorReply;
 			}
 		}
 
 
 		@Override
-		protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
-			EvaApiReply apiReply = new EvaApiReply(result);		
+		protected void onPostExecute(EvaApiReply apiReply) { // onPostExecute displays the results of the AsyncTask.
 			
 			// coming from text search
 			if (mEva.isDebug()) {
@@ -169,7 +172,6 @@ import com.evature.util.ExternalIpAddressGetter;
 						
 			mEva.onEvaReply(apiReply, mCookie);
 		}
-
 		
 	}
 

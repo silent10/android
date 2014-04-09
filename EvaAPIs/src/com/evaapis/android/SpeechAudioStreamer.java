@@ -16,16 +16,14 @@ import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.io.FileUtils;
 
-import com.evaapis.EvaException;
-
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.util.Log;
+
+import com.evaapis.EvaException;
+import com.evature.util.Log;
 
 public class SpeechAudioStreamer {
 	public static final String TAG = "SpeechAudioStreamer";
@@ -45,6 +43,9 @@ public class SpeechAudioStreamer {
 	private static final long SILENCE_PERIOD = 700;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
+
+	private static final int MAX_UPLOADER_WAIT_ITERATIONS = 300; // wait maximum 3 seconds
+
 	private int mSampleRate;
 
 	int mBufferIndex = 0;
@@ -193,6 +194,7 @@ public class SpeechAudioStreamer {
 	 * Read from Recorder and place in queue
 	 */
 	class Producer implements Runnable {
+		private static final long MAX_TIME_WAIT_ITERATIONS = 300; // wait maximum 3 seconds
 		DataOutputStream dos = null;
 		FileOutputStream fos = null;
 
@@ -251,6 +253,7 @@ public class SpeechAudioStreamer {
 							"Set rec thread priority failed: " + e.getMessage());
 				}
 
+				int iterations = 0;
 				while (mIsRecording) {
 					// int packetSize = 2 * CHANNELS *
 					// mEncoder.speexEncoder.getFrameSize();
@@ -258,13 +261,17 @@ public class SpeechAudioStreamer {
 
 					// Log.i("EVA","Read:"+readSize);
 
+					iterations++;
 					if (readSize == 0) {
 						try {
 							Log.i(TAG, "Waiting for microphone to produce data");
 							Thread.sleep(10);
+							if (iterations > MAX_TIME_WAIT_ITERATIONS) {
+								Log.e(TAG, "Waited too long for microphone to produce data - quiting");
+								break;
+							}
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							Log.e(TAG, "Interruprted Producer stream", e);
 						}
 					} else {
 						Boolean hadSilence = checkForSilence(readSize);
@@ -306,10 +313,10 @@ public class SpeechAudioStreamer {
 				
 //				queue.put(new byte[0]);
 
-				Log.i(TAG, "<<< Finished producer thread");
+				Log.i(TAG, "<<< Finished producer thread - iterations="+iterations+ "  time="+((System.nanoTime() - t0) / 1000000)+"ms");
 
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				Log.e(TAG, "Exception in microphone producer", ex);
 			} finally {
 				mRecorder.stop();
 				mRecorder.release();
@@ -431,14 +438,23 @@ public class SpeechAudioStreamer {
 		Producer p = new Producer();
 		//	Consumer c = new Consumer(q);
 		Uploader u = new Uploader();
-		new Thread(u).start(); // start uploader first -
+		Thread uploaderThread = new Thread(u);
+		uploaderThread.start(); // start uploader first -
 								// must read from encoded FIFO before any write takes place
+		int iterations = 0;
 		while (u.startedReading == false) {
+			iterations++;
 			try {
 				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing");
 				Thread.sleep(10);
+				if (iterations > MAX_UPLOADER_WAIT_ITERATIONS) {
+					Log.e(TAG, "Waited too long for uploader to start reading");
+					uploaderThread.interrupt();
+					return null;
+				}
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				Log.e(TAG, "interrupted waiting for uploader", e);
+				return null;
 			}
 		}
 
@@ -490,19 +506,19 @@ public class SpeechAudioStreamer {
 			return out.toByteArray();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, "IO exception reading encoded bytes", e);
 		} finally {
 			try {
 				if (in != null)
 					in.close();
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				Log.e(TAG, "IO exception closing file", e1);
 			}
 			try {
 				if (outputChannel != null)
 					outputChannel.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e(TAG, "IO exception closing output file", e);
 			}
 		}
 		return new byte[0];
@@ -527,8 +543,7 @@ public class SpeechAudioStreamer {
 		try {
 			out = new FileOutputStream(outputFile);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(TAG, "Exception opening file", e);
 		}
 
 		byte[] header = new byte[44];
@@ -582,8 +597,7 @@ public class SpeechAudioStreamer {
 			out.flush();
 			out.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(TAG, "IO exception saving wav file", e);
 		}
 	}
 

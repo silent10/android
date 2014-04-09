@@ -90,7 +90,7 @@ public class S3DrawableBackgroundLoader {
 			try {
 				url = new URL(mUrl);
 			} catch (MalformedURLException e) {
-				e.printStackTrace();
+				VHAApplication.logError(TAG, "Maformed URL in S3Drawable", e);
 				return null;
 			}
 

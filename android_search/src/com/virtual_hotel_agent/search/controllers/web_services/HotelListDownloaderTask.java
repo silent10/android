@@ -46,29 +46,6 @@ public class HotelListDownloaderTask extends DownloaderTask {
 //		mCurrencyCode = currencyCode;
 	}
 
-//	void createHotelData(JSONObject hotelListResponseJSON) {
-//
-//		if (hotelListResponseJSON == null) {
-//			return;
-//		}
-//		try {
-////			MyApplication.getDb().EvaDatabaseUpdateExpedia(hotelListResponseJSON);
-//			XpediaDatabase db = new XpediaDatabase(hotelListResponseJSON);
-//			MyApplication.setDb(db);
-//			
-//			
-////			if (MyApplication.getDb().mHotelData == null) {
-////				return false;
-////			}
-////			else {
-////				 MyApplication.setDb(db);
-////			}
-//		} catch (NullPointerException e) {
-//			e.printStackTrace();
-//		}
-//
-//	}
-
 	@Override
 	protected JSONObject doInBackground(Void... params) {
 

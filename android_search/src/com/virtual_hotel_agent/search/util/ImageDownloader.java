@@ -51,7 +51,7 @@ public class ImageDownloader {
 		try {
 			url = new URL(path);
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			VHAApplication.logError(TAG, "Maformed URL in ImageDownloader", e);
 			return null;
 		}
 

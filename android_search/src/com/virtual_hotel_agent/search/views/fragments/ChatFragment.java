@@ -199,7 +199,9 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			long id) {
 		ChatItem item = (ChatItem) view.getTag();
 		if (item == null) {
-			editVirtualAgentChat(item, position);
+			if (editedChatItemIndex != -1) {
+				closeEditChatItem(false);
+			}
 			return;
 		}
 		
@@ -208,8 +210,12 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			clickedDialogAnswer(item);
 			break;
 		case VirtualAgentWelcome:
-			Log.i(TAG, "Eva item clicked: "+item.getChat());
-			showExamples();
+			if (editedChatItemIndex != -1) {
+				closeEditChatItem(false);
+			}
+			else {
+				showExamples();
+			}
 			break;
 			
 		case VirtualAgentContinued:
@@ -260,43 +266,60 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 	}
 
 	private void editVirtualAgentChat(ChatItem item, int position) {
-		// search for "Me" chat before
-		for (int i=position-1; i>0; i--) {
-			ChatItem itemBefore = mChatListModel.get(i);
-			if (itemBefore.getType() == ChatType.Me) {
-				editMeChat(itemBefore, i);
-				return;
-			}
-		}
 
-		// finished loop - no "Me" chat was found - add one and edit it
-		//addUtterance();
-	}
-
-	private void editMeChat(ChatItem current, int position) {
-		if (editedChatItemIndex == position) {
-			// this chat item is already in edit - close it
-			closeEditChatItem(false);
-			return;
-		}
-
-		// you can only edit the last utterance
-		for (int i=position+1; i< mChatListModel.size(); i++ ) {
-			ChatItem itemAfter = mChatListModel.get(i);
-			if (itemAfter.getType() == ChatType.Me) {
-				Toast.makeText(getActivity(), "You can only modify your last utterance", Toast.LENGTH_SHORT).show();
-				return;
-			}
-		}
-		
 		if (editedChatItemIndex != -1) {
 			closeEditChatItem(false);
 		}
-		if (current.getStatus() != Status.InEdit) {
-			current.setStatus(Status.InEdit);
-			eventManager.fire(new ToggleMainButtonsEvent(false));
-			editedChatItemIndex = position;
-			mChatAdapter.notifyDataSetChanged();
+		else {
+			if (item.getType() == ChatType.DialogQuestion) {
+				// search for "Me" chat after
+				for (int i=position+1; i<mChatListModel.size(); i++) {
+					ChatItem itemAfter = mChatListModel.get(i);
+					if (itemAfter.getType() == ChatType.Me) {
+						editMeChat(itemAfter, i);
+						return;
+					}
+				}
+				// no me chat after question - add one
+				addUtterance();
+			}
+			else {
+				// search for "Me" chat before
+				for (int i=position-1; i>0; i--) {
+					ChatItem itemBefore = mChatListModel.get(i);
+					if (itemBefore.getType() == ChatType.Me) {
+						editMeChat(itemBefore, i);
+						return;
+					}
+				}
+				// no me chat before the statement - add one
+				addUtterance();
+			}
+		}
+
+	}
+
+	private void editMeChat(ChatItem current, int position) {
+		if (editedChatItemIndex != -1) {
+			closeEditChatItem(false);
+		}
+		else {
+			// you can only edit the last utterance
+			for (int i=position+1; i< mChatListModel.size(); i++ ) {
+				ChatItem itemAfter = mChatListModel.get(i);
+				if (itemAfter.getType() == ChatType.Me) {
+					Toast.makeText(getActivity(), "You can only modify your last utterance", Toast.LENGTH_SHORT).show();
+					return;
+				}
+			}
+			
+			
+			if (current.getStatus() != Status.InEdit) {
+				current.setStatus(Status.InEdit);
+				eventManager.fire(new ToggleMainButtonsEvent(false));
+				editedChatItemIndex = position;
+				mChatAdapter.notifyDataSetChanged();
+			}
 		}
 	}
 	
@@ -333,18 +356,35 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		closeEditChatItem(false);
 	}
 
+	
+	/***
+	 * Close the chat-utterance that is being editted right now
+	 * 
+	 * @param isSubmitted - true if submit modification, false if revert to pre-modified text (or remove new utterance)
+	 */
 	private void closeEditChatItem(boolean isSubmitted) {
-		InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
-			      Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mChatListView.getWindowToken(), 0);
-			
 		if (editedChatItemIndex == -1) {
 			VHAApplication.logError(TAG, "Unexpected closed edit chat item");
 			return;
 		}
+		if (getActivity() == null) {
+			VHAApplication.logError(TAG, "no activity connected to chat Fragment");
+		} 
+		else {
+			InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+			if (imm == null) {
+				VHAApplication.logError(TAG, "no input method manager");
+			}
+			else {
+				imm.hideSoftInputFromWindow(mChatListView.getWindowToken(), 0);
+			}
+		}
+		
 		ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);
 		editedChatItem.setStatus(Status.ToSearch);
 		eventManager.fire(new ToggleMainButtonsEvent(true));
+		String preModifiedString = editedChatItem.getChat().toString();
 		if (isSubmitted) {
 			//View rowView = mChatListView.getChildAt(editedChatItemIndex - mChatListView.getFirstVisiblePosition() );
 			View rowView = mChatListView.findViewWithTag(editedChatItem);
@@ -358,7 +398,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				return;
 			}
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
-			boolean editLastUtterance = false == editedChatItem.getChat().toString().isEmpty();
+			boolean editLastUtterance = false == preModifiedString.isEmpty();
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
 	
@@ -368,7 +408,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		else {
 			// not submitting - just canceling edit
 			// if this chat was empty text (new chat) - cancel adding it
-			if (editedChatItem.getChat().toString().equals("")) {
+			if (preModifiedString.equals("")) {
 				mAnimAdapter.animateDismiss(editedChatItemIndex);
 			}
 		}
@@ -382,6 +422,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		for (int i=position; i<mChatListModel.size(); i++) {
 			itemsToDismiss.add(i);
 		}
+		
 		mAnimAdapter.animateDismiss(itemsToDismiss);
 	}
 	
@@ -393,9 +434,16 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				VHAApplication.logError(TAG, "Unexpected delete no edit chat item");
 				return;
 			}
+			ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);
+			String preModifiedString = editedChatItem.getChat().toString();
+			boolean editLastUtterance = false == preModifiedString.isEmpty();
+			
 			dismissItemsFromPosition(editedChatItemIndex);
 			editedChatItemIndex = -1;
-			eventManager.fire(new ChatItemModified(null, false, true));
+			if (editLastUtterance) {
+				// non empty last utterance - send to server 
+				eventManager.fire(new ChatItemModified(null, false, true));
+			}
 			eventManager.fire(new ToggleMainButtonsEvent(true));
 		}
 	};

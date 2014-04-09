@@ -36,6 +36,7 @@ public class MainView {
 	private ProgressBar mProgressBar;
 	private SoundLevelView mSoundView;
 	private ImageButton mSearchButton;
+	private ImageButton mTextButton;
 	private View mBottomBar;
 	private final int search_button_padding = 24;
 
@@ -176,6 +177,7 @@ public class MainView {
 		});
 	}
 	
+
 	public void showStatus(String text) {
 		mStatusText.setText(text);
 		mProgressBar.setVisibility(View.VISIBLE);
@@ -247,13 +249,6 @@ public class MainView {
 		public void speechResultError(String message, Object cookie) {
 			finishSpeech();
 			VHAApplication.EVA.speechResultError(message, cookie);
-			flashBadSearchButton(2);
-			Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
-			if (defaultTracker != null) 
-				defaultTracker.send(MapBuilder
-					    .createEvent("speech_search", "speech_search_end_bad", message, 0l)
-					    .build()
-					   );
 		}
 
 		@Override
@@ -263,7 +258,7 @@ public class MainView {
 		}
 	};
 	
-	public void startSpeechSearch(final EvaSpeechComponent speechSearch, boolean editLastUtterance) {
+	public void startSpeechSearch(final EvaSpeechComponent speechSearch, Object cookie, boolean editLastUtterance) {
 		showStatus("Listening...");
 		
 		activateSearchButton();
@@ -273,7 +268,7 @@ public class MainView {
 		try {
 			Handler handler = mUpdateLevel.get();
 			if (handler != null) {
-				speechSearch.start(mSpeechSearchListener, "voice", editLastUtterance);
+				speechSearch.start(mSpeechSearchListener, cookie, editLastUtterance);
 				handler.sendEmptyMessageDelayed(0, 50);
 			}
 			else {

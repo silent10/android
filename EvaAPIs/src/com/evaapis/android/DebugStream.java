@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import android.util.Log;
+import com.evature.util.Log;
 
 public class DebugStream extends InputStream {
 	long timeOfLastBuffer = -1;

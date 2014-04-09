@@ -91,9 +91,7 @@ public class ExternalIpAddressGetter {
 				// This can sometimes fail - no need to log...
 				return null;
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				Log.w(TAG, "attempt to get ip_address failed on JSON parse");
-				e.printStackTrace();
+				Log.e(TAG, "attempt to get ip_address failed on JSON parse", e);
 				return null;
 			}
 		}

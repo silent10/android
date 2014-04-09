@@ -29,6 +29,8 @@ import com.evature.util.EvatureSSLSocketFactory;
 
 public class DownloadUrl {
 	
+	private static final String TAG = "DownloadUrl";
+
 	// Iftah: I changed this to be non-static method so that a unit test can inject a mock class and verify URL without trouble
 	//        but added @Singleton - which should make Guice reuse a single instance of this class for each instantiation
 	public String get(String myurl) throws IOException {
@@ -56,13 +58,13 @@ public class DownloadUrl {
 			try {
 				sf = new EvatureSSLSocketFactory(null);
 			} catch (UnrecoverableKeyException e) {
-				e.printStackTrace();
+				Log.e(TAG, "UnrecoverableKeyException", e);
 			} catch (KeyStoreException e) {
-				e.printStackTrace();
+				Log.e(TAG, "KeyStoreException", e);
 			} catch (KeyManagementException e) {
-				e.printStackTrace();
+				Log.e(TAG, "KeyManagementException", e);
 			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
+				Log.e(TAG, "NoSuchAlgorithmException", e);
 			}
 			sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 			Scheme sch = new Scheme("https", sf, 443);

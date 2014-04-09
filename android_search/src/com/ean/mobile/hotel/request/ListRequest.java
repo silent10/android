@@ -80,9 +80,7 @@ public final class ListRequest extends Request<HotelList> {
             final LocalDate arrivalDate, final LocalDate departureDate) {
 
         final List<NameValuePair> requestParameters = Arrays.<NameValuePair>asList(
-            new BasicNameValuePair("destinationString", destination),
-            new BasicNameValuePair("numberOfResults", NUMBER_OF_RESULTS),
-            new BasicNameValuePair("supplierType", "E")  // Temporary until Hotel collect handling is finished
+            new BasicNameValuePair("destinationString", destination)
         );
 
         final List<NameValuePair> roomParameters = new ArrayList<NameValuePair>(occupancies.size());
@@ -101,7 +99,24 @@ public final class ListRequest extends Request<HotelList> {
         setUrlParameters(urlParameters);
     }
     
-    public ListRequest(List<NameValuePair> urlParameters) {
+    public ListRequest(List<NameValuePair> parameters) {
+    	final List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+    	boolean hasNumOfResults = false;
+    	boolean hasSuppliedType = false;
+    	for (NameValuePair param : parameters) {
+    		if (param.getName().equals("numberOfResults")) {
+    			hasNumOfResults = true;
+    		}
+    		if (param.getName().equals("supplierType")) {
+    			hasSuppliedType = true;
+    		}
+    		urlParameters.add(param);
+    	}
+    	if (!hasNumOfResults)
+    		urlParameters.add(new BasicNameValuePair("numberOfResults", NUMBER_OF_RESULTS));
+    	if (!hasSuppliedType)
+    		urlParameters.add(new BasicNameValuePair("supplierType", "E"));  // Temporary until Hotel collect handling is finished
+
     	setUrlParameters(urlParameters);
     }
 
