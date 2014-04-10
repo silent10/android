@@ -92,6 +92,7 @@ import com.virtual_hotel_agent.search.controllers.events.ChatItemModified;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
+import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
 import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
@@ -113,6 +114,7 @@ import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
 import com.virtual_hotel_agent.search.views.fragments.ReservationDisplayFragment;
+import com.virtual_hotel_agent.search.views.fragments.ReviewsFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
@@ -145,7 +147,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	private String mRoomsTabName;
 	private String mBookingTabName;
 	private String mMapTabName;
-	private String mReservationsTabName; 
+	private String mReservationsTabName;
+	private String mReviewsTabName;
 
 	static private HotelListDownloaderTask mSearchExpediaTask = null;
 	static private RoomsUpdaterTask mRoomUpdater = null;
@@ -305,6 +308,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		mBookingTabName = getString(R.string.BOOKING);
 		mReservationsTabName = getString(R.string.RESERVATIONS);
 		mMapTabName = getString(R.string.MAP);
+		mReviewsTabName = getString(R.string.REVIEWS);
 
 		CommonParameters.currencyCode = SettingsAPI.getCurrencyCode(this);
 		
@@ -388,12 +392,13 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		//private final ViewPager mViewPager;
 		private final String TAG = TabsPagerAdapter.class.getSimpleName();
-		Fragment mMapFragment;
-		Fragment mHotelsListFragment;
-		Fragment mHotelDetailFragment;
-		Fragment mRoomSelectFragment;
-		Fragment mBookingFragment;
-		Fragment mReservationFragment;
+		HotelsMapFragment mMapFragment;
+		HotelListFragment mHotelsListFragment;
+		HotelDetailFragment mHotelDetailFragment;
+		RoomsSelectFragement mRoomSelectFragment;
+		BookingFragement mBookingFragment;
+		ReservationDisplayFragment mReservationFragment;
+		ReviewsFragment mReviewsFragment;
 		ChatFragment mChatFragment;
 
 		public TabsPagerAdapter( FragmentManager fm) {
@@ -406,6 +411,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
 			mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
 			mBookingFragment = injector.getInstance(BookingFragement.class);
+			mReviewsFragment = null;
 			mReservationFragment = null;
 		}
 		
@@ -478,6 +484,13 @@ public class MainActivity extends RoboFragmentActivity implements
 					mReservationFragment = injector.getInstance(ReservationDisplayFragment.class);
 				}
 				return mReservationFragment;
+			}
+			else if (tabTitle.equals(mReviewsTabName)) {
+				Log.i(TAG, "Starting reviews fragment");
+				if (mReviewsFragment == null) {
+					mReviewsFragment = injector.getInstance(ReviewsFragment.class);
+				}
+				return mReviewsFragment;
 			}
 //			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 //				Log.i(TAG, "Trains Fragment");
@@ -738,7 +751,7 @@ public class MainActivity extends RoboFragmentActivity implements
 			return null;
 		}
 
-		ChatFragment fragment = (ChatFragment) mTabsAdapter.mChatFragment;//instantiateItem(mViewPager, index); 		// http://stackoverflow.com/a/8886019/78234
+		ChatFragment fragment = mTabsAdapter.mChatFragment;//instantiateItem(mViewPager, index); 		// http://stackoverflow.com/a/8886019/78234
 		if (fragment == null) { // could be null if not instantiated yet
 			Log.w(TAG, "chat fragment == null!?");
 		}
@@ -1065,7 +1078,8 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 	
 	private void removeTabs() {
-		final String [] tabsToRemove = { mHotelsTabName, mHotelTabName, mMapTabName, mRoomsTabName, mBookingTabName, mReservationsTabName };
+		final String [] tabsToRemove = { mHotelsTabName, mHotelTabName, mMapTabName, mRoomsTabName, 
+				mReviewsTabName, mBookingTabName, mReservationsTabName };
 		for (String tab : tabsToRemove) {
 			int index = mTabTitles.indexOf(tab);
 			if (index != -1)
@@ -1124,14 +1138,15 @@ public class MainActivity extends RoboFragmentActivity implements
 						mTabsAdapter.addTab(mMapTabName);
 						mapIndex = mTabTitles.size()-1;
 					}
-					HotelsMapFragment mapFragment = (HotelsMapFragment) mTabsAdapter.mMapFragment;// instantiateItem(mViewPager, mapIndex);
+					HotelsMapFragment mapFragment = mTabsAdapter.mMapFragment;// instantiateItem(mViewPager, mapIndex);
 					mapFragment.onHotelsListUpdated();
 					
 					mTabsAdapter.removeTab(mHotelTabName);
 					mTabsAdapter.removeTab(mRoomsTabName);
+					mTabsAdapter.removeTab(mReviewsTabName);
 					mTabsAdapter.removeTab(mBookingTabName);
 
-					HotelListFragment fragment = (HotelListFragment) mTabsAdapter.mHotelsListFragment; //instantiateItem(mViewPager, index);
+					HotelListFragment fragment = mTabsAdapter.mHotelsListFragment; //instantiateItem(mViewPager, index);
 					if (fragment != null) {
 						fragment.newHotelsList();
 					}
@@ -1347,7 +1362,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				mTabsAdapter.addTab(tabName);
 				index = mTabTitles.size()-1;
 			}
-			RoomsSelectFragement fragment = (RoomsSelectFragement) mTabsAdapter.mRoomSelectFragment; //instantiateItem(mViewPager, index);
+			RoomsSelectFragement fragment = mTabsAdapter.mRoomSelectFragment; //instantiateItem(mViewPager, index);
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				fragment.changeHotelId(mRoomUpdater.hotelId);
@@ -1368,7 +1383,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				if ("SOLD_OUT".equals(err.category)) {
 					int index = mTabTitles.indexOf(mHotelTabName);
 					if (index != -1) {
-						HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
+						HotelDetailFragment fragment = mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
 						if (fragment != null) // could be null if not instantiated yet
 						{
 							fragment.hotelSoldOut();
@@ -1412,7 +1427,7 @@ public class MainActivity extends RoboFragmentActivity implements
 				index = mTabTitles.size() - 1;
 			}
 	
-			HotelDetailFragment fragment = (HotelDetailFragment) mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
+			HotelDetailFragment fragment = mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				fragment.changeHotelId(hotelId);
@@ -1421,6 +1436,14 @@ public class MainActivity extends RoboFragmentActivity implements
 			index = mTabTitles.indexOf(tabName);
 			mTabs.setCurrentItem(index);
 
+			index = mTabTitles.indexOf(mReviewsTabName);
+			if (index == -1) {
+				mTabsAdapter.addTab(mReviewsTabName);
+			}
+			ReviewsFragment reviews = mTabsAdapter.mReviewsFragment;
+			reviews.hotelChanged(hotelId);
+
+			
 			startRoomSearch(hotelId);
 			mHotelDownloader = null;
 		}
@@ -1514,7 +1537,7 @@ public class MainActivity extends RoboFragmentActivity implements
 		
 		
 		mainView.hideStatus();
-		S3DrawableBackgroundLoader.getInstance().Reset();
+		//S3DrawableBackgroundLoader.getInstance().Reset();
 		
 //		for (ChatItem chatItem : mChatListModel.getItemList()) {
 //			chatItem.setInSession(false);
@@ -1544,6 +1567,12 @@ public class MainActivity extends RoboFragmentActivity implements
 				frag.onHotelsListUpdated();
 			}
 		}
+	}
+	
+	public void onEventRatingClicked( @Observes RatingClickedEvent event) {
+		int reviewsIndex = mTabTitles.indexOf(mReviewsTabName);
+		if (reviewsIndex != -1)
+			mTabs.setCurrentItem(reviewsIndex);
 	}
 	
 	public void onEventBookingCompleted( @Observes BookingCompletedEvent event) {

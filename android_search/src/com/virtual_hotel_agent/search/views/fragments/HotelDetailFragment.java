@@ -3,6 +3,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import roboguice.event.EventManager;
 import roboguice.fragment.RoboFragment;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -25,6 +27,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -34,6 +37,7 @@ import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
 import com.google.inject.Inject;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
@@ -41,6 +45,7 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
+import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
@@ -59,7 +64,9 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	private Gallery mHotelGallery;
 	private TextView mHotelName;
 	private WebView mPropertyDescription;
-//	private RatingBar mTripAdvisorRatingBar;
+	private View mTripAdvisorRatingBar;
+	private ImageView mTripAdvisorRatingBar_image;
+	private TextView mTripAdvisorRatingBar_text;
 	private RatingBar mStarRatingBar;
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
@@ -100,9 +107,47 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		}
 	}
 	
+	static class AllDoneHandler extends Handler {
+		private WeakReference<HotelDetailFragment> fragmentRef;
+
+		public AllDoneHandler(WeakReference<HotelDetailFragment> fragmentRef) {
+			this.fragmentRef = fragmentRef;
+		}
+		
+		@Override
+		public void handleMessage(Message msg) {
+			if (fragmentRef != null) {
+				HotelDetailFragment hdf = fragmentRef.get();
+				if (hdf != null) {
+					long id = hdf.mHotelGallery.getSelectedItemId();
+					int realSize = hdf.mHotelGalleryAdapter.getRealSize();
+					if (realSize > 3) {
+						hdf.mHotelGalleryAdapter.setCyclic(true);
+						int center = realSize * ((Integer.MAX_VALUE / 2) / realSize);
+						hdf.mHotelGallery.setSelection((int)(center+id), false);
+					}
+					else {
+						hdf.mHotelGalleryAdapter.setCyclic(false);
+					}
+				}
+			}
+			super.handleMessage(msg);
+		}
+		
+	}
 	
-	private Handler mHandlerFinish;
+
+	private AllDoneHandler mAllDoneHandler;
+	private DownloadedImg mHandlerFinish;
 	private ImageDownloader imageDownloader;
+
+	private OnClickListener mRatingClickHandler = new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			eventManager.fire(new RatingClickedEvent());
+		}
+	};
 
 
 	@Override
@@ -128,13 +173,17 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
 		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
 		mPropertyDescription = (WebView) mView.findViewById(R.id.propertyDescription);
-//		mTripAdvisorRatingBar;
+		mTripAdvisorRatingBar = mView.findViewById(R.id.tripAdvisor_ratingBar);
+		mTripAdvisorRatingBar_image = (ImageView) mView.findViewById(R.id.tripadvisor_ratingBar_image);
+		mTripAdvisorRatingBar_text = (TextView) mView.findViewById(R.id.tripadvisor_ratingBar_text);
 		mStarRatingBar = (RatingBar) mView.findViewById(R.id.ratingBarStar);
 		mAmenitiesGridView = (GridView) mView.findViewById(R.id.amenitiesGridview);
 		
+		mTripAdvisorRatingBar.setOnClickListener(mRatingClickHandler);
 		WeakReference<HotelDetailFragment> _this = new WeakReference<HotelDetailFragment>(this);
 		mHandlerFinish = new DownloadedImg(_this);
-
+		mAllDoneHandler = new AllDoneHandler(_this);
+		
 		mHotelGalleryAdapter = new PhotoGalleryAdapter(getActivity());
 
 		mHotelGallery.setOnItemClickListener(this);
@@ -280,7 +329,22 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 		mPropertyDescription.setBackgroundColor(Color.rgb(0xe3, 0xe3, 0xe3));
 
-		//mTripAdvisorRatingBar.setRating((float) mHotelData.mSummary.mTripAdvisorRating);
+		if (hotel.tripAdvisorRatingUrl == null) {
+			mTripAdvisorRatingBar.setVisibility(View.GONE);
+		}
+		else {
+			S3DrawableBackgroundLoader loader = S3DrawableBackgroundLoader.getInstance();
+			Drawable placeHolder = getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
+			loader.loadDrawable(hotel.tripAdvisorRatingUrl, mTripAdvisorRatingBar_image, placeHolder);
+			if (hotel.tripAdvisorReviewCount > 0) {
+				mTripAdvisorRatingBar_text.setText("Based on "+hotel.tripAdvisorReviewCount+" ratings");
+				mTripAdvisorRatingBar_text.setVisibility(View.VISIBLE);
+			}
+			else {
+				mTripAdvisorRatingBar_text.setVisibility(View.GONE);
+			}
+			mTripAdvisorRatingBar.setVisibility(View.VISIBLE);
+		}
 
 		mStarRatingBar.setRating(hotel.starRating.floatValue());
 
@@ -290,12 +354,13 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 		mVhaBmp = mEvaBmpCached;
 		mHotelGalleryAdapter.clear();
+		mHotelGalleryAdapter.setCyclic(false);
 		mHotelGalleryAdapter.addBitmap(mVhaBmp);
 
 		mHotelGallery.setAdapter(mHotelGalleryAdapter);
 
 
-		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish);
+		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish, mAllDoneHandler);
 		
 		if (info.images.size() > 0 ) {
 			Log.i(TAG, "gallery showing "+info.images.size()+" imgs for hotel "+mHotelId);
@@ -360,7 +425,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 		if (isAdded()) {
 			Intent intent = new Intent(this.getActivity(), ImageGalleryActivity.class);
-			intent.putExtra(ImageGalleryActivity.PHOTO_INDEX, position);
+			intent.putExtra(ImageGalleryActivity.PHOTO_INDEX, (int) id);
 			intent.putExtra(ImageGalleryActivity.HOTEL_ID, mHotelId);
 			startActivity(intent);
 		}

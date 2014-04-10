@@ -104,6 +104,13 @@ public final class Hotel {
     private double distance = -2;
 
     /**
+     * Tripadvisor fields
+     */
+    public double tripAdvisorRating;
+    public int tripAdvisorReviewCount;
+    public String tripAdvisorRatingUrl;
+
+    /**
      * The constructor that constructs the hotel info from a JSONObject.
      * @param hotelSummary The object holding the hotel's info.
      * @throws JSONException If there is a problem with the JSON objects
@@ -123,6 +130,10 @@ public final class Hotel {
         this.currencyCode = hotelSummary.optString("rateCurrencyCode");
         this.supplierType = SupplierType.getByCode(hotelSummary.optString("supplierType"));
         this.amenityMask = hotelSummary.optInt("amenityMask", 0);
+        
+        this.tripAdvisorRating = hotelSummary.optDouble("tripAdvisorRating", -1);
+        this.tripAdvisorReviewCount = hotelSummary.optInt("tripAdvisorReviewCount", -1);
+        this.tripAdvisorRatingUrl = hotelSummary.optString("tripAdvisorRatingUrl");
     }
 
     /**

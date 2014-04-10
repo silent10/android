@@ -214,7 +214,7 @@ public final class Reservation implements Comparable<Reservation> {
         this.rateInformations = Collections.unmodifiableList(Rate.parseFromRateInformations(object));
 
         final int prime = 31;
-        int localHash = new Long(itineraryId).hashCode();
+        int localHash = Long.valueOf(itineraryId).hashCode();
         for (Long confirmationNumber : confirmationNumbers) {
             localHash += prime * confirmationNumber.hashCode();
         }
