@@ -60,31 +60,30 @@
   <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
-            
+      
+      <ImageView
+                android:id="@+id/tripAdvisorStrip"
+                android:layout_width="100dip"
+                android:layout_height="20dip"
+                android:layout_marginTop="2dp"
+                android:layout_alignParentRight="true"
+                android:contentDescription="@string/trip_advisor_icon"
+                />
+<!--                 android:src="@drawable/trip_advisor_strip"  -->
+      
         <TextView
             android:id="@+id/hotelLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Located near city center"
             android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/tripAdvisorStrip"
             android:textColor="#ff1f5477" />
-<!--             android:layout_toLeftOf="@+id/tripAdvisorStrip" -->
+<!--             android:singleLine="true" -->
 
-<!--         <ImageView -->
-<!--                 android:id="@+id/tripAdvisorStrip" -->
-<!--                 android:layout_width="wrap_content" -->
-<!--                 android:layout_height="16dip" -->
-<!--                 android:layout_marginTop="2dp" -->
-<!--                 android:layout_alignParentRight="true" -->
-<!--                 android:contentDescription="@string/trip_advisor_icon" -->
-<!--                 android:src="@drawable/trip_advisor_strip" /> -->
         </RelativeLayout>
         
                     
-      
-
-
-            
         
 
         <RelativeLayout
@@ -96,7 +95,7 @@
             <RatingBar
                 android:id="@+id/rating"
                 android:layout_width="wrap_content"
-                android:layout_height="32dip"
+                android:layout_height="22dip"
                 android:isIndicator="true"
                 android:progressDrawable="@drawable/rating_layers" 
                 android:layout_alignParentRight="true"/>

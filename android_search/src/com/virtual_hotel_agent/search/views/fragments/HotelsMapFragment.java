@@ -87,15 +87,21 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 
 	private void setUpMapIfNeeded() {
 		if (mMap == null) {
-			FragmentManager fm = getChildFragmentManager();
-			SupportMapFragment mapFragment = (SupportMapFragment)  fm.findFragmentByTag("the_map");
-			if (mapFragment == null || mapFragment.isAdded() == false) {
-				mapFragment = SupportMapFragment.newInstance();
-		        fm.beginTransaction().replace(R.id.map_container, mapFragment, "the_map").commit();
-		        fm.executePendingTransactions();
+			try {
+				FragmentManager fm = getChildFragmentManager();
+				SupportMapFragment mapFragment = (SupportMapFragment)  fm.findFragmentByTag("the_map");
+				if (mapFragment == null || mapFragment.isAdded() == false) {
+					mapFragment = SupportMapFragment.newInstance();
+			        fm.beginTransaction().replace(R.id.map_container, mapFragment, "the_map").commit();
+			        fm.executePendingTransactions();
+				}
+			
+				mMap = mapFragment.getMap();
 			}
-		
-			mMap = mapFragment.getMap();
+			catch (Exception e) {
+				VHAApplication.logError(TAG, "Exception setting map fragment", e);
+				mMap = null;
+			}
         }
 		
 		// Check if we were successful in obtaining the map.

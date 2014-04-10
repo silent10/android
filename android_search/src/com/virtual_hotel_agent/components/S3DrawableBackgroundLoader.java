@@ -2,13 +2,10 @@ package com.virtual_hotel_agent.components;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
@@ -16,13 +13,13 @@ import java.util.concurrent.ExecutorService;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.util.LruCache;
 import android.widget.ImageView;
 
 import com.virtual_hotel_agent.search.VHAApplication;
 
 public class S3DrawableBackgroundLoader {
-	private final Map<String, SoftReference<Drawable>> mCache = new HashMap<String, SoftReference<Drawable>>();
-	private final LinkedList<Drawable> mChacheController = new LinkedList<Drawable>();
+	private final LruCache<String, Drawable> mCache = new LruCache<String, Drawable>(MAX_CACHE_SIZE);
 	private ExecutorService mThreadPool;
 	private final Map<ImageView, String> mImageViews = Collections
 			.synchronizedMap(new WeakHashMap<ImageView, String>());
@@ -58,8 +55,9 @@ public class S3DrawableBackgroundLoader {
 		mThreadPool = createThreadPool();
 		oldThreadPool.shutdownNow();
 
-		mChacheController.clear();
-		mCache.clear();
+		//mChacheController.clear();
+		//mCache.clear();
+		mCache.evictAll();
 		mImageViews.clear();
 	}
 
@@ -136,20 +134,17 @@ public class S3DrawableBackgroundLoader {
 	}
 
 	public Drawable getDrawableFromCache(String lookup) {
-		if (mCache.containsKey(lookup)) {
-			return mCache.get(lookup).get();
-		}
-
-		return null;
+		return mCache.get(lookup);
 	}
 
 	private synchronized void putDrawableInCache(String lookup, Drawable drawable) {
-		int chacheControllerSize = mChacheController.size();
-		if (chacheControllerSize > MAX_CACHE_SIZE)
-			mChacheController.subList(0, MAX_CACHE_SIZE / 2).clear();
-
-		mChacheController.addLast(drawable);
-		mCache.put(lookup, new SoftReference<Drawable>(drawable));
+//		int chacheControllerSize = mChacheController.size();
+//		if (chacheControllerSize > MAX_CACHE_SIZE)
+//			mChacheController.subList(0, MAX_CACHE_SIZE / 2).clear();
+//
+//		mChacheController.addLast(drawable);
+//		mCache.put(lookup, new SoftReference<Drawable>(drawable));
+		mCache.put(lookup, drawable);
 	}
 
 	private void queueJob(final SourceContainer sourceContainer, final String lookup, final ImageView imageView,

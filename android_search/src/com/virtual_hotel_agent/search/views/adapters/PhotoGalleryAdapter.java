@@ -15,18 +15,25 @@ public class PhotoGalleryAdapter extends BaseAdapter {
 	private Context mContext;
 	private ArrayList<Bitmap> mBitmaps;
 	private int mGalleryItemBackground;
+	
+	private boolean isCyclic = false;
 
 	public int getCount() {
-		return mBitmaps.size();
+		if (isCyclic) {
+			return Integer.MAX_VALUE;
+		}
+		else {
+			return mBitmaps.size();
+		}
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return mBitmaps.get(position);
+		return mBitmaps.get(position % mBitmaps.size());
 	}
 
 	public long getItemId(final int position) {
-		return position;
+		return position  % mBitmaps.size();
 	}
 
 	public View getView(final int position, final View contentView, final ViewGroup viewGroup) {
@@ -38,7 +45,7 @@ public class PhotoGalleryAdapter extends BaseAdapter {
 			myView = (ImageView) contentView;
 		}
 
-		myView.setImageBitmap(mBitmaps.get(position));
+		myView.setImageBitmap((Bitmap)getItem(position));
 
 		myView.setLayoutParams(new Gallery.LayoutParams(300, 200));
 		myView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -66,9 +73,17 @@ public class PhotoGalleryAdapter extends BaseAdapter {
 		mGalleryItemBackground = android.R.drawable.picture_frame;
 	}
 
+	public int getRealSize() {
+		return mBitmaps.size();
+	}
+
 	public void clear() {
 		mBitmaps.clear();
 		notifyDataSetChanged();
+	}
+
+	public void setCyclic(boolean b) {
+		isCyclic = b;
 	}
 
 }

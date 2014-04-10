@@ -111,7 +111,6 @@
             android:id="@+id/detailsLayout"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:orientation="vertical" 
              >
 
@@ -121,31 +120,52 @@
                 android:layout_height="wrap_content"
                 android:background="@color/white"
             >
-
-<!--         	<ImageView -->
-<!--         	    android:id="@+id/tripAdvisor" -->
-<!--         	    android:layout_width="wrap_content" -->
-<!--         	    android:layout_height="wrap_content" -->
-<!--         	    android:layout_alignParentRight="true" -->
-<!--         	    android:layout_centerVertical="true" -->
-<!--         	    android:layout_gravity="center_vertical" -->
-<!--         	    android:src="@drawable/tripadvisor" /> -->
-            
-            <GridView
-                android:id="@+id/amenitiesGridview"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:columnWidth="64dp"
-                android:layout_marginRight="4dp"
-                android:gravity="center"
-                android:layout_alignParentLeft="true"
-                android:horizontalSpacing="5dp"
-                android:numColumns="auto_fit"
-                android:stretchMode="none"
-                android:verticalSpacing="5dp" />
-<!--                 android:layout_toLeftOf="@id/tripAdvisor" -->
-                
-            </RelativeLayout>
+	
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/tripAdvisor_ratingBar" 
+	        	    android:layout_alignParentLeft="true"
+	        	    android:layout_centerVertical="true"
+                    >
+	                <TextView
+	                	android:layout_width="wrap_content"
+                    	android:layout_height="wrap_content"
+                    	android:textSize="12sp"
+                    	android:text="TripAdvisor Traveler Rating"
+	                    />
+	                <ImageView
+		        	    android:id="@+id/tripadvisor_ratingBar_image"
+		        	    android:layout_width="wrap_content"
+		        	    android:layout_height="wrap_content"
+		        	    android:layout_gravity="center_vertical"
+		        	     />
+		            <TextView
+	                	android:layout_width="wrap_content"
+                    	android:layout_height="wrap_content"
+                    	android:textSize="12sp"
+                    	android:id="@+id/tripadvisor_ratingBar_text"
+                    	android:text="Based on 65 reviews"
+	                    />    
+                </LinearLayout>
+	        	
+	            <GridView
+	                android:id="@+id/amenitiesGridview"
+	                android:layout_width="fill_parent"
+	                android:layout_height="wrap_content"
+	                android:columnWidth="64dp"
+	                android:layout_marginLeft="4dp"
+	                android:gravity="center"
+	                android:layout_alignParentRight="true"
+	                android:horizontalSpacing="5dp"
+	                android:numColumns="auto_fit"
+	                android:stretchMode="none"
+	                android:verticalSpacing="5dp" 
+	                android:layout_toRightOf="@id/tripAdvisor_ratingBar"
+	                />
+	                
+	            </RelativeLayout>
             
             <WebView
                 android:id="@+id/propertyDescription"
