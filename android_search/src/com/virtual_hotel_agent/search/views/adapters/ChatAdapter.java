@@ -148,7 +148,12 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			row.setTag(R.id.chat_row_holder, holder);
 		}
 		TextView label = holder.label;
-		label.setText(chatItem.getChat());
+		if (label == null) {
+			VHAApplication.logError(TAG, "No label in Row?");
+		}
+		else {
+			label.setText(chatItem.getChat());
+		}
 		
 		
 		// some row types require more than label setting...

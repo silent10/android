@@ -44,7 +44,7 @@
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:ellipsize="marquee"
-           android:freezesText="true"
+           android:marqueeRepeatLimit="marquee_forever"
            android:singleLine="true"
            android:layout_toLeftOf="@id/hotelDistance"
            android:layout_alignParentLeft="true"
@@ -52,6 +52,7 @@
            android:textColor="#FF000000"
            android:textSize="18sp"
            android:textStyle="bold" />
+<!--            android:freezesText="true" -->
 
             
         </RelativeLayout>
@@ -76,10 +77,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Located near city center"
+            android:ellipsize="marquee"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@id/tripAdvisorStrip"
+            android:singleLine="true"
             android:textColor="#ff1f5477" />
-<!--             android:singleLine="true" -->
 
         </RelativeLayout>
         

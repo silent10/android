@@ -48,27 +48,28 @@
        android:layout_height="42dp"
        android:layout_below="@id/hotelGallery">
         
-	   <Button
-	            android:id="@+id/selectButton"
-	            android:layout_width="wrap_content"
-	            android:layout_height="36sp"
-	            android:layout_centerVertical="true"
-	            android:layout_alignParentRight="true"
-	            android:layout_marginRight="10dp"
-	            android:background="@drawable/custom_button_active"
-	            android:gravity="center"
-	            android:text="@string/select"
-	            android:paddingLeft="17dip"
-	            android:paddingRight="17dip"
-	            android:textColor="#FFFFFFFF"
-	            android:textSize="16dp" />
+<!-- 	   <Button -->
+<!-- 	            android:id="@+id/selectButton" -->
+<!-- 	            android:layout_width="wrap_content" -->
+<!-- 	            android:layout_height="36sp" -->
+<!-- 	            android:layout_centerVertical="true" -->
+<!-- 	            android:layout_alignParentRight="true" -->
+<!-- 	            android:layout_marginRight="10dp" -->
+<!-- 	            android:background="@drawable/custom_button_active" -->
+<!-- 	            android:gravity="center" -->
+<!-- 	            android:text="@string/select" -->
+<!-- 	            android:paddingLeft="17dip" -->
+<!-- 	            android:paddingRight="17dip" -->
+<!-- 	            android:textColor="#FFFFFFFF" -->
+<!-- 	            android:textSize="16dp" /> -->
+
+    
 
 	        <Button
 	            android:id="@+id/mapButton"
 	            android:layout_width="wrap_content"
 	            android:layout_height="30sp"
 	            android:layout_centerVertical="true"
-	            android:layout_toLeftOf="@id/selectButton"
 	            android:background="@drawable/custom_button_active"
 	            android:gravity="center"
 	            android:layout_marginRight="10dp"
@@ -76,20 +77,36 @@
 	            android:paddingLeft="11dip"
 	            android:paddingRight="11dip"
 	            android:textColor="#FFFFFFFF"
-	            android:textSize="12sp" />
+	            android:textSize="12sp" 
+	            android:layout_alignParentRight="true"
+	            />
+<!-- 	            android:layout_toLeftOf="@id/selectButton" -->
          
-    <RatingBar
+	<RatingBar
         android:id="@+id/ratingBarStar"
         android:layout_width="118dp"
         android:layout_height="32dp"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
         android:isIndicator="true"
-        android:paddingLeft="10dp"
-        android:progressDrawable="@drawable/rating_layers" >
+        android:paddingRight="10dp"
+        android:progressDrawable="@drawable/rating_layers" 
+		android:layout_toLeftOf="@+id/mapButton"     
+        >
 
      </RatingBar>
     
+	 <ImageView
+                android:id="@+id/tripadvisor_ratingBar_image"
+                android:layout_width="100dip"
+                android:layout_height="22dip"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="5dip"
+                android:layout_marginBottom="9dip"
+                android:layout_toLeftOf="@+id/ratingBarStar"
+                android:layout_alignParentBottom="true"
+                android:contentDescription="@string/trip_advisor_icon"
+                />
+	 
     </RelativeLayout>
     
     <ImageView
@@ -128,6 +145,7 @@
                     android:id="@+id/tripAdvisor_ratingBar" 
 	        	    android:layout_alignParentLeft="true"
 	        	    android:layout_centerVertical="true"
+	        	    android:layout_marginLeft="2dip"
                     >
 	                <TextView
 	                	android:layout_width="wrap_content"
@@ -135,12 +153,12 @@
                     	android:textSize="12sp"
                     	android:text="TripAdvisor Traveler Rating"
 	                    />
-	                <ImageView
-		        	    android:id="@+id/tripadvisor_ratingBar_image"
-		        	    android:layout_width="wrap_content"
-		        	    android:layout_height="wrap_content"
-		        	    android:layout_gravity="center_vertical"
-		        	     />
+<!-- 	                <ImageView -->
+<!-- 		        	    android:id="@+id/tripadvisor_ratingBar_image" -->
+<!-- 		        	    android:layout_width="wrap_content" -->
+<!-- 		        	    android:layout_height="wrap_content" -->
+<!-- 		        	    android:layout_gravity="center_vertical" -->
+<!-- 		        	     /> -->
 		            <TextView
 	                	android:layout_width="wrap_content"
                     	android:layout_height="wrap_content"
@@ -150,9 +168,22 @@
 	                    />    
                 </LinearLayout>
 	        	
+                
+                <ImageView
+			        android:id="@+id/separator"
+			       android:layout_toRightOf="@id/tripAdvisor_ratingBar"
+			       android:layout_width="2dip"
+			       android:paddingTop="2dip"
+			       android:paddingBottom="2dip"
+			       android:layout_height="match_parent"
+       	           android:src="@drawable/divider" >
+			    </ImageView>
+                
+			                
 	            <GridView
 	                android:id="@+id/amenitiesGridview"
 	                android:layout_width="fill_parent"
+	                android:layout_toRightOf="@+id/separator"
 	                android:layout_height="wrap_content"
 	                android:columnWidth="64dp"
 	                android:layout_marginLeft="4dp"
@@ -162,7 +193,7 @@
 	                android:numColumns="auto_fit"
 	                android:stretchMode="none"
 	                android:verticalSpacing="5dp" 
-	                android:layout_toRightOf="@id/tripAdvisor_ratingBar"
+	                
 	                />
 	                
 	            </RelativeLayout>
@@ -181,5 +212,31 @@
         </LinearLayout>
     </ScrollView>
 
+    
+    
+    <RelativeLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/bottom_bar_background"
+         >
+    
+     <Button
+         android:id="@+id/selectButton"
+         android:layout_width="wrap_content"
+         android:layout_height="48sp"
+         android:layout_centerHorizontal="true"
+         android:layout_marginBottom="5dp"
+         android:layout_marginTop="6dp"
+         android:background="@drawable/custom_button_active"
+         android:gravity="center"
+         android:padding="8dp"
+         android:text="@string/select"
+         android:textColor="#FFFFFFFF"
+         android:textSize="20sp" />
+     
+     </RelativeLayout>
 
 </RelativeLayout>

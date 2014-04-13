@@ -142,7 +142,8 @@ public final class InformationRequest extends Request<HotelInformation> {
                     new HotelImageTuple(new URL(image.optString("thumbnailUrl")),
                         new URL(image.optString("url")), image.optString("caption")));
             } catch (MalformedURLException me) {
-                VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON", me);
+                VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON: "+
+                				image.optString("url","<null>")+" "+image.optString("thumbnailUrl","<null>"), me);
             }
         }
 

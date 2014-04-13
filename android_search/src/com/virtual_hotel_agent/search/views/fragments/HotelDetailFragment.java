@@ -123,8 +123,10 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 					int realSize = hdf.mHotelGalleryAdapter.getRealSize();
 					if (realSize > 3) {
 						hdf.mHotelGalleryAdapter.setCyclic(true);
-						int center = realSize * ((Integer.MAX_VALUE / 2) / realSize);
+						hdf.mHotelGalleryAdapter.notifyDataSetChanged();
+						int center = realSize * (int)((Integer.MAX_VALUE / 2) / realSize);
 						hdf.mHotelGallery.setSelection((int)(center+id), false);
+						hdf.mHotelGalleryAdapter.notifyDataSetChanged();
 					}
 					else {
 						hdf.mHotelGalleryAdapter.setCyclic(false);
@@ -180,6 +182,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mAmenitiesGridView = (GridView) mView.findViewById(R.id.amenitiesGridview);
 		
 		mTripAdvisorRatingBar.setOnClickListener(mRatingClickHandler);
+		mTripAdvisorRatingBar_image.setOnClickListener(mRatingClickHandler);
 		WeakReference<HotelDetailFragment> _this = new WeakReference<HotelDetailFragment>(this);
 		mHandlerFinish = new DownloadedImg(_this);
 		mAllDoneHandler = new AllDoneHandler(_this);
@@ -414,7 +417,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		mBookButton.setOnClickListener(mBookButtonListener);
 		mBookButton.setEnabled(true);
 		mBookButton.setText(R.string.select);
-		
+//		
 		mMapButton.setOnClickListener(mMapButtonLisener);
 		
 	}
