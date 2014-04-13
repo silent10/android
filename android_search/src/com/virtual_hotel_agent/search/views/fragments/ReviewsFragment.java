@@ -1,5 +1,6 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +9,6 @@ import android.webkit.WebView;
 
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
-
-import roboguice.fragment.RoboFragment;
 
 public class ReviewsFragment extends RoboFragment {
 
@@ -28,8 +27,7 @@ public class ReviewsFragment extends RoboFragment {
 
 		mView = inflater.inflate(R.layout.fragment_reviews, container, false);
 		
-		mWebView = (WebView) mView.findViewById(R.id.reviews_webview); 
-				
+		mWebView = (WebView) mView.findViewById(R.id.reviews_webview);
 		return mView;
 	}
 

@@ -13,6 +13,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -26,9 +27,9 @@ import com.google.inject.Inject;
 import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.ScaleInAnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
@@ -140,6 +141,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		mHotelListView.clearChoices();
 		if (VHAApplication.selectedHotel != null) {
 			mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
+//			mHotelListView.requestFocus();
 		}
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
@@ -207,7 +209,9 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 				    .build()
 				   );
 		
-		mHotelListView.setItemChecked(position, true);
+//		mHotelListView.setItemChecked(position, true);
+		mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
+		//mHotelListView.requestFocus();
 		eventManager.fire(new HotelItemClicked(position));
 		Log.d(TAG, "running showHotelDetails()");
 
@@ -331,4 +335,5 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		setAdapter(); // for some reason starting a new adapter is the only way to scroll to top
 		//mAdapter.notifyDataSetChanged();
 	}
+
 }

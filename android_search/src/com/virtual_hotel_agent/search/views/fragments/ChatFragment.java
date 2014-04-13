@@ -284,15 +284,15 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				addUtterance();
 			}
 			else {
-				// search for "Me" chat before
-				for (int i=position-1; i>0; i--) {
+				// search for last "Me" chat before
+				for (int i=mChatListModel.size()-1; i>0; i--) {
 					ChatItem itemBefore = mChatListModel.get(i);
 					if (itemBefore.getType() == ChatType.Me) {
 						editMeChat(itemBefore, i);
 						return;
 					}
 				}
-				// no me chat before the statement - add one
+				// no me-chat - add one
 				addUtterance();
 			}
 		}

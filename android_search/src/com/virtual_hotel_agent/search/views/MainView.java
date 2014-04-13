@@ -281,7 +281,15 @@ public class MainView {
 		}
 	}
 
+	
+	private boolean mainButtonsShown = true;
+	
+	public boolean areMainButtonsShown() {
+		return mainButtonsShown;
+	}
+	
 	public void toggleMainButtons(boolean showMainButtons) {
+		mainButtonsShown = showMainButtons;
 		mBottomBar.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
 	}
 		

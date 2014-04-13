@@ -83,7 +83,6 @@ import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.viewpagerindicator.TitlePageIndicator;
-import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -330,6 +329,9 @@ public class MainActivity extends RoboFragmentActivity implements
 		mViewPager.setOffscreenPageLimit(5);
 
 		mTabs.setOnPageChangeListener(new OnPageChangeListener() {
+			private boolean lastShown = true;
+			private boolean hidButtons = false;
+			
 			@Override
 			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 			}
@@ -337,6 +339,21 @@ public class MainActivity extends RoboFragmentActivity implements
 			@Override
 			public void onPageSelected(int position) {
 				getActionBar().setDisplayHomeAsUpEnabled(position > 0);
+				if (position > 2) {
+					if (!hidButtons) {
+						// save last shown on first hiding of buttons
+						lastShown = mainView.areMainButtonsShown();
+					}
+					mainView.toggleMainButtons(false);
+					hidButtons = true;
+				}
+				else {
+					if (lastShown && hidButtons) {
+						mainView.toggleMainButtons(true);
+						hidButtons = false;
+						lastShown = true;
+					}
+				}
 			}
 
 			@Override
@@ -370,6 +387,8 @@ public class MainActivity extends RoboFragmentActivity implements
 		// data.putExtras(a_bundle);
 		// onActivityResult(VOICE_RECOGNITION_REQUEST_CODE, RESULT_OK, data);
 		
+		// stop the flash-screen being in memory
+		findViewById(R.id.the_main_layout).setBackgroundResource(R.drawable.hotel_background);
 	}
 		
 	@Override
@@ -1145,7 +1164,7 @@ public class MainActivity extends RoboFragmentActivity implements
 					mTabsAdapter.removeTab(mRoomsTabName);
 					mTabsAdapter.removeTab(mReviewsTabName);
 					mTabsAdapter.removeTab(mBookingTabName);
-
+					
 					HotelListFragment fragment = mTabsAdapter.mHotelsListFragment; //instantiateItem(mViewPager, index);
 					if (fragment != null) {
 						fragment.newHotelsList();
