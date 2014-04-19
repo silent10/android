@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:virtual_hotel_agent="http://schemas.android.com/apk/res-auto"  >
 
+    <item
+        android:id="@+id/audio"
+        android:title="Audio Control"
+        android:icon="@drawable/sound_icon"
+        virtual_hotel_agent:showAsAction="ifRoom"></item>
+    
     <item
         android:id="@+id/faq"
         android:title="@string/faq">

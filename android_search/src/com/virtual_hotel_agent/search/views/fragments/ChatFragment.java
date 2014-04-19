@@ -3,11 +3,10 @@ package com.virtual_hotel_agent.search.views.fragments;
 import java.util.ArrayList;
 import java.util.Random;
 
-import roboguice.event.EventManager;
-import roboguice.fragment.RoboFragment;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
@@ -28,7 +27,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.evature.util.Log;
-import com.google.inject.Inject;
 import com.nhaarman.listviewanimations.itemmanipulation.OnDismissCallback;
 import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.R;
@@ -45,16 +43,14 @@ import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.views.adapters.ChatAdapter;
 import com.virtual_hotel_agent.search.views.adapters.ChatAnimAdapter;
 
-public class ChatFragment extends RoboFragment implements OnItemClickListener {
+public class ChatFragment extends Fragment implements OnItemClickListener {
 	
 //	@Override
 //	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 //		inflater.inflate(R.menu.mainmenu, menu);
 //	}
 
-	@Inject protected EventManager eventManager;
-	
-	@Inject private ChatItemList mChatListModel;
+	private ChatItemList mChatListModel;
 	
 	private ChatAdapter mChatAdapter;
 
@@ -82,6 +78,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		
 		// Connect the data of the chat history to the view:
 //		mChatListModel.loadInstanceState(savedInstanceState);
+		mChatListModel = new ChatItemList();
 		mChatAdapter = new ChatAdapter(this, R.layout.row_vha_chat, R.id.label, mChatListModel);
 
 		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback());
@@ -316,7 +313,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			
 			if (current.getStatus() != Status.InEdit) {
 				current.setStatus(Status.InEdit);
-				eventManager.fire(new ToggleMainButtonsEvent(false));
+//				eventManager.fire(new ToggleMainButtonsEvent(false));
 				editedChatItemIndex = position;
 				mChatAdapter.notifyDataSetChanged();
 			}
@@ -383,7 +380,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		
 		ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);
 		editedChatItem.setStatus(Status.ToSearch);
-		eventManager.fire(new ToggleMainButtonsEvent(true));
+//		eventManager.fire(new ToggleMainButtonsEvent(true));
 		String preModifiedString = editedChatItem.getChat().toString();
 		if (isSubmitted) {
 			//View rowView = mChatListView.getChildAt(editedChatItemIndex - mChatListView.getFirstVisiblePosition() );
@@ -403,7 +400,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			editedChatItem.setChat(newText);
 	
 			dismissItemsFromPosition(editedChatItemIndex+1);
-			eventManager.fire(new ChatItemModified(editedChatItem, false, editLastUtterance));
+//			eventManager.fire(new ChatItemModified(editedChatItem, false, editLastUtterance));
 		}
 		else {
 			// not submitting - just canceling edit
@@ -442,9 +439,9 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			editedChatItemIndex = -1;
 			if (editLastUtterance) {
 				// non empty last utterance - send to server 
-				eventManager.fire(new ChatItemModified(null, false, true));
+//				eventManager.fire(new ChatItemModified(null, false, true));
 			}
-			eventManager.fire(new ToggleMainButtonsEvent(true));
+//			eventManager.fire(new ToggleMainButtonsEvent(true));
 		}
 	};
 
@@ -474,7 +471,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
 			boolean editLastUtterance = false == editedChatItem.getChat().toString().isEmpty();
 
-			eventManager.fire(new ChatItemModified(editedChatItem, true, editLastUtterance));
+//			eventManager.fire(new ChatItemModified(editedChatItem, true, editLastUtterance));
 		}
 	};
 
@@ -497,7 +494,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		
 		ChatItem editChat = new ChatItem("");
 		editChat.setStatus(Status.InEdit);
-		eventManager.fire(new ToggleMainButtonsEvent(false));
+//		eventManager.fire(new ToggleMainButtonsEvent(false));
 		addChatItem(editChat);
 		editedChatItemIndex = mChatListModel.size()-1;
 

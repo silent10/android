@@ -2,9 +2,6 @@ package com.virtual_hotel_agent.search.models.chat;
 
 import java.util.ArrayList;
 
-import com.google.inject.Singleton;
-
-@Singleton
 public class ChatItemList extends ArrayList<ChatItem> {
 	static final String TAG = "ChatItemList";
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
 
-    <string name="app_name">Virtual Hotel Agent</string>
+    <string name="app_name">Hotel Agent</string>
 <!--     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\n -->
 <!-- We will, someday.\n -->
 <!-- We promise.\n -->

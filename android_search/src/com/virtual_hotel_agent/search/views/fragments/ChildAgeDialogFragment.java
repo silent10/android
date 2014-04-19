@@ -2,11 +2,11 @@ package com.virtual_hotel_agent.search.views.fragments;
 
 import java.util.ArrayList;
 
-import roboguice.fragment.RoboDialogFragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -16,10 +16,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.evaapis.crossplatform.EvaTravelers;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.VHAApplication;
 
-public class ChildAgeDialogFragment extends RoboDialogFragment {
+public class ChildAgeDialogFragment extends DialogFragment {
 
 	public interface ChildAgeDialogListener {
 		void onDialogPositiveClick(ChildAgeDialogFragment dialog);

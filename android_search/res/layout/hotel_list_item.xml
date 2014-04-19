@@ -46,6 +46,7 @@
            android:ellipsize="marquee"
            android:marqueeRepeatLimit="marquee_forever"
            android:singleLine="true"
+           android:scrollHorizontally="true"
            android:layout_toLeftOf="@id/hotelDistance"
            android:layout_alignParentLeft="true"
            android:text="Hotel Name"

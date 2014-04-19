@@ -8,6 +8,8 @@ import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.joda.time.LocalDate;
@@ -15,8 +17,6 @@ import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import roboguice.event.EventManager;
-import roboguice.fragment.RoboFragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -58,14 +59,12 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.BuildConfig;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.events.BookingCompletedEvent;
 
-public class BookingFragement extends RoboFragment {
+public class BookingFragement extends Fragment {
 
 	private static final String TAG = "BookingFragement";
 	private static final String DATE_FORMAT_STRING = "EEEE, MMMM dd, yyyy";
@@ -76,8 +75,6 @@ public class BookingFragement extends RoboFragment {
 	private static final int PICK_CONTACT_INTENT = 1;
 	private ArrayList<String> mCreditCardTypes;
 	private ArrayList<String> mCreditCardValues;
-	
-	@Inject protected EventManager eventManager;
 	
 	private Hotel hotel;
 	private HotelRoom hotelRoom;
@@ -537,7 +534,7 @@ public class BookingFragement extends RoboFragment {
             }
             else {
 	            //startActivity(new Intent(getActivity(), ReservationDisplayFragment.class));
-	            eventManager.fire(new BookingCompletedEvent());
+//	            eventManager.fire(new BookingCompletedEvent());
             }
         }
     }

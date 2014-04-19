@@ -94,11 +94,13 @@ public class ImageDownloader {
 					if (mRunThreads) {
 						bmp = null;
 						if (url != null) {
-							bmp = cache.get(url);
+							if (cache != null) {
+								bmp = cache.get(url);
+							}
 							if (bmp == null) {
 								//Log.d(TAG, url+" not found - downloading");
 								bmp = download_Image(url);
-								if (bmp != null) {
+								if (bmp != null && cache != null) {
 									synchronized (cache) {
 										if (cache.get(url) == null) {
 											cache.put(url, bmp);

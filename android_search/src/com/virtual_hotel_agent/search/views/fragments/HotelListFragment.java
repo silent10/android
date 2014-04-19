@@ -1,11 +1,11 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
-import roboguice.event.EventManager;
-import roboguice.event.Observes;
-import roboguice.fragment.RoboFragment;
+import javax.inject.Inject;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +13,6 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -23,7 +22,6 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.google.inject.Inject;
 import com.nhaarman.listviewanimations.swinginadapters.AnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.ScaleInAnimationAdapter;
 import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
@@ -37,9 +35,8 @@ import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskLis
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
-public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
+public class HotelListFragment extends Fragment implements OnItemClickListener, DownloaderTaskListenerInterface {
 
-	@Inject protected EventManager eventManager;
 	
 	ListContinuationDownloaderTask mContinuationLoader = null;
 	private LinearLayout mFooterView;
@@ -184,7 +181,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		mHotelListView.setOnItemClickListener(this);
 	}
 
-	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
+	public void onEventHotelItemClicked( /*@Observes*/ HotelItemClicked event) {
 		
 		final int hotelIndex = event.hotelIndex;
 		if (mHotelListView.getCheckedItemPosition() != hotelIndex) {
@@ -212,7 +209,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 //		mHotelListView.setItemChecked(position, true);
 		mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
 		//mHotelListView.requestFocus();
-		eventManager.fire(new HotelItemClicked(position));
+//		eventManager.fire(new HotelItemClicked(position));
 		Log.d(TAG, "running showHotelDetails()");
 
 	}
@@ -266,7 +263,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 			mEnabledPaging = false;
 		}
 		
-		eventManager.fire(new HotelsListUpdated());
+//		eventManager.fire(new HotelsListUpdated());
 	}
 
 	ProgressDialog mProgressDialog = null;
