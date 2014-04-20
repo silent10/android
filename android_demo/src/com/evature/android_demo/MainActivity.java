@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evaapis.android.EvaBaseActivity;
 import com.evaapis.crossplatform.EvaApiReply;
@@ -28,7 +29,7 @@ import com.evaapis.crossplatform.EvaWarning;
 
 public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	
-	// default values
+	// default values  - can be overwritten by preferences
 	private static final String API_KEY = "e7567517-0a1b-4a89-bd56-1b18915353f9";
 	private static final String SITE_CODE = "androiddev";
 	
@@ -54,7 +55,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		recordButton = (Button) findViewById(R.id.button_start);
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	searchWithVoice();
+            	searchWithVoice("voice");
             }
         });
         
@@ -63,7 +64,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
         searchText.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				searchWithText(freeText.getText().toString());
+				searchWithText(freeText.getText().toString(), "text", false);
 				freeText.setText("");
 			}
 		});
@@ -85,7 +86,11 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		return true;
 	}
 	
-
+	@Override
+	public void onEvaError(String message, boolean isServerError, Object cookie) {
+		Toast.makeText(this, "Error: "+message, Toast.LENGTH_LONG).show();
+	}
+	
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
