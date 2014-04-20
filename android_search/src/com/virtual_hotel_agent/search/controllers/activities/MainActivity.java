@@ -234,14 +234,19 @@ public class MainActivity extends RoboFragmentActivity implements
 	@Override
 	public void onStart() {
 		super.onStart();
-		Tracker t1 = GoogleAnalytics.getInstance(this).getTracker("UA-47284954-1");
-
-		Intent intent = this.getIntent();
-	    Uri uri = intent.getData();
-	    if (uri != null) {
-	    	MapBuilder.createAppView().setAll(getReferrerMapFromUri(uri));
-	    }
-	    EasyTracker.getInstance(this).activityStart(this);
+		try {
+			Tracker t1 = GoogleAnalytics.getInstance(this).getTracker("UA-47284954-1");
+	
+			Intent intent = this.getIntent();
+		    Uri uri = intent.getData();
+		    if (uri != null) {
+		    	MapBuilder.createAppView().setAll(getReferrerMapFromUri(uri));
+		    }
+		    EasyTracker.getInstance(this).activityStart(this);
+		}
+	    catch(Exception e) {
+			VHAApplication.logError(TAG, "Exception setting google analytics", e);
+		}
 	}
 	
 	@Override
