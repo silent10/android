@@ -26,7 +26,6 @@ import java.util.Map;
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
-import roboguice.activity.RoboFragmentActivity;
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
 import android.app.AlertDialog;
@@ -55,12 +54,13 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
@@ -75,6 +75,7 @@ import com.evaapis.crossplatform.flow.FlowElement;
 import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evaapis.crossplatform.flow.QuestionElement;
 import com.evature.util.Log;
+import com.github.rtyley.android.sherlock.roboguice.activity.RoboSherlockFragmentActivity;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -117,7 +118,7 @@ import com.virtual_hotel_agent.search.views.fragments.ReviewsFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
-public class MainActivity extends RoboFragmentActivity implements 
+public class MainActivity extends RoboSherlockFragmentActivity implements 
 													EvaSearchReplyListener,
 													OnSharedPreferenceChangeListener {
 
@@ -380,6 +381,9 @@ public class MainActivity extends RoboFragmentActivity implements
 		}
 
 //		setDebugData(DebugTextType.None, null);
+		
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setHomeButtonEnabled(true);
 
 		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 
@@ -617,15 +621,15 @@ public class MainActivity extends RoboFragmentActivity implements
 	}
 	
 	
-	@Override
-	public boolean onPrepareOptionsMenu (Menu menu) {
-		//menu.getItem(2).setVisible(eva.isDebug());
-		return super.onPrepareOptionsMenu(menu);
-	}
+//	@Override
+//	public boolean onPrepareOptionsMenu (Menu menu) {
+//		//menu.getItem(2).setVisible(eva.isDebug());
+//		return super.onPrepareOptionsMenu(menu);
+//	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.mainmenu, menu);
 		return true;
 	}
