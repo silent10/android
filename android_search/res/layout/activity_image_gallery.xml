@@ -36,13 +36,13 @@
             
             <TextView 
                 android:id="@+id/photo_caption"
-                style="?buttonBarButtonStyle"
                 android:background="@color/black_overlay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 />
+<!--                 style="?buttonBarButtonStyle" -->
             
             <com.viewpagerindicator.UnderlinePageIndicator
 		        android:id="@+id/indicator"
