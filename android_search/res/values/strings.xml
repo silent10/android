@@ -130,4 +130,5 @@
     <string name="room_description">Room Description</string>
     <string name="credit_card_type_">Credit card type:</string>
     <string name="delete_utterance_button">Delete button</string>
+    <string name="audio_control">Audio Control</string>
 </resources>
