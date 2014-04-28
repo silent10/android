@@ -29,9 +29,12 @@ import org.acra.ErrorReporter;
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
@@ -161,6 +164,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	MainView mainView;
 
 
+	private MenuItem soundControlMenuItem;
+
+
 	@Override
 	public void onDestroy() {
 		VHAApplication.EVA.onDestroy();
@@ -256,6 +262,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
 	}
 	
+	private BroadcastReceiver updateVolumeReceiver = new UpdateVolumeReceiver();
 	
 	@Override 
 	public void onResume() {
@@ -263,6 +270,11 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		VHAApplication.EVA.onResume();
 		super.onResume();
 //		setDebugData(DebugTextType.None, null);
+		
+		registerReceiver(updateVolumeReceiver, new IntentFilter(android.bluetooth.BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
+		
+		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		audioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(), UpdateVolumeReceiver.class.getName()));
 	}
 	
 	@Override
@@ -384,9 +396,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
-
+		
 		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
-
+		
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
 		// Bundle a_bundle = new Bundle();
@@ -631,10 +643,49 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.mainmenu, menu);
+
+		soundControlMenuItem = menu.findItem(R.id.audio);
+		
+		setVolumeIcon();
+
 		return true;
 	}
 	
 	
+
+	private void setVolumeIcon() {
+		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+		int volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+		int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		Log.i(TAG, "Current volume :"+volume+" out of "+maxVolume);
+		
+		if (soundControlMenuItem == null) {
+			return;
+		}
+		
+		boolean isTooLow = volume <= maxVolume / 4;
+
+		if (audioManager.isBluetoothA2dpOn()) {
+			Log.i(TAG, "Bluetooth");
+			if (isTooLow) {
+				soundControlMenuItem.setIcon(R.drawable.bluetooth_warning_icon);
+			}
+			else {
+				soundControlMenuItem.setIcon(R.drawable.bluetooth_icon);
+			}
+		} else { //if (audioManager.isSpeakerphoneOn()) {
+			Log.i(TAG, "NOT Bluetooth");
+			if (isTooLow) {
+				soundControlMenuItem.setIcon(R.drawable.speaker_warning_icon);
+			}
+			else {
+				soundControlMenuItem.setIcon(R.drawable.speaker_icon);
+			}
+		} 
+	}
+
+
+
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button

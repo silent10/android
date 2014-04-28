@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/audio"
+        android:title="@string/audio_control"
+        android:icon="@drawable/speaker_icon"
+        android:showAsAction="ifRoom">
+    </item>
+    
+    
     <item
         android:id="@+id/faq"
         android:title="@string/faq">
