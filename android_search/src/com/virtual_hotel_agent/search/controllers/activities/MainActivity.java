@@ -262,7 +262,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
 	}
 	
-	private BroadcastReceiver updateVolumeReceiver = new UpdateVolumeReceiver();
+	//private BroadcastReceiver updateVolumeReceiver = new UpdateVolumeReceiver();
 	
 	@Override 
 	public void onResume() {
@@ -271,10 +271,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		super.onResume();
 //		setDebugData(DebugTextType.None, null);
 		
-		registerReceiver(updateVolumeReceiver, new IntentFilter(android.bluetooth.BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
+//		registerReceiver(updateVolumeReceiver, new IntentFilter(android.bluetooth.BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
 		
-		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-		audioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(), UpdateVolumeReceiver.class.getName()));
+//		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+//		audioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(), UpdateVolumeReceiver.class.getName()));
 	}
 	
 	@Override

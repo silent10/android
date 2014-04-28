@@ -5,7 +5,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="11"
+        android:minSdkVersion="13"
         android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -30,7 +30,7 @@
         
         <activity android:name="com.evature.android_demo.DemoPreferences"></activity>
         
-        <activity android:name="com.evaapis.EvaSpeechRecognitionActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name="com.evaapis.android.EvaSpeechRecognitionActivity" android:screenOrientation="portrait"></activity>
     
     </application>
 
