@@ -7,6 +7,6 @@ import android.content.Intent;
 public class UpdateVolumeReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		setVolumeIcon();
+//		setVolumeIcon();
 	}
 }
