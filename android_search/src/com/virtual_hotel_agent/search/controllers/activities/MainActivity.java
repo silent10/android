@@ -29,12 +29,9 @@ import org.acra.ErrorReporter;
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
@@ -108,6 +105,8 @@ import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
+import com.virtual_hotel_agent.search.util.VolumeUtil;
+import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
 import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.fragments.BookingFragement;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
@@ -123,6 +122,7 @@ import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
 public class MainActivity extends RoboSherlockFragmentActivity implements 
 													EvaSearchReplyListener,
+													VolumeListener,
 													OnSharedPreferenceChangeListener {
 
 	private static final String ITEMS_IN_SESSION = "items_in_session";
@@ -259,10 +259,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	@Override
 	public void onStop() {
 	    super.onStop();
+	    cancelBackgroundThreads();
 	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
 	}
 	
-	//private BroadcastReceiver updateVolumeReceiver = new UpdateVolumeReceiver();
 	
 	@Override 
 	public void onResume() {
@@ -271,17 +271,15 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		super.onResume();
 //		setDebugData(DebugTextType.None, null);
 		
-//		registerReceiver(updateVolumeReceiver, new IntentFilter(android.bluetooth.BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
-		
-//		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-//		audioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(), UpdateVolumeReceiver.class.getName()));
+		VolumeUtil.register(this, this);
 	}
 	
 	@Override
 	public void onPause() {
 		Log.d(TAG, "onPause()");
-		cancelBackgroundThreads();
 		VHAApplication.EVA.onPause();
+		
+		VolumeUtil.unregister(this);
 		super.onPause();
 	}
 	
@@ -654,35 +652,19 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	
 
 	private void setVolumeIcon() {
-		AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-		int volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-		int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		Log.i(TAG, "Current volume :"+volume+" out of "+maxVolume);
-		
 		if (soundControlMenuItem == null) {
 			return;
 		}
-		
-		boolean isTooLow = volume <= maxVolume / 4;
-
-		if (audioManager.isBluetoothA2dpOn()) {
-			Log.i(TAG, "Bluetooth");
-			if (isTooLow) {
-				soundControlMenuItem.setIcon(R.drawable.bluetooth_warning_icon);
-			}
-			else {
-				soundControlMenuItem.setIcon(R.drawable.bluetooth_icon);
-			}
-		} else { //if (audioManager.isSpeakerphoneOn()) {
-			Log.i(TAG, "NOT Bluetooth");
-			if (isTooLow) {
-				soundControlMenuItem.setIcon(R.drawable.speaker_warning_icon);
-			}
-			else {
-				soundControlMenuItem.setIcon(R.drawable.speaker_icon);
-			}
-		} 
+		VolumeUtil.checkVolume(this);
+		soundControlMenuItem.setIcon(VolumeUtil.getVolumeIcon());
 	}
+	
+
+	@Override
+	public void onVolumeChange() {
+		setVolumeIcon();
+	}
+
 
 
 
@@ -701,6 +683,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 //			Bundle a_bundle = new Bundle(); // Lets send some data to the preferences activity
 		//	a_bundle.putStringArrayList("mLanguages", (ArrayList<String>) mSpeechRecognition.getmGoogleLanguages());
 //			intent.putExtras(a_bundle);
+			startActivity(intent);
+			return true;
+		case R.id.audio:
+			intent = new Intent(this, VolumeSettingsDialog.class);
 			startActivity(intent);
 			return true;
 		case R.id.faq:
@@ -1760,7 +1746,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	public void onEventToggleMainButtons( @Observes ToggleMainButtonsEvent event) {
 		mainView.toggleMainButtons(event.showMainButtons);
 	}
-		
+	
 	private void startRoomSearch(long hotelId) {
 		if (mRoomUpdater != null) {
 			if (false == mRoomUpdater.cancel(true)) {
@@ -1808,6 +1794,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 //			}
 //		}
 //	}
+
 
 
 	

@@ -146,10 +146,14 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			holder = new RowHolder();
 			holder.label = (TextView) row.findViewById(R.id.label);
 			row.setTag(R.id.chat_row_holder, holder);
+			if (holder.label == null)
+				VHAApplication.logError(TAG, "No label in Row #1 ?");
 		}
 		TextView label = holder.label;
 		if (label == null) {
 			VHAApplication.logError(TAG, "No label in Row?");
+			row.setTag(chatItem);
+			return row;
 		}
 		else {
 			label.setText(chatItem.getChat());
