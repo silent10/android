@@ -63,7 +63,7 @@ public class BugReportDialog extends Activity implements
 
 		AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 		dialogBuilder.setTitle(R.string.bugreport_dialog_title);
-		dialogBuilder.setIcon(android.R.drawable.ic_dialog_info);
+		dialogBuilder.setIconAttribute(android.R.attr.alertDialogIcon);
 		dialogBuilder.setView(buildCustomView(savedInstanceState));
 		dialogBuilder.setPositiveButton(R.string._ok, this);
 		dialogBuilder.setNegativeButton(R.string.cancel, this);

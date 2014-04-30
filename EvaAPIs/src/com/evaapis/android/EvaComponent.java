@@ -276,7 +276,13 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 					speechResultOK(evaJson, bundle, voiceActivityCookie);
 				}
 				else if (resultCode == Activity.RESULT_CANCELED) {
-					String message = data.getStringExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE);
+					String message;
+					if (data == null) {
+						message = "Canceled";
+					}
+					else {
+						message = data.getStringExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE);
+					}
 					speechResultError(message, voiceActivityCookie);
 				}
 				voiceActivityCookie = null;

@@ -170,19 +170,23 @@ public class EvaVoiceClient {
 		}
 		
 		String host = mConfig.vproxyHost.toLowerCase();
-		host = host.replaceFirst("^http[s]?://", "");
+		if (host.startsWith("http") == false) {
+			host = "https://"+host;
+		}
 		int port = -1;
+		String protocol = "https";
 		try {
-			URL aURL = new URL("https://"+host);
+			URL aURL = new URL(host);
 			port = aURL.getPort();
 			host = aURL.getHost();
+			protocol = aURL.getProtocol();
 		}catch (MalformedURLException e) {
 		}
 		if (port == -1) {
 			port = PORT;
 		}
 
-		URI uri = URIUtils.createURI("https", host, port, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
+		URI uri = URIUtils.createURI(protocol, host, port, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
 		return uri;
 	}
 

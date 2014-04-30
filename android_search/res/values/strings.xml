@@ -131,4 +131,7 @@
     <string name="credit_card_type_">Credit card type:</string>
     <string name="delete_utterance_button">Delete button</string>
     <string name="audio_control">Audio Control</string>
+    <string name="low_volume_warning">Our experience shows that users with low volume do not notice when the they are being asked a question by the Virtual Hotel Agent, eg. being asked about missing stay duration or check in date.</string>
+    <string name="low_volume_header">Your volume is too low!</string>
+    <string name="volume_">Volume:</string>
 </resources>
