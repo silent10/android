@@ -1,18 +1,12 @@
-/*****
- * BugReport Dialog - based on ACRA's Crash Report Dialog  (org.acra.CrashReportDialog)
- */
 package com.virtual_hotel_agent.search.controllers.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -26,16 +20,18 @@ public class VolumeSettingsDialog extends Activity
 		VolumeListener,
 		DialogInterface.OnDismissListener,
 		DialogInterface.OnClickListener,
-		OnSeekBarChangeListener
+		OnSeekBarChangeListener//,
+//		OnCheckedChangeListener
 {
 	protected static final String TAG = "VolumeSettingsDialog";
-	AlertDialog mDialog;
+	private AlertDialog mDialog;
 	private View volumeWarning;
 	private ImageView volumeWarningIcon;
 	private SeekBar volumeSeekBar;
-	private RadioButton bluetoothOption;
 	private ImageView volumeIcon;
-	private RadioButton headphonesOption;
+//	private RadioButton bluetoothOption;
+//	private RadioButton headphonesOption;
+//	private RadioButton speakerOption;
 
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +42,17 @@ public class VolumeSettingsDialog extends Activity
 		
 		View volumeSettingsView = View.inflate(this, R.layout.volume_settings_dialog, null);
 		volumeSeekBar = (SeekBar) volumeSettingsView.findViewById(R.id.seekBar_volume);
-		bluetoothOption = (RadioButton) volumeSettingsView.findViewById(R.id.radioButton_bluetooth);
-		headphonesOption = (RadioButton) volumeSettingsView.findViewById(R.id.radioButton_headphones);
+		
+//		bluetoothOption = (RadioButton) volumeSettingsView.findViewById(R.id.radioButton_bluetooth);
+//		headphonesOption = (RadioButton) volumeSettingsView.findViewById(R.id.radioButton_headphones);
+//		speakerOption = (RadioButton) volumeSettingsView.findViewById(R.id.radioButton_speaker);
+//		RadioGroup group = (RadioGroup) volumeSettingsView.findViewById(R.id.radioGroup_audio);
+//		group.setOnCheckedChangeListener(this);
+		
 		volumeIcon = (ImageView) volumeSettingsView.findViewById(R.id.volume_icon);
 		
-		BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		bluetoothOption.setEnabled(bluetoothAdapter != null && bluetoothAdapter.isEnabled());
+//		BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//		bluetoothOption.setEnabled(bluetoothAdapter != null && bluetoothAdapter.isEnabled());
 
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -113,12 +114,24 @@ public class VolumeSettingsDialog extends Activity
 			volumeWarning.setVisibility(View.GONE);
 		}
 		
-		bluetoothOption.setSelected(VolumeUtil.isBluetooth());
-		
-		if (VolumeUtil.isHeadphone()) {
-			headphonesOption.setEnabled(true);
-			headphonesOption.setChecked(true);
-		}
+//		if (VolumeUtil.isBluetoothEnabled()) {
+//			bluetoothOption.setEnabled(true);
+//			if (VolumeUtil.isBluetoothChosen()) {
+//				bluetoothOption.setChecked(true);
+//			}
+//		}
+//		
+//		
+//		if (VolumeUtil.isHeadphoneEnabled()) {
+//			headphonesOption.setEnabled(true);
+//			speakerOption.setEnabled(false);
+//			if (VolumeUtil.isHeadphoneChosen()) {
+//				headphonesOption.setChecked(true);
+//			}
+//		}
+//		else {
+//			speakerOption.setEnabled(true);
+//		}
 		
 		volumeIcon.setImageResource(VolumeUtil.getVolumeIconNoWarning());
 	}
@@ -141,5 +154,18 @@ public class VolumeSettingsDialog extends Activity
 		VolumeUtil.checkVolume(this);
 		updateView();
 	}
+//
+//	@Override
+//	public void onCheckedChanged(RadioGroup group, int checkedId) {
+//		if (speakerOption.isChecked()) {
+//			VolumeUtil.setAudioToSpeaker(this);
+//		}
+//		else if (headphonesOption.isChecked()) {
+//			VolumeUtil.setAudioToHeadphones(this);
+//		}
+//		else if (bluetoothOption.isChecked()) {
+//			VolumeUtil.setAudioToBluetooth(this);
+//		}
+//	}
 
 }

@@ -293,7 +293,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		eva.onCreate(savedInstanceState);
 		super.onCreate(savedInstanceState);
 		
-		setVolumeControlStream(AudioManager.STREAM_MUSIC); // TODO: move to EvaComponent?
+		setVolumeControlStream(VolumeUtil.currentStream); // TODO: move to EvaComponent?
 		speechSearch = new EvaSpeechComponent(eva);
 		setContentView(R.layout.new_main);
 		

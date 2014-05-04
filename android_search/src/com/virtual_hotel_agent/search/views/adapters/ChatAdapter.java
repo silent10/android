@@ -145,9 +145,15 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		if (holder == null) {
 			holder = new RowHolder();
 			holder.label = (TextView) row.findViewById(R.id.label);
-			row.setTag(R.id.chat_row_holder, holder);
-			if (holder.label == null)
+			if (holder.label == null) {
+				// rare bug that is hard to reproduce - the row is a recycled filler view but isn't at the last position
 				VHAApplication.logError(TAG, "No label in Row #1 ?");
+				if (convertView != null) {
+					// try again without view recycling
+					return getView(position, null, parent);
+				}
+			}
+			row.setTag(R.id.chat_row_holder, holder);
 		}
 		TextView label = holder.label;
 		if (label == null) {

@@ -1,5 +1,6 @@
 package com.virtual_hotel_agent.search.util;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +16,18 @@ public class VolumeUtil {
 
 	private static final String TAG = "VolumeUtil";
 	
-	private static boolean _isBluetooth = false;
-	private static boolean _isHeadphone = false;
+	private static boolean _isBluetoothEnabled = false;
+	private static boolean _isHeadphoneEnabled = false;
 	private static boolean _isSpeaker = false;
+	
+	public enum AudioDevice {
+		Speaker,
+		Bluetooth,
+		Headphone
+	};
+	
+	public static AudioDevice routedToDevice;
+	private static boolean forcedAudio = false;
 	
 	public static int volume;
 	public static int maxVolume;
@@ -26,30 +36,40 @@ public class VolumeUtil {
 		void onVolumeChange();
 	}
 	
+	public static int currentStream = AudioManager.STREAM_MUSIC;
 	private static VolumeListener listener = null;
 
-	public static void checkVolume(Context context) {
+	public static void checkVolume(Activity context) {
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-		maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		Log.i(TAG, "Current volume :"+volume+" out of "+maxVolume);
-		
-		_isBluetooth = audioManager.isBluetoothA2dpOn();
-		
-		// if (audioManager.isSpeakerphoneOn()) {
-		_isSpeaker = !_isBluetooth && !_isHeadphone;
+		volume = audioManager.getStreamVolume(currentStream);
+		maxVolume = audioManager.getStreamMaxVolume(currentStream);
+		Log.i(TAG, "Current volume :"+volume+" out of "+maxVolume+ "  mode = "+audioManager.getMode()+ " stream = "+currentStream);
+	 	
+		_isBluetoothEnabled = audioManager.isBluetoothA2dpOn();
+
+		if (!forcedAudio) {
+			if (_isBluetoothEnabled) {
+				routedToDevice = AudioDevice.Bluetooth;
+			}
+			else if (_isHeadphoneEnabled) {
+				routedToDevice = AudioDevice.Headphone;
+			}
+			else {
+				routedToDevice = AudioDevice.Speaker;
+			}
+		}
 	}
 
-	public static boolean isBluetooth() {
-		return _isBluetooth;
+	public static boolean isBluetoothEnabled() {
+		return _isBluetoothEnabled;
 	}
 	
-	public static boolean isHeadphone() {
-		return _isHeadphone;
+	public static boolean isHeadphoneEnabled() {
+		return _isHeadphoneEnabled;
 	}
 	
 	public static void setIsHeadphone(boolean b) {
-		_isHeadphone = b;
+		_isHeadphoneEnabled = b;
 	}
 
 	public static boolean isSpeaker() {
@@ -57,16 +77,16 @@ public class VolumeUtil {
 	}
 
 	public static boolean isLowVolume() {
-		if (_isBluetooth || _isHeadphone) {
-			return volume <= maxVolume / 4;  // earpiece should be at least 25%
+		if (routedToDevice == AudioDevice.Speaker) {
+			return volume <= maxVolume / 2;  // speaker should be at least 50%
 		}
 		else {
-			return volume <= maxVolume / 2;  // speaker should be at least 50%
+			return volume <= maxVolume / 4;  // earpiece should be at least 25%
 		}
 	}
 
 	public static int getVolumeIcon() {
-		if (VolumeUtil.isBluetooth()) {
+		if (routedToDevice == AudioDevice.Bluetooth) {
 			Log.i(TAG, "Bluetooth");
 			if (VolumeUtil.isLowVolume()) {  
 				return R.drawable.bluetooth_warning_icon;
@@ -74,7 +94,7 @@ public class VolumeUtil {
 			else {
 				return R.drawable.bluetooth_icon;
 			}
-		} else if (VolumeUtil.isHeadphone()) {
+		} else if (routedToDevice == AudioDevice.Headphone) {
 			Log.i(TAG, "Headphones");
 			if (VolumeUtil.isLowVolume()) {
 				return R.drawable.headphones_warning_icon;
@@ -95,9 +115,9 @@ public class VolumeUtil {
 	}
 	
 	public static int getVolumeIconNoWarning() {
-		if (VolumeUtil.isBluetooth()) {
+		if (routedToDevice == AudioDevice.Bluetooth) {
 			return R.drawable.bluetooth_icon;
-		} else if (VolumeUtil.isHeadphone()) {
+		} else if (routedToDevice == AudioDevice.Headphone) {
 			return R.drawable.headphones_icon;
 		}
 		else { 
@@ -105,10 +125,10 @@ public class VolumeUtil {
 		}
 	}
 
-	public static void setVolume(Context context, int volume) {
+	public static void setVolume(Activity context, int volume) {
 		VolumeUtil.volume = volume;
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-		audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
+		audioManager.setStreamVolume(currentStream, volume, 0);
 		
 	}
 
@@ -117,8 +137,9 @@ public class VolumeUtil {
 		public void onReceive(Context context, Intent intent) {
 			int state = intent.getIntExtra("state", -1);
 			Log.d(TAG, "Headset status changed hasHeadphone: "+state);
-			VolumeUtil._isHeadphone = state == 1;
-			listener.onVolumeChange();
+			VolumeUtil._isHeadphoneEnabled = state == 1;
+			if (listener != null)
+				listener.onVolumeChange();
 		}
 	};
 	
@@ -126,7 +147,8 @@ public class VolumeUtil {
 		@Override
 	    public void onChange(boolean selfChange) {
 			Log.d(TAG, "volume changed selfChange: "+selfChange);
-			listener.onVolumeChange();
+			if (listener != null)
+				listener.onVolumeChange();
 		}
 	};
 	
@@ -134,12 +156,14 @@ public class VolumeUtil {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(TAG, "Bluetooth status changed");
-			listener.onVolumeChange();
+			if (listener != null)
+				listener.onVolumeChange();
 		}
 	};
 
-	public static void register(Context context, VolumeListener listener) {
+	public static void register(Activity context, VolumeListener listener) {
 		VolumeUtil.listener = listener;
+		context.setVolumeControlStream(VolumeUtil.currentStream);
 		context.registerReceiver(updateBluetoothReceiver, new IntentFilter(android.bluetooth.BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED));
 		context.registerReceiver(updateHeadsetReceiver, new IntentFilter(Intent.ACTION_HEADSET_PLUG));
 		context.getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, updateVolumeContent );
@@ -151,6 +175,74 @@ public class VolumeUtil {
 		context.unregisterReceiver(updateHeadsetReceiver);
 		context.getApplicationContext().getContentResolver().unregisterContentObserver(updateVolumeContent);
 	}
+	
+	// I failed to force audio to speaker/headphones/bluetooth in a bug free way!  Android is making it ridiculously difficult !
+//
+//	public  static void setAudioToSpeaker(Activity context) {
+//		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+//		audioManager.setMode(AudioManager.MODE_NORMAL);
+//		audioManager.stopBluetoothSco();
+//		audioManager.setBluetoothScoOn(false);
+//		audioManager.setSpeakerphoneOn(true);
+//		context.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//		currentStream = AudioManager.STREAM_MUSIC;
+//		routedToDevice = AudioDevice.Speaker;
+//		forcedAudio = true;
+//		Log.d(TAG, "Force Speaker");
+//	    checkVolume(context);
+//	    if (listener != null) {
+//	    	listener.onVolumeChange();
+//	    }
+//	}
+//
+//	public static void setAudioToHeadphones(Activity context) {
+//		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+//		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+//		audioManager.stopBluetoothSco();
+//		audioManager.setBluetoothScoOn(false);
+//		audioManager.setSpeakerphoneOn(false);
+//		context.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+//		currentStream = AudioManager.STREAM_VOICE_CALL;
+//		routedToDevice = AudioDevice.Headphone;
+//		forcedAudio = true;
+//		Log.d(TAG, "Force to Earpiece");
+//	    checkVolume(context);
+//	    if (listener != null) {
+//	    	listener.onVolumeChange();
+//	    }
+//	}
+//	
+//	public static void setAudioToBluetooth(Activity context) {
+//		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+//		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+//		audioManager.startBluetoothSco();
+//		audioManager.setBluetoothScoOn(true);
+//		context.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+//		currentStream = AudioManager.STREAM_VOICE_CALL;
+//		routedToDevice = AudioDevice.Bluetooth;
+//		forcedAudio = true;
+//	    Log.d(TAG, "Force to Bluetooth");
+//	    checkVolume(context);
+//	    if (listener != null) {
+//	    	listener.onVolumeChange();
+//	    }
+//	}
+
+	public static boolean isHeadphoneChosen() {
+		if (forcedAudio) {
+			return routedToDevice == AudioDevice.Headphone;
+		}
+		// no forced audio
+		return isHeadphoneEnabled();
+	}
+
+	public static boolean isBluetoothChosen() {
+		if (forcedAudio) {
+			return routedToDevice == AudioDevice.Bluetooth;
+		}
+		return isBluetoothEnabled();
+	}
+	
 	
 	
 }
