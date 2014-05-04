@@ -16,8 +16,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<!--     <uses-permission android:name="android.permission.READ_LOGS" /> -->
+<!--     <uses-permission android:name="android.permission.READ_LOGS" />    ACRA uses it to send logs - but 1) don't want to scare users, 2) app logs are disabled in release, 3) traceback is enough -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<!--     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />  modify audio routing - commented out GUI -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
