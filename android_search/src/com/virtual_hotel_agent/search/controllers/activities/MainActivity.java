@@ -28,6 +28,8 @@ import org.acra.ErrorReporter;
 
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -37,7 +39,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Typeface;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -55,6 +56,7 @@ import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -66,6 +68,11 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.request.CommonParameters;
+import com.espian.showcaseview.OnShowcaseEventListener;
+import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.anim.AnimationUtils;
+import com.espian.showcaseview.anim.AnimationUtils.AnimationEndListener;
+import com.espian.showcaseview.targets.ViewTarget;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
@@ -83,6 +90,7 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.nineoldandroids.view.ViewHelper;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -406,8 +414,6 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		// data.putExtras(a_bundle);
 		// onActivityResult(VOICE_RECOGNITION_REQUEST_CODE, RESULT_OK, data);
 		
-		// stop the flash-screen being in memory
-		findViewById(R.id.the_main_layout).setBackgroundResource(R.drawable.hotel_background);
 	}
 		
 	@Override
@@ -676,6 +682,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		case android.R.id.home:
 			mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 			return true;
+
 		case R.id.settings: // Did the user select "settings"?
 			intent = new Intent();
 			// Then set the activity class that needs to be launched/started.
@@ -685,10 +692,16 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 //			intent.putExtras(a_bundle);
 			startActivity(intent);
 			return true;
+
+		case R.id.tutorial:
+			showTutorial();
+	        return true;
+	        
 		case R.id.audio:
 			intent = new Intent(this, VolumeSettingsDialog.class);
 			startActivity(intent);
 			return true;
+		
 		case R.id.faq:
 			String faqUrl = "http://www.travelnow.com/templates/352395/faq";
 			Uri uri = Uri.parse(Html.fromHtml(faqUrl).toString());
@@ -748,6 +761,71 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			return super.onOptionsItemSelected(item);
 		}
 	}
+
+	private void showTutorial() {
+        ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+        co.block = true;
+        ViewTarget target = new ViewTarget(R.id.search_button, 
+        		this);
+        
+		final ShowcaseView sv = ShowcaseView.insertShowcaseView(target, this, "Record Button!", 
+				"Tap the microphone button to start recording. Go ahead, try tapping the microphone and then say 'hotel in New York'", co);
+
+		final View hand = sv.getHand();
+		hand.setPivotX(0);
+		hand.setPivotY(0);
+		hand.setRotation(-45);
+		int y = target.getPoint().y;
+		int x = target.getPoint().x;
+		
+        AnimationUtils.createMovementAnimation(hand, 0,
+                0,
+                x+10, y-20, x+14, y+5,
+                new AnimationEndListener() {
+                    @Override
+                    public void onAnimationEnd() {
+                        sv.removeView(hand);
+                    }
+                }).start();
+        
+        sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
+			
+			@Override
+			public void onShowcaseViewShow(ShowcaseView showcaseView) {
+				AlphaAnimation anim = new AlphaAnimation(1f, 0.1f);
+				anim.setDuration(500);
+				anim.setRepeatCount(0);
+				anim.setFillAfter(true);   
+				mTabs.setAnimation(anim);
+				mViewPager.startAnimation(anim);
+				ViewHelper.setAlpha(hand, 1f);
+				Log.i("Showcase", "Show");
+			}
+			
+			@Override
+			public void onShowcaseViewHide(ShowcaseView showcaseView) {
+				AlphaAnimation anim = new AlphaAnimation(0.1f, 1f);
+				anim.setFillAfter(true);
+				anim.setRepeatCount(0);
+				anim.setDuration(200);
+				mTabs.setAnimation(anim);
+				mViewPager.startAnimation(anim);
+
+				Log.i("Showcase", "Hide");
+			}
+			
+			@Override
+			public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
+				Log.i("Showcase", "DidHide");
+			}
+		});
+        
+        sv.show();
+		
+	}
+
+
+
 
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		// Save UI state changes to the savedInstanceState.
