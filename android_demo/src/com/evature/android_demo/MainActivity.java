@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.evaapis.android.EvaBaseActivity;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
+import com.evature.util.Log;
 
 public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	
@@ -47,6 +48,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
 		eva.registerPreferenceListener();
 
+		Log.DEBUG = BuildConfig.DEBUG;
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
