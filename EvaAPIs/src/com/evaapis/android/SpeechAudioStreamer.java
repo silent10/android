@@ -92,6 +92,9 @@ public class SpeechAudioStreamer {
 			mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 					AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 					bufferSize);
+			if (mRecorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
+				Log.e(TAG, "Failed to initalize recorder");
+			}
 		}
 	}
 	
@@ -318,8 +321,12 @@ public class SpeechAudioStreamer {
 			} catch (Exception ex) {
 				Log.e(TAG, "Exception in microphone producer", ex);
 			} finally {
-				mRecorder.stop();
-				mRecorder.release();
+				if (mRecorder.getState() == AudioRecord.STATE_INITIALIZED) {
+					mRecorder.stop();
+				}
+				// mRecorder is initalized only once!
+//				mRecorder.release();
+//				mRecorder = null;
 				totalTimeRecording = (System.nanoTime() - t0) / 1000000;
 			}
 		}

@@ -1,5 +1,7 @@
 package com.evaapis.android;
 
+import java.io.IOException;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -127,10 +129,22 @@ public class EvaSpeechComponent {
 
 			mVoiceClient.stopTransfer();
 
-			try {
-				mVoiceClient.startVoiceRequest();
-			} catch (Exception e) {
-				Log.e(TAG, "Exception starting voice request", e);
+			if (isCancelled() == false) {
+				try {
+					mVoiceClient.startVoiceRequest();
+				} catch (Exception e) {
+					if (e instanceof IOException) {
+						IOException ioe = (IOException) e;
+						if (ioe.getMessage().equals("Request aborted")) {
+							Log.w(TAG, "Request was aborted");
+							return null;
+						}
+					}
+					Log.e(TAG, "Exception starting voice request", e);
+				}
+			}
+			else {
+				Log.w(TAG, "Request was canceled");
 			}
 			return null;
 		}

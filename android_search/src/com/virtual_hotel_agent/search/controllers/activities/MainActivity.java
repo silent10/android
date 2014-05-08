@@ -28,8 +28,6 @@ import org.acra.ErrorReporter;
 
 import roboguice.event.Observes;
 import roboguice.inject.InjectView;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,7 +54,6 @@ import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -68,11 +65,6 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.request.CommonParameters;
-import com.espian.showcaseview.OnShowcaseEventListener;
-import com.espian.showcaseview.ShowcaseView;
-import com.espian.showcaseview.anim.AnimationUtils;
-import com.espian.showcaseview.anim.AnimationUtils.AnimationEndListener;
-import com.espian.showcaseview.targets.ViewTarget;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
@@ -90,7 +82,6 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.nineoldandroids.view.ViewHelper;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -103,6 +94,7 @@ import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
 import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
+import com.virtual_hotel_agent.search.controllers.tutorial.TutorialController;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
@@ -419,14 +411,33 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	@Override
 	public void onBackPressed() {
 	   Log.d(TAG, "onBackPressed Called");
+
+	   // cancel recording if during recording
+	   if (speechSearch.isInSpeechRecognition()) {
+		   Log.i(TAG, "Canceling recording");
+		   speechSearch.cancel();
+		   mainView.deactivateSearchButton();
+		   mainView.hideStatus();
+		   mainView.hideSpeechWave();
+		   TutorialController.canceledRecording(this);
+		   return;
+	   }
+	   
+	   if (TutorialController.onBackPressed(this)) {
+		   return;
+	   }
+	   
 	   int chatInd = mTabTitles.indexOf(mChatTabName);
 	   if (mTabs.getCurrentPage() == chatInd) {
+		   // close edit text if chat text is being edited
 		   boolean handled = getChatFragment().handleBackPressed();
 		   if (!handled) {
+			   // nothing handled - close application
 			   super.onBackPressed();
 		   }
 	   }
 	   else {
+		   // switch to Chat tab if not there 
 		   mTabs.setCurrentItem(chatInd);
 	   }
 	}
@@ -694,7 +705,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			return true;
 
 		case R.id.tutorial:
-			showTutorial();
+			TutorialController.showRecordButtonTutorial(this, mViewPager, mTabs);
 	        return true;
 	        
 		case R.id.audio:
@@ -762,67 +773,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		}
 	}
 
-	private void showTutorial() {
-        ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-        co.block = true;
-        ViewTarget target = new ViewTarget(R.id.search_button, 
-        		this);
-        
-		final ShowcaseView sv = ShowcaseView.insertShowcaseView(target, this, "Record Button!", 
-				"Tap the microphone button to start recording. Go ahead, try tapping the microphone and then say 'hotel in New York'", co);
-
-		final View hand = sv.getHand();
-		hand.setPivotX(0);
-		hand.setPivotY(0);
-		hand.setRotation(-45);
-		int y = target.getPoint().y;
-		int x = target.getPoint().x;
-		
-        AnimationUtils.createMovementAnimation(hand, 0,
-                0,
-                x+10, y-20, x+14, y+5,
-                new AnimationEndListener() {
-                    @Override
-                    public void onAnimationEnd() {
-                        sv.removeView(hand);
-                    }
-                }).start();
-        
-        sv.setOnShowcaseEventListener(new OnShowcaseEventListener() {
-			
-			@Override
-			public void onShowcaseViewShow(ShowcaseView showcaseView) {
-				AlphaAnimation anim = new AlphaAnimation(1f, 0.1f);
-				anim.setDuration(500);
-				anim.setRepeatCount(0);
-				anim.setFillAfter(true);   
-				mTabs.setAnimation(anim);
-				mViewPager.startAnimation(anim);
-				ViewHelper.setAlpha(hand, 1f);
-				Log.i("Showcase", "Show");
-			}
-			
-			@Override
-			public void onShowcaseViewHide(ShowcaseView showcaseView) {
-				AlphaAnimation anim = new AlphaAnimation(0.1f, 1f);
-				anim.setFillAfter(true);
-				anim.setRepeatCount(0);
-				anim.setDuration(200);
-				mTabs.setAnimation(anim);
-				mViewPager.startAnimation(anim);
-
-				Log.i("Showcase", "Hide");
-			}
-			
-			@Override
-			public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
-				Log.i("Showcase", "DidHide");
-			}
-		});
-        
-        sv.show();
-		
-	}
+	
 
 
 
@@ -955,6 +906,8 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			return;
 		}
 		
+		TutorialController.onMicrophonePressed(this);
+		
 		storeVoiceResultInChatItem = chatItem;
 		
 		VHAApplication.EVA.speak("");
@@ -1057,6 +1010,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			}
 		}
 		if (VOICE_COOKIE == cookie) {
+			TutorialController.onEvaReply(this, reply);
 			if (reply.errorMessage != null) {
 				mainView.flashBadSearchButton(2);
 				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();

@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import com.evaapis.android.EvaComponent;
 
 public class SettingsAPI {
-	// WTF WTF WTF???
 	public static String getCurrencyCode(Context context) {
 		if (context == null) {
 			return null;
