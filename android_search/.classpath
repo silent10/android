@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/EvaAPIs"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Library-ListViewAnimations"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/roboguice-sherlock"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/showcaseView-library"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/ViewPagerIndicator_library"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
