@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 
 import com.evature.util.Log;
 import com.google.inject.Inject;
+import com.nhaarman.listviewanimations.itemmanipulation.OnAnimEndCallback;
 import com.nhaarman.listviewanimations.itemmanipulation.OnDismissCallback;
 import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.R;
@@ -36,6 +38,7 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemModified;
 import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
+import com.virtual_hotel_agent.search.controllers.tutorial.TutorialController;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
@@ -84,7 +87,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 //		mChatListModel.loadInstanceState(savedInstanceState);
 		mChatAdapter = new ChatAdapter(this, R.layout.row_vha_chat, R.id.label, mChatListModel);
 
-		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback());
+		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback(), new MyOnAnimEndCallback());
 		mAnimAdapter.setAbsListView(mChatListView);
 		mChatListView.setAdapter(mAnimAdapter);
         
@@ -108,6 +111,20 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
             }
         }
     }
+	
+	private class MyOnAnimEndCallback implements OnAnimEndCallback {
+
+		@Override
+		public void onAnimEnd(View row) {
+			ChatItem chatItem = (ChatItem) row.getTag();
+			if (chatItem == null) {
+				Log.w(TAG, "unexpected null chatItem");
+			}
+			else {
+				TutorialController.onAddChatItem(chatItem, row, ChatFragment.this);
+			}
+		}
+	}
 
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {
@@ -356,6 +373,9 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		closeEditChatItem(false);
 	}
 
+	public View getViewForChatItem(ChatItem chatItem) {
+		return mChatListView.findViewWithTag(chatItem);
+	}
 	
 	/***
 	 * Close the chat-utterance that is being editted right now
@@ -386,8 +406,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		eventManager.fire(new ToggleMainButtonsEvent(true));
 		String preModifiedString = editedChatItem.getChat().toString();
 		if (isSubmitted) {
-			//View rowView = mChatListView.getChildAt(editedChatItemIndex - mChatListView.getFirstVisiblePosition() );
-			View rowView = mChatListView.findViewWithTag(editedChatItem);
+			View rowView = getViewForChatItem(editedChatItem);
 			if (rowView == null) {
 				VHAApplication.logError(TAG, "Unexpected edited row not found");
 				return;
@@ -501,6 +520,42 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		addChatItem(editChat);
 		editedChatItemIndex = mChatListModel.size()-1;
 
+	}
+
+	public void fadeOutOtherChat(ChatItem chatItem) {
+		AlphaAnimation animFadeOut = new AlphaAnimation(1f, 0.1f);
+		animFadeOut.setDuration(500);
+		animFadeOut.setRepeatCount(0);
+		animFadeOut.setFillAfter(true);
+
+		AlphaAnimation animFadeIn = new AlphaAnimation(0.1f, 1f);
+		animFadeIn.setFillAfter(true);
+		animFadeIn.setRepeatCount(0);
+		animFadeIn.setDuration(200);
+		
+		View viewToNotFade = getViewForChatItem(chatItem);
+		for (int i=0; i<mChatListView.getChildCount(); i++) {
+			View current = mChatListView.getChildAt(i);
+			if (current == viewToNotFade) {
+				current.startAnimation(animFadeIn);
+			}
+			else {
+				if (current.getTag() != null)
+					current.startAnimation(animFadeOut);
+			}
+		}
+	}
+	
+	public void fadeInAll() {
+		AlphaAnimation anim = new AlphaAnimation(0.1f, 1f);
+		anim.setFillAfter(true);
+		anim.setRepeatCount(0);
+		anim.setDuration(200);
+		for (int i=0; i<mChatListView.getChildCount(); i++) {
+			View current = mChatListView.getChildAt(i);
+			if (current.getTag() != null)
+				current.startAnimation(anim);
+		}
 	}
 	
 }

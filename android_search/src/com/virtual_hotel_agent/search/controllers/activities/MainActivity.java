@@ -108,6 +108,7 @@ import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.util.VolumeUtil;
 import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
 import com.virtual_hotel_agent.search.views.MainView;
+import com.virtual_hotel_agent.search.views.MainView.TabsPagerAdapter;
 import com.virtual_hotel_agent.search.views.fragments.BookingFragement;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
@@ -134,24 +135,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	private List<String> mTabTitles;
 	@Inject Injector injector;
 	
-	@InjectView(R.id.viewpager) private ViewPager mViewPager; 
-//	@InjectView(R.id.indicator) private TabPageIndicator mTabs;
-	@InjectView(R.id.indicator) private TitlePageIndicator mTabs;
 	//SearchVayantTask mSearchVayantTask;
 	//SearchTravelportTask mSearchTravelportTask;
-	TabsPagerAdapter mTabsAdapter;
 		
 	private boolean mIsNetworkingOk = false;
-
-	private String mChatTabName;
-//	private String mExamplesTabName;
-	private String mHotelsTabName;
-	private String mHotelTabName;
-	private String mRoomsTabName;
-	private String mBookingTabName;
-	private String mMapTabName;
-	private String mReservationsTabName;
-	private String mReviewsTabName;
 
 	static private HotelListDownloaderTask mSearchExpediaTask = null;
 	static private RoomsUpdaterTask mRoomUpdater = null;
@@ -309,22 +296,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			eva.setAppVersion("vha_unknown");
 		}
 		
-		mainView = new MainView(this);
 		
 		eva.setApiKey(SettingsAPI.getEvaKey(this));
 		eva.setSiteCode(SettingsAPI.getEvaSiteCode(this));
 		
-		mChatTabName = getString(R.string.CHAT);
-//		mExamplesTabName = getString(R.string.EXAMPLES);
-		//mDebugTabName = getString(R.string.DEBUG);
-		mHotelsTabName = getString(R.string.HOTELS);
-		mHotelTabName = getString(R.string.HOTEL);
-		mRoomsTabName = getString(R.string.ROOMS);
-		mBookingTabName = getString(R.string.BOOKING);
-		mReservationsTabName = getString(R.string.RESERVATIONS);
-		mMapTabName = getString(R.string.MAP);
-		mReviewsTabName = getString(R.string.REVIEWS);
-
 		CommonParameters.currencyCode = SettingsAPI.getCurrencyCode(this);
 		
 //		if (savedInstanceState != null  && MyApplication.FOUND_HOTELS.size() > 0) { // Restore state
@@ -333,50 +308,14 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 //			mTabTitles = savedInstanceState.getStringArrayList("mTabTitles");
 //		} else {
 //			Log.d(TAG, "no saved instance state");
-			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ mChatTabName));
+			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ getString(R.string.CHAT)));
 //		}
 		
-		mTabsAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+		mainView = new MainView(this, injector, mTabTitles);
+		TutorialController.mainView = mainView; // accessible to all tutorials
 		
 		clearChatList();
 
-		mViewPager.setAdapter(mTabsAdapter);
-		mTabs.setViewPager(mViewPager);
-		mViewPager.setOffscreenPageLimit(5);
-
-		mTabs.setOnPageChangeListener(new OnPageChangeListener() {
-			private boolean lastShown = true;
-			private boolean hidButtons = false;
-			
-			@Override
-			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-			}
-	
-			@Override
-			public void onPageSelected(int position) {
-				getActionBar().setDisplayHomeAsUpEnabled(position > 0);
-				if (position > 2) {
-					if (!hidButtons) {
-						// save last shown on first hiding of buttons
-						lastShown = mainView.areMainButtonsShown();
-					}
-					mainView.toggleMainButtons(false);
-					hidButtons = true;
-				}
-				else {
-					if (lastShown && hidButtons) {
-						mainView.toggleMainButtons(true);
-						hidButtons = false;
-						lastShown = true;
-					}
-				}
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-				
-			}
-		});
 	
 		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -394,8 +333,6 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setHomeButtonEnabled(true);
-		
-		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 		
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
@@ -427,226 +364,23 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		   return;
 	   }
 	   
-	   int chatInd = mTabTitles.indexOf(mChatTabName);
-	   if (mTabs.getCurrentPage() == chatInd) {
+	   int chatInd = mainView.getChatTabIndex();
+	   if (mainView.getCurrentPage() == chatInd) {
 		   // close edit text if chat text is being edited
-		   boolean handled = getChatFragment().handleBackPressed();
+		   boolean handled = mainView.getChatFragment().handleBackPressed();
 		   if (!handled) {
 			   // nothing handled - close application
+			   Log.i(TAG, "Back pressed, nothing to close - closing activity");
 			   super.onBackPressed();
 		   }
 	   }
 	   else {
 		   // switch to Chat tab if not there 
-		   mTabs.setCurrentItem(chatInd);
+		   mainView.setCurrentItem(chatInd);
 	   }
 	}
 	
 
-	public class TabsPagerAdapter  extends FragmentPagerAdapter /*implements ViewPager.OnPageChangeListener */ {
-		
-		//private final ViewPager mViewPager;
-		private final String TAG = TabsPagerAdapter.class.getSimpleName();
-		HotelsMapFragment mMapFragment;
-		HotelListFragment mHotelsListFragment;
-		HotelDetailFragment mHotelDetailFragment;
-		RoomsSelectFragement mRoomSelectFragment;
-		BookingFragement mBookingFragment;
-		ReservationDisplayFragment mReservationFragment;
-		ReviewsFragment mReviewsFragment;
-		ChatFragment mChatFragment;
-
-		public TabsPagerAdapter( FragmentManager fm) {
-			super(fm);
-			Log.i(TAG, "CTOR");
-			// optimization - create before needed
-			mChatFragment = injector.getInstance(ChatFragment.class); 
-			mMapFragment = injector.getInstance(HotelsMapFragment.class);
-			mHotelsListFragment = injector.getInstance(HotelListFragment.class);
-			mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
-			mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
-			mBookingFragment = injector.getInstance(BookingFragement.class);
-			mReviewsFragment = null;
-			mReservationFragment = null;
-		}
-		
-
-	    @Override
-	    public int getItemPosition(Object object){
-	        return POSITION_NONE;
-	    }
-				
-
-		@Override
-		public Fragment getItem(int position) {// Asks for the main fragment
-			Log.d(TAG, "getItem " + String.valueOf(position));
-			int size = mTabTitles.size();
-			if (position >= size) {
-				VHAApplication.logError(TAG, "No fragment made for Position "+position);
-				return null;
-			}
-			String tabTitle = mTabTitles.get(position);
-			if (tabTitle.equals(mChatTabName)) { // Main Chat window
-				Log.d(TAG, "Chat Fragment");
-				if (mChatFragment == null) {
-					mChatFragment = injector.getInstance(ChatFragment.class);
-				}
-				return mChatFragment;
-			}
-			else if (tabTitle.equals(mHotelsTabName)) { // Hotel list window
-				Log.i(TAG, "Hotels Fragment");
-				if (mHotelsListFragment == null) {
-					mHotelsListFragment = injector.getInstance(HotelListFragment.class);
-				}
-				return mHotelsListFragment;
-			}
-			else if (tabTitle.equals(mMapTabName)) { // Hotel list window
-				Log.i(TAG, "HotelsMap Fragment");
-				if (mMapFragment == null) {
-					mMapFragment = injector.getInstance(HotelsMapFragment.class);
-				}
-				return mMapFragment;
-			}
-			
-//			else if (mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
-//				Log.i(TAG, "Flights Fragment");
-//				return injector.getInstance(FlightsFragment.class);
-//			}
-			else if (tabTitle.equals(mHotelTabName)) { // Single hotel
-				Log.i(TAG, "starting hotel Fragment");
-				if (mHotelDetailFragment == null) {
-					mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
-				}
-				return mHotelDetailFragment;
-			}
-			else if (tabTitle.equals(mRoomsTabName)) {
-				Log.i(TAG, "starting Rooms Fragment");
-				if (mRoomSelectFragment == null) {
-					mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
-				}
-				return mRoomSelectFragment;
-			}
-			else if (tabTitle.equals(mBookingTabName)) {
-				Log.i(TAG, "starting booking fragment");
-				if (mBookingFragment == null) {
-					mBookingFragment = injector.getInstance(BookingFragement.class);
-				}
-				return mBookingFragment;
-			}
-			else if (tabTitle.equals(mReservationsTabName)) {
-				Log.i(TAG, "starting reservation fragment");
-				if (mReservationFragment == null) {
-					mReservationFragment = injector.getInstance(ReservationDisplayFragment.class);
-				}
-				return mReservationFragment;
-			}
-			else if (tabTitle.equals(mReviewsTabName)) {
-				Log.i(TAG, "Starting reviews fragment");
-				if (mReviewsFragment == null) {
-					mReviewsFragment = injector.getInstance(ReviewsFragment.class);
-				}
-				return mReviewsFragment;
-			}
-//			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
-//				Log.i(TAG, "Trains Fragment");
-//				return injector.getInstance(TrainsFragment.class);
-//			}
-
-			VHAApplication.logError(TAG, "No fragment made for Position "+position+(position< size ? " titled "+tabTitle : ""));
-			return null;
-		}
-
-		@Override
-		public int getCount() {
-			return mTabTitles.size();
-		}
-		
-		@Override
-        public CharSequence getPageTitle(int position) {
-            return mTabTitles.get(position % mTabTitles.size());
-        }
-	 
-//		@Override
-//		public void onPageScrollStateChanged(int arg0) {
-//		}
-
-//		@Override
-//		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//			if (positionOffset > 0) {
-//				lastShown = position+1;
-//			}
-//			else {
-//				lastShown = position;
-//			}
-//		}
-//
-//		@Override
-//		public void onPageSelected(int position) {
-//			lastShown = position;
-//		}
-//		
-		@Override
-		public void notifyDataSetChanged() {
-			mTabs.notifyDataSetChanged();
-			super.notifyDataSetChanged();
-		}
-		
-//		int lastShown = -1;
-
-		// Internal helper function
-		public void showTab(int position) {
-			Log.d(TAG, "showTab "+position);
-//			lastShown = position;
-			mViewPager.setCurrentItem(position, true);
-//			mTabs.onPageSelected(position);
-//			this.notifyDataSetChanged();
-		}
-		
-		public void showTab(String name) {
-			int index = mTabTitles.indexOf(name);
-			if (index == -1) {
-				addTab(name);
-			}
-			else {
-				showTab(index);
-			}
-		}
-
-		public void addTab(String name) { // Dynamic tabs add to end
-			Log.d(TAG, "addTab "+name);
-//			mTabs.setAdapter(null);
-			// ??? mViewPager.setAdapter(null);
-			mTabTitles.add(name);
-			notifyDataSetChanged();
-		}
-		
-		public void addTab(String name, int position) { // Dynamic tabs add to certain position
-			Log.d(TAG, "addTab "+name);
-//			mTabs.setAdapter(null);
-			// ??? mViewPager.setAdapter(null);
-			mTabTitles.add(position, name);
-			notifyDataSetChanged();
-		}
-		
-
-		
-		public void removeTab(String tabName) {
-			int ind = mTabTitles.indexOf(tabName);
-			if (ind != -1)
-				removeTab(ind);
-		}
-		
-		public void removeTab(int tabIndex)
-		{
-			Log.d(TAG, "removeTab "+tabIndex);
-//			mTabs.setAdapter(null);
-			// ??? mViewPager.setAdapter(null);
-			mTabTitles.remove(tabIndex);
-			notifyDataSetChanged();
-		}
-
-	}
-	
 	
 //	@Override
 //	public boolean onPrepareOptionsMenu (Menu menu) {
@@ -691,7 +425,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		Intent intent;
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
+			mainView.setCurrentItem(mainView.getChatTabIndex());
 			return true;
 
 		case R.id.settings: // Did the user select "settings"?
@@ -705,7 +439,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			return true;
 
 		case R.id.tutorial:
-			TutorialController.showRecordButtonTutorial(this, mViewPager, mTabs);
+			TutorialController.showRecordButtonTutorial(this);
 	        return true;
 	        
 		case R.id.audio:
@@ -806,7 +540,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	
 	private void clearChatList() {
 		if (mChatListModel.size() > 0) {
-			ChatFragment chatFragment = getChatFragment();
+			ChatFragment chatFragment = mainView.getChatFragment();
 			if (chatFragment != null && chatFragment.isReady()) {
 				chatFragment.clearChat();
 			}
@@ -823,36 +557,16 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	
 	private void addChatItem(ChatItem item) {
 		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
-		ChatFragment chatFragment = getChatFragment();
+		ChatFragment chatFragment = mainView.getChatFragment();
 		if (chatFragment != null && chatFragment.isReady()) {
 			chatFragment.addChatItem(item);
 		}
 		else {
 			mChatListModel.add(item);
 		}
-		//mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
+		//mainView.setCurrentItem(mainView.getChatTabIndex());
 	}
 	
-	private ChatFragment getChatFragment() {
-//		int index = mTabTitles.indexOf(mChatTabName);
-//				Log.i(TAG, "Chat tab at index "+index);
-//		if (index == -1) {
-//			mTabsAdapter.addTab(mChatTabName);
-//			index = mTabTitles.size() - 1;
-//		}
-		if (mTabsAdapter == null) {
-			Log.w(TAG, "chat mTabsAdapter == null!?");
-			return null;
-		}
-
-		ChatFragment fragment = mTabsAdapter.mChatFragment;//instantiateItem(mViewPager, index); 		// http://stackoverflow.com/a/8886019/78234
-		if (fragment == null) { // could be null if not instantiated yet
-			Log.w(TAG, "chat fragment == null!?");
-		}
-		return fragment;
-	}
-	
-
 	private String handleChat(EvaApiReply apiReply) {
 		if (!apiReply.isFlightSearch() && !apiReply.isHotelSearch() && (apiReply.chat != null)) {
 			if (apiReply.chat.hello != null && apiReply.chat.hello) {
@@ -935,10 +649,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			break;
 			
 		case R.id.add_utterance_button:
-			ChatFragment chatFragment = getChatFragment();
+			ChatFragment chatFragment = mainView.getChatFragment();
 			if (chatFragment != null)
 				chatFragment.addUtterance();
-			mTabsAdapter.showTab(mChatTabName);
+			mainView.setCurrentItem(mainView.getChatTabIndex());
 			break;
 		}
 	}
@@ -1009,8 +723,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 				bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 			}
 		}
+		TutorialController.onEvaReply(this, reply);
+		
 		if (VOICE_COOKIE == cookie) {
-			TutorialController.onEvaReply(this, reply);
 			if (reply.errorMessage != null) {
 				mainView.flashBadSearchButton(2);
 				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
@@ -1052,7 +767,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			if (chat != null) {
 				if (storeVoiceResultInChatItem != null) {
 					// this voice recognition replaces the last utterance
-					getChatFragment().voiceResponseToChatItem(storeVoiceResultInChatItem, chat);
+					mainView.getChatFragment().voiceResponseToChatItem(storeVoiceResultInChatItem, chat);
 					storeVoiceResultInChatItem = null;
 				}
 				else {
@@ -1174,18 +889,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		}
 	}
 	
-	private void removeTabs() {
-		final String [] tabsToRemove = { mHotelsTabName, mHotelTabName, mMapTabName, mRoomsTabName, 
-				mReviewsTabName, mBookingTabName, mReservationsTabName };
-		for (String tab : tabsToRemove) {
-			int index = mTabTitles.indexOf(tab);
-			if (index != -1)
-				mTabTitles.remove(index);
-		}
-		
-		mTabsAdapter.notifyDataSetChanged();
-	}
-
+	
 
 	static ChatItem currentHotelSearch = null;
 //	static ChatItem currentFlightSearch = null;
@@ -1219,31 +923,31 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			// tabName is HOTELS, FLIGHTS, etc.. depending on chatItem downloader id
 			
 			if (id == R.string.HOTELS && (VHAApplication.FOUND_HOTELS.size() == 0)) {
-				removeTabs();
+				mainView.removeTabs();
 				Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
 			}
 			else {
 				int index = mTabTitles.indexOf(tabName);
 				if (index == -1) {
-					mTabsAdapter.addTab(tabName);
+					mainView.addTab(tabName);
 					index = mTabTitles.size()-1;
 				} 
 
 				if (id == R.string.HOTELS) {
-					int mapIndex = mTabTitles.indexOf(mMapTabName);
+					int mapIndex = mainView.getMapTabIndex();
 					if (mapIndex == -1) {
-						mTabsAdapter.addTab(mMapTabName);
+						mainView.addTab(mainView.getMapTabName());
 						mapIndex = mTabTitles.size()-1;
 					}
-					HotelsMapFragment mapFragment = mTabsAdapter.mMapFragment;// instantiateItem(mViewPager, mapIndex);
+					HotelsMapFragment mapFragment = mainView.getMapFragment();
 					mapFragment.onHotelsListUpdated();
 					
-					mTabsAdapter.removeTab(mHotelTabName);
-					mTabsAdapter.removeTab(mRoomsTabName);
-					mTabsAdapter.removeTab(mReviewsTabName);
-					mTabsAdapter.removeTab(mBookingTabName);
+					mainView.removeTab(mainView.getHotelTabName());
+					mainView.removeTab(mainView.getRoomsTabName());
+					mainView.removeTab(mainView.getReviewsTabName());
+					mainView.removeTab(mainView.getBookingTabName());
 					
-					HotelListFragment fragment = mTabsAdapter.mHotelsListFragment; //instantiateItem(mViewPager, index);
+					HotelListFragment fragment = mainView.getHotelsListFragment();
 					if (fragment != null) {
 						fragment.newHotelsList();
 					}
@@ -1253,7 +957,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 				}
 				
 				if (this.switchToResult) {
-					mTabs.setCurrentItem(index);
+					// do not switch tabs in the middle of a tutorial
+					if (TutorialController.currentTutorial == TutorialController.NO_TUTORIAL)
+						mainView.setCurrentItem(index);
 				}
 			}
 			
@@ -1305,9 +1011,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			// ??? mViewPager.setAdapter(null);
 			//mTabs.setAdapter(null);
 			
-			removeTabs();
+			mainView.removeTabs();
 			
-			//mSwipeyAdapter.stuffChanged(mTabTitles.indexOf(mChatTabName));
+			//mSwipeyAdapter.stuffChanged(mainView.getChatTabIndex());
 			
 			VHAApplication.clearSearch();
 		}
@@ -1453,18 +1159,18 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			Log.d(TAG, "endProgressDialog() for hotel rooms for hotel "+mRoomUpdater.hotelId);
 			mainView.hideStatus();
 			
-			String tabName = mRoomsTabName; 
-			int index = mTabTitles.indexOf(tabName);
+			
+			int index = mainView.getRoomsTabIndex();
 			if (index == -1) {
-				mTabsAdapter.addTab(tabName);
+				mainView.addTab(mainView.getRoomsTabName());
 				index = mTabTitles.size()-1;
 			}
-			RoomsSelectFragement fragment = mTabsAdapter.mRoomSelectFragment; //instantiateItem(mViewPager, index);
+			RoomsSelectFragement fragment = mainView.getRoomsFragment();
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				fragment.changeHotelId(mRoomUpdater.hotelId);
 				if (mSwitchToTab) {
-					mTabs.setCurrentItem(index);
+					mainView.setCurrentItem(index);
 					mSwitchToTab  = false;
 				}
 			}
@@ -1478,9 +1184,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			if (mRoomUpdater.eanWsError != null) {
 				EanWsError err = mRoomUpdater.eanWsError;
 				if ("SOLD_OUT".equals(err.category)) {
-					int index = mTabTitles.indexOf(mHotelTabName);
+					int index = mainView.getHotelTabIndex();
 					if (index != -1) {
-						HotelDetailFragment fragment = mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
+						HotelDetailFragment fragment = mainView.getHotelFragment();
 						if (fragment != null) // could be null if not instantiated yet
 						{
 							fragment.hotelSoldOut();
@@ -1517,29 +1223,27 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			onEventHotelsListUpdated(null);
 
 			// add hotel tab again
-			String tabName = mHotelTabName; 
-			int index = mTabTitles.indexOf(tabName);
+			int index = mainView.getHotelTabIndex();
 			if (index == -1) {
-				mTabsAdapter.addTab(tabName);
+				mainView.addTab(mainView.getHotelTabName());
 				index = mTabTitles.size() - 1;
 			}
 	
-			HotelDetailFragment fragment = mTabsAdapter.mHotelDetailFragment; //instantiateItem(mViewPager, index);
+			HotelDetailFragment fragment = mainView.getHotelFragment();
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				fragment.changeHotelId(hotelId);
 			}
 
-			index = mTabTitles.indexOf(tabName);
-			mTabs.setCurrentItem(index);
+			index = mainView.getHotelTabIndex();
+			mainView.setCurrentItem(index);
 
-			index = mTabTitles.indexOf(mReviewsTabName);
+			index = mainView.getReviewsTabIndex();
 			if (index == -1) {
-				mTabsAdapter.addTab(mReviewsTabName);
+				mainView.addTab(mainView.getReviewsTabName());
 			}
-			ReviewsFragment reviews = mTabsAdapter.mReviewsFragment;
+			ReviewsFragment reviews = mainView.getReviewsFragment();
 			reviews.hotelChanged(hotelId);
-
 			
 			startRoomSearch(hotelId);
 			mHotelDownloader = null;
@@ -1565,9 +1269,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	 */
 	private void startNewSession() {
 //		if (isNewSession() == false) {
-			mTabsAdapter.showTab(mChatTabName);
+			mainView.setCurrentItem(mainView.getChatTabIndex());
 			VHAApplication.EVA.resetSession();
-			ChatItem myChat = new ChatItem("Start new search");
+			ChatItem myChat = new ChatItem(ChatItem.START_NEW_SESSION);
 			addChatItem(myChat);
 			String greeting = "Starting a new search. How may I help you?";
 			
@@ -1643,11 +1347,11 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 //		lastFlightCompleted = null;
 		lastHotelCompleted = null;
 
-		mTabsAdapter.showTab(mChatTabName);
+		mainView.setCurrentItem(mainView.getChatTabIndex());
 		// ??? mViewPager.setAdapter(null);
 		//mTabs.setAdapter(null);
 		
-		removeTabs();
+		mainView.removeTabs();
 
 		VHAApplication.clearSearch();
 	}
@@ -1657,9 +1361,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	// note "onEvent" template is needed for progruard to not break roboguice
 	// this event happens after a next page of hotel list results is downloaded
 	public void onEventHotelsListUpdated( @Observes HotelsListUpdated event) {
-		int mapTabIndex = mTabTitles.indexOf(mMapTabName);
+		int mapTabIndex = mainView.getMapTabIndex();
 		if (mapTabIndex != -1) {
-			HotelsMapFragment frag = (HotelsMapFragment)  mTabsAdapter.mMapFragment; //instantiateItem(mViewPager, mapTabIndex);
+			HotelsMapFragment frag = (HotelsMapFragment) mainView.getMapFragment();
 			if (frag != null) {
 				frag.onHotelsListUpdated();
 			}
@@ -1667,23 +1371,23 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	}
 	
 	public void onEventRatingClicked( @Observes RatingClickedEvent event) {
-		int reviewsIndex = mTabTitles.indexOf(mReviewsTabName);
+		int reviewsIndex = mainView.getReviewsTabIndex();
 		if (reviewsIndex != -1)
-			mTabs.setCurrentItem(reviewsIndex);
+			mainView.setCurrentItem(reviewsIndex);
 	}
 	
 	public void onEventBookingCompleted( @Observes BookingCompletedEvent event) {
-		int reservationTabIndex = mTabTitles.indexOf(mReservationsTabName);
+		int reservationTabIndex = mainView.getReservationsTabIndex();
 		if (reservationTabIndex == -1) {
-			mTabsAdapter.addTab(mReservationsTabName);
+			mainView.addTab(mainView.getReservationsTabName());
 			reservationTabIndex = mTabTitles.size() - 1;
 		}
 		
-		ReservationDisplayFragment frag = (ReservationDisplayFragment)  mTabsAdapter.mReservationFragment; //instantiateItem(mViewPager, reservationTabIndex);
+		ReservationDisplayFragment frag = (ReservationDisplayFragment)  mainView.getReservationsFragment();
 		if (frag != null) {
 			frag.showLatestReservation();
 		}
-		mTabs.setCurrentItem(reservationTabIndex);
+		mainView.setCurrentItem(reservationTabIndex);
 	}
 	
 	
@@ -1692,16 +1396,16 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(event.hotelId);
 		VHAApplication.selectedRoom = event.room;
 		
-		int bookingIndex = mTabTitles.indexOf(mBookingTabName);
+		int bookingIndex = mainView.getBookingTabIndex();
 		if (bookingIndex == -1) {
-			mTabsAdapter.addTab(mBookingTabName);
+			mainView.addTab(mainView.getBookingTabName());
 			bookingIndex = mTabTitles.size() - 1;
 		}
-		BookingFragement frag = (BookingFragement)  mTabsAdapter.mBookingFragment; //instantiateItem(mViewPager, bookingIndex);
+		BookingFragement frag = (BookingFragement)  mainView.getBookingFragment();
 		if (frag != null) {
 			frag.changeHotelRoom(hotel, event.room);
 		}
-		mTabs.setCurrentItem(bookingIndex);
+		mainView.setCurrentItem(bookingIndex);
 	}
 	
 	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
@@ -1761,7 +1465,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	public void onEventHotelSelected( @Observes HotelSelected event) {
 		Log.d(TAG, "onHotelSelected("+event.hotelId+")");
 
-		int index = mTabTitles.indexOf(mRoomsTabName);
+		int index = mainView.getRoomsTabIndex();
 		if (index == -1) {
 			// no rooms tab - will be soon - so mark as switch to it
 			if (mRoomUpdater == null) {
@@ -1771,7 +1475,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		}
 		else {
 			// room fragment is available - this is in sync with the selected hotel
-			mTabs.setCurrentItem(index);
+			mainView.setCurrentItem(index);
 		}
 	}
 	
@@ -1788,9 +1492,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			}
 		}
 		
-		mTabsAdapter.removeTab(mRoomsTabName);
-		mTabsAdapter.removeTab(mBookingTabName);
-		mTabsAdapter.removeTab(mReservationsTabName);
+		mainView.removeTab(mainView.getRoomsTabName());
+		mainView.removeTab(mainView.getBookingTabName());
+		mainView.removeTab(mainView.getReservationsTabName());
 		mRoomUpdater = new RoomsUpdaterTask(hotelId);
 		mRoomUpdater.attach(mRoomUpdaterListener);
 		List<HotelRoom> rooms = VHAApplication.HOTEL_ROOMS.get(hotelId);

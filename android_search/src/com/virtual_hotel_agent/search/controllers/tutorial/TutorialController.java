@@ -1,13 +1,16 @@
 package com.virtual_hotel_agent.search.controllers.tutorial;
 
 import android.app.Activity;
-import android.support.v4.view.ViewPager;
+import android.view.View;
 import android.widget.Toast;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.Log;
-import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.search.controllers.tutorial.BaseTutorial.TutorialStatus;
+import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.views.MainView;
+import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
 public class TutorialController {
 
@@ -18,7 +21,12 @@ public class TutorialController {
 	
 	public static BaseTutorial currentTutorial = NO_TUTORIAL;
 	
+	static RecordButtonTutorial recordButtonTutorial = new RecordButtonTutorial();
+	static ChatTutorial chatTutorial = new ChatTutorial();
+	
+	public static MainView mainView;
 
+	
 	
 	/***
 	 * Tutorial #1 -  Urge the user to start recording
@@ -31,11 +39,12 @@ public class TutorialController {
 	 * @param pager
 	 * @param tabs
 	 */
-	public static void showRecordButtonTutorial(Activity activity, final ViewPager pager, final TitlePageIndicator tabs) {
+	public static void showRecordButtonTutorial(Activity activity) {
 		if (currentTutorial != NO_TUTORIAL) {
 			Log.w(TAG, "Unexpected showRecordButtonTutorial when another tutorial is running: "+currentTutorial.name);
+			currentTutorial.cancel(activity);
 		}
-		RecordButtonTutorial tutorial = new RecordButtonTutorial();
+		RecordButtonTutorial tutorial = recordButtonTutorial;
 		TutorialStatus status = tutorial.getStatus();
 		if (status == TutorialStatus.Played) {
 			// this was already played
@@ -44,7 +53,7 @@ public class TutorialController {
 			//return;  TODO: remove above two lines and restore the 'return'
 		}
 		currentTutorial  = tutorial;
-		tutorial.start(activity, pager, tabs);
+		tutorial.start(activity);
 	}
 	
 	
@@ -66,5 +75,15 @@ public class TutorialController {
 
 	public static void canceledRecording(Activity activity) {
 		currentTutorial.canceledRecording(activity);
+	}
+
+	public static void onAddChatItem(ChatItem chatItem, View row, ChatFragment chatFragment) {
+		if (currentTutorial == NO_TUTORIAL) {
+			if (chatTutorial.shouldStart(chatItem, row, chatFragment.getActivity())) {
+				currentTutorial = chatTutorial;
+			}
+		}
+		
+		currentTutorial.onAddChatItem(chatItem, row, chatFragment);
 	}
 }
