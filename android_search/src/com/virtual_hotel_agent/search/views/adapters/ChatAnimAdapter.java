@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.nhaarman.listviewanimations.itemmanipulation.OnAnimEndCallback;
 import com.nhaarman.listviewanimations.itemmanipulation.OnDismissCallback;
 import com.nhaarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
 import com.nhaarman.listviewanimations.util.AdapterViewUtil;
@@ -44,17 +45,17 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
      *            indicated that she would like to dismiss one or more list
      *            items.
      */
-    public ChatAnimAdapter(final BaseAdapter baseAdapter, final OnDismissCallback callback) {
-        this(baseAdapter, DEFAULTANIMATIONDELAYMILLIS, DEFAULTANIMATIONDURATIONMILLIS, callback);
+    public ChatAnimAdapter(final BaseAdapter baseAdapter, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
+        this(baseAdapter, DEFAULTANIMATIONDELAYMILLIS, DEFAULTANIMATIONDURATIONMILLIS, callback, animEndCallback);
         
     }
 
-    public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final OnDismissCallback callback) {
-        this(baseAdapter, animationDelayMillis, DEFAULTANIMATIONDURATIONMILLIS, callback);
+    public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
+        this(baseAdapter, animationDelayMillis, DEFAULTANIMATIONDURATIONMILLIS, callback, animEndCallback);
     }
 
-    public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final long animationDurationMillis, final OnDismissCallback callback) {
-        super(baseAdapter);
+    public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final long animationDurationMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
+        super(baseAdapter, animEndCallback);
         mAnimationDelayMillis = animationDelayMillis;
         mAnimationDurationMillis = animationDurationMillis;
         mCallback = callback;
@@ -72,10 +73,12 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
     
     @Override
     protected void animateViewIfNecessary(int position, View view, ViewGroup parent) {
-    	if (position == getCount() -1) {
-    		// last position is a filler row - no animate
+    	if (view.getTag() == null)
     		return;
-    	}
+//    	if (position == getCount() -1) {
+//    		// last position is a filler row - no animate
+//    		return;
+//    	}
     	super.animateViewIfNecessary(position, view, parent);
     };
     
@@ -83,10 +86,14 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
     protected Animator getAnimator(final ViewGroup parent, final View view) {
     	ChatItem chatItem = (ChatItem) view.getTag();
     	if (chatItem != null && chatItem.getType() == ChatType.Me) {
-    		return ObjectAnimator.ofFloat(view, TRANSLATION_X, 0 - parent.getWidth(), 0);
+    		Animator result = ObjectAnimator.ofFloat(view, TRANSLATION_X, 0 - parent.getWidth(), 0);
+    		result.setStartDelay(0);
+    		return result;
     	}
     	else {
-    		return ObjectAnimator.ofFloat(view, TRANSLATION_X, parent.getWidth(), 0);
+    		Animator result = ObjectAnimator.ofFloat(view, TRANSLATION_X, parent.getWidth(), 0);
+    		result.setStartDelay(250);
+    		return result;
     	}
     }
     

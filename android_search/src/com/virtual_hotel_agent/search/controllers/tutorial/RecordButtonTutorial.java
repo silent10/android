@@ -2,11 +2,8 @@ package com.virtual_hotel_agent.search.controllers.tutorial;
 
 import android.app.Activity;
 import android.os.Handler;
-import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.widget.Toast;
 
 import com.espian.showcaseview.OnShowcaseEventListener;
 import com.espian.showcaseview.ShowcaseView;
@@ -14,22 +11,26 @@ import com.espian.showcaseview.anim.AnimationUtils;
 import com.espian.showcaseview.anim.AnimationUtils.AnimationEndListener;
 import com.espian.showcaseview.targets.ViewTarget;
 import com.evaapis.crossplatform.EvaApiReply;
-import com.evaapis.crossplatform.flow.FlowElement;
-import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
+import com.evature.util.Log;
 import com.nineoldandroids.view.ViewHelper;
-import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.views.MainView;
+import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
 public class RecordButtonTutorial extends BaseTutorial {
 
 	public static final String NAME = "recordButtonTutorial";
-	public static final String questionAskedTutorial = "questionAskedTutorial";
-	public static final String hotelResultsTutorial = "hotelResultsTutorial";
+	private static final String TAG = NAME;
+//	public static final String questionAskedTutorial = "questionAskedTutorial";
+//	public static final String hotelResultsTutorial = "hotelResultsTutorial";
 
 	enum State {
 		NotStarted,
 		WaitingForMicrophoneClick,
-		WaitingForRecordingEnd
+		WaitingForRecordingEnd, 
+		WaitingForMyChatItem
 	}
 	
 	private State state;
@@ -40,7 +41,7 @@ public class RecordButtonTutorial extends BaseTutorial {
 	}
 
 
-	public void start(Activity activity, final ViewPager pager, final TitlePageIndicator tabs) {
+	public void start(Activity activity) {
 		setStatus(TutorialStatus.PlayStarted);
 		
         ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
@@ -99,33 +100,29 @@ public class RecordButtonTutorial extends BaseTutorial {
                 x+10, y-20, x+14, y+5,
                 handAnimEnded).start();
         
+		showcaseView.setScaleMultiplier(0.95f);
         showcaseView.setOnShowcaseEventListener(new OnShowcaseEventListener() {
 			
 			@Override
 			public void onShowcaseViewShow(ShowcaseView showcaseView) {
-				AlphaAnimation anim = new AlphaAnimation(1f, 0.1f);
-				anim.setDuration(500);
-				anim.setRepeatCount(0);
-				anim.setFillAfter(true);   
-				tabs.setAnimation(anim);
-				pager.startAnimation(anim);
+				TutorialController.mainView.fadeOutView(true, true, false);
 				ViewHelper.setAlpha(hand, 1f);
 			}
 			
 			@Override
 			public void onShowcaseViewHide(ShowcaseView showcaseView) {
-				AlphaAnimation anim = new AlphaAnimation(0.1f, 1f);
-				anim.setFillAfter(true);
-				anim.setRepeatCount(0);
-				anim.setDuration(200);
-				tabs.setAnimation(anim);
-				pager.startAnimation(anim);
+				TutorialController.mainView.fadeInView(true, true, false);
+				
 			}
 			
 			@Override
 			public void onShowcaseViewDidHide(ShowcaseView _showcaseView) {
-				((ViewGroup) showcaseView.getParent()).removeView(showcaseView);
-				showcaseView = null;
+				if (_showcaseView.getParent() != null) {
+					((ViewGroup) _showcaseView.getParent()).removeView(_showcaseView);
+				}
+				if (showcaseView == _showcaseView) {
+					showcaseView = null;
+				}
 			}
 		});
         
@@ -153,8 +150,9 @@ public class RecordButtonTutorial extends BaseTutorial {
 	@Override
 	public void onEvaReply(Activity activity, EvaApiReply reply) {
 		if (state == State.WaitingForRecordingEnd) {
+			// TODO: check if Eva parsed correctly
+			state = State.WaitingForMyChatItem;
 			showcaseView.hide();
-			state = State.NotStarted;
 			setStatus(TutorialStatus.Played);
 		}
 	}
@@ -165,7 +163,7 @@ public class RecordButtonTutorial extends BaseTutorial {
 			if (showcaseView != null) {
 				showcaseView.setText("Canceled :(", 
 						"Press 'back' again if you want to cancel the tutorial,\n"
-						+ "or try again by tapping the microphone button again and say a search query such as 'Hotel in Las Vegas'");
+						+ "or try again: Tap the microphone button and say a search query \nsuch as 'Hotel in Las Vegas'");
 			}
 			state = State.WaitingForMicrophoneClick;	
 		}

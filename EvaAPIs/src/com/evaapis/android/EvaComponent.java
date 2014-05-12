@@ -126,6 +126,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			mConfig = config;
 		}
 		this.activity = activity;
+		getDeviceId(); // fill the device Id in the mConfig
 		this.replyListener = replyListener;
 		mLocationUpdater = new EvatureLocationUpdater();
 		mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);

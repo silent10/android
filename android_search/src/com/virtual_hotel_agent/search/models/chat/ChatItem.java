@@ -104,6 +104,7 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 //	};
 	
 	final static ChatType[] chatTypeValues = ChatType.values();
+	public static final String START_NEW_SESSION = "Start new search";
 
 	// example constructor that takes a Parcel and gives you an object populated with it's values
 //	private ChatItem(Parcel in) {

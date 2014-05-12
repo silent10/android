@@ -4,12 +4,16 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
+import android.view.View;
 import android.widget.Toast;
 
 import com.espian.showcaseview.ShowcaseView;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.VHAApplication;
+import com.virtual_hotel_agent.search.models.chat.ChatItem;
+import com.virtual_hotel_agent.search.views.MainView;
+import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
 public class BaseTutorial {
 	private static final String TAG = "BaseTutorial";
@@ -27,10 +31,14 @@ public class BaseTutorial {
 	
 	public BaseTutorial(String name) {
 		this.name = name;
+		status = null;
 	}
 	
 
 	public TutorialStatus getStatus() {
+		if (status != null) {
+			return status;
+		}
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(VHAApplication.getAppContext());
 
 		String statusStr = sp.getString(name, TutorialStatus.Locked.toString());
@@ -65,10 +73,9 @@ public class BaseTutorial {
 		Toast.makeText(activity, "You can replay this tutorial again later by choosing 'Tutorial' from the menu", Toast.LENGTH_LONG).show();
 	}
 	
-	// events - to be overridden by implementations
-	public void onMicrphonePressed(Activity activity) {}
-	public void onEvaReply(Activity activity, EvaApiReply reply) {}
-	public void canceledRecording(Activity activity) {}
+	////////////////////////
+	//  events - to be overridden by implementations
+	//
 	
 	public boolean onBackPressed(Activity activity) { 
 		if (TutorialController.currentTutorial != TutorialController.NO_TUTORIAL) {
@@ -78,6 +85,12 @@ public class BaseTutorial {
 		}
 		return false;
 	}
+
+	
+	public void onMicrphonePressed(Activity activity) {}
+	public void onEvaReply(Activity activity, EvaApiReply reply) {}
+	public void canceledRecording(Activity activity) {}
+	public void onAddChatItem(ChatItem chatItem, View row, ChatFragment chatFragment) {}
 
 
 
