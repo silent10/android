@@ -10,12 +10,11 @@ import android.widget.Toast;
 import com.espian.showcaseview.OnShowcaseEventListener;
 import com.espian.showcaseview.ShowcaseView;
 import com.espian.showcaseview.targets.ViewTarget;
-import com.evaapis.android.EvaVoiceClient;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.controllers.tutorial.BaseTutorial.TutorialStatus;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
 public class ChatTutorial extends BaseTutorial {
@@ -25,8 +24,9 @@ public class ChatTutorial extends BaseTutorial {
 
 	enum State {
 		NotStarted,
-		WaitingForMyChatItem,
-		WaitingForEvaChatItem,
+		ShowMyChatItem,
+		ShowEvaChatItem,
+		ShowNewSession,
 		Done
 	}
 	
@@ -39,30 +39,57 @@ public class ChatTutorial extends BaseTutorial {
 		state = State.NotStarted;
 	}
 	
-	private void onClick(ChatFragment chatFragment) {
-		if (state == State.Done) {
+	
+	
+	private void showEvaChatItem(ChatFragment chatFragment) {
+		
+		state = State.ShowEvaChatItem;
+		if (evaChatItem != null) {
+			showcaseView.setText("Virtual Agent Response", 
+					"The red bordered balloons coming from the right side of the screen is the response of the Virtual Hotel Agent");
+			
+			chatFragment.fadeOutOtherChat(evaChatItem);
+			TextView label = (TextView)evaChatView.findViewById(R.id.label);
+			ViewTarget target = new ViewTarget(label);
+			showcaseView.setShowcase(target, true);
+			if (showcaseView.getVisibility() == View.GONE) {
+				showcaseView.show();
+			}
+			evaChatItem = null;
+			evaChatView = null;
+			state = State.ShowNewSession;
+		}
+	}
+	
+	private void showClearSession(ChatFragment chatFragment) {
+		MainView mainView = TutorialController.mainView;
+		mainView.fadeInView(false, false, true);
+		mainView.fadeOutView(true, true, false);
+		showcaseView.setText("New Session", 
+				"Tapping on this button will start a new session.");
+		
+		ViewTarget target = new ViewTarget(mainView.startNewSessionButton);
+		showcaseView.setShowcase(target, true);
+		if (showcaseView.getVisibility() == View.GONE) {
+			showcaseView.show();
+		}
+		state = State.Done;
+	}
+	
+	private void onClickShowcase(ChatFragment chatFragment) {
+		switch (state) {
+		case Done:
 			showcaseView.hide();
 			setStatus(TutorialStatus.Played);
 			TutorialController.currentTutorial = TutorialController.NO_TUTORIAL;
-			return;
-		}
-		if (state == State.WaitingForMyChatItem) {
-			state = State.WaitingForEvaChatItem;
-			if (evaChatItem != null) {
-				showcaseView.setText("Virtual Agent Response", 
-						"The red bordered balloons coming from the right side of the screen is the response of the Virtual Hotel Agent");
-				
-				chatFragment.fadeOutOtherChat(evaChatItem);
-				TextView label = (TextView)evaChatView.findViewById(R.id.label);
-				ViewTarget target = new ViewTarget(label);
-				showcaseView.setShowcase(target, true);
-				if (showcaseView.getVisibility() == View.GONE) {
-					showcaseView.show();
-				}
-				evaChatItem = null;
-				evaChatView = null;
-				state = State.Done;
-			}
+			break;
+		case ShowMyChatItem:
+		case ShowEvaChatItem:
+			showEvaChatItem(chatFragment);
+			break;
+		case ShowNewSession:
+			showClearSession(chatFragment);
+			break;
 		}
 	}
 
@@ -70,24 +97,25 @@ public class ChatTutorial extends BaseTutorial {
 	@Override
 	public void onAddChatItem(final ChatItem chatItem, View chatView, final ChatFragment chatFragment) {
 		Log.i(TAG, "onAddChatItem: "+chatItem);
-		if (state == State.NotStarted) {
+		if (state == State.NotStarted || state == State.Done) {
 			// starting chat tutorial
+			// temp for dev: allow state Done
 			setStatus(TutorialStatus.PlayStarted);
-			state = State.WaitingForMyChatItem;
+			state = State.ShowMyChatItem;
 		}
 		
 		if (chatItem.getType() == ChatType.VirtualAgent || chatItem.getType() == ChatType.DialogQuestion) {
 			// save this chatItem for later
 			evaChatItem = chatItem;
 			evaChatView = chatView;
-			if (state == State.WaitingForEvaChatItem) {
+			if (state == State.ShowEvaChatItem) {
 				// already was clicked
-				onClick(chatFragment);
+				showEvaChatItem(chatFragment);
 			}
 		}
 
 		
-		if (state == State.WaitingForMyChatItem && chatItem.getType() == ChatType.Me) {
+		if (state == State.ShowMyChatItem && chatItem.getType() == ChatType.Me) {
 			if (chatItem.getChat().toString().equals(ChatItem.START_NEW_SESSION)) {
 				return;
 			}
@@ -106,7 +134,7 @@ public class ChatTutorial extends BaseTutorial {
 			
 			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
 	        co.block = true;
-	        co.noButton = false;
+	        co.noButton = true;
 	        co.scaleMultiplier = 0.75f;
 	        co.textPadding = 4;
 	        ViewTarget target = new ViewTarget(label);
@@ -121,7 +149,7 @@ public class ChatTutorial extends BaseTutorial {
 	        
 			showcaseView = ShowcaseView.insertShowcaseView(target, chatFragment.getActivity(), 
 					"Your input", 
-					"The blue bordered balloons coming from the left side of the screen are your inputs.", co);
+					"The blue bordered balloons coming from the left side of the screen are your inputs.\n\nTap anywhere to continue.", co);
 
 			showcaseView.setOnShowcaseEventListener(new OnShowcaseEventListener() {
 				
@@ -131,7 +159,7 @@ public class ChatTutorial extends BaseTutorial {
 				
 				@Override
 				public void onShowcaseViewHide(ShowcaseView showcaseView) {
-					TutorialController.mainView.fadeInView(true, false, true);
+					TutorialController.mainView.fadeInView(true, true, true);
 					chatFragment.fadeInAll();
 				}
 				
@@ -145,7 +173,7 @@ public class ChatTutorial extends BaseTutorial {
 			showcaseView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					ChatTutorial.this.onClick(chatFragment);
+					ChatTutorial.this.onClickShowcase(chatFragment);
 				}
 			});
 			
@@ -153,7 +181,7 @@ public class ChatTutorial extends BaseTutorial {
 				@Override
 				public boolean onTouch(View v, MotionEvent event) {
 					if (event.getAction() == MotionEvent.ACTION_UP) {
-						ChatTutorial.this.onClick(chatFragment);
+						ChatTutorial.this.onClickShowcase(chatFragment);
 						return true;
 					}
 					return false;
@@ -162,10 +190,6 @@ public class ChatTutorial extends BaseTutorial {
 			
 			showcaseView.show();
 		}
-	//		showcaseView.hide();
-	//		state = State.NotStarted;
-	//		setStatus(TutorialStatus.Played);
-		
 	}
 
 	
