@@ -51,6 +51,7 @@ public class MainView {
 	private ProgressBar mProgressBar;
 	private SoundLevelView mSoundView;
 	private ImageButton mSearchButton;
+	public ImageButton startNewSessionButton;
 //	private ImageButton mTextButton;
 	private View mBottomBar;
 	private final int search_button_padding = 24;
@@ -79,7 +80,7 @@ public class MainView {
 		mSoundView = (SoundLevelView)mainActivity.findViewById(R.id.surfaceView_sound_wave);
 		mSearchButton = (ImageButton) mainActivity.findViewById(R.id.search_button);
 		mBottomBar = mainActivity.findViewById(R.id.bottom_bar);
-		
+		startNewSessionButton = (ImageButton) mainActivity.findViewById(R.id.restart_button);
 		mViewPager = (ViewPager) mainActivity.findViewById(R.id.viewpager);
 		mTabs = (TitlePageIndicator) /*(TabPageIndicator)*/ mainActivity.findViewById(R.id.indicator);
 		
