@@ -11,7 +11,6 @@ abstract public class EvaBaseActivity extends FragmentActivity implements EvaSea
 	protected EvaComponent eva;
 	
 	public EvaBaseActivity() {
-		eva = new EvaComponent(this, this);
 	}
 
 
@@ -47,6 +46,7 @@ abstract public class EvaBaseActivity extends FragmentActivity implements EvaSea
 
 	@Override
 	protected void onCreate(Bundle arg0) {
+		eva = new EvaComponent(this, this);
 		eva.onCreate(arg0);
 		super.onCreate(arg0);
 	}

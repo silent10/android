@@ -48,7 +48,7 @@ public class DownloadUrl {
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setUseExpectContinue(params, false);
 		HttpConnectionParams.setConnectionTimeout(params, 10000); // wait 10 seconds to establish connection
-		HttpConnectionParams.setSoTimeout(params, 1000); // wait 10 seconds to get first byte in response
+		HttpConnectionParams.setSoTimeout(params, 10000); // wait 10 seconds to get first byte in response
 
 		// Initialize the HTTP client
 		HttpClient httpclient = new DefaultHttpClient(params);

@@ -7,6 +7,7 @@ import org.json.JSONException;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.evaapis.android.EvaBaseActivity;
+import com.evaapis.android.EvaComponent;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
 import com.evature.util.Log;
@@ -43,13 +45,17 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.DEBUG = BuildConfig.DEBUG;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		if (sharedPreferences.getString(EvaComponent.VRSERV_PREF_KEY, "-").equals("-")) {
+			Editor edit = sharedPreferences.edit();
+			edit.putString(EvaComponent.VRSERV_PREF_KEY, "google_local");
+			edit.apply();
+		}
+		super.onCreate(savedInstanceState);
 		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
 		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
 		eva.registerPreferenceListener();
-
-		Log.DEBUG = BuildConfig.DEBUG;
-		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
 		startOverButton = (Button) findViewById(R.id.button_new_session);
@@ -57,6 +63,11 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		recordButton = (Button) findViewById(R.id.button_start);
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+            	if ("google_local".equals(eva.getVrService())) {
+        			eva.searchWithLocalVoiceRecognition(4);
+        			return;
+        		}
+            	
             	searchWithVoice("voice");
             }
         });

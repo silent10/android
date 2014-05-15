@@ -43,8 +43,8 @@
         
         <ListPreference 
             android:key="eva_vr_service"
-            android:title="Preferred VProxy service"
-            android:summary="Backend of Voice Recognition"
+            android:title="Preferred Voice Recognition service"
+            android:summary=""
             android:entries="@array/entries_vr_service"
             android:entryValues="@array/entryvalues_vr_service"
             />
