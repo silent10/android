@@ -33,8 +33,8 @@ import com.evature.util.Log;
 public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	
 	// default values  - can be overwritten by preferences
-	private static final String API_KEY = "e7567517-0a1b-4a89-bd56-1b18915353f9";
-	private static final String SITE_CODE = "androiddev";
+	private static final String API_KEY = "<put your api-key here>";
+	private static final String SITE_CODE = "<put your site-code here>";
 	
 	// GUI elements
 	TextView responseText;
