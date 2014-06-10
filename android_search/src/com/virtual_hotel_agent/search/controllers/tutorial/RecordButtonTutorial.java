@@ -14,6 +14,7 @@ import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.Log;
 import com.nineoldandroids.view.ViewHelper;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.tutorial.ChatTutorial.State;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.views.MainView;
@@ -168,4 +169,9 @@ public class RecordButtonTutorial extends BaseTutorial {
 			state = State.WaitingForMicrophoneClick;	
 		}
 	}
+	
+	@Override public void cancel(Activity activity) {
+		state = State.NotStarted;
+		super.cancel(activity);
+	};
 }

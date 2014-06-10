@@ -139,7 +139,7 @@
          android:background="@drawable/custom_button"
          android:onClick="myClickHandler"
          android:contentDescription="Restart"
-         android:src="@drawable/add_utterance"
+         android:src="@drawable/keyboard_icon"
          android:padding="3dp"
            />
      </RelativeLayout>

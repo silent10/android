@@ -162,5 +162,21 @@
         <item>2032</item>
         <item>2033</item>
         <item>2034</item>
-    </string-array>    
+    </string-array>
+    
+        <string-array name="entries_vr_service">
+<!--         <item>None</item> -->
+<!--         <item>Ginger</item> -->
+<!--         <item>Google Web Service</item> -->
+		<item>Other Voice Recognition</item>
+        <item>Google Phone</item>
+    </string-array>
+    <string-array name="entryvalues_vr_service">
+        <item>none</item>
+<!--         <item>ginger</item> -->
+<!--         <item>google</item> -->
+        <item>google_local</item>
+    </string-array>
+   
+    
 </resources>

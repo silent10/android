@@ -9,11 +9,13 @@ import android.widget.Toast;
 
 import com.espian.showcaseview.OnShowcaseEventListener;
 import com.espian.showcaseview.ShowcaseView;
+import com.espian.showcaseview.drawing.ClingDrawer;
 import com.espian.showcaseview.targets.ViewTarget;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
+import com.virtual_hotel_agent.search.util.RectClingDrawerImpl;
 import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 
@@ -32,7 +34,10 @@ public class ChatTutorial extends BaseTutorial {
 	
 	private State state;
 	private ChatItem evaChatItem;
+	private ChatItem meChatItem;
 	private View evaChatView;
+	private View meChatView;
+	private RectClingDrawerImpl rectClingDrawer;
 	
 	public ChatTutorial() {
 		super(NAME);
@@ -50,25 +55,33 @@ public class ChatTutorial extends BaseTutorial {
 			
 			chatFragment.fadeOutOtherChat(evaChatItem);
 			TextView label = (TextView)evaChatView.findViewById(R.id.label);
+			Log.i(TAG, "Highlighting view: "+label.getText());
 			ViewTarget target = new ViewTarget(label);
+			rectClingDrawer.setWidth(label.getWidth()+48);
+			rectClingDrawer.setHeight(label.getHeight()+48);
 			showcaseView.setShowcase(target, true);
 			if (showcaseView.getVisibility() == View.GONE) {
 				showcaseView.show();
 			}
 			evaChatItem = null;
 			evaChatView = null;
+			meChatItem = null;
+			meChatView = null;
 			state = State.ShowNewSession;
 		}
 	}
 	
 	private void showClearSession(ChatFragment chatFragment) {
 		MainView mainView = TutorialController.mainView;
+		chatFragment.fadeInAll();
 		mainView.fadeInView(false, false, true);
 		mainView.fadeOutView(true, true, false);
 		showcaseView.setText("New Session", 
 				"Tapping on this button will start a new session.");
 		
 		ViewTarget target = new ViewTarget(mainView.startNewSessionButton);
+		rectClingDrawer.setWidth(mainView.startNewSessionButton.getWidth()+48);
+		rectClingDrawer.setHeight(mainView.startNewSessionButton.getHeight()+48);
 		showcaseView.setShowcase(target, true);
 		if (showcaseView.getVisibility() == View.GONE) {
 			showcaseView.show();
@@ -108,10 +121,10 @@ public class ChatTutorial extends BaseTutorial {
 			// save this chatItem for later
 			evaChatItem = chatItem;
 			evaChatView = chatView;
-			if (state == State.ShowEvaChatItem) {
-				// already was clicked
-				showEvaChatItem(chatFragment);
-			}
+//			if (state == State.ShowEvaChatItem) {
+//				// already was clicked
+//				showEvaChatItem(chatFragment);
+//			}
 		}
 
 		
@@ -119,38 +132,44 @@ public class ChatTutorial extends BaseTutorial {
 			if (chatItem.getChat().toString().equals(ChatItem.START_NEW_SESSION)) {
 				return;
 			}
-//				View chatView = chatFragment.getViewForChatItem(chatItem);
-			if (chatView == null) {
-				Log.w(TAG, "no view for chat item "+chatItem);
-				state = State.NotStarted;
-				setStatus(TutorialStatus.Unlocked);
-				return;
-			}
+			
+			meChatItem = chatItem;
+			meChatView = chatView;
+		}
+		
+		
+		if (state == State.ShowMyChatItem && meChatItem != null && evaChatItem != null) {	
+			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
+	        co.block = true;
+	        co.noButton = true;
+//	        co.scaleMultiplier = 0.75f;
+//	        co.textPadding = 4;
 			TextView label = (TextView)chatView.findViewById(R.id.label);
 			if (label.getText().toString().equals(chatItem.getChat().toString()) == false) {
 				Log.w(TAG, "unexpected mismatch chatItem: "+chatItem.getChat()+"  and label: "+label.getText());
 				return;
 			}
-			
-			ShowcaseView.ConfigOptions co = new ShowcaseView.ConfigOptions();
-	        co.block = true;
-	        co.noButton = true;
-	        co.scaleMultiplier = 0.75f;
-	        co.textPadding = 4;
+
 	        ViewTarget target = new ViewTarget(label);
+	        Log.i(TAG, "Highlighting view: "+label.getText());
 	        
 	        TutorialController.mainView.fadeOutView(true, false, true);
 	        chatFragment.fadeOutOtherChat(chatItem);
 	        
 	        if (showcaseView != null) {
 	        	showcaseView.hide();
-	        	showcaseView = null;
 	        }
 	        
-			showcaseView = ShowcaseView.insertShowcaseView(target, chatFragment.getActivity(), 
+	        Activity activity = chatFragment.getActivity();
+			showcaseView = ShowcaseView.insertShowcaseView(target, activity, 
 					"Your input", 
 					"The blue bordered balloons coming from the left side of the screen are your inputs.\n\nTap anywhere to continue.", co);
 
+			rectClingDrawer = new RectClingDrawerImpl(activity.getResources(), showcaseView.getShowcaseColor());
+			rectClingDrawer.setWidth(label.getWidth()+48);
+			rectClingDrawer.setHeight(label.getHeight()+48);
+			showcaseView.setClingDrawer(rectClingDrawer);
+			
 			showcaseView.setOnShowcaseEventListener(new OnShowcaseEventListener() {
 				
 				@Override

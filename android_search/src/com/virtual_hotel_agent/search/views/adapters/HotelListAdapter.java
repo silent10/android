@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -25,13 +24,13 @@ import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
 public class HotelListAdapter extends BaseAdapter {
 
-	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
-	private static final double DISTANCE_DELTA = 200;
+//	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
+	private static final double DISTANCE_DELTA = 50;
 	private static final String TAG = "HotelListAdapter";
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
 	static Drawable mHotelIcon;
-	static Drawable mTripadvisorPlaceHolder;
+//	static Drawable mTripadvisorPlaceHolder;
 
 	public HotelListAdapter(HotelListFragment parent) {
 
@@ -39,8 +38,8 @@ public class HotelListAdapter extends BaseAdapter {
 		mParent = parent;
 		if (mHotelIcon == null)
 			mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_72);
-		if (mTripadvisorPlaceHolder == null)
-			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
+//		if (mTripadvisorPlaceHolder == null)
+//			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
 	}
 	
 	private List<Hotel>  getHotels() {
@@ -106,12 +105,14 @@ public class HotelListAdapter extends BaseAdapter {
 			convertView = mInflater.inflate(R.layout.hotel_list_item, null);
 			holder = new ViewHolder();
 			holder.image = (ImageView) convertView.findViewById(R.id.hotelImage);
-			holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
+			//holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
+			holder.tripAdvisorRating = (TextView)convertView.findViewById(R.id.tripAdvisorRating);
 			holder.name = (TextView) convertView.findViewById(R.id.hotelName);
 			holder.rate = (TextView) convertView.findViewById(R.id.pricePerNight);
-			holder.layout = (LinearLayout) convertView.findViewById(R.id.hotel_list_item_layout);
+			holder.layout = (ViewGroup) convertView.findViewById(R.id.hotel_list_item_layout);
 			holder.distance = (TextView) convertView.findViewById(R.id.hotelDistance);
 			holder.location = (TextView) convertView.findViewById(R.id.hotelLocation);
+			holder.reviews = (TextView) convertView.findViewById(R.id.tripAdvisorReviews);
 			holder.rating = (RatingBar) convertView.findViewById(R.id.rating);
 			holder.layout.setTag(holder);
 			convertView.setTag(holder);
@@ -150,8 +151,7 @@ public class HotelListAdapter extends BaseAdapter {
 		if (distance > 0 && distance < DISTANCE_DELTA) {
 			DecimalFormat distanceFormat = new DecimalFormat("#.#");
 			String formattedDistance = distanceFormat.format(distance);
-			holder.distance.setText(formattedDistance + "km");
-			holder.distance.setVisibility(View.VISIBLE);
+			holder.distance.setText(formattedDistance + "km from you");
 		} else {
 			holder.distance.setVisibility(View.GONE);
 		}
@@ -165,6 +165,8 @@ public class HotelListAdapter extends BaseAdapter {
 		else {
 			holder.location.setVisibility(View.GONE);
 		}
+
+		
 
 		// Format price
 		DecimalFormat rateFormat = new DecimalFormat("#.00");
@@ -182,21 +184,25 @@ public class HotelListAdapter extends BaseAdapter {
 
 //		double trRating = hotel.tripAdvisorRating;
 //
-		if (hotel.tripAdvisorRatingUrl == null) {//trRating < TRIP_ADVISOR_GOOD_RATING) {
-			holder.tripAdvisorStrip.setVisibility(View.GONE);
-		} else {
+//		if (hotel.tripAdvisorRatingUrl == null) {//trRating < TRIP_ADVISOR_GOOD_RATING) {
+//			holder.tripAdvisorStrip.setVisibility(View.GONE);
+//		} else {
 			// TODO: show rating instead of just strip?
-			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
-			loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder);
-		}
+			//holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
+		holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
+		holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
+			//loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder);
+//		}
 
 		
 		return convertView;
 	}
 
 	private static class ViewHolder {
-		public LinearLayout layout;
-		public ImageView tripAdvisorStrip;
+		public TextView reviews;
+		public ViewGroup layout;
+		//public ImageView tripAdvisorStrip;
+		TextView tripAdvisorRating;
 		ImageView image;
 		TextView name;
 		TextView rate;
