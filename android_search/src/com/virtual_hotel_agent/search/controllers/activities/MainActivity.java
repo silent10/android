@@ -438,9 +438,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			startActivity(intent);
 			return true;
 
-		case R.id.tutorial:
-			TutorialController.showRecordButtonTutorial(this);
-	        return true;
+//		case R.id.tutorial:
+//			TutorialController.showRecordButtonTutorial(this);
+//	        return true;
 	        
 		case R.id.audio:
 			intent = new Intent(this, VolumeSettingsDialog.class);
