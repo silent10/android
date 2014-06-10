@@ -205,6 +205,9 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 
 	private static Random randomGenerator = new Random();
 	private static final String exampleMonth = "June";
+
+	private static final float FADE_TO = 0.14f;
+	
 	private final String tests[] = { "Hotel tonight", 
 			"Hotel in Madrid "+exampleMonth+" 22nd to 24th", 
 			"Hotel in Paris "+exampleMonth+" 22nd to 24th", 
@@ -523,12 +526,12 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 	}
 
 	public void fadeOutOtherChat(ChatItem chatItem) {
-		AlphaAnimation animFadeOut = new AlphaAnimation(1f, 0.1f);
+		AlphaAnimation animFadeOut = new AlphaAnimation(1f, FADE_TO);
 		animFadeOut.setDuration(500);
 		animFadeOut.setRepeatCount(0);
 		animFadeOut.setFillAfter(true);
 
-		AlphaAnimation animFadeIn = new AlphaAnimation(0.1f, 1f);
+		AlphaAnimation animFadeIn = new AlphaAnimation(FADE_TO, 1f);
 		animFadeIn.setFillAfter(true);
 		animFadeIn.setRepeatCount(0);
 		animFadeIn.setDuration(200);
@@ -547,7 +550,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 	}
 	
 	public void fadeInAll() {
-		AlphaAnimation anim = new AlphaAnimation(0.1f, 1f);
+		AlphaAnimation anim = new AlphaAnimation(FADE_TO, 1f);
 		anim.setFillAfter(true);
 		anim.setRepeatCount(0);
 		anim.setDuration(200);

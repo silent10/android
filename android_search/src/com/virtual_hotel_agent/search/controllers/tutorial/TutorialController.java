@@ -1,6 +1,7 @@
 package com.virtual_hotel_agent.search.controllers.tutorial;
 
 import android.app.Activity;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ public class TutorialController {
 	
 	static RecordButtonTutorial recordButtonTutorial = new RecordButtonTutorial();
 	static ChatTutorial chatTutorial = new ChatTutorial();
+	static QuestionTutorial questionTutorial = new QuestionTutorial();
 	
 	public static MainView mainView;
 
@@ -48,9 +50,9 @@ public class TutorialController {
 		TutorialStatus status = tutorial.getStatus();
 		if (status == TutorialStatus.Played) {
 			// this was already played
-			Toast.makeText(activity, "This tutorial was already played - replaying", Toast.LENGTH_LONG).show();
-			tutorial.setStatus(TutorialStatus.Unlocked);
-			//return;  TODO: remove above two lines and restore the 'return'
+//			Toast.makeText(activity, "This tutorial was already played - replaying", Toast.LENGTH_LONG).show();
+//			tutorial.setStatus(TutorialStatus.Unlocked);
+			return; // TODO: remove above two lines and restore the 'return'
 		}
 		currentTutorial  = tutorial;
 		tutorial.start(activity);
@@ -78,11 +80,15 @@ public class TutorialController {
 	}
 
 	public static void onAddChatItem(ChatItem chatItem, View row, ChatFragment chatFragment) {
-		if (currentTutorial == NO_TUTORIAL) {
-			if (chatTutorial.shouldStart(chatItem, row, chatFragment.getActivity())) {
-				currentTutorial = chatTutorial;
-			}
-		}
+//		if (currentTutorial == NO_TUTORIAL) {
+//			FragmentActivity activity = chatFragment.getActivity();
+//			if (chatTutorial.shouldStart(chatItem, row, activity)) {
+//				currentTutorial = chatTutorial;
+//			}
+//			else if (questionTutorial.shouldStart(chatItem, row, activity)) {
+//				currentTutorial = questionTutorial;
+//			}
+//		}
 		
 		currentTutorial.onAddChatItem(chatItem, row, chatFragment);
 	}
