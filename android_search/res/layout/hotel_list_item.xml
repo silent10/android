@@ -7,27 +7,40 @@
      >
 
     
-    <RelativeLayout
-        android:id="@+id/layoutName"
+    
+     <ImageView
+       android:id="@+id/hotelImage"
+       android:layout_width="72dip"
+       android:layout_height="72dip"
+       android:src="@drawable/slanted_icon_72"
+       android:padding="2dp"
+       android:contentDescription="@string/hotel_image">
+       
+   	  </ImageView>
+    
+     
+    <LinearLayout
+        android:id="@+id/layoutDetails"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/hotelImage"
+        android:orientation="vertical" 
         >
         
-        <RatingBar
-                android:id="@+id/rating"
-                android:layout_width="wrap_content"
-                android:layout_height="22dip"
-                android:isIndicator="true"
-                android:progressDrawable="@drawable/rating_layers_tiny" 
-                android:layout_alignParentRight="true"/>
+        <!--  Row 1:  Name + stars -->
+        <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
     
+            
+            
         <TextView
 	           android:id="@+id/hotelName"
 	           android:layout_width="wrap_content"
 	           android:layout_height="wrap_content"
 	           android:ellipsize="marquee"
-	           android:layout_alignParentLeft="true"
-	           android:layout_toLeftOf="@id/rating"
+	           android:layout_weight="1"
 	           android:marqueeRepeatLimit="marquee_forever"
 	           android:singleLine="true"
 	           android:text="Hotel Name Bla Bla Yada Yada"
@@ -35,67 +48,73 @@
 	           android:textSize="18sp"
 	           android:textStyle="bold" />
 	<!--            android:freezesText="true" -->
-    </RelativeLayout>
+            
+            <RatingBar
+                android:id="@+id/rating"
+                android:layout_width="wrap_content"
+                android:layout_height="20dip"
+                android:layout_weight="0"
+                android:isIndicator="true"
+                android:progressDrawable="@drawable/rating_layers_tiny" 
+                />
     
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/layoutName"
-        >
+        </LinearLayout>
         
-        <ImageView
-	        android:id="@+id/hotelImage"
-	        android:layout_width="72dip"
-	        android:layout_height="72dip"
-	        android:src="@drawable/slanted_icon_72"
-	        android:padding="2dp"
-	        android:contentDescription="@string/hotel_image">
-	        
-	    </ImageView>
-	    
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_toRightOf="@id/hotelImage"
-            android:orientation="vertical"
-            android:paddingLeft="4dip" >
-
-            <TextView
+   	
+        <!--  Row 2: Location -->
+         <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+    
+             <TextView
                 android:id="@+id/hotelLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:ellipsize="marquee"
                 android:singleLine="true"
                 android:text="Located near city center"
                 android:textColor="#ff1f5477" />
+             
+			<TextView
+                     android:id="@+id/hotelDistance"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_weight="0"
+                     android:singleLine="true"
+                     android:text="15Km from you"
+                     android:textColor="#ff2f74a7"
+                     android:textSize="12sp"/>
 
-           
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="2dp" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TripAdvisor reviews: "
-                    android:textColor="#ff7f7f9f"
-                    android:textSize="12sp" />
+		</LinearLayout>
+		
+         
+         <!--  Row 3:  trip advisor + price -->
+         <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+             
+<!--                 <TextView -->
+<!--                     android:layout_width="wrap_content" -->
+<!--                     android:layout_height="wrap_content" -->
+<!--                     android:text="TripAdvisor reviews: " -->
+<!--                     android:textColor="#ff7f7f9f" -->
+<!--                     android:textSize="10sp" /> -->
                 
-                <TextView
-                    android:id="@+id/tripAdvisorRating"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" 
-                    />
+<!--                 <TextView -->
+<!--                     android:id="@+id/tripAdvisorRating" -->
+<!--                     android:layout_width="wrap_content" -->
+<!--                     android:layout_height="wrap_content"  -->
+<!--                     /> -->
                 
-<!--                 <ImageView -->
-<!--                     android:id="@+id/tripAdvisorStrip" -->
-<!--                     android:layout_width="100dip" -->
-<!--                     android:layout_height="20dip" -->
-<!--                     android:contentDescription="@string/trip_advisor_icon" /> -->
+                <ImageView
+                    android:id="@+id/tripAdvisorStrip"
+                    android:layout_width="100dip"
+                    android:layout_height="20dip"
+                    android:contentDescription="@string/trip_advisor_icon" />
                 
                 <TextView
                     android:id="@+id/tripAdvisorReviews"
@@ -106,64 +125,47 @@
                     android:textColor="#ff7f7f9f"
                     android:textSize="12sp" />
 
-
-            </LinearLayout>
-
-            <RelativeLayout
+            
+             <LinearLayout
                 android:id="@+id/layoutBottomRow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                
+                android:layout_weight="0"
+                android:layout_marginLeft="3dip"
+                android:gravity="right|bottom"
                 >
 
-                <TextView
-                    android:id="@+id/perNightTitle"
+                 <TextView
+                    android:id="@+id/textFromTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="4dip"
-                    android:text="@string/per_night"
-                    android:textColor="#ff9f9faf"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
+                    android:text="≥"
+                    android:layout_marginRight="2dip"
+                    android:textColor="#FF9f9faf"
+                    android:textSize="18sp" />
+           
                 <TextView
                     android:id="@+id/pricePerNight"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/perNightTitle"
                     android:text="$180.20"
                     android:textColor="#ff2f74a7"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
+                      
                 <TextView
-                    android:id="@+id/textFromTitle"
+                    android:id="@+id/perNightTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/pricePerNight"
-                    android:layout_marginRight="3dip"
-                    android:layout_marginTop="4dip"
-                    android:text="@string/from"
-                    android:textColor="#FF9f9faf"
+                    android:text="@string/per_night"
+                    android:textColor="#ff9f9faf"
                     android:textSize="14sp"
                     android:textStyle="bold" />
                 
-                 <TextView
-                     android:id="@+id/hotelDistance"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_toLeftOf="@id/textFromTitle"
-                     android:layout_alignParentLeft="true"
-                     android:singleLine="true"
-                     android:text="15Km from you"
-                     android:textColor="#ff2f74a7"
-                     android:textSize="12sp"/>
-            </RelativeLayout>
-            
+            </LinearLayout>
         </LinearLayout>
-    </RelativeLayout>
-
-
+    </LinearLayout>
+            
     
 </RelativeLayout>

@@ -30,7 +30,7 @@ public class HotelListAdapter extends BaseAdapter {
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
 	static Drawable mHotelIcon;
-//	static Drawable mTripadvisorPlaceHolder;
+	static Drawable mTripadvisorPlaceHolder;
 
 	public HotelListAdapter(HotelListFragment parent) {
 
@@ -38,8 +38,8 @@ public class HotelListAdapter extends BaseAdapter {
 		mParent = parent;
 		if (mHotelIcon == null)
 			mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_72);
-//		if (mTripadvisorPlaceHolder == null)
-//			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
+		if (mTripadvisorPlaceHolder == null)
+			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
 	}
 	
 	private List<Hotel>  getHotels() {
@@ -105,8 +105,8 @@ public class HotelListAdapter extends BaseAdapter {
 			convertView = mInflater.inflate(R.layout.hotel_list_item, null);
 			holder = new ViewHolder();
 			holder.image = (ImageView) convertView.findViewById(R.id.hotelImage);
-			//holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
-			holder.tripAdvisorRating = (TextView)convertView.findViewById(R.id.tripAdvisorRating);
+			holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
+//			holder.tripAdvisorRating = (TextView)convertView.findViewById(R.id.tripAdvisorRating);
 			holder.name = (TextView) convertView.findViewById(R.id.hotelName);
 			holder.rate = (TextView) convertView.findViewById(R.id.pricePerNight);
 			holder.layout = (ViewGroup) convertView.findViewById(R.id.hotel_list_item_layout);
@@ -182,17 +182,15 @@ public class HotelListAdapter extends BaseAdapter {
 		loader.loadDrawable(
 				hotel.mainHotelImageTuple.thumbnailUrl.toString(), holder.image, mHotelIcon);
 
-//		double trRating = hotel.tripAdvisorRating;
-//
-//		if (hotel.tripAdvisorRatingUrl == null) {//trRating < TRIP_ADVISOR_GOOD_RATING) {
-//			holder.tripAdvisorStrip.setVisibility(View.GONE);
-//		} else {
+		if (hotel.tripAdvisorRatingUrl == null) {//hotel.tripAdvisorRating < TRIP_ADVISOR_GOOD_RATING) {
+			holder.tripAdvisorStrip.setVisibility(View.GONE);
+		} else {
 			// TODO: show rating instead of just strip?
-			//holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
-		holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
-		holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
-			//loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder);
-//		}
+			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
+//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
+			holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
+			loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder);
+		}
 
 		
 		return convertView;
@@ -201,8 +199,8 @@ public class HotelListAdapter extends BaseAdapter {
 	private static class ViewHolder {
 		public TextView reviews;
 		public ViewGroup layout;
-		//public ImageView tripAdvisorStrip;
-		TextView tripAdvisorRating;
+		public ImageView tripAdvisorStrip;
+//		TextView tripAdvisorRating;
 		ImageView image;
 		TextView name;
 		TextView rate;
