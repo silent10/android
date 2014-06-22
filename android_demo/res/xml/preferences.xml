@@ -5,49 +5,43 @@
 	
 	
     
-     <EditTextPreference
-         android:key="eva_key"
-         android:summary="Leave blank for default"
-         android:title="Eva API Key"
-      	/>
-     <EditTextPreference
-         android:key="eva_site_code"
-         android:summary="Leave blank for default"
-         android:title="Site Code"
-      	/>    
+<!--      <EditTextPreference -->
+<!--          android:key="eva_key" -->
+<!--          android:summary="Leave blank for default" -->
+<!--          android:title="Eva API Key" -->
+<!--       	/> -->
+<!--      <EditTextPreference -->
+<!--          android:key="eva_site_code" -->
+<!--          android:summary="Leave blank for default" -->
+<!--          android:title="Site Code" -->
+<!--       	/>     -->
       	
-      	 <EditTextPreference
-            android:key="eva_vproxy_host"
-            android:summary="Leave blank for default"
-            android:title="VProxy Host"
-         	/>
+<!--       	 <EditTextPreference -->
+<!--             android:key="eva_vproxy_host" -->
+<!--             android:summary="Leave blank for default" -->
+<!--             android:title="VProxy Host" -->
+<!--          	/> -->
         
-        <EditTextPreference
-            android:key="eva_webservice_host"
-            android:summary="Leave blank for default"
-            android:title="EVA WS Host"
-         	/>
+<!--         <EditTextPreference -->
+<!--             android:key="eva_webservice_host" -->
+<!--             android:summary="Leave blank for default" -->
+<!--             android:title="EVA WS Host" -->
+<!--          	/>       	 -->
         
-        <EditTextPreference
-            android:key="eva_api_ver_host"
-            android:summary="Leave blank for default"
-            android:title="API Version"
-         	/>
-         	
+<!--         <EditTextPreference -->
+<!--             android:key="eva_api_ver_host" -->
+<!--             android:summary="Leave blank for default" -->
+<!--             android:title="API Version" -->
+<!--          	/> -->
         
-        <EditTextPreference
-            android:key="eva_api_ver_host"
-            android:summary="Leave blank for default"
-            android:title="API Version"
-         	/>
+<!--         <ListPreference  -->
+<!--             android:key="eva_vr_service" -->
+<!--             android:title="Preferred Voice Recognition service" -->
+<!--             android:summary="" -->
+<!--             android:entries="@array/entries_vr_service" -->
+<!--             android:entryValues="@array/entryvalues_vr_service" -->
+<!--             /> -->
         
-        <ListPreference 
-            android:key="eva_vr_service"
-            android:title="Preferred Voice Recognition service"
-            android:summary=""
-            android:entries="@array/entries_vr_service"
-            android:entryValues="@array/entryvalues_vr_service"
-            />
         <CheckBoxPreference
             android:key="save_pcm"
             android:summary="@string/save_recording_pcm_file_wav_"

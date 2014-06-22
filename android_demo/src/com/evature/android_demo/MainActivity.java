@@ -30,7 +30,7 @@ import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
 import com.evature.util.Log;
 
-public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
+public class MainActivity extends EvaBaseActivity /*implements OnSharedPreferenceChangeListener*/ {
 	
 	// default values  - can be overwritten by preferences
 	private static final String API_KEY = "<put your api-key here>";
@@ -52,9 +52,14 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 			edit.putString(EvaComponent.VRSERV_PREF_KEY, "google_local");
 			edit.apply();
 		}
+//		Editor edit = sharedPreferences.edit();
+//		edit.putString(EvaComponent.VPROXY_HOST_PREF_KEY, "http://ec2-54-87-254-109.compute-1.amazonaws.com:8000");
+//		edit.apply();
+				
 		super.onCreate(savedInstanceState);
 		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
 		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
+
 		eva.registerPreferenceListener();
 		setContentView(R.layout.activity_main);
 		
@@ -63,11 +68,11 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		recordButton = (Button) findViewById(R.id.button_start);
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	if ("google_local".equals(eva.getVrService())) {
-        			eva.searchWithLocalVoiceRecognition(4);
-        			return;
-        		}
-            	
+//            	if ("google_local".equals(eva.getVrService())) {
+//        			eva.searchWithLocalVoiceRecognition(4);
+//        			return;
+//        		}
+//            	
             	searchWithVoice("voice");
             }
         });
@@ -167,12 +172,12 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 	}
 
 
-	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-			String key) {
-		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
-		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
-	}
+//	@Override
+//	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+//			String key) {
+//		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
+//		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
+//	}
 
 	
 

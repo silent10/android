@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<color name="sayit">#ffa9ffa9</color>
-	<color name="procssed">#ffd5d9a9</color>
+	<color name="procssed">#fff5f9b9</color>
 	<color name="warn">#ffffb9a9</color>
 	<color name="text">#ffefefef</color>
 	<color name="bg">#333</color>
