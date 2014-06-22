@@ -10,10 +10,10 @@
     
     
     
-    <item
-        android:id="@+id/tutorial"
-        android:title="@string/tutorial">
-    </item>
+<!--     <item -->
+<!--         android:id="@+id/tutorial" -->
+<!--         android:title="@string/tutorial"> -->
+<!--     </item> -->
     
     <item
         android:id="@+id/faq"
@@ -30,9 +30,9 @@
         
         android:title="@string/report_a_bug">
     </item>
-   <!--  <item
+    <item
         android:id="@+id/about"
         android:title="@string/about">
-    </item> -->
+    </item>
 
 </menu>

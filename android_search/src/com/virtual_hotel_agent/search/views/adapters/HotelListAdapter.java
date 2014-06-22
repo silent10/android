@@ -25,7 +25,7 @@ import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 public class HotelListAdapter extends BaseAdapter {
 
 //	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
-	private static final double DISTANCE_DELTA = 50;
+	private static final double DISTANCE_DELTA = 200;
 	private static final String TAG = "HotelListAdapter";
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
@@ -151,7 +151,7 @@ public class HotelListAdapter extends BaseAdapter {
 		if (distance > 0 && distance < DISTANCE_DELTA) {
 			DecimalFormat distanceFormat = new DecimalFormat("#.#");
 			String formattedDistance = distanceFormat.format(distance);
-			holder.distance.setText(formattedDistance + "km from you");
+			holder.distance.setText(formattedDistance + "km");
 		} else {
 			holder.distance.setVisibility(View.GONE);
 		}
