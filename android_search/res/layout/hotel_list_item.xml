@@ -24,6 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/hotelImage"
+        android:padding="2dip"
         android:orientation="vertical" 
         >
         
@@ -53,6 +54,7 @@
                 android:id="@+id/rating"
                 android:layout_width="wrap_content"
                 android:layout_height="20dip"
+                android:layout_marginTop="2dip"
                 android:layout_weight="0"
                 android:isIndicator="true"
                 android:progressDrawable="@drawable/rating_layers_tiny" 
@@ -80,10 +82,12 @@
 			<TextView
                      android:id="@+id/hotelDistance"
                      android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
+                     android:layout_height="22sp"
+                     android:gravity="center"
                      android:layout_weight="0"
                      android:singleLine="true"
-                     android:text="15Km from you"
+                     android:drawableLeft="@drawable/target"
+                     android:text="15Km"
                      android:textColor="#ff2f74a7"
                      android:textSize="12sp"/>
 

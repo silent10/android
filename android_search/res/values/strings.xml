@@ -2,15 +2,11 @@
 <resources>
 
     <string name="app_name">Virtual Hotel Agent</string>
-<!--     <string name="lots_of_text">This is a cool Travel Search application for which we did not write the about text yet.\n -->
-<!-- We will, someday.\n -->
-<!-- We promise.\n -->
-<!-- \n -->
-<!-- Using:\n -->
-<!--   Expedia API for hotel search.\n -->
-<!-- \n -->
-<!-- Check us out at\n -->
-<!-- \nhttp://www.evature.com\n</string> Vayant API for travel search.\n -->
+    <string name="lots_of_text">
+          Hotel Rating and Reviews powered by TripAdvisor.\n
+		  Hotel Search and booking by Expedia.\n
+		  Text parsing by Evature.\n
+	</string> 
     <string name="help_text">	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".</string>
     <string name="ok_button">OK, got it.</string>
     <string name="_ok">OK</string>

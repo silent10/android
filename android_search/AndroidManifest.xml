@@ -72,6 +72,14 @@
              />
         
         <activity
+            android:name="com.virtual_hotel_agent.search.controllers.activities.AboutDialog"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Holo.Light.Dialog"
+             />
+        
+        <activity
             android:name="com.virtual_hotel_agent.search.controllers.activities.VolumeSettingsDialog"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
