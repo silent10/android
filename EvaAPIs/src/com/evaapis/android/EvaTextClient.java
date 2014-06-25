@@ -32,6 +32,8 @@ import com.evature.util.Log;
 		private int mResponseId;
 		private long startOfTextSearch;
 		private boolean mEditLastUtterance;
+
+		private String recordingKey;
 		
 		/****
 		 * 
@@ -139,6 +141,9 @@ import com.evature.util.Log;
 			if (mEditLastUtterance) {
 				evatureUrl += "&edit_last_utterance=true";
 			}
+			if (recordingKey != null) {
+				evatureUrl += "&recording_key="+recordingKey;
+			}
 			Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
 			try {
 				String result = DownloadUrl.sget(evatureUrl);
@@ -171,6 +176,10 @@ import com.evature.util.Log;
 			}
 						
 			mEva.onEvaReply(apiReply, mCookie);
+		}
+
+		public void setRecordingKey(String recordingKey) {
+			this.recordingKey= recordingKey;
 		}
 		
 	}

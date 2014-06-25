@@ -3,8 +3,6 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 	
-	
-    
      <EditTextPreference
          android:key="eva_key"
          android:summary="Leave blank for default"
@@ -27,13 +25,6 @@
             android:summary="Leave blank for default"
             android:title="EVA WS Host"
          	/>
-        
-        <EditTextPreference
-            android:key="eva_api_ver_host"
-            android:summary="Leave blank for default"
-            android:title="API Version"
-         	/>
-         	
         
         <EditTextPreference
             android:key="eva_api_ver_host"
