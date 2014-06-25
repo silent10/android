@@ -38,8 +38,10 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
@@ -94,7 +96,7 @@ public class EvaVoiceClient {
 		this.editLastUtterance = editLastUtterance; 
 	}
 
-	private HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyManagementException
+	private static HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyManagementException
 	{
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setContentCharset(params, "UTF-8");
@@ -352,9 +354,57 @@ public class EvaVoiceClient {
 				httpclient.getConnectionManager().shutdown();
 			mInTransaction = false;
 		}
-
 	}
 	
+	public static void sendAudioFile(Context context, EvaComponent.EvaConfig config, Uri fileuri, String filekey) {
+		HttpClient httpclient = null;
+		try {
+			httpclient = getHttpClient();
+
+			String host = config.vproxyHost.toLowerCase();
+			if (host.startsWith("http") == false) {
+				host = "https://"+host;
+			}
+			
+			String url = host+"/save_to_s3/"+filekey;
+			Log.i(TAG,"<<< Sending audio file to URI: "+url);
+
+		    HttpPost httppost = new HttpPost(url);
+		    ContentResolver contentResolver = context.getContentResolver();
+		    InputStreamEntity reqEntity =  new InputStreamEntity( contentResolver.openInputStream(fileuri), -1); //new FileInputStream(file), -1);
+		    reqEntity.setContentType("audio/amr");
+//		    reqEntity.setChunked(true);
+		    httppost.setEntity(reqEntity);
+			long t0 = System.nanoTime();
+			HttpResponse response = httpclient.execute(httppost);
+			long t1 = System.nanoTime();
+			Log.d(TAG, "Response: code="+ response.getStatusLine().getStatusCode()+ ";   Time spent uploading audio file = "+ ((t1 - t0) / 1000000));
+			if( httpclient != null ) {
+				httpclient.getConnectionManager().shutdown();
+				httpclient = null;
+			}
+		}
+		catch (IOException e) {
+			if (e.getMessage().equals("Connection already shutdown")) {
+				Log.i(TAG, "Connection already shutdown");
+			}
+			else {
+				Log.e(TAG, "Exception sending audio file", e);
+			}
+		}
+		catch(Exception e)	{
+			Log.e(TAG, "Exception sending audio file", e);
+		}
+		finally {
+			// When HttpClient instance is no longer needed, 
+			// shut down the connection manager to ensure
+			// immediate deallocation of all system resources
+			if( httpclient != null ) 
+				httpclient.getConnectionManager().shutdown();
+		}
+	}
+	
+
 	public void stopTransfer()
 	{
 		if(getInTransaction())

@@ -33,6 +33,7 @@
         
         <activity android:name="com.evaapis.android.EvaSpeechRecognitionActivity" android:screenOrientation="portrait"></activity>
     
+        <activity android:name="com.evature.evaspeechrecognition.SpeechRecognitionActivity"></activity>
     </application>
 
 </manifest>

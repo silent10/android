@@ -91,7 +91,6 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
         responseText = (TextView) findViewById(R.id.textView_response_text);
 	}
 
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -123,6 +122,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		try {
 			startOverButton.setVisibility(View.VISIBLE);
 			String replyStr = reply.JSONReply.toString(2);
+//			Log.d(TAG, "Reply is: "+replyStr);
 			SpannableString replySpan = new SpannableString(replyStr);
 			
 			Resources resources = getResources();
@@ -130,6 +130,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 			int col = resources.getColor(R.color.sayit);
 			Matcher matcher = sayitPatten.matcher(replyStr);
 			while (matcher.find()) {
+//				Log.d(TAG, "Found sayit: "+matcher.start(1) + "-" + (matcher.end(1)+1));
 				replySpan.setSpan( new ForegroundColorSpan(col), matcher.start(1), matcher.end(1)+1, 0);
 			}
 			
@@ -147,6 +148,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 					}
 					int start = matcher.start(1)+warning.position;
 					int end = matcher.start(1)+warning.position+warning.text.length();
+//					Log.d(TAG, "Found warning: "+start + "-" + (end+1));
 					replySpan.setSpan( new ForegroundColorSpan(warn), start, end, 0);
 					replySpan.setSpan( new StyleSpan(Typeface.ITALIC), start, end, 0);
 				}
