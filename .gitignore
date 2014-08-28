@@ -7,3 +7,5 @@ deadcode/
 makefile
 *.apk
 key_store
+keys.xml
+R.java
