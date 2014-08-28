@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
+        android:name="com.evature.android_demo.DemoApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -32,8 +33,6 @@
         <activity android:name="com.evature.android_demo.DemoPreferences"></activity>
         
         <activity android:name="com.evaapis.android.EvaSpeechRecognitionActivity" android:screenOrientation="portrait"></activity>
-    
-        <activity android:name="com.evature.evaspeechrecognition.SpeechRecognitionActivity"></activity>
     </application>
 
 </manifest>

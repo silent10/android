@@ -55,6 +55,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 		super.onCreate(savedInstanceState);
 		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
 		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
+		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 		eva.registerPreferenceListener();
 		setContentView(R.layout.activity_main);
 		
