@@ -5,12 +5,12 @@
 	
      <EditTextPreference
          android:key="eva_key"
-         android:summary="Leave blank for default"
+         android:summary=""
          android:title="Eva API Key"
       	/>
      <EditTextPreference
          android:key="eva_site_code"
-         android:summary="Leave blank for default"
+         android:summary=""
          android:title="Site Code"
       	/>    
       	
