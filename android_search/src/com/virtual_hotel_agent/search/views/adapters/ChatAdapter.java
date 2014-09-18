@@ -66,8 +66,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	@Override
 	public ChatItem getItem(int position) {
 		// todo: if some items are collapsed then count from start and skip them
-		if (position > mChatList.size()) {
+		if (position >= mChatList.size()) {
 			VHAApplication.logError(TAG, "Accessing chat item "+position+" but size is "+mChatList.size());
+			return null;
 		}
 		ChatItem chatItem = mChatList.get(position);
 		return chatItem;

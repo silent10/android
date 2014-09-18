@@ -17,8 +17,16 @@ public class FlowElement {
 		Flight,
 		Hotel,
 		Car,
+		Cruise, 
+		Train,
+		Explore, 
+
 		Question,
-		Statement
+		Answer, 
+		Statement,
+		Service,
+		
+		Other
 	}
 	public TypeEnum Type;
 	public EvaLocation[] RelatedLocations;
@@ -43,6 +51,10 @@ public class FlowElement {
 		
 		try {
 			Type = TypeEnum.valueOf(jFlowElement.getString("Type"));
+		}
+		catch(IllegalArgumentException e) {
+			Log.w(TAG, "Unexpected Flow Type in Flow element", e);
+			Type = TypeEnum.Other;
 		}
 		catch(JSONException e) {
 			Log.e(TAG, "Bad EVA reply! no Type in Flow element", e);
