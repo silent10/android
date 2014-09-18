@@ -301,12 +301,12 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 					ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
 					if (audioUri == null) {
 						Log.d(TAG, "No voice file url");
-						searchWithMultipleText(matches, "google voice", false);
+						searchWithMultipleText(matches, voiceActivityCookie, false);
 					}
 					else {
 						String recordingKey = SpeechRecognition.getRecordingKey(activity, data);
 						Log.d(TAG, "Voice file url: "+audioUri);
-						searchWithMultipleText(matches, "google voice", false, recordingKey); 
+						searchWithMultipleText(matches, voiceActivityCookie, false, recordingKey); 
 					}
 				}
 				break;
@@ -400,7 +400,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
 	}
 	
-	public void searchWithLocalVoiceRecognition(int nbest) {
+	public void searchWithLocalVoiceRecognition(int nbest, Object cookie) {
 //		// Fire an intent to start the speech recognition activity.
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 //		// Specify the calling package to identify your application (optional step)
@@ -419,6 +419,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		SpeechRecognition.requestRecordingKey(intent);
 		
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_GOOGLE);
+		voiceActivityCookie = cookie;
 		
 //		SpeechRecognizer recognizer = SpeechRecognizer
 //	            .createSpeechRecognizer(activity.getApplicationContext());

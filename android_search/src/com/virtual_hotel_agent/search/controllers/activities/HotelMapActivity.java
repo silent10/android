@@ -66,6 +66,13 @@ public class HotelMapActivity extends RoboFragmentActivity {
 		String latitudeString = extras.getString(HOTEL_LATITUDE);
 		String snippet = extras.getString(HOTEL_SNIPPET);
 		// String city = extras.getString(HOTEL_CITY);
+		
+		if (name == null || longitudeString == null || latitudeString == null) {
+			return;
+		}
+		if (snippet == null) {
+			snippet = "";
+		}
 
 		Double longitude = Double.valueOf(longitudeString);
 		Double latitude = Double.valueOf(latitudeString);

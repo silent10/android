@@ -587,7 +587,14 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		// MainActivity.this.eva.searchWithVoice("voice");
 		
 		if ("google_local".equals(VHAApplication.EVA.getVrService())) {
-			VHAApplication.EVA.searchWithLocalVoiceRecognition(4);
+			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, VOICE_COOKIE);
+			Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+			if (defaultTracker != null) 
+				defaultTracker.send(MapBuilder
+					    .createEvent("native_speech_search", "native_speech_search_start", "", editLastUtterance ? 1l: 0l)
+					    .build()
+					   );
+			
 			return;
 		}
 		
