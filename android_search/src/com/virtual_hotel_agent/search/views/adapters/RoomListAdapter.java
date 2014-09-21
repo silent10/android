@@ -231,6 +231,16 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		return groupPosition;
 	}
 
+	static String splitCamelCase(String s) {
+		   return s.replaceAll(
+		      String.format("%s|%s|%s",
+		         "(?<=[A-Z])(?=[A-Z][a-z])",
+		         "(?<=[^A-Z])(?=[A-Z])",
+		         "(?<=[A-Za-z])(?=[^A-Za-z])"
+		      ),
+		      " "
+		   );
+		}
 
 
 	@Override
@@ -309,9 +319,9 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			text.append("&lt;b&gt;Surcharges&lt;/b&gt; &lt;ul&gt;");
 			for (String surchargeType: room.rate.chargeable.surcharges.keySet()) {
 				text.append("&lt;li&gt;")
-					.append(surchargeType)
+					.append(RoomListAdapter.splitCamelCase(surchargeType))
 					.append(": ")
-					.append(room.rate.chargeable.surcharges.get(surchargeType)) // TODO: formatting
+					.append(room.rate.chargeable.surcharges.get(surchargeType))
 					.append(dollar)
 					.append("&lt;/li&gt;");
 			}

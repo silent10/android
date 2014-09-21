@@ -42,11 +42,11 @@
 # fix error on export - http://stackoverflow.com/questions/2680827/conversion-to-dalvik-format-failed-with-error-1-on-external-jar
 -optimizations !code/allocation/variable
 
-# Actionbar sherlock  - http://actionbarsherlock.com/faq.html
-#-keep class android.support.v4.app.** { *; }
-#-keep interface android.support.v4.app.** { *; }
-#-keep class com.actionbarsherlock.** { *; }
-#-keep interface com.actionbarsherlock.** { *; }
+# ActionBarSherlock 
+-keep class android.support.** { *; } 
+-keep interface android.support.** { *; } 
+-keep class com.actionbarsherlock.** { *; } 
+-keep interface com.actionbarsherlock.** { *; }
 
 # play services - http://developer.android.com/google/play-services/setup.html
 -keep class * extends java.util.ListResourceBundle {

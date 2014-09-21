@@ -65,7 +65,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	if ("google_local".equals(eva.getVrService())) {
-        			eva.searchWithLocalVoiceRecognition(4);
+        			eva.searchWithLocalVoiceRecognition(4, null);
         			return;
         		}
             	
