@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,6 +100,12 @@ import com.evature.util.Log;
 			if (mEva.getLocale() != null) {
 				evatureUrl += ("&locale="+ mEva.getLocale());
 			}
+			else {
+				Locale currentLocale = Locale.getDefault();
+				evatureUrl += "&locale="+ currentLocale.getLanguage()+"_"+currentLocale.getCountry(); 
+			}
+			
+			
 			if (mEva.getDeviceId() != null) {
 				evatureUrl += "&uid="+mEva.getDeviceId();
 			}
@@ -113,6 +121,14 @@ import com.evature.util.Log;
 			if (mEva.mConfig.appVersion != null) {
 				evatureUrl += "&app_version="+ mEva.mConfig.appVersion;
 			}
+			try {
+				evatureUrl += "&timezone="+URLEncoder.encode("UTC+"+TimeZone.getDefault().getRawOffset()/3600000.0, "UTF-8");
+				evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.SDK_INT), "UTF-8");
+				evatureUrl += "&device="+URLEncoder.encode(android.os.Build.MODEL, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				Log.e(TAG, "UnsupportedEncodingException", e);
+			}
+			
 			if (mNBest != null) {
 				for (String input: mNBest) {
 					try {
@@ -129,10 +145,10 @@ import com.evature.util.Log;
 					Log.e(TAG, "UnsupportedEncodingException", e); 
 				}
 			}
-			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
-			if (externalIpAddress != null) {
-				evatureUrl += ("&ip_addr=" + externalIpAddress);
-			}
+//			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
+//			if (externalIpAddress != null) {
+//				evatureUrl += ("&ip_addr=" + externalIpAddress);
+//			}
 			double latitude = EvatureLocationUpdater.getLatitude();
 			if (latitude != EvatureLocationUpdater.NO_LOCATION) {
 				double longitude = EvatureLocationUpdater.getLongitude();

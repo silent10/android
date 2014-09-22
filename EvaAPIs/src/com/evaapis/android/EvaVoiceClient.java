@@ -17,6 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -166,6 +168,15 @@ public class EvaVoiceClient {
 		if (mConfig.locale != null) {
 			qparams.add(new BasicNameValuePair("locale", mConfig.locale));
 		}
+		else {
+			Locale currentLocale = Locale.getDefault();
+			qparams.add(new BasicNameValuePair("locale", currentLocale.getLanguage()+"_"+currentLocale.getCountry())); 
+		}
+		
+		qparams.add(new BasicNameValuePair("timezone", "UTC+"+TimeZone.getDefault().getRawOffset()/3600000.0));
+		
+		qparams.add(new BasicNameValuePair("android_ver", String.valueOf(android.os.Build.VERSION.SDK_INT)));
+		qparams.add(new BasicNameValuePair("device", android.os.Build.MODEL));
 		
 		if (editLastUtterance) {
 			qparams.add(new BasicNameValuePair("edit_last_utterance", "true"));
