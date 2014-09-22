@@ -11,8 +11,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> <!--  needed for debug - saving PCM or Flac files -->
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />      <!--  needed for getDeviceID() for uid param -->
 
     <application
         android:name="com.evature.android_demo.DemoApplication"

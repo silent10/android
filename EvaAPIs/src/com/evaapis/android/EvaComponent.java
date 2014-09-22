@@ -2,10 +2,8 @@ package com.evaapis.android;
 
 
 import java.io.Serializable;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Locale;
-import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +24,6 @@ import android.telephony.TelephonyManager;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.evaspeechrecognition.SpeechRecognition;
-import com.evature.util.ExternalIpAddressGetter;
 import com.evature.util.Log;
 
 
@@ -69,7 +66,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
 
-	private ExternalIpAddressGetter mExternalIpAddressGetter;
+//	private ExternalIpAddressGetter mExternalIpAddressGetter;
 	private EvatureLocationUpdater mLocationUpdater;
 	
 	Activity activity;
@@ -118,7 +115,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		this.activity = activity;
 		this.replyListener = replyListener;
 		mLocationUpdater = new EvatureLocationUpdater();
-		mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
+		//mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
 	}
 	
 	public EvaComponent(Activity activity, EvaSearchReplyListener replyListener, EvaConfig config) {
@@ -132,7 +129,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		getDeviceId(); // fill the device Id in the mConfig
 		this.replyListener = replyListener;
 		mLocationUpdater = new EvatureLocationUpdater();
-		mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
+		//mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
 	}
 	
 	public void speak(String sayIt) {
@@ -174,14 +171,14 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public void onPause()
 	{
-		mExternalIpAddressGetter.pause();
+//		mExternalIpAddressGetter.pause();
 		mLocationUpdater.stopGPS();
 	}
 	
 	
 	// Request updates at startupResults
 	public void onResume() {
-		mExternalIpAddressGetter.start();
+//		mExternalIpAddressGetter.start();
 		mLocationUpdater.startGPS();
 	}
 	
