@@ -381,9 +381,9 @@ public class MainView {
 	public void toggleMainButtons(boolean showMainButtons) {
 		mainButtonsShown = showMainButtons;
 		mBottomBar.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
+		mViewPager.invalidate();
+		mTabs.invalidate();
 	}
-		
-	
 	
 	//  Tabs handling
 
@@ -443,7 +443,10 @@ public class MainView {
 			mReservationFragment = null;
 		}
 		
-
+		@Override public void destroyItem(android.view.ViewGroup container, int position, Object object) {
+			Log.d(TAG, "Ignoring destroyItem at position "+position);
+		};
+		
 	    @Override
 	    public int getItemPosition(Object object){
 	        return POSITION_NONE;

@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ import org.json.JSONObject;
 
 import com.evature.util.Log;
 
-public class HotelAttributes {
+public class HotelAttributes  implements Serializable {
 	private static final String TAG = "HotelAttributes";
 
 	// The chain of the hotel (e.g. Sheraton)

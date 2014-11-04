@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -162,7 +163,7 @@ public class EvaVoiceClient {
 		}
 		
 		if (mConfig.language != null) {
-			qparams.add(new BasicNameValuePair("language", mConfig.language));
+			qparams.add(new BasicNameValuePair("language", mConfig.language.replaceAll("-.*$", "")));
 		}
 		
 		if (mConfig.locale != null) {
@@ -170,13 +171,14 @@ public class EvaVoiceClient {
 		}
 		else {
 			Locale currentLocale = Locale.getDefault();
-			qparams.add(new BasicNameValuePair("locale", currentLocale.getLanguage()+"_"+currentLocale.getCountry())); 
+			qparams.add(new BasicNameValuePair("locale", currentLocale.getCountry())); 
 		}
 		
 		qparams.add(new BasicNameValuePair("timezone", "UTC+"+TimeZone.getDefault().getRawOffset()/3600000.0));
 		
 		qparams.add(new BasicNameValuePair("android_ver", String.valueOf(android.os.Build.VERSION.SDK_INT)));
 		qparams.add(new BasicNameValuePair("device", android.os.Build.MODEL));
+
 		
 		if (editLastUtterance) {
 			qparams.add(new BasicNameValuePair("edit_last_utterance", "true"));

@@ -28,6 +28,7 @@ import org.acra.ErrorReporter;
 
 import roboguice.event.Observes;
 import android.app.AlertDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,6 +43,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.speech.RecognizerIntent;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -126,6 +128,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	
 	private List<String> mTabTitles;
 	@Inject Injector injector;
+	@Inject private ChatItemList mChatListModel;
 	
 	//SearchVayantTask mSearchVayantTask;
 	//SearchTravelportTask mSearchTravelportTask;
@@ -136,14 +139,15 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	static private RoomsUpdaterTask mRoomUpdater = null;
 	static private HotelDownloaderTask mHotelDownloader = null;
 	
-	private ChatItem storeVoiceResultInChatItem = null;
-
 	private EvaSpeechComponent speechSearch = null;
 	
 	MainView mainView;
 
 
 	private MenuItem soundControlMenuItem;
+
+
+	private long lastEvaReply = -1;
 
 
 	@Override
@@ -158,6 +162,27 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 // Handle the results from the speech recognition activity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case EvaComponent.VOICE_RECOGNITION_REQUEST_CODE_GOOGLE:
+				// store the text in a new or existing chat-item
+				if (data != null && data.getExtras() != null) {
+					Bundle bundle = data.getExtras();
+					ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
+					if (matches.size() > 0) {
+						if (VOICE_COOKIE.storeResultInItem == null) {
+							ChatItem newChatItem = new ChatItem(matches.get(0));
+							VOICE_COOKIE.storeResultInItem = newChatItem;
+							addChatItem(newChatItem);
+						} else {
+							VOICE_COOKIE.storeResultInItem.setChat(matches.get(0));
+						}
+					}
+				}
+			break;
+			default:
+			break;
+		}
+
 		VHAApplication.EVA.onActivityResult(requestCode, resultCode, data);
 		
 		super.onActivityResult(requestCode, resultCode, data);
@@ -169,9 +194,16 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
 
 
-	// cookies are returned onEvaReply are those passed to the search query 
+	static class VoiceCookie {
+		ChatItem storeResultInItem;
+	}
+
+	// Different requests to Eva all come back to the same callback (onEvaReply)
+	// (eg text vs voice, add vs delete or replace)
+	// the "cookie" parameter that you use for the request is returned in the
+	// callback, so you can differentiate between the different calls
+	private static final VoiceCookie VOICE_COOKIE = new VoiceCookie();
 	private static final Object DELETED_UTTERANCE_COOKIE = new Object();
-	private static final Object VOICE_COOKIE = new Object();
 	private static final Object TEXT_TYPED_COOKIE = new Object();
 	 /*
 	   * Given a URI, returns a map of campaign data that can be sent with
@@ -237,17 +269,37 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	
 	@Override
 	public void onStop() {
-	    super.onStop();
 	    cancelBackgroundThreads();
 	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+	    super.onStop();
 	}
 	
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+	    super.onNewIntent(intent);
+	    // getIntent() should always return the most recent
+	    setIntent(intent);
+	}
 	
 	@Override 
 	public void onResume() {
 		Log.d(TAG, "onResume()");
-		VHAApplication.EVA.onResume();
 		super.onResume();
+		
+		Intent myIntent = getIntent();
+		if ("com.google.android.gms.actions.SEARCH_ACTION".equals(myIntent.getAction())) {
+			VHAApplication.EVA.resetSession();
+			VHAApplication.EVA.stopSearch();
+			clearChatList();
+			String searchString = myIntent.getStringExtra(SearchManager.QUERY);
+			ChatItem chat = new ChatItem(searchString);
+			addChatItem(chat);
+			VOICE_COOKIE.storeResultInItem = chat;
+			VHAApplication.EVA.searchWithText(searchString, VOICE_COOKIE, false);
+		}
+		
+		VHAApplication.EVA.onResume();
 //		setDebugData(DebugTextType.None, null);
 		
 		VolumeUtil.register(this, this);
@@ -306,8 +358,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		mainView = new MainView(this, injector, mTabTitles);
 		TutorialController.mainView = mainView; // accessible to all tutorials
 		
-		clearChatList();
-
+		if (savedInstanceState == null) {
+			clearChatList();
+		}
+		
 	
 		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -336,7 +390,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		// onActivityResult(VOICE_RECOGNITION_REQUEST_CODE, RESULT_OK, data);
 		
 	}
-		
+	
 	@Override
 	public void onBackPressed() {
 	   Log.d(TAG, "onBackPressed Called");
@@ -483,6 +537,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		// Save UI state changes to the savedInstanceState.
 		// This bundle will be passed to onCreate if the process is killed and restarted.
+		Log.d(TAG, "onSaveInstanceState");
 		try {
 			super.onSaveInstanceState(savedInstanceState);
 		}
@@ -491,8 +546,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 			VHAApplication.logError(TAG, "Illegal state while saving instance state in main activity", e);
 		}
 
+		savedInstanceState.putLong("lastEvaReply", lastEvaReply);
+		
 		// savedInstanceState.putBoolean("mTtsWasConfigured", mSpeechToTextWasConfigured);
-		// savedInstanceState.putString("mExternalIpAddress", mExternalIpAddress);
 		savedInstanceState.putStringArrayList("mTabTitles", (ArrayList<String>) mTabTitles);
 	}
 
@@ -502,7 +558,6 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		// Restore UI state from the savedInstanceState.
 		// This bundle has also been passed to onCreate.
 		// restore state:
-		// mExternalIpAddress = savedInstanceState.getString("mExternalIpAddress");
 		// mSpeechToTextWasConfigured = savedInstanceState.getBoolean("mTtsWasConfigured");
 	}
 	
@@ -535,20 +590,20 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		//mainView.setCurrentItem(mainView.getChatTabIndex());
 	}
 	
-	private String handleChat(EvaApiReply apiReply) {
-		if (!apiReply.isFlightSearch() && !apiReply.isHotelSearch() && (apiReply.chat != null)) {
-			if (apiReply.chat.hello != null && apiReply.chat.hello) {
-				return "Why, Hello there!";
-			}
-			if (apiReply.chat.who != null && apiReply.chat.who) {
-				return "I'm your virtual hotel agent";
-			}
-			if (apiReply.chat.meaningOfLife != null && apiReply.chat.meaningOfLife) {
-				return "Staying in awesome hotels, of course!";
-			}
-		}
-		return null;
-	}
+//	private String handleChat(EvaApiReply apiReply) {
+//		if (!apiReply.isFlightSearch() && !apiReply.isHotelSearch() && (apiReply.chat != null)) {
+//			if (apiReply.chat.hello != null && apiReply.chat.hello) {
+//				return "Why, Hello there!";
+//			}
+//			if (apiReply.chat.who != null && apiReply.chat.who) {
+//				return "I'm your virtual hotel agent";
+//			}
+//			if (apiReply.chat.meaningOfLife != null && apiReply.chat.meaningOfLife) {
+//				return "Staying in awesome hotels, of course!";
+//			}
+//		}
+//		return null;
+//	}
 
 
 //	public void setVayantReply(JSONObject response) {
@@ -597,7 +652,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 		
 		TutorialController.onMicrophonePressed(this);
 		
-		storeVoiceResultInChatItem = chatItem;
+		VOICE_COOKIE.storeResultInItem = chatItem;
 		
 		VHAApplication.EVA.speak("");
 		Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
@@ -679,6 +734,8 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 
+		lastEvaReply  = System.currentTimeMillis();
+		
 		if (VHAApplication.AcraInitialized) {
 			ErrorReporter bugReporter = ACRA.getErrorReporter();
 			String itemsStr = bugReporter.getCustomData(ITEMS_IN_SESSION);
@@ -740,10 +797,9 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 				}
 			}
 			if (chat != null) {
-				if (storeVoiceResultInChatItem != null) {
+				if (VOICE_COOKIE.storeResultInItem != null) {
 					// this voice recognition replaces the last utterance
-					mainView.getChatFragment().voiceResponseToChatItem(storeVoiceResultInChatItem, chat);
-					storeVoiceResultInChatItem = null;
+					mainView.getChatFragment().voiceResponseToChatItem(VOICE_COOKIE.storeResultInItem, chat);
 				}
 				else {
 					addChatItem(new ChatItem(chat));
@@ -1121,8 +1177,6 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	}
 
 
-	@Inject private ChatItemList mChatListModel;
-
 	/**
 	 * Listener to Room-information request complete
 	 */
@@ -1246,10 +1300,10 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 //		if (isNewSession() == false) {
 			mainView.setCurrentItem(mainView.getChatTabIndex());
 			VHAApplication.EVA.resetSession();
+			VHAApplication.EVA.stopSearch();
 			ChatItem myChat = new ChatItem(ChatItem.START_NEW_SESSION);
 			addChatItem(myChat);
 			String greeting = "Starting a new search. How may I help you?";
-			
 			int pos = greeting.length();
 			String seeExamples = "\nClick here to see some examples.";
 			SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));

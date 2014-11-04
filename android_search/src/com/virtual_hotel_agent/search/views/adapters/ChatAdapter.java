@@ -190,14 +190,14 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			
 		case Me:
 //			TextView icon = (TextView)row.findViewById(R.id.icon);
-			if (chatItem.isInSession()) {
-				label.setTextColor(myChatInSessionText);
-//				icon.setTextColor(myChatInSessionText);
-			}
-			else {
+//			if (chatItem.isInSession()) {
+//				label.setTextColor(myChatInSessionText);
+////				icon.setTextColor(myChatInSessionText);
+//			}
+//			else {
 				label.setTextColor(myChatNoSessionText);
 //				icon.setTextColor(myChatNoSessionText);
-			}
+//			}
 			
 			MeRowHolder meHolder = (MeRowHolder) row.getTag(R.id.chat_row_holder); 
 			
@@ -255,12 +255,12 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				break;				
 			}*/
 			
-			if (chatItem.isInSession()) {
+//			if (chatItem.isInSession()) {
 				label.setTextColor(vhaChatInSessionText);
-			}
-			else {
-				label.setTextColor(vhaChatNoSessionText);
-			}
+//			}
+//			else {
+//				label.setTextColor(vhaChatNoSessionText);
+//			}
 		}
 		row.setTag(chatItem);
 		return row;

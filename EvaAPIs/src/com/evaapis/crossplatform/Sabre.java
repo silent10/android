@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -8,7 +9,7 @@ import org.json.JSONObject;
 
 import com.evature.util.Log;
 
-public class Sabre {
+public class Sabre  implements Serializable {
 	private static final String TAG = "Sabre";
 	public String[] cryptic;
 	public String[] warnings;

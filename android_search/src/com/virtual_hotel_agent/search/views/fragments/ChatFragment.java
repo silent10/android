@@ -56,7 +56,6 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 //	}
 
 	@Inject protected EventManager eventManager;
-	
 	@Inject private ChatItemList mChatListModel;
 	
 	private ChatAdapter mChatAdapter;
@@ -84,7 +83,6 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		mChatListView = (ListView) root.findViewById(R.id.chat_list);
 		
 		// Connect the data of the chat history to the view:
-//		mChatListModel.loadInstanceState(savedInstanceState);
 		mChatAdapter = new ChatAdapter(this, R.layout.row_vha_chat, R.id.label, mChatListModel);
 
 		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback(), new MyOnAnimEndCallback());
@@ -97,10 +95,20 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		
 		mChatListView.setOnItemClickListener(this);
 		
-		showIntro();
 		
 		return root;
 	}
+	
+	@Override 
+	public void onActivityCreated(Bundle savedInstanceState) {
+		Log.d(TAG, "ChatFragment onActivityCreated");
+		super.onActivityCreated(savedInstanceState);
+		mChatListModel.loadInstanceState(savedInstanceState);
+		if (mChatListModel.size() == 0) {
+			showIntro();
+		}
+	};
+	
 	
 	private class MyOnDismissCallback implements OnDismissCallback {
 
@@ -130,10 +138,10 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 	public void onSaveInstanceState(Bundle instanceState) {
 		Log.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(instanceState);
-		
-//		mChatListModel.saveInstanceState(instanceState);
+		mChatListModel.saveInstanceState(instanceState);
 	}
-
+	
+	
 	public void addChatItem(ChatItem chatItem) {
 		if (editedChatItemIndex != -1 && chatItem.getType() == ChatType.Me) {
 			// adding a "me" chat - close the editted me-chat
@@ -420,7 +428,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 				return;
 			}
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
-			boolean editLastUtterance = false == preModifiedString.isEmpty();
+			boolean editLastUtterance = false == preModifiedString.equals("");
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
 	

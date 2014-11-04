@@ -9,18 +9,33 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
 import android.telephony.TelephonyManager;
+import android.view.Gravity;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.evaapis.R;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.evaspeechrecognition.SpeechRecognition;
@@ -32,8 +47,8 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 									SpeechRecognitionResultListener,
 									EvaSearchReplyListener, OnInitListener{ 
 
-	private static final int VOICE_RECOGNITION_REQUEST_CODE_EVA = 0xBABE;
-	private static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
+	public static final int VOICE_RECOGNITION_REQUEST_CODE_EVA = 0xBABE;
+	public static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
 	
 	private final String TAG = "EvaComponent";
 	
@@ -397,6 +412,179 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
 	}
 	
+			
+	
+	public void searchWithLocalVoiceRecognitionCustomDialog(int nbest, final Object cookie) {
+
+		class Listener implements RecognitionListener {
+			private TextView listenStatus;
+			private TextView partialResults;
+			private View volumeFeedback;
+			private Dialog dialog;
+			private double prevPower;
+
+			public Listener(Dialog dialog, final SpeechRecognizer recognizer) {
+				this.dialog = dialog;
+				listenStatus = (TextView) dialog.findViewById(R.id.text_listening_status); 
+				partialResults = (TextView) dialog.findViewById(R.id.text_partial_results);
+				volumeFeedback = dialog.findViewById(R.id.volume_feedback);
+				
+				prevPower = 0;
+				setListenStatus("Please Wait...");
+				
+				Button button = (Button) dialog.findViewById(R.id.btn_listening_stop);
+				button.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						recognizer.stopListening();
+					}
+				});
+				
+				dialog.setOnCancelListener(new OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						recognizer.cancel();
+					}
+				});
+			}
+			
+			private void setListenStatus(final String status) {
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						listenStatus.setText(status);
+					}
+				});
+			}
+			private void setResults(final String result) {
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						partialResults.setText(result);
+					}
+				});
+			}
+			
+			private void setVolumeFeedback(final int background) {
+				activity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						volumeFeedback.setBackgroundColor(background);
+					}
+				});
+			}
+			
+			
+			public void onReadyForSpeech(Bundle params) {
+				Log.d(TAG, "onReadyForSpeech >>");
+				setListenStatus("Speak Now...");
+			}
+
+			public void onBeginningOfSpeech() {
+				Log.d(TAG, "onBeginningOfSpeech >>>>>");
+			}
+
+			public void onRmsChanged(float rmsdB) {
+				Log.d(TAG, "onRmsChanged "+rmsdB);
+				int color = 0xff << 24; // 255 alpha component
+				double currentPower = Math.pow(10, rmsdB/10.0);
+				double smoothPower = 0.4*currentPower + 0.6*prevPower;
+				prevPower = currentPower;
+				
+				color |= (0xff & Math.round(smoothPower*255/10.0)) << 16; // strong red
+				color |= (0xff & Math.round(smoothPower*145/10.0)) << 8;  // weaker green
+																	// nothing for blue
+				setVolumeFeedback(color);
+			}
+
+			
+			public void onBufferReceived(byte[] buffer) {
+				Log.d(TAG, "onBufferReceived "+buffer.length);
+			}
+
+			public void onEndOfSpeech() {
+				Log.d(TAG, "onEndofSpeech <<<<<");
+				setListenStatus("Processing...");
+			}
+
+			public void onError(int error) {
+				Log.d(TAG, "Error " + error);
+				dialog.dismiss();
+			}
+
+			public void onResults(Bundle results) {
+				Log.d(TAG, "onResults " + results);
+				ArrayList<String> data = results
+						.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+				for (int i = 0; i < data.size(); i++) {
+					Log.d(TAG, "Result: " + data.get(i));
+				}
+				if (data.size() > 0) {
+					setResults(data.get(0));
+				}
+				
+				searchWithMultipleText(data, cookie, false);
+				
+				dialog.dismiss();
+			}
+
+			public void onPartialResults(Bundle partialResults) {
+				Log.d(TAG, "onPartialResults ");
+				ArrayList<String> data = partialResults
+						.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+				for (int i = 0; i < data.size(); i++) {
+					Log.d(TAG, "Partial Result: " + data.get(i));
+				}
+				if (data.size() > 0) {
+					setResults(data.get(0));
+				}
+			}
+
+			public void onEvent(int eventType, Bundle params) {
+				Log.d(TAG, "onEvent " + eventType);
+			}
+		}
+		
+		voiceActivityCookie = cookie;
+		
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, nbest);
+		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, getPreferedLanguage());
+		intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+		
+		final SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(activity.getApplicationContext());
+		
+		Dialog dialog  = new Dialog(this.activity);
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.getWindow().setBackgroundDrawable(
+				new ColorDrawable(android.graphics.Color.TRANSPARENT));
+		dialog.setContentView(R.layout.evature_listening);
+
+		dialog.setCanceledOnTouchOutside(true); // you may want to set this to
+												// false
+
+		WindowManager.LayoutParams wmlp = dialog.getWindow().getAttributes();
+
+		// Alternative 1: Exact position -
+		// If you want to open the dialog at a certain location set the gravity
+		// to Top/Bottom and Left/Right and set the x/y coordinates
+		// wmlp.gravity = Gravity.TOP | Gravity.LEFT;
+		// wmlp.x = x;
+		// wmlp.y = y;
+
+		// Alternative 2: Center of screen -
+		wmlp.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+
+		dialog.show();
+
+		Listener listener = new Listener(dialog, recognizer);
+		recognizer.setRecognitionListener(listener );
+		recognizer.startListening(intent);
+		Log.i(TAG, "starting recognizer");
+	}
+	
 	public void searchWithLocalVoiceRecognition(int nbest, Object cookie) {
 //		// Fire an intent to start the speech recognition activity.
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -418,68 +606,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_GOOGLE);
 		voiceActivityCookie = cookie;
 		
-//		SpeechRecognizer recognizer = SpeechRecognizer
-//	            .createSpeechRecognizer(activity.getApplicationContext());
-//	    RecognitionListener listener = new RecognitionListener() {
-//	        @Override
-//	        public void onResults(Bundle results) {
-//	            ArrayList<String> voiceResults = results
-//	                    .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-//	            if (voiceResults == null) {
-//	                Log.e(TAG, "No voice results");
-//	            } else {
-//	                Log.d(TAG, "Printing matches: ");
-//	                for (String match : voiceResults) {
-//	                    Log.d(TAG, match);
-//	                }
-//	            }
-//	        }
-//
-//	        @Override
-//	        public void onReadyForSpeech(Bundle params) {
-//	            Log.d(TAG, "Ready for speech");
-//	        }
-//
-//	        @Override
-//	        public void onError(int error) {
-//	            Log.d(TAG,
-//	                    "Error listening for speech: " + error);
-//	        }
-//
-//	        @Override
-//	        public void onBeginningOfSpeech() {
-//	            Log.d(TAG, "Speech starting");
-//	        }
-//
-//	        @Override
-//	        public void onBufferReceived(byte[] buffer) {
-//	        	Log.d(TAG, "Received buffer: "+buffer.length);
-//	        }
-//
-//	        @Override
-//	        public void onEndOfSpeech() {
-//	        	Log.d(TAG, "end of speech");
-//	        }
-//
-//	        @Override
-//	        public void onEvent(int eventType, Bundle params) {
-//	        	Log.d(TAG, "onEvent: "+eventType);
-//	        }
-//
-//	        @Override
-//	        public void onPartialResults(Bundle partialResults) {
-//	            // TODO Auto-generated method stub
-//
-//	        }
-//
-//	        @Override
-//	        public void onRmsChanged(float rmsdB) {
-//	            Log.d(TAG, "onRms Change "+rmsdB);
-//
-//	        }
-//	    };
-//	    recognizer.setRecognitionListener(listener);
-//	    recognizer.startListening(intent);
 	}
 	
 	public void stopSearch() {
@@ -593,6 +719,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public String getSessionId() {
 		return mConfig.sessionId;
 	}
+	public void setSessionId(String sessionId) {
+		mConfig.sessionId = sessionId;
+	}
 
 	public String getPreferedLanguage() {
 		return mConfig.language;
@@ -601,11 +730,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void setPreferedLanguage(String preferedLanguage) {
 		mConfig.language = preferedLanguage;
 	}
-
-	public void setSessionId(String sessionId) {
-		mConfig.sessionId = sessionId;
-	}
-
 
 	public String getContext() {
 		return mConfig.context;

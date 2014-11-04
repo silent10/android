@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONException;
@@ -7,7 +8,7 @@ import org.json.JSONObject;
 
 import com.evature.util.Log;
 
-public class EvaMoney {
+public class EvaMoney  implements Serializable {
 	private final static String TAG = "EvaMoney";
 
 	public String Amount; 		// the amount of money.

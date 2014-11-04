@@ -1,10 +1,14 @@
 package com.evature.android_demo;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONException;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -13,6 +17,7 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.speech.RecognizerIntent;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -33,8 +38,9 @@ import com.evature.util.Log;
 public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	
 	// default values  - can be overwritten by preferences
-	private static final String API_KEY = "<put your api-key here>";
-	private static final String SITE_CODE = "<put your site-code here>";
+	private static final String API_KEY = "e7567517-0a1b-4a89-bd56-1b18915353f9";
+	private static final String SITE_CODE = "androiddev";
+	private static final String TAG = "MainActivity";
 	
 	// GUI elements
 	TextView responseText;
@@ -43,6 +49,37 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 	Button startOverButton;
 	Button searchText;
 
+	public class LanguageDetailsChecker extends BroadcastReceiver
+	{
+	    private List<String> supportedLanguages;
+
+	    private String languagePreference;
+
+	    @Override
+	    public void onReceive(Context context, Intent intent)
+	    {
+	        Bundle results = getResultExtras(true);
+	        String text = "";
+	        if (results.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE))
+	        {
+	            languagePreference =
+	                    results.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE);
+	            text += "Prefrence: "+languagePreference +"\n";
+	        }
+	        if (results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES))
+	        {
+	            supportedLanguages =
+	                    results.getStringArrayList(
+	                            RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES);
+	            text += "Supported Languages:\n";
+	            for (String supported: supportedLanguages) {
+	            	text += " - "+supported+"\n";
+	            }
+	        }
+            responseText.setText(text);
+	    }
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.DEBUG = BuildConfig.DEBUG;
@@ -65,7 +102,8 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
             	if ("google_local".equals(eva.getVrService())) {
-        			eva.searchWithLocalVoiceRecognition(4, null);
+        			//eva.searchWithLocalVoiceRecognition(4, null);
+            		eva.searchWithLocalVoiceRecognitionCustomDialog(4, null);
         			return;
         		}
             	
@@ -90,6 +128,10 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 			}
 		});
         responseText = (TextView) findViewById(R.id.textView_response_text);
+        
+        Intent detailsIntent =  new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
+        sendOrderedBroadcast(
+                detailsIntent, null, new LanguageDetailsChecker(), null, Activity.RESULT_OK, null, null);
 	}
 
 	@Override
@@ -175,6 +217,17 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
 			String key) {
 		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
 		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
+		
+		String language = sharedPreferences.getString("eva_language", "");
+		if (language.equals("")) {
+			language = "en";
+		}
+		String locale = sharedPreferences.getString("eva_locale", "");
+		if (locale.equals("")) {
+			locale = "US";
+		}
+		eva.setPreferedLanguage(language);
+		eva.setLocale(locale);
 	}
 
 	

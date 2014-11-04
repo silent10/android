@@ -106,12 +106,12 @@
 <!--                 android:verticalSpacing="20dp" > -->
 <!--             </GridView> -->
 
-            <WebView
-                android:id="@+id/propertyDescription"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Location" >
-            </WebView>
+<!--             <WebView -->
+<!--                 android:id="@+id/propertyDescription" -->
+<!--                 android:layout_width="wrap_content" -->
+<!--                 android:layout_height="wrap_content" -->
+<!--                 android:text="Location" > -->
+<!--             </WebView> -->
         </LinearLayout>
     </ScrollView>
     <Gallery

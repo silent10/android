@@ -1,5 +1,9 @@
 package com.evaapis.crossplatform;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,7 +17,9 @@ import org.json.JSONObject;
 import com.evaapis.crossplatform.flow.Flow;
 import com.evature.util.Log;
 
-public class EvaApiReply {
+public class EvaApiReply implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private final String TAG = "EvaApiReply";
 	public String sayIt = null;
 	public String sessionId = null;
@@ -29,10 +35,11 @@ public class EvaApiReply {
 	public Map<String, Boolean> geoAttributes = null;
 	public FlightAttributes flightAttributes = null;
 	public HotelAttributes hotelAttributes = null;
+	public ServiceAttributes serviceAttributes = null;
 	public EvaTravelers travelers = null;
 	public EvaMoney money = null;
 	public PNRAttributes pnrAttributes = null;
-	public Flow flow = null;
+	public Flow flow = null;  // covers the top level understanding of what the user asks for, and what to do next
 	
 	public String errorMessage = null; // error code returned from Eva service
 	public List<EvaWarning> evaWarnings = new ArrayList<EvaWarning>();
@@ -41,6 +48,10 @@ public class EvaApiReply {
 	public JSONObject JSONReply;
 
 	public EvaApiReply(String fullReply) {
+		initFromJson(fullReply);
+	}
+	
+	private void initFromJson(String fullReply) {
 		parseErrors = new ArrayList<String>();
 		evaWarnings = new ArrayList<EvaWarning>();
 		try {
@@ -137,6 +148,9 @@ public class EvaApiReply {
 				if (jApiReply.has("Hotel Attributes")) {
 					hotelAttributes = new HotelAttributes(jApiReply.getJSONObject("Hotel Attributes"), parseErrors);
 				}
+				if (jApiReply.has("Service Attributes")) {
+					serviceAttributes = new ServiceAttributes(jApiReply.getJSONObject("Service Attributes"), parseErrors);
+				}
 				
 				if (jApiReply.has("Request Attributes")) {
 					JSONObject requestAttr = jApiReply.getJSONObject("Request Attributes");
@@ -157,45 +171,14 @@ public class EvaApiReply {
 			Log.w(TAG, "reply is "+fullReply);
 		}
 	}
-
-	public boolean isHotelSearch() {
-		if (locations != null && locations.length > 1) {
-			if ((locations[0].requestAttributes != null)
-					&& (locations[0].requestAttributes.transportType.contains("Train"))) {
-				return false; // It is a train search!
-			}
-			if (locations[1].actions == null) {
-				return true;
-			} else {
-				return locations[1].isHotelSearch();
-			}
-		}
-		return false;
+	
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		// write only the JSON - to save space and time
+		oos.writeObject(JSONReply.toString());
 	}
 
-	public boolean isFlightSearch() {
-		if (locations != null && locations.length > 1) {
-			if ((locations[0].requestAttributes != null)
-					&& (locations[0].requestAttributes.transportType.contains("Train"))) {
-				return false; // It is a train search!
-			}
-			if (locations[1].actions == null) {
-				return true;
-			} else {
-				return locations[1].actions.contains("Get There");
-			}
-		}
-		return false;
-	}
-
-	public boolean isTrainSearch() {
-		if (locations != null && locations.length > 1) {
-			if ((locations[0].requestAttributes != null)
-					&& (locations[0].requestAttributes.transportType.contains("Train"))) {
-				return true; // It is a train search!
-			}
-		}
-		return false;
+	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+		initFromJson((String)ois.readObject());
 	}
 
 }
