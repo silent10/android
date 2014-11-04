@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import org.json.JSONObject;
 
 import com.evature.util.Log;
 
-public class RequestAttributes {
+public class RequestAttributes  implements Serializable {
 	private static final String TAG = "RequestAttributes";
 
 	public List<String> transportType = new ArrayList<String>();

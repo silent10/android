@@ -1,5 +1,6 @@
 package com.evaapis.android;
 
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -14,7 +15,6 @@ import android.os.AsyncTask;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;
-import com.evature.util.ExternalIpAddressGetter;
 import com.evature.util.Log;
 
 
@@ -36,6 +36,8 @@ import com.evature.util.Log;
 		private boolean mEditLastUtterance;
 
 		private String recordingKey;
+
+		private boolean mFromSpeech;
 		
 		/****
 		 * 
@@ -53,6 +55,7 @@ import com.evature.util.Log;
 			mInputText = inputText;
 			mNBest = null;
 			mCookie = cookie;
+			mFromSpeech = false;
 			mEditLastUtterance = editLastUtterance;
 		}
 		
@@ -69,6 +72,7 @@ import com.evature.util.Log;
 			mResponseId = -1;
 			mEva = eva;
 			mNBest = nBestText;
+			mFromSpeech = true; // hackish..
 			mInputText = null;
 			mCookie = cookie;
 			mEditLastUtterance = editLastUtterance;
@@ -77,14 +81,11 @@ import com.evature.util.Log;
 		@Override
 		protected EvaApiReply doInBackground(Void... non) {
 			startOfTextSearch = System.nanoTime();
-			String evatureUrl = mEva.mConfig.webServiceHost;
-			if (mNBest != null) {
-				evatureUrl = mEva.mConfig.vproxyHost;
-			}
+			String evatureUrl = mEva.mConfig.vproxyHost;
 			
 //			// TODO REMOVE!!!!!!!!!!!
 //			if (BuildConfig.DEBUG)
-//				evatureUrl = "http://10.0.0.52:8008"; 
+//			evatureUrl = "http://10.0.0.52:8008"; 
 			
 			evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());
@@ -93,16 +94,17 @@ import com.evature.util.Log;
 			evatureUrl += ("&session_id=" + mEva.getSessionId());
 			evatureUrl += ("&sdk_version="+EvaComponent.SDK_VERSION);
 			evatureUrl += "&ffi_chains=true&ffi_statement=true";
+			evatureUrl += "&from_speech="+(mFromSpeech ? "true" : "false");
 			String language = mEva.getPreferedLanguage();
 			if (language != null && !"".equals(language)) {
-				evatureUrl += "&language="+language;
+				evatureUrl += "&language="+language.replaceAll("-.*$", "");
 			}
 			if (mEva.getLocale() != null) {
 				evatureUrl += ("&locale="+ mEva.getLocale());
 			}
 			else {
 				Locale currentLocale = Locale.getDefault();
-				evatureUrl += "&locale="+ currentLocale.getLanguage()+"_"+currentLocale.getCountry(); 
+				evatureUrl += "&locale="+ currentLocale.getCountry(); 
 			}
 			
 			
@@ -122,8 +124,8 @@ import com.evature.util.Log;
 				evatureUrl += "&app_version="+ mEva.mConfig.appVersion;
 			}
 			try {
-				evatureUrl += "&timezone="+URLEncoder.encode("UTC+"+TimeZone.getDefault().getRawOffset()/3600000.0, "UTF-8");
-				evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.SDK_INT), "UTF-8");
+				evatureUrl += "&timezone="+URLEncoder.encode((""+TimeZone.getDefault().getRawOffset()/3600000.0).replaceFirst("\\.0+$",  ""), "UTF-8");
+				evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.RELEASE), "UTF-8");
 				evatureUrl += "&device="+URLEncoder.encode(android.os.Build.MODEL, "UTF-8");
 			} catch (UnsupportedEncodingException e) {
 				Log.e(TAG, "UnsupportedEncodingException", e);
@@ -160,18 +162,29 @@ import com.evature.util.Log;
 			if (recordingKey != null) {
 				evatureUrl += "&recording_key="+recordingKey;
 			}
-			Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
-			try {
-				String result = DownloadUrl.sget(evatureUrl);
-				EvaApiReply apiReply = new EvaApiReply(result);	
-				return apiReply;
-			} catch (IOException e) {
-				EvaApiReply errorReply = new EvaApiReply(
-						  "{\"status\": false, \"message\":\""
-							+ EvaComponent.NETWORK_ERROR
-							+"\" }");
-				return errorReply;
+			
+			int retries = 0;
+			while (retries < 3) {
+				Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
+				try {
+					String result = DownloadUrl.sget(evatureUrl);
+					EvaApiReply apiReply = new EvaApiReply(result);
+					return apiReply;
+				} catch (IOException e) {
+					Log.w(TAG, "IOException in request to Evature: "+e.getMessage());
+					retries++;
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+				}
 			}
+			// had 3 IOExceptions in a row - give up
+			EvaApiReply errorReply = new EvaApiReply("{\"status\": false }");
+			errorReply.errorMessage = EvaComponent.NETWORK_ERROR;
+			return errorReply;
+
 		}
 
 

@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform.flow;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +12,7 @@ import org.json.JSONObject;
 import com.evaapis.crossplatform.EvaLocation;
 import com.evature.util.Log;
 
-public class Flow {
+public class Flow  implements Serializable {
 
 	private static final String TAG = "Flow";
 	public FlowElement[]  Elements;
@@ -26,13 +27,17 @@ public class Flow {
 					continue;
 				}
 				JSONObject jElement = jFlow.getJSONObject(index);
-				if (jElement.getString("Type").equals( FlowElement.TypeEnum.Question.name())) {
+				String flowType = jElement.getString("Type");
+				if (flowType.equals( FlowElement.TypeEnum.Question.name())) {
 					elementsToAdd.add( new QuestionElement(jElement, parseErrors, locations));
 				}
-				else if (jElement.getString("Type").equals( FlowElement.TypeEnum.Flight.name())) {
+				else if (flowType.equals( FlowElement.TypeEnum.Flight.name())) {
 					FlightFlowElement flightFlowElement = new FlightFlowElement(jElement, parseErrors, locations);
 					elementsToAdd.add( flightFlowElement);
 					indexesToSkip.add( Integer.valueOf(flightFlowElement.ActionIndex));
+				}
+				else if (flowType.equals( FlowElement.TypeEnum.Reply.name())) {
+					elementsToAdd.add( new ReplyElement(jElement, parseErrors, locations));
 				}
 				else {
 					elementsToAdd.add( new FlowElement(jElement, parseErrors, locations));
@@ -43,7 +48,6 @@ public class Flow {
 			parseErrors.add("Exception during parsing: "+e.getMessage());	
 		}
 		
-		Elements = new FlowElement[elementsToAdd.size()];
-		Elements = elementsToAdd.toArray(Elements);
+		Elements = elementsToAdd.toArray(new FlowElement[elementsToAdd.size()]);
 	}
 }

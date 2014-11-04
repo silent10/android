@@ -1,0 +1,148 @@
+<!-- Based on this blog post: http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/the_main_layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:background="@drawable/chat_background"
+    android:layout_height="fill_parent">
+
+   
+<!--     <com.viewpagerindicator.TabPageIndicator -->
+<!--         android:id="@+id/indicator" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:layout_width="fill_parent" -->
+<!--         /> -->
+    
+    <com.viewpagerindicator.TitlePageIndicator
+        android:id="@+id/indicator"
+        android:padding="10dip"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_toRightOf="@+id/bottom_bar" 
+        android:background="#ff3b3b3b"
+        android:textColor="#AA88aaee"
+        app:footerColor="#ff88aaee"
+        app:footerLineHeight="2dp"
+        app:footerIndicatorHeight="3dp"
+        app:footerIndicatorStyle="underline"
+        app:selectedColor="#FF88aaee"
+        app:selectedBold="true"
+        />
+    
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="fill_parent"
+        android:layout_below="@id/indicator"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/bottom_bar" 
+        android:background="@drawable/chat_background"
+        android:layout_height="fill_parent" />
+<!--         android:layout_above="@+id/bottom_bar" -->
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@+id/bottom_bar" 
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:id="@+id/status_panel"
+        android:background="@color/half_black"
+        >
+
+        <TextView
+            android:id="@+id/text_listeningStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/listening_"
+            android:textColor="#dddddd" />
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <com.evaapis.android.SoundLevelView
+        android:id="@+id/surfaceView_sound_wave"
+        android:layout_width="wrap_content"
+        android:layout_height="80dip"
+        android:layout_margin="20dip"
+        android:background="@color/half_black"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+         />
+    
+    <ImageView 
+        android:id="@+id/trip_advisor_promo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:contentDescription="Now with TripAdvisor Ratings"/>
+    
+    <RelativeLayout
+        android:id="@id/bottom_bar"
+        android:layout_width="110dp"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/bottom_bar_background"
+         >
+    
+    
+     <ImageButton
+        android:id="@+id/search_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/transition_button_activate"
+        android:contentDescription="@string/microphone_button"
+        android:onClick="myClickHandler"
+        android:padding="12dp"
+        android:src="@drawable/microphone_icon"
+        android:text="@string/button"
+        android:layout_centerVertical="true"
+         />
+     
+     <ImageButton
+         android:id="@+id/restart_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="48dp"
+         android:layout_height="48dp"
+         android:layout_alignParentLeft="true"
+         android:layout_alignParentBottom="true"
+         android:layout_marginLeft="30dp"
+         android:layout_marginBottom="28dp"
+         android:background="@drawable/custom_button"
+         android:onClick="myClickHandler"
+         android:contentDescription="Restart"
+         android:src="@drawable/session_restart"
+         android:padding="3dp"
+           />
+     
+        <ImageButton
+         android:id="@+id/add_utterance_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="48dp"
+         android:layout_height="48dp"
+         android:layout_alignParentLeft="true"
+         android:layout_alignParentTop="true"
+         android:layout_marginLeft="30dp"
+         android:layout_marginTop="28dp"
+         android:background="@drawable/custom_button"
+         android:onClick="myClickHandler"
+         android:contentDescription="Restart"
+         android:src="@drawable/keyboard_icon"
+         android:padding="3dp"
+           />
+     </RelativeLayout>
+</RelativeLayout>

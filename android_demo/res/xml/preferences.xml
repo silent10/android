@@ -32,6 +32,18 @@
             android:title="API Version"
          	/>
         
+        <EditTextPreference
+            android:key="eva_language"
+            android:summary="Leave blank for 'en'"
+            android:title="Language"
+         	/>
+        
+        <EditTextPreference
+            android:key="eva_locale"
+            android:summary="Leave blank for 'US'"
+            android:title="Locale"
+         	/>
+        
         <ListPreference 
             android:key="eva_vr_service"
             android:title="Preferred Voice Recognition service"

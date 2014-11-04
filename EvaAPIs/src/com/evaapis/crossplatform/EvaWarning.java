@@ -1,10 +1,12 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class EvaWarning {
+public class EvaWarning  implements Serializable {
 	
 	public String type;
 	public String text;

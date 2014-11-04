@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +11,7 @@ import org.json.JSONObject;
 
 import com.evature.util.Log;
 
-public class EvaLocation {
+public class EvaLocation implements Serializable {
 	private final String TAG = "EvaLocation";
 	public int index; // A number representing the location index in the trip. Index numbers usually progress with the
 						   // duration of the trip (so a location with index 11 is visited before a location with index

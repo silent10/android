@@ -1,14 +1,21 @@
 package com.virtual_hotel_agent.search.models.chat;
 
-import org.json.JSONObject;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.text.Html;
 import android.text.SpannableString;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.flow.FlowElement;
+import com.evature.util.Log;
 
 
-public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/2141166/78234
+public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2141166/78234
 	
 	public enum ChatType {
 		Me,
@@ -26,10 +33,12 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 		InSearch,
 		HasResults
 	}
+
+	private static final String TAG = "ChatItem";
 	
 //	static ChatItem lastActivated = null;
 	
-	protected SpannableString chat = new SpannableString("");
+	protected transient SpannableString chat = new SpannableString("");
 	protected ChatType chatType;
 	protected boolean inSession = true;
 	
@@ -63,7 +72,33 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 			setStatus(Status.None);
 		}
 	}
+	
 
+	private void writeObject(ObjectOutputStream oos) throws IOException {
+		// default serialization for everything except the SpannableString chat 
+		oos.defaultWriteObject();
+		// write the chat as html
+		String html = Html.toHtml(chat);
+		// Html module converts "chat..." to "<p>chat...</p>\n" when serializing,
+		// and the <p> element is converted to "chat...\n\n" when deserializing -
+		// this makes the ChatItem show empty space below the text after restore -
+		// trimming the restored string isn't simple because it is a "spannedString"
+		// solution - remove the <p> wrapping before 
+		html = html.replaceAll("<p[^>]*?>(.*?)</p>", "$1");
+		oos.writeObject(html);
+	}
+	
+	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+		// default deserialization for everything except the SpannableString
+		ois.defaultReadObject();
+		// load the chat from html string
+		String html = (String) ois.readObject();
+		Log.i(TAG, "Restoring: "+html);
+		chat = new SpannableString(Html.fromHtml(html)); //(SpannableString) Html.fromHtml(html);
+	}
+
+
+	
 	public SpannableString getChat() {
 		return chat;
 	}
@@ -80,47 +115,18 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 		return chatType;
 	}
 
-//	@Override
-//	public int describeContents() {
-//		return 0;
-//	}
-
-//	@Override
-//	public void writeToParcel(Parcel dest, int flags) {
-//		dest.writeByte((byte) getType().ordinal());
-//		dest.writeByte((byte) (inSession ? 1 : 0));
-//		dest.writeString(chat.);
-//	}
-//
-//	// this is used to regenerate your object. All Parcelables must have a CREATOR that implements these two methods
-//	public static final Parcelable.Creator<ChatItem> CREATOR = new Parcelable.Creator<ChatItem>() {
-//		public ChatItem createFromParcel(Parcel in) {
-//			return new ChatItem(in);
-//		}
-//
-//		public ChatItem[] newArray(int size) {
-//			return new ChatItem[size];
-//		}
-//	};
 	
 	final static ChatType[] chatTypeValues = ChatType.values();
 	public static final String START_NEW_SESSION = "Start new search";
 
-	// example constructor that takes a Parcel and gives you an object populated with it's values
-//	private ChatItem(Parcel in) {
-//		super();
-//		chatType = chatTypeValues[in.readByte()];
-//		inSession = in.readByte() == 1;
-//		chat = in.readString();
+	
+//	public void setInSession(boolean inSession) {
+//		this.inSession = inSession;
 //	}
-
-	public void setInSession(boolean inSession) {
-		this.inSession = inSession;
-	}
-
-	public boolean isInSession() {
-		return inSession;
-	}
+//
+//	public boolean isInSession() {
+//		return inSession;
+//	}
 
 	public FlowElement getFlowElement() {
 		return flow;
@@ -128,6 +134,10 @@ public class ChatItem  {//implements Parcelable { // http://stackoverflow.com/a/
 
 	public EvaApiReply getEvaReply() {
 		return evaReply;
+	}
+	
+	public void setApiReply(EvaApiReply reply) {
+		evaReply = reply;
 	}
 
 	public Status getStatus() {

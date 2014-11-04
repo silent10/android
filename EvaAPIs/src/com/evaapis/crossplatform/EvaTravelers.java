@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONException;
@@ -7,7 +8,7 @@ import org.json.JSONObject;
 
 import com.evature.util.Log;
 
-public class EvaTravelers {
+public class EvaTravelers  implements Serializable{
 	private final static String TAG = "EvaTravellers";
 	public Integer adult = null;
 	public Integer child = null;

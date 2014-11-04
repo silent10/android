@@ -1,5 +1,6 @@
 package com.evaapis.crossplatform.flow;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -9,7 +10,7 @@ import org.json.JSONObject;
 import com.evaapis.crossplatform.EvaLocation;
 import com.evature.util.Log;
 
-public class FlowElement {
+public class FlowElement implements Serializable {
 
 	private final static String TAG = "FlowElement"; 
 	
@@ -25,6 +26,7 @@ public class FlowElement {
 		Answer, 
 		Statement,
 		Service,
+		Reply,
 		
 		Other
 	}
