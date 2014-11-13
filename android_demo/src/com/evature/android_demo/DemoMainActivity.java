@@ -35,7 +35,7 @@ import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
 import com.evature.util.Log;
 
-public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
+public class DemoMainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	
 	// default values  - can be overwritten by preferences
 	private static final String API_KEY = "e7567517-0a1b-4a89-bd56-1b18915353f9";
@@ -107,7 +107,7 @@ public class MainActivity extends EvaBaseActivity implements OnSharedPreferenceC
         			return;
         		}
             	
-            	searchWithVoice("voice");
+            	searchWithVoice("voice", false);
             }
         });
         

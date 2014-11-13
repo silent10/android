@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -18,6 +19,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognitionListener;
@@ -32,9 +34,9 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.evaapis.BuildConfig;
 import com.evaapis.R;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
@@ -74,7 +76,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	// Eva Config
 	EvaConfig mConfig;
 
-	private String mLastLanguageUsed = "en";
 	private boolean mDebug;
 	
 	
@@ -90,8 +91,14 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
 	private static final String DefaultEvaWSHost = "http://apiuseh.evaws.com";
 	private static final String DefaultApiVersion = "v1.0";
-	public static final String SDK_VERSION = "android_1.54";
+	public static final String SDK_VERSION = "android_1.2";
+	
+	private Object voiceActivityCookie;
+	private EvaTextClient mEvaTextClient;
 
+	private boolean editLastUtterance;
+
+	private String pendingSayit;
 	
 	final static String NETWORK_ERROR = "There was an error contacting the server, please check your internet connection or try again later";
 	
@@ -123,7 +130,29 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			apiVersion = DefaultApiVersion;
 		}
 	}
-		
+
+	public class RecognizerLanguageChecker extends BroadcastReceiver
+	{
+	    @Override
+	    public void onReceive(Context context, Intent intent)
+	    {
+	        Bundle results = getResultExtras(true);
+	        if (results.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE))
+	        {
+	            String languagePreference = results.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE);
+	            Log.i(TAG, "Voice Recognition Phone Language Prefrence: "+languagePreference);
+	            if (languagePreference.startsWith("en-")) {
+	            	// could be en-US, en-IN, en-GB, en-NZ, etc...
+	            	setPreferedLanguage(languagePreference);
+	            }
+	            else {
+	            	// if the voice recognition is set to none English, change to Generic English (available on all phones) 
+	            	setPreferedLanguage("en");
+	            }
+	        }
+	    }
+	}
+	
 	
 	public EvaComponent(Activity activity, EvaSearchReplyListener replyListener) {
 		this(activity, replyListener, null);
@@ -149,30 +178,27 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public void speak(String sayIt) {
 		if (mTts != null) {
-			mTts.speak(sayIt, TextToSpeech.QUEUE_FLUSH, null);
+			if (mTtsConfigured)
+				mTts.speak(sayIt, TextToSpeech.QUEUE_FLUSH, null);
+			else {
+				pendingSayit = sayIt;
+			}
 		}
 	}
 	
-	private void setTtsLanguage(String destLanguage) {
-		// Set preferred language to whatever the user used to speak to phone.
-		// Note that a language may not be available, and the result will indicate this.
-		Locale aLocale = /*Locale.US*/ new Locale(destLanguage);
-		mTts.setLanguage(aLocale);
-		 
-	}
-
 	// Implements TextToSpeech.OnInitListener.
 	public void onInit(int status) {
-		// status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
 		if (status == TextToSpeech.SUCCESS) {
-			Log.i(TAG, "Setting TTS language to "+mLastLanguageUsed);
-			setTtsLanguage(mLastLanguageUsed);
-			// Check the documentation for other possible result codes.
-			// For example, the language may be available for the locale, but not for the specified country and variant.
+			mTts.setLanguage(Locale.US);
 			mTtsConfigured = true;
+			if (pendingSayit != null) {
+				speak(pendingSayit);
+				pendingSayit = null;
+			}
 		} else {
 			// Initialization failed.
 			mTts = null;
+			mTtsConfigured = false;
 		}
 	}
 
@@ -237,14 +263,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 
 		String oldLanguage = getPreferedLanguage();
 		setPreferedLanguage(sharedPreferences.getString(LANG_PREF_KEY, "en"));
-		
-		if (!oldLanguage.equals(getPreferedLanguage())) {// User changed the settings and chose a new speech recognition
-			// language
-			if (mTtsConfigured) {
-				Log.i(TAG, "Setting TTS language to "+mLastLanguageUsed);
-				setTtsLanguage(getPreferedLanguage());
-			}
-		}
 	}
 	
 
@@ -253,6 +271,13 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 		mEvaTextClient = null;
+		if (reply.errorMessage != null) {
+			Log.w(TAG, "Error from Eva: "+reply.errorMessage);
+			replyListener.onEvaError(reply.errorMessage, true, cookie);
+			return;
+		}
+
+		
 		if (reply.sessionId != null) {
 			if (reply.sessionId.equals(getSessionId()) == false) {
 				// not same as previous session = new session
@@ -263,12 +288,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			}
 		}
 		else {
-			if (reply.errorMessage != null) {
-				Log.w(TAG, "Error from Eva: "+reply.errorMessage);
-				onEvaError(reply.errorMessage, true, cookie);
-				return;
-			}
-			
 			// no session support - every reply starts a new session
 			resetSession();
 		}
@@ -313,12 +332,12 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 					ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
 					if (audioUri == null) {
 						Log.d(TAG, "No voice file url");
-						searchWithMultipleText(matches, voiceActivityCookie, false);
+						searchWithMultipleText(matches, voiceActivityCookie, editLastUtterance);
 					}
 					else {
 						String recordingKey = SpeechRecognition.getRecordingKey(activity, data);
 						Log.d(TAG, "Voice file url: "+audioUri);
-						searchWithMultipleText(matches, voiceActivityCookie, false, recordingKey); 
+						searchWithMultipleText(matches, voiceActivityCookie, editLastUtterance, recordingKey); 
 					}
 				}
 				break;
@@ -383,30 +402,31 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 		setDebug(sharedPreferences.getBoolean(DEBUG_PREF_KEY, false));
 		setVrService(sharedPreferences.getString(VRSERV_PREF_KEY, "none")); 
-		setPreferedLanguage(mLastLanguageUsed = sharedPreferences.getString(LANG_PREF_KEY, "en"));
-
+		setPreferedLanguage(sharedPreferences.getString(LANG_PREF_KEY, "en"));
 		if (mTts == null)
 			mTtsConfigured = false;
 		mTts = new TextToSpeech(activity, this);
+		
+		// the language set to the voice recoginition will replace the PreferedLanguage with specific English variant  (eg. en-US or en-GB)
+		Intent detailsIntent =  new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
+        activity.sendOrderedBroadcast(
+                detailsIntent, null, new RecognizerLanguageChecker(), null, Activity.RESULT_OK, null, null);
 	}
 	
 	
-	private Object voiceActivityCookie;
-	private EvaTextClient mEvaTextClient;
-	public void searchWithVoice(Object cookie)
+	public void searchWithVoice(Object cookie, boolean editLastUtterance)
 	{
 		// stop the TTS speech - so that we don't record the generated speech
 		if (mTts != null) {
 			mTts.stop();
 		}
-		mLastLanguageUsed = getPreferedLanguage();
-		
 		Log.i(TAG, "search with voice starting, lang="+getPreferedLanguage());
 
 		Intent intent = new Intent(activity.getApplicationContext(), EvaSpeechRecognitionActivity.class);
 		getDeviceId();
 		intent.putExtra("evaConfig", mConfig);
 		intent.putExtra("debug", mDebug);
+		this.editLastUtterance =editLastUtterance;  
 		voiceActivityCookie = cookie;
 		
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
@@ -585,7 +605,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		Log.i(TAG, "starting recognizer");
 	}
 	
-	public void searchWithLocalVoiceRecognition(int nbest, Object cookie) {
+	public void searchWithLocalVoiceRecognition(int nbest, Object cookie, boolean editLastUtterance) {
 //		// Fire an intent to start the speech recognition activity.
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 //		// Specify the calling package to identify your application (optional step)
@@ -605,7 +625,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_GOOGLE);
 		voiceActivityCookie = cookie;
-		
+		this.editLastUtterance = editLastUtterance;
 	}
 	
 	public void stopSearch() {
@@ -616,8 +636,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	}
 	
 	public void searchWithText(String searchString, Object cookie, boolean editLastUtterance) {
-		mLastLanguageUsed = getPreferedLanguage();
-		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
+		Log.i(TAG, "search with text starting");
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 		}
@@ -626,8 +645,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	}
 	
 	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie, boolean editLastUtterance) {
-		mLastLanguageUsed = getPreferedLanguage();
-		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
+		Log.i(TAG, "search with text starting");
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 		}
@@ -637,8 +655,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 
 	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie, boolean editLastUtterance, String recordingKey) {
-		mLastLanguageUsed = getPreferedLanguage();
-		Log.i(TAG, "search with text starting, lang="+mLastLanguageUsed);
+		Log.i(TAG, "search with text starting");
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 		}
