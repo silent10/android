@@ -45,7 +45,7 @@ public class EvaApiReply implements Serializable {
 	public List<EvaWarning> evaWarnings = new ArrayList<EvaWarning>();
 	public List<String>  parseErrors = new ArrayList<String>();  // errors identified during the parsing
 	
-	public JSONObject JSONReply;
+	public transient JSONObject JSONReply;
 
 	public EvaApiReply(String fullReply) {
 		initFromJson(fullReply);

@@ -52,9 +52,9 @@ abstract public class EvaBaseActivity extends FragmentActivity implements EvaSea
 	}
 	
 	
-	public void searchWithVoice(Object cookie)
+	public void searchWithVoice(Object cookie, boolean editLastUtterance)
 	{
-		eva.searchWithVoice(cookie);
+		eva.searchWithVoice(cookie, editLastUtterance);
 	}
 
 	public void searchWithText(String searchString, Object cookie, boolean editLastUtterance) {

@@ -124,7 +124,7 @@ import com.evature.util.Log;
 				evatureUrl += "&app_version="+ mEva.mConfig.appVersion;
 			}
 			try {
-				evatureUrl += "&timezone="+URLEncoder.encode((""+TimeZone.getDefault().getRawOffset()/3600000.0).replaceFirst("\\.0+$",  ""), "UTF-8");
+				evatureUrl += "&time_zone="+URLEncoder.encode((""+TimeZone.getDefault().getRawOffset()/3600000.0).replaceFirst("\\.0+$",  ""), "UTF-8");
 				evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.RELEASE), "UTF-8");
 				evatureUrl += "&device="+URLEncoder.encode(android.os.Build.MODEL, "UTF-8");
 			} catch (UnsupportedEncodingException e) {

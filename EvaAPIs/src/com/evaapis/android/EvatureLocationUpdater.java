@@ -5,7 +5,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.evature.util.Log;
 
@@ -95,17 +94,17 @@ public class EvatureLocationUpdater implements LocationListener {
 
 	@Override
 	public void onProviderDisabled(String provider) {
-		Toast.makeText(appContext, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
+		//Toast.makeText(appContext, "Disabled provider " + provider, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void onProviderEnabled(String provider) {
-		Toast.makeText(appContext, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
+		//Toast.makeText(appContext, "Enabled new provider " + provider, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
-		Toast.makeText(appContext, "Status Changed " + provider, Toast.LENGTH_SHORT).show();
+		//Toast.makeText(appContext, "Status Changed " + provider, Toast.LENGTH_SHORT).show();
 	}
 
 	private boolean isBetterLocation(Location location, Location currentBestLocation) {
