@@ -2,10 +2,13 @@
 <classpath>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/EvaAPIs"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Library-ListViewAnimations"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="third_party/StickyListHeaders/library/src"/>
+	<classpathentry kind="src" path="third_party/ListViewAnimations/lib-core/src/main/java"/>
+	<classpathentry kind="src" path="third_party/ListViewAnimations/lib-core-slh/src/main/java"/>
+	<classpathentry kind="src" path="third_party/ListViewAnimations/lib-manipulation/src/main/java"/>
 	<classpathentry kind="src" path="third_party/Android-ViewPagerIndicator/library/src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/showcaseView-library"/>

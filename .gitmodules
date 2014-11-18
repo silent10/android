@@ -1,3 +1,9 @@
 [submodule "android_search/third_party/Android-ViewPagerIndicator"]
 	path = android_search/third_party/Android-ViewPagerIndicator
 	url = git@github.com:Iftahh/Android-ViewPagerIndicator.git
+[submodule "android_search/third_party/ListViewAnimations"]
+	path = android_search/third_party/ListViewAnimations
+	url = git@github.com:Iftahh/ListViewAnimations.git
+[submodule "android_search/third_party/StickyListHeaders"]
+	path = android_search/third_party/StickyListHeaders
+	url = git@github.com:Iftahh/StickyListHeaders.git
