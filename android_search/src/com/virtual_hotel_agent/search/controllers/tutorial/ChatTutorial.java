@@ -36,7 +36,7 @@ public class ChatTutorial extends BaseTutorial {
 	private ChatItem evaChatItem;
 	private ChatItem meChatItem;
 	private View evaChatView;
-	private View meChatView;
+//	private View meChatView;
 	private RectClingDrawerImpl rectClingDrawer;
 	
 	public ChatTutorial() {
@@ -66,7 +66,7 @@ public class ChatTutorial extends BaseTutorial {
 			evaChatItem = null;
 			evaChatView = null;
 			meChatItem = null;
-			meChatView = null;
+//			meChatView = null;
 			state = State.ShowNewSession;
 		}
 	}
@@ -134,7 +134,7 @@ public class ChatTutorial extends BaseTutorial {
 			}
 			
 			meChatItem = chatItem;
-			meChatView = chatView;
+//			meChatView = chatView;
 		}
 		
 		

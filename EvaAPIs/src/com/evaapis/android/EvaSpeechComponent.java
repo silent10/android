@@ -43,9 +43,9 @@ public class EvaSpeechComponent {
 		this(eva.activity, eva.mConfig);
 	}
 	
-	public EvaSpeechComponent(EvaBaseActivity evaActivity) {
-		this(evaActivity.eva);
-	}
+//	public EvaSpeechComponent(EvaBaseActivity evaActivity) {
+//		this(evaActivity.eva);
+//	}
 
 	
 	public interface SpeechRecognitionResultListener {

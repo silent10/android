@@ -11,7 +11,6 @@ import com.espian.showcaseview.anim.AnimationUtils;
 import com.espian.showcaseview.anim.AnimationUtils.AnimationEndListener;
 import com.espian.showcaseview.targets.ViewTarget;
 import com.evaapis.crossplatform.EvaApiReply;
-import com.nineoldandroids.view.ViewHelper;
 import com.virtual_hotel_agent.search.R;
 
 public class RecordButtonTutorial extends BaseTutorial {
@@ -101,7 +100,8 @@ public class RecordButtonTutorial extends BaseTutorial {
 			@Override
 			public void onShowcaseViewShow(ShowcaseView showcaseView) {
 				TutorialController.mainView.fadeOutView(true, true, false);
-				ViewHelper.setAlpha(hand, 1f);
+				//ViewHelper.setAlpha(hand, 1f);
+				hand.setAlpha(1f);
 			}
 			
 			@Override

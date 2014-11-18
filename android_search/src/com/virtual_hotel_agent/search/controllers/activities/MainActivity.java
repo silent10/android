@@ -99,7 +99,7 @@ import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
 import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
-import com.virtual_hotel_agent.search.controllers.tutorial.TutorialController;
+//import com.virtual_hotel_agent.search.controllers.tutorial.TutorialController;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
@@ -392,7 +392,7 @@ public class MainActivity extends ActionBarActivity implements
 //		}
 		
 		mainView = new MainView(this, injector, mTabTitles);
-		TutorialController.mainView = mainView; // accessible to all tutorials
+//		TutorialController.mainView = mainView; // accessible to all tutorials
 		
 		if (savedInstanceState == null) {
 			clearChatList();
@@ -438,13 +438,13 @@ public class MainActivity extends ActionBarActivity implements
 		   mainView.deactivateSearchButton();
 		   mainView.hideStatus();
 		   mainView.hideSpeechWave();
-		   TutorialController.canceledRecording(this);
+//		   TutorialController.canceledRecording(this);
 		   return;
 	   }
 	   
-	   if (TutorialController.onBackPressed(this)) {
-		   return;
-	   }
+//	   if (TutorialController.onBackPressed(this)) {
+//		   return;
+//	   }
 	   
 	   int chatInd = mainView.getChatTabIndex();
 	   if (mainView.getCurrentPage() == chatInd) {
@@ -689,7 +689,7 @@ public class MainActivity extends ActionBarActivity implements
 			return;
 		}
 		
-		TutorialController.onMicrophonePressed(this);
+//		TutorialController.onMicrophonePressed(this);
 		
 		VOICE_COOKIE.storeResultInItem = chatItem;
 		
@@ -792,7 +792,7 @@ public class MainActivity extends ActionBarActivity implements
 				bugReporter.putCustomData("eva_session_"+items, reply.JSONReply.toString());
 			}
 		}
-		TutorialController.onEvaReply(this, reply);
+//		TutorialController.onEvaReply(this, reply);
 		
 		if (VOICE_COOKIE == cookie) {
 			if (reply.errorMessage != null) {
@@ -1026,7 +1026,7 @@ public class MainActivity extends ActionBarActivity implements
 				
 				if (this.switchToResult) {
 					// do not switch tabs in the middle of a tutorial
-					if (TutorialController.currentTutorial == TutorialController.NO_TUTORIAL)
+//					if (TutorialController.currentTutorial == TutorialController.NO_TUTORIAL)
 						mainView.setCurrentItem(index);
 				}
 			}
