@@ -19,7 +19,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -30,7 +29,6 @@ import android.widget.Toast;
 
 import com.evature.util.Log;
 import com.google.inject.Inject;
-import com.nhaarman.listviewanimations.appearance.OnAnimEndCallback;
 import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.R;
@@ -38,7 +36,6 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemModified;
 import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
-import com.virtual_hotel_agent.search.controllers.tutorial.TutorialController;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
@@ -85,7 +82,7 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		// Connect the data of the chat history to the view:
 		mChatAdapter = new ChatAdapter(this, R.layout.row_vha_chat, R.id.label, mChatListModel);
 
-		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback(), new MyOnAnimEndCallback());
+		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback(), null);//new MyOnAnimEndCallback());
 		mAnimAdapter.setAbsListView(mChatListView);
 		mChatListView.setAdapter(mAnimAdapter);
         
@@ -120,19 +117,19 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 		}
     }
 	
-	private class MyOnAnimEndCallback implements OnAnimEndCallback {
-
-		@Override
-		public void onAnimEnd(View row) {
-			ChatItem chatItem = (ChatItem) row.getTag();
-			if (chatItem == null) {
-				Log.w(TAG, "unexpected null chatItem");
-			}
-			else {
-				TutorialController.onAddChatItem(chatItem, row, ChatFragment.this);
-			}
-		}
-	}
+//	private class MyOnAnimEndCallback implements OnAnimEndCallback {
+//
+//		@Override
+//		public void onAnimEnd(View row) {
+//			ChatItem chatItem = (ChatItem) row.getTag();
+//			if (chatItem == null) {
+//				Log.w(TAG, "unexpected null chatItem");
+//			}
+//			else {
+//				TutorialController.onAddChatItem(chatItem, row, ChatFragment.this);
+//			}
+//		}
+//	}
 
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {

@@ -4,13 +4,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/EvaAPIs"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="third_party/StickyListHeaders/library/src"/>
-	<classpathentry kind="src" path="third_party/ListViewAnimations/lib-core/src/main/java"/>
-	<classpathentry kind="src" path="third_party/ListViewAnimations/lib-core-slh/src/main/java"/>
-	<classpathentry kind="src" path="third_party/ListViewAnimations/lib-manipulation/src/main/java"/>
-	<classpathentry kind="src" path="third_party/Android-ViewPagerIndicator/library/src"/>
+	<classpathentry excluding="com/virtual_hotel_agent/search/controllers/tutorial/**" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/showcaseView-library"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/EvaSpeechRecognition"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

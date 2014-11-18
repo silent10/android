@@ -43,10 +43,10 @@
 -optimizations !code/allocation/variable
 
 # ActionBarSherlock 
--keep class android.support.** { *; } 
--keep interface android.support.** { *; } 
--keep class com.actionbarsherlock.** { *; } 
--keep interface com.actionbarsherlock.** { *; }
+#-keep class android.support.** { *; } 
+#-keep interface android.support.** { *; } 
+#-keep class com.actionbarsherlock.** { *; } 
+#-keep interface com.actionbarsherlock.** { *; }
 
 # play services - http://developer.android.com/google/play-services/setup.html
 -keep class * extends java.util.ListResourceBundle {
