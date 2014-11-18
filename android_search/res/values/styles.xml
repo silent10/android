@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme" parent="android:style/Theme.Light"></style>
+<!--     <style name="Theme" parent="android:style/Theme.Light"></style> -->
+<!-- <style name="Theme.MyTheme" parent="Theme.AppCompat.Light"> -->
+<!--     customize the color palette -->
+<!--     <item name="colorPrimary">@color/material_blue_500</item> -->
+<!--     <item name="colorPrimaryDark">@color/material_blue_700</item> -->
+<!--     <item name="colorAccent">@color/material_green_A200</item> -->
+<!-- </style> -->
 
     <style name="about_kotikan_text" parent="@android:style/TextAppearance">
         <item name="android:textSize">14.0sp</item>
