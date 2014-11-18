@@ -20,13 +20,22 @@ package com.virtual_hotel_agent.search.controllers.activities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
+import roboguice.RoboGuice;
+import roboguice.activity.event.OnStopEvent;
+import roboguice.context.event.OnCreateEvent;
+import roboguice.context.event.OnDestroyEvent;
+import roboguice.event.EventManager;
 import roboguice.event.Observes;
+import roboguice.inject.ContentViewListener;
+import roboguice.inject.RoboInjector;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -44,18 +53,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.RecognizerIntent;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
@@ -70,7 +80,6 @@ import com.evaapis.crossplatform.flow.FlowElement;
 import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evaapis.crossplatform.flow.QuestionElement;
 import com.evature.util.Log;
-import com.github.rtyley.android.sherlock.roboguice.activity.RoboSherlockFragmentActivity;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -78,6 +87,7 @@ import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -115,7 +125,7 @@ import com.virtual_hotel_agent.search.views.fragments.ReviewsFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
-public class MainActivity extends RoboSherlockFragmentActivity implements 
+public class MainActivity extends ActionBarActivity implements 
 													EvaSearchReplyListener,
 													VolumeListener,
 													OnSharedPreferenceChangeListener {
@@ -146,16 +156,31 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 
 	private MenuItem soundControlMenuItem;
 
+	
+	// following https://github.com/roboguice/roboguice/wiki/Using-your-own-BaseActivity-with-RoboGuice
+    protected EventManager eventManager;
+    protected HashMap<Key<?>,Object> scopedObjects = new HashMap<Key<?>, Object>();
+    @Inject ContentViewListener ignored; // BUG find a better place to put this
+
 
 
 	@Override
 	public void onDestroy() {
-		VHAApplication.EVA.onDestroy();
-		super.onDestroy();
+		try {
+			VHAApplication.EVA.onDestroy();
+            eventManager.fire(new OnDestroyEvent<Activity>(this));
+        } finally {
+            try {
+                RoboGuice.destroyInjector(this);
+            } finally {
+                super.onDestroy();
+            }
+        }
 	}
 	
-	
-	
+    public Map<Key<?>, Object> getScopedObjectMap() {
+        return scopedObjects;
+    }	
 	
 // Handle the results from the speech recognition activity
 	@Override
@@ -267,9 +292,13 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	
 	@Override
 	public void onStop() {
-	    cancelBackgroundThreads();
-	    EasyTracker.getInstance(this).activityStop(this);  // Add this method.
-	    super.onStop();
+		try {
+			cancelBackgroundThreads();
+			EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+            eventManager.fire(new OnStopEvent(this));
+        } finally {
+            super.onStop();
+        }
 	}
 	
 
@@ -316,6 +345,14 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
 		Log.d(TAG, "onCreate()");
+		
+		final RoboInjector injector = RoboGuice.getInjector(this);
+        eventManager = injector.getInstance(EventManager.class);
+        injector.injectMembersWithoutViews(this);
+        super.onCreate(savedInstanceState);
+        eventManager.fire(new OnCreateEvent<Activity>(this,savedInstanceState));
+    
+	
 		
 		SettingsAPI.getLocale(this);
 		VHAApplication.EVA = new EvaComponent(this, this);
@@ -435,7 +472,7 @@ public class MainActivity extends RoboSherlockFragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.mainmenu, menu);
 
 		soundControlMenuItem = menu.findItem(R.id.audio);
