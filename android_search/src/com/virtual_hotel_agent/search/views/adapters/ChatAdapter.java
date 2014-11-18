@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
-import com.virtual_hotel_agent.search.controllers.tutorial.TutorialController;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
@@ -35,7 +34,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	int  vhaChatInSessionText,  vhaChatNoSessionText;
 	
 	public ChatAdapter(final ChatFragment chatFragment, int resource, int textViewResourceId, final ChatItemList chatList) {
-		super(chatList, false);
+		super(chatList);
 		mChatList = chatList;
 		this.chatFragment = chatFragment;
 		FragmentActivity activity = chatFragment.getActivity();

@@ -10,11 +10,13 @@ import java.util.List;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ViewAnimator;
 
-import com.nhaarman.listviewanimations.itemmanipulation.OnAnimEndCallback;
-import com.nhaarman.listviewanimations.itemmanipulation.OnDismissCallback;
-import com.nhaarman.listviewanimations.swinginadapters.SingleAnimationAdapter;
+import com.nhaarman.listviewanimations.appearance.OnAnimEndCallback;
+import com.nhaarman.listviewanimations.appearance.SingleAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.nhaarman.listviewanimations.util.AdapterViewUtil;
+import com.nhaarman.listviewanimations.util.ListViewWrapper;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.AnimatorSet;
@@ -46,12 +48,12 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
      *            items.
      */
     public ChatAnimAdapter(final BaseAdapter baseAdapter, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
-        this(baseAdapter, DEFAULTANIMATIONDELAYMILLIS, DEFAULTANIMATIONDURATIONMILLIS, callback, animEndCallback);
+        this(baseAdapter, 100, 300, callback, animEndCallback);
         
     }
 
     public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
-        this(baseAdapter, animationDelayMillis, DEFAULTANIMATIONDURATIONMILLIS, callback, animEndCallback);
+        this(baseAdapter, animationDelayMillis, 300, callback, animEndCallback);
     }
 
     public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final long animationDurationMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
@@ -61,15 +63,6 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
         mCallback = callback;
     }
 
-    @Override
-    protected long getAnimationDelayMillis() {
-        return mAnimationDelayMillis;
-    }
-
-    @Override
-    protected long getAnimationDurationMillis() {
-        return mAnimationDurationMillis;
-    }
     
     @Override
     protected void animateViewIfNecessary(int position, View view, ViewGroup parent) {
@@ -114,8 +107,8 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
      */
     public void animateDismiss(final Collection<Integer> positions) {
         final List<Integer> positionsCopy = new ArrayList<Integer>(positions);
-        if (getAbsListView() == null) {
-            throw new IllegalStateException("Call setAbsListView() on this AnimateDismissAdapter before calling setAdapter()!");
+        if (getListViewWrapper() == null) {
+            throw new IllegalStateException("Call getListViewWrapper() on this AnimateDismissAdapter before calling setAdapter()!");
         }
 
         List<View> views = getVisibleViewsForPositions(positionsCopy);
@@ -152,14 +145,15 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
         for (int i = 0; i < positionsList.size(); i++) {
             dismissPositions[i] = positionsList.get(positionsList.size() - 1 - i);
         }
-        mCallback.onDismiss(getAbsListView(), dismissPositions);
+        mCallback.onDismiss(getListViewWrapper().getListView(), dismissPositions);
     }
 
     private List<View> getVisibleViewsForPositions(final Collection<Integer> positions) {
         List<View> views = new ArrayList<View>();
-        for (int i = 0; i < getAbsListView().getChildCount(); i++) {
-            View child = getAbsListView().getChildAt(i);
-            if (positions.contains(AdapterViewUtil.getPositionForView(getAbsListView(), child))) {
+        ListViewWrapper listView = getListViewWrapper();
+        for (int i = 0; i < listView.getChildCount(); i++) {
+            View child = listView.getChildAt(i);
+            if (positions.contains(AdapterViewUtil.getPositionForView(listView, child))) {
                 views.add(child);
             }
         }

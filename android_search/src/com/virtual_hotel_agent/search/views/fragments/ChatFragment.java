@@ -30,8 +30,8 @@ import android.widget.Toast;
 
 import com.evature.util.Log;
 import com.google.inject.Inject;
-import com.nhaarman.listviewanimations.itemmanipulation.OnAnimEndCallback;
-import com.nhaarman.listviewanimations.itemmanipulation.OnDismissCallback;
+import com.nhaarman.listviewanimations.appearance.OnAnimEndCallback;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
@@ -112,12 +112,12 @@ public class ChatFragment extends RoboFragment implements OnItemClickListener {
 	
 	private class MyOnDismissCallback implements OnDismissCallback {
 
-        @Override
-        public void onDismiss(final AbsListView listView, final int[] reverseSortedPositions) {
-            for (int position : reverseSortedPositions) {
+		@Override
+		public void onDismiss(ViewGroup listView, int[] reverseSortedPositions) {
+			for (int position : reverseSortedPositions) {
             	mChatAdapter.remove(position);
             }
-        }
+		}
     }
 	
 	private class MyOnAnimEndCallback implements OnAnimEndCallback {
