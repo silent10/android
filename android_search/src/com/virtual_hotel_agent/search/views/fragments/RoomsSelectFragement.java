@@ -4,8 +4,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import roboguice.event.EventManager;
-import roboguice.fragment.RoboFragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -13,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,16 +33,14 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.google.inject.Inject;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.RoomListAdapter;
 
 @SuppressLint("ValidFragment")
-public class RoomsSelectFragement extends RoboFragment {//implements OnItemClickListener {
+public class RoomsSelectFragement extends Fragment {//implements OnItemClickListener {
 
 	private static final String TAG = "RoomsSelectFragement";
 	private View mView = null;
@@ -55,8 +52,6 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 	private ExpandableListView mRoomListView;
 	private RoomListAdapter mAdapter;
 	private long mHotelId = -1;
-	
-	@Inject protected EventManager eventManager;
 	
 	static class DownloadedImg extends Handler {
 		private WeakReference<RoomsSelectFragement> fragmentRef;
@@ -232,7 +227,7 @@ public class RoomsSelectFragement extends RoboFragment {//implements OnItemClick
 		mRoomListView = (ExpandableListView)mView.findViewById(R.id.roomListView);
 		
 
-		mAdapter = new RoomListAdapter(getActivity(), hotel.hotelId, rooms, eventManager);
+		mAdapter = new RoomListAdapter(getActivity(), hotel.hotelId, rooms);
 		mAdapter.setDisclaimer(disclaimer);
 
 		mRoomListView.setAdapter( mAdapter );

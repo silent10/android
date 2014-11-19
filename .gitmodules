@@ -7,3 +7,6 @@
 [submodule "android_search/third_party/StickyListHeaders"]
 	path = android_search/third_party/StickyListHeaders
 	url = git@github.com:Iftahh/StickyListHeaders.git
+[submodule "android_search/third_party/EventBus"]
+	path = android_search/third_party/EventBus
+	url = git@github.com:Iftahh/EventBus.git

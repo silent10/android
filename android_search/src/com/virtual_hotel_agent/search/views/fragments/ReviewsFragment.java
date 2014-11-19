@@ -1,7 +1,7 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
-import roboguice.fragment.RoboFragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +10,7 @@ import android.webkit.WebView;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
 
-public class ReviewsFragment extends RoboFragment {
+public class ReviewsFragment extends Fragment {
 
 	private static final String TAG = "ReviewsFragment";
 	private View mView;

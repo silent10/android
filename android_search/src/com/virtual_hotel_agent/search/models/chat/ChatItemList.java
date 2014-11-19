@@ -1,17 +1,23 @@
 package com.virtual_hotel_agent.search.models.chat;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.os.Bundle;
 
-import com.evaapis.crossplatform.EvaApiReply;
-import com.evature.util.Log;
-import com.google.inject.Singleton;
-
-@Singleton
 public class ChatItemList extends ArrayList<ChatItem> {
 	static final String TAG = "ChatItemList";
+	private static ChatItemList instance;  
+	
+	private ChatItemList() {
+	}
+	
+	
+	public static ChatItemList getInstance() {
+		if (instance == null) {
+			instance = new ChatItemList();
+		}
+		return instance;
+	}
 
 	public void saveInstanceState(Bundle instanceState) {
 //		Bundle replyCache = new Bundle();

@@ -20,22 +20,12 @@ package com.virtual_hotel_agent.search.controllers.activities;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
-import roboguice.RoboGuice;
-import roboguice.activity.event.OnStopEvent;
-import roboguice.context.event.OnCreateEvent;
-import roboguice.context.event.OnDestroyEvent;
-import roboguice.event.EventManager;
-import roboguice.event.Observes;
-import roboguice.inject.ContentViewListener;
-import roboguice.inject.RoboInjector;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -85,9 +75,6 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -125,6 +112,8 @@ import com.virtual_hotel_agent.search.views.fragments.ReviewsFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
+import de.greenrobot.event.EventBus;
+
 public class MainActivity extends ActionBarActivity implements 
 													EvaSearchReplyListener,
 													VolumeListener,
@@ -137,8 +126,7 @@ public class MainActivity extends ActionBarActivity implements
 	// private static String mExternalIpAddress = null;
 	
 	private List<String> mTabTitles;
-	@Inject Injector injector;
-	@Inject private ChatItemList mChatListModel;
+	private ChatItemList mChatListModel;
 	
 	//SearchVayantTask mSearchVayantTask;
 	//SearchTravelportTask mSearchTravelportTask;
@@ -157,30 +145,12 @@ public class MainActivity extends ActionBarActivity implements
 	private MenuItem soundControlMenuItem;
 
 	
-	// following https://github.com/roboguice/roboguice/wiki/Using-your-own-BaseActivity-with-RoboGuice
-    protected EventManager eventManager;
-    protected HashMap<Key<?>,Object> scopedObjects = new HashMap<Key<?>, Object>();
-    @Inject ContentViewListener ignored; // BUG find a better place to put this
-
-
-
 	@Override
 	public void onDestroy() {
-		try {
-			VHAApplication.EVA.onDestroy();
-            eventManager.fire(new OnDestroyEvent<Activity>(this));
-        } finally {
-            try {
-                RoboGuice.destroyInjector(this);
-            } finally {
-                super.onDestroy();
-            }
-        }
+		VHAApplication.EVA.onDestroy();
+        super.onDestroy();
 	}
 	
-    public Map<Key<?>, Object> getScopedObjectMap() {
-        return scopedObjects;
-    }	
 	
 // Handle the results from the speech recognition activity
 	@Override
@@ -292,13 +262,9 @@ public class MainActivity extends ActionBarActivity implements
 	
 	@Override
 	public void onStop() {
-		try {
-			cancelBackgroundThreads();
-			EasyTracker.getInstance(this).activityStop(this);  // Add this method.
-            eventManager.fire(new OnStopEvent(this));
-        } finally {
-            super.onStop();
-        }
+		cancelBackgroundThreads();
+		EasyTracker.getInstance(this).activityStop(this);  // Add this method.
+        super.onStop();
 	}
 	
 
@@ -345,21 +311,16 @@ public class MainActivity extends ActionBarActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
 		Log.d(TAG, "onCreate()");
+		super.onCreate(savedInstanceState);
 		
-		final RoboInjector injector = RoboGuice.getInjector(this);
-        eventManager = injector.getInstance(EventManager.class);
-        injector.injectMembersWithoutViews(this);
-        super.onCreate(savedInstanceState);
-        eventManager.fire(new OnCreateEvent<Activity>(this,savedInstanceState));
-    
-	
+		mChatListModel = ChatItemList.getInstance();
 		
 		SettingsAPI.getLocale(this);
 		VHAApplication.EVA = new EvaComponent(this, this);
 		EvaComponent eva = VHAApplication.EVA;
 		eva.onCreate(savedInstanceState);
-		super.onCreate(savedInstanceState);
 		
+		EventBus.getDefault().register(this);
 		setVolumeControlStream(VolumeUtil.currentStream); // TODO: move to EvaComponent?
 		speechSearch = new EvaSpeechComponent(eva);
 		setContentView(R.layout.new_main);
@@ -391,7 +352,7 @@ public class MainActivity extends ActionBarActivity implements
 			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ getString(R.string.CHAT)));
 //		}
 		
-		mainView = new MainView(this, injector, mTabTitles);
+		mainView = new MainView(this, mTabTitles);
 //		TutorialController.mainView = mainView; // accessible to all tutorials
 		
 		if (savedInstanceState == null) {
@@ -1094,7 +1055,7 @@ public class MainActivity extends ActionBarActivity implements
 		// reached hotel search - no need showing tips & examples next time
 		SettingsAPI.setShowIntroTips(this, false);
 		
-		mSearchExpediaTask = injector.getInstance(HotelListDownloaderTask.class);
+		mSearchExpediaTask = new HotelListDownloaderTask();
 		mSearchExpediaTask.initialize(new ChatItemDownloaderListener(_chatItem, _switchToResult), 
 				 _reply); // TODO: change to be based on flow element, 
 //		if (currentHotelSearch.getStatus() == Status.HasResults) {
@@ -1286,7 +1247,7 @@ public class MainActivity extends ActionBarActivity implements
 			VHAApplication.selectedHotel = VHAApplication.HOTEL_ID_MAP.get(hotelId);
 			Log.d(TAG, "endProgressDialog() Hotel # " + hotelId+ " - "+VHAApplication.selectedHotel.name);
 
-			onEventHotelsListUpdated(null);
+			onEvent(new HotelsListUpdated());
 
 			// add hotel tab again
 			int index = mainView.getHotelTabIndex();
@@ -1430,7 +1391,7 @@ public class MainActivity extends ActionBarActivity implements
 
 	// note "onEvent" template is needed for progruard to not break roboguice
 	// this event happens after a next page of hotel list results is downloaded
-	public void onEventHotelsListUpdated( @Observes HotelsListUpdated event) {
+	public void onEvent( HotelsListUpdated event) {
 		int mapTabIndex = mainView.getMapTabIndex();
 		if (mapTabIndex != -1) {
 			HotelsMapFragment frag = (HotelsMapFragment) mainView.getMapFragment();
@@ -1440,13 +1401,13 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 	
-	public void onEventRatingClicked( @Observes RatingClickedEvent event) {
+	public void onEvent( RatingClickedEvent event) {
 		int reviewsIndex = mainView.getReviewsTabIndex();
 		if (reviewsIndex != -1)
 			mainView.setCurrentItem(reviewsIndex);
 	}
 	
-	public void onEventBookingCompleted( @Observes BookingCompletedEvent event) {
+	public void onEvent( BookingCompletedEvent event) {
 		int reservationTabIndex = mainView.getReservationsTabIndex();
 		if (reservationTabIndex == -1) {
 			mainView.addTab(mainView.getReservationsTabName());
@@ -1461,7 +1422,7 @@ public class MainActivity extends ActionBarActivity implements
 	}
 	
 	
-	public void onEventRoomSelected( @Observes RoomSelectedEvent event) {
+	public void onEvent(RoomSelectedEvent event) {
 
 		Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(event.hotelId);
 		VHAApplication.selectedRoom = event.room;
@@ -1478,7 +1439,7 @@ public class MainActivity extends ActionBarActivity implements
 		mainView.setCurrentItem(bookingIndex);
 	}
 	
-	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
+	public void onEvent( HotelItemClicked event) {
 		Log.d(TAG, "onHotelItemClicked("+event.hotelIndex+")");
 		if (VHAApplication.FOUND_HOTELS.size() <= event.hotelIndex) {
 			VHAApplication.logError(TAG, "clicked index "+event.hotelIndex+ " but size is "+VHAApplication.FOUND_HOTELS.size());
@@ -1508,7 +1469,7 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 	
-	public void onEventChatItemModified( @Observes ChatItemModified event) {
+	public void onEvent( ChatItemModified event) {
 		if (event.startRecord) {
 			if (event.chatItem == null) {
 				VHAApplication.logError(TAG, "Unexpected chatItem=null startRecord");
@@ -1532,7 +1493,7 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 	
-	public void onEventHotelSelected( @Observes HotelSelected event) {
+	public void onEvent( HotelSelected event) {
 		Log.d(TAG, "onHotelSelected("+event.hotelId+")");
 
 		int index = mainView.getRoomsTabIndex();
@@ -1549,7 +1510,7 @@ public class MainActivity extends ActionBarActivity implements
 		}
 	}
 	
-	public void onEventToggleMainButtons( @Observes ToggleMainButtonsEvent event) {
+	public void onEvent( ToggleMainButtonsEvent event) {
 		mainView.toggleMainButtons(event.showMainButtons);
 	}
 	

@@ -1,11 +1,9 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
-import roboguice.event.EventManager;
-import roboguice.event.Observes;
-import roboguice.fragment.RoboFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +20,6 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.google.inject.Inject;
 import com.nhaarman.listviewanimations.appearance.AnimationAdapter;
 import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
 import com.nhaarman.listviewanimations.appearance.simple.SwingBottomInAnimationAdapter;
@@ -36,10 +33,12 @@ import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskLis
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
 
-public class HotelListFragment extends RoboFragment implements OnItemClickListener, DownloaderTaskListenerInterface {
+import de.greenrobot.event.EventBus;
 
-	@Inject protected EventManager eventManager;
-	
+public class HotelListFragment extends Fragment implements OnItemClickListener, DownloaderTaskListenerInterface {
+
+
+	private EventBus eventBus;
 	ListContinuationDownloaderTask mContinuationLoader = null;
 	private LinearLayout mFooterView;
 	boolean mClickEnabled = true;
@@ -117,6 +116,8 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		eventBus = EventBus.getDefault();
+		eventBus.register(this);
 		Context context = getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 		if (defaultTracker != null) 
@@ -183,7 +184,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 		mHotelListView.setOnItemClickListener(this);
 	}
 
-	public void onEventHotelItemClicked( @Observes HotelItemClicked event) {
+	public void onEvent( HotelItemClicked event) {
 		
 		final int hotelIndex = event.hotelIndex;
 		if (mHotelListView.getCheckedItemPosition() != hotelIndex) {
@@ -211,7 +212,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 //		mHotelListView.setItemChecked(position, true);
 		mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
 		//mHotelListView.requestFocus();
-		eventManager.fire(new HotelItemClicked(position));
+		eventBus.post(new HotelItemClicked(position));
 		Log.d(TAG, "running showHotelDetails()");
 
 	}
@@ -265,7 +266,7 @@ public class HotelListFragment extends RoboFragment implements OnItemClickListen
 			mEnabledPaging = false;
 		}
 		
-		eventManager.fire(new HotelsListUpdated());
+		eventBus.post(new HotelsListUpdated());
 	}
 
 	ProgressDialog mProgressDialog = null;

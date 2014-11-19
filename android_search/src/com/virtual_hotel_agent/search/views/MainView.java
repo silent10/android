@@ -25,8 +25,6 @@ import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.android.SoundLevelView;
 import com.evaapis.android.SpeechAudioStreamer;
 import com.evature.util.Log;
-import com.google.android.gms.internal.m;
-import com.google.inject.Injector;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -70,10 +68,9 @@ public class MainView {
 	private String mMapTabName;
 	private String mReservationsTabName;
 	private String mReviewsTabName;
-	private Injector injector;
 	private List<String> mTabTitles;
 	
-	public MainView(final MainActivity mainActivity, Injector injector, List<String> tabTitles) {
+	public MainView(final MainActivity mainActivity, List<String> tabTitles) {
 		mStatusPanel = mainActivity.findViewById(R.id.status_panel);
 		mStatusText = (TextView)mainActivity.findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)mainActivity.findViewById(R.id.progressBar1);
@@ -95,8 +92,6 @@ public class MainView {
 		mMapTabName = mainActivity.getString(R.string.MAP);
 		mReviewsTabName = mainActivity.getString(R.string.REVIEWS);
 		
-		this.injector = injector;
-
 		mTabTitles = tabTitles;
 
 		// setup the tab switching
@@ -116,7 +111,7 @@ public class MainView {
 	
 			@Override
 			public void onPageSelected(int position) {
-				mainActivity.getActionBar().setDisplayHomeAsUpEnabled(position > 0);
+				mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(position > 0);
 				if (position > 2) {
 					if (!hidButtons) {
 						// save last shown on first hiding of buttons
@@ -433,12 +428,12 @@ public class MainView {
 			super(fm);
 			Log.i(TAG, "CTOR");
 			// optimization - create before needed
-			mChatFragment = injector.getInstance(ChatFragment.class); 
-			mMapFragment = injector.getInstance(HotelsMapFragment.class);
-			mHotelsListFragment = injector.getInstance(HotelListFragment.class);
-			mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
-			mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
-			mBookingFragment = injector.getInstance(BookingFragement.class);
+			mChatFragment = new ChatFragment(); 
+			mMapFragment = new HotelsMapFragment();
+			mHotelsListFragment = new HotelListFragment();
+			mHotelDetailFragment = new HotelDetailFragment();
+			mRoomSelectFragment = new RoomsSelectFragement();
+			mBookingFragment = new BookingFragement();
 			mReviewsFragment = null;
 			mReservationFragment = null;
 		}
@@ -465,67 +460,67 @@ public class MainView {
 			if (tabTitle.equals(mChatTabName)) { // Main Chat window
 				Log.d(TAG, "Chat Fragment");
 				if (mChatFragment == null) {
-					mChatFragment = injector.getInstance(ChatFragment.class);
+					mChatFragment = new ChatFragment();
 				}
 				return mChatFragment;
 			}
 			else if (tabTitle.equals(mHotelsTabName)) { // Hotel list window
 				Log.i(TAG, "Hotels Fragment");
 				if (mHotelsListFragment == null) {
-					mHotelsListFragment = injector.getInstance(HotelListFragment.class);
+					mHotelsListFragment = new HotelListFragment();
 				}
 				return mHotelsListFragment;
 			}
 			else if (tabTitle.equals(mMapTabName)) { // Hotel list window
 				Log.i(TAG, "HotelsMap Fragment");
 				if (mMapFragment == null) {
-					mMapFragment = injector.getInstance(HotelsMapFragment.class);
+					mMapFragment = new HotelsMapFragment();
 				}
 				return mMapFragment;
 			}
 			
 //			else if (mTabTitles.get(position).equals(getString(R.string.FLIGHTS))) { // flights list
 //				Log.i(TAG, "Flights Fragment");
-//				return injector.getInstance(FlightsFragment.class);
+//				return new FlightsFragment();
 //			}
 			else if (tabTitle.equals(mHotelTabName)) { // Single hotel
 				Log.i(TAG, "starting hotel Fragment");
 				if (mHotelDetailFragment == null) {
-					mHotelDetailFragment = injector.getInstance(HotelDetailFragment.class);
+					mHotelDetailFragment = new HotelDetailFragment();
 				}
 				return mHotelDetailFragment;
 			}
 			else if (tabTitle.equals(mRoomsTabName)) {
 				Log.i(TAG, "starting Rooms Fragment");
 				if (mRoomSelectFragment == null) {
-					mRoomSelectFragment = injector.getInstance(RoomsSelectFragement.class);
+					mRoomSelectFragment = new RoomsSelectFragement();
 				}
 				return mRoomSelectFragment;
 			}
 			else if (tabTitle.equals(mBookingTabName)) {
 				Log.i(TAG, "starting booking fragment");
 				if (mBookingFragment == null) {
-					mBookingFragment = injector.getInstance(BookingFragement.class);
+					mBookingFragment = new BookingFragement();
 				}
 				return mBookingFragment;
 			}
 			else if (tabTitle.equals(mReservationsTabName)) {
 				Log.i(TAG, "starting reservation fragment");
 				if (mReservationFragment == null) {
-					mReservationFragment = injector.getInstance(ReservationDisplayFragment.class);
+					mReservationFragment = new ReservationDisplayFragment();
 				}
 				return mReservationFragment;
 			}
 			else if (tabTitle.equals(mReviewsTabName)) {
 				Log.i(TAG, "Starting reviews fragment");
 				if (mReviewsFragment == null) {
-					mReviewsFragment = injector.getInstance(ReviewsFragment.class);
+					mReviewsFragment = new ReviewsFragment();
 				}
 				return mReviewsFragment;
 			}
 //			if (mTabTitles.get(position).equals(getString(R.string.TRAINS))) { // trains list window
 //				Log.i(TAG, "Trains Fragment");
-//				return injector.getInstance(TrainsFragment.class);
+//				return new TrainsFragment();
 //			}
 
 			VHAApplication.logError(TAG, "No fragment made for Position "+position+(position< size ? " titled "+tabTitle : ""));

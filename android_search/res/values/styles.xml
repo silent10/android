@@ -278,7 +278,7 @@
 
     <style name="ButtonBarButton" />
 
-    <style name="StyledIndicators"   parent="@android:style/Theme.Holo.Light.DarkActionBar">
+    <style name="StyledIndicators"   parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowBackground">@drawable/splash_screen</item>
         <item name="vpiCirclePageIndicatorStyle">@style/CustomCirclePageIndicator</item>
         <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item>

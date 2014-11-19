@@ -1,9 +1,9 @@
 package com.virtual_hotel_agent.search.controllers.activities;
 
-import roboguice.activity.RoboFragmentActivity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.virtual_hotel_agent.search.R;
 
-public class HotelMapActivity extends RoboFragmentActivity {
+public class HotelMapActivity extends FragmentActivity {
 	
     public static String HOTEL_NAME="SUMMARY";
     public static String HOTEL_LATITUDE="LATITUDE";

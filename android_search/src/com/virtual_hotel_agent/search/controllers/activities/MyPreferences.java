@@ -3,12 +3,12 @@
  */
 package com.virtual_hotel_agent.search.controllers.activities;
 
-import roboguice.activity.RoboPreferenceActivity;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 
 import com.virtual_hotel_agent.search.R;
 
-public class MyPreferences extends RoboPreferenceActivity {
+public class MyPreferences extends PreferenceActivity {
 
 	// This approach was deprecated, but the new fragments approach is not backwards compatible!!!
 	@SuppressWarnings("deprecation")

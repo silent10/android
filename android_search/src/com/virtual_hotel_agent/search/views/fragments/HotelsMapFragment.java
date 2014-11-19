@@ -4,11 +4,10 @@ import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import roboguice.event.EventManager;
-import roboguice.fragment.RoboFragment;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
@@ -34,14 +33,15 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.LatLngBounds.Builder;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.inject.Inject;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 
+import de.greenrobot.event.EventBus;
 
-public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClickListener  {
+
+public class HotelsMapFragment extends Fragment implements OnInfoWindowClickListener  {
 	private final String TAG = "HotelsMapFragment";
 
 	private GoogleMap mMap = null;
@@ -53,11 +53,12 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	
 	private final int MAX_HOTELS = 30; 
 
-	@Inject protected EventManager eventManager;
-
+	private EventBus eventBus;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		eventBus = EventBus.getDefault();
 		
 		mLastPresentedHotel = new WeakReference<Hotel>(null);
 		mLastPresentLength = -1;
@@ -267,7 +268,7 @@ public class HotelsMapFragment extends RoboFragment implements OnInfoWindowClick
 	        				    .createEvent("ui_action", "hotel_click", "hotels_map", (long) i)
 	        				    .build()
 	        				   );
-	        		eventManager.fire(new HotelItemClicked(i) );
+	        		eventBus.post(new HotelItemClicked(i) );
 	        	}
 	        }
         }
