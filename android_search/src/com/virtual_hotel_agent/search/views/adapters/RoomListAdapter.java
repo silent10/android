@@ -3,7 +3,6 @@ package com.virtual_hotel_agent.search.views.adapters;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import roboguice.event.EventManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -24,17 +23,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.hotel.HotelRoom.ValueAdd;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
+
+import de.greenrobot.event.EventBus;
 
 public class RoomListAdapter extends BaseExpandableListAdapter {
 
@@ -48,9 +48,8 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	protected static final String TAG = "RoomListAdapter";
 	private int selectedColor;
 	private int selectedNonRefundColor;
-	private EventManager mEventManager;
 		
-	public RoomListAdapter(Context context, long hotelId, List<HotelRoom> rooms, EventManager eventManager)
+	public RoomListAdapter(Context context, long hotelId, List<HotelRoom> rooms)
 	{	
 		mInflater = LayoutInflater.from(context);
 	    mParent = context;
@@ -60,7 +59,6 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		selectedColor = resources.getColor(R.color.selected_room_list_item);
 		selectedNonRefundColor = resources.getColor(R.color.selected_non_refundable_room_list_item);
 		disclaimer = "";
-		mEventManager = eventManager;
 		mEvaBmpCached = BitmapFactory.decodeResource(resources, R.drawable.slanted_icon_512);
 	}
 	
@@ -374,7 +372,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 			
 			@Override
 			public void onClick(View v) {
-				mEventManager.fire(new RoomSelectedEvent(room, hotelId));
+				EventBus.getDefault().post(new RoomSelectedEvent(room, hotelId));
 			}
 		});
 		

@@ -3,10 +3,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 
-import roboguice.event.EventManager;
-import roboguice.fragment.RoboFragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.LayoutInflater;
@@ -36,21 +34,21 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
-import com.google.inject.Inject;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
 
-public class HotelDetailFragment extends RoboFragment implements OnItemClickListener {
+import de.greenrobot.event.EventBus;
+
+public class HotelDetailFragment extends Fragment implements OnItemClickListener {
 
 	protected static final String TAG = HotelDetailFragment.class.getSimpleName();
 
@@ -73,8 +71,8 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 	private Button mMapButton;
 	private ScrollView mScrollView;
 	
-	@Inject protected EventManager eventManager;
 
+	private EventBus eventBus;
 	private View mView = null;
 	private PhotoGalleryAdapter mHotelGalleryAdapter;
 	private Bitmap mVhaBmp;
@@ -147,7 +145,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 		
 		@Override
 		public void onClick(View v) {
-			eventManager.fire(new RatingClickedEvent());
+			eventBus.post(new RatingClickedEvent());
 		}
 	};
 
@@ -160,6 +158,8 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 			Log.w(TAG, "Fragment create view twice");
 			return mView;
 		}
+		
+		eventBus = EventBus.getDefault(); 
 
 //		int orientation = getResources().getConfiguration().orientation;
 //		if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -245,7 +245,7 @@ public class HotelDetailFragment extends RoboFragment implements OnItemClickList
 				return;
 			}
 			
-			eventManager.fire(new HotelSelected(hotel.hotelId));
+			eventBus.post(new HotelSelected(hotel.hotelId));
 		}
 	};
 	

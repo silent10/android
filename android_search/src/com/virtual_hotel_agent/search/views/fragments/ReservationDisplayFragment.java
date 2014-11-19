@@ -28,9 +28,9 @@ package com.virtual_hotel_agent.search.views.fragments;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import roboguice.fragment.RoboFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,14 +44,13 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
  * The code behind the ReservationDisplay activity.
  */
-public class ReservationDisplayFragment extends RoboFragment {
+public class ReservationDisplayFragment extends Fragment {
 
     private static final String DATE_FORMAT_STRING = "MM/dd/yyyy";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern(DATE_FORMAT_STRING);
