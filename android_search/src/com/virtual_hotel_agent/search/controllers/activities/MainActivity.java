@@ -1389,7 +1389,6 @@ public class MainActivity extends ActionBarActivity implements
 	
 
 
-	// note "onEvent" template is needed for progruard to not break roboguice
 	// this event happens after a next page of hotel list results is downloaded
 	public void onEvent( HotelsListUpdated event) {
 		int mapTabIndex = mainView.getMapTabIndex();

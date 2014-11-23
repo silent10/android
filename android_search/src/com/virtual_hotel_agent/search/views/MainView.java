@@ -10,6 +10,7 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
@@ -439,7 +440,16 @@ public class MainView {
 		}
 		
 		@Override public void destroyItem(android.view.ViewGroup container, int position, Object object) {
-			Log.d(TAG, "Ignoring destroyItem at position "+position);
+			if (position >= getCount()) {
+				Log.d(TAG, "Destryoing tab at position "+position);
+		        FragmentManager manager = ((Fragment) object).getFragmentManager();
+		        FragmentTransaction trans = manager.beginTransaction();
+		        trans.remove((Fragment) object);
+		        trans.commit();
+		    }
+			else {
+				Log.d(TAG, "Ignoring destroyItem at position "+position);
+			}
 		};
 		
 	    @Override
