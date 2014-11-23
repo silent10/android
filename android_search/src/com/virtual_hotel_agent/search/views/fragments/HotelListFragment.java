@@ -117,7 +117,6 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 		super.onCreate(savedInstanceState);
 		
 		eventBus = EventBus.getDefault();
-		eventBus.register(this);
 		Context context = getActivity();
 		Tracker defaultTracker = GoogleAnalytics.getInstance(context).getDefaultTracker();
 		if (defaultTracker != null) 
@@ -135,7 +134,7 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 			((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
 		}
-		
+		eventBus.register(this);		
 		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
 		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
 		mHotelListView.clearChoices();

@@ -129,6 +129,7 @@ public class SpeechAudioStreamer {
 		// Analyze Sound.
 		for (int i = 0; i < numberOfReadBytes; i += 2) {
 			sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
+			
 			totalAbsValue += Math.abs(sample);
 		}
 		// average "sound level" of the current chunk

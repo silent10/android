@@ -1,10 +1,13 @@
 package com.evaapis.android;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 
 
-abstract public class EvaBaseActivity {}
-/*extends FragmentActivity implements EvaSearchReplyListener { 
+
+abstract public class EvaBaseActivity extends FragmentActivity implements EvaSearchReplyListener { 
 
 	protected EvaComponent eva;
 	
@@ -74,8 +77,5 @@ abstract public class EvaBaseActivity {}
 	public void resetSession() {
 		eva.resetSession();
 	}
-
-	
 	
 }
-*/
