@@ -969,7 +969,8 @@ public class MainActivity extends Activity implements
 						mapIndex = mTabTitles.size()-1;
 					}
 					HotelsMapFragment mapFragment = mainView.getMapFragment();
-					mapFragment.onHotelsListUpdated();
+					if (mapFragment != null)
+						mapFragment.onHotelsListUpdated();
 					
 					mainView.removeTab(mainView.getHotelTabName());
 					mainView.removeTab(mainView.getRoomsTabName());

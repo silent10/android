@@ -10,8 +10,8 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-//import android.view.PagerAdapter;
-//import android.view.ViewPager;
+import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -55,8 +55,8 @@ public class MainView {
 	private final int search_button_padding = 24;
 
 	private WeakReference<Handler> mUpdateLevel;
-//	private ViewPager mViewPager;
-	private TabsPagerAdapter mTabsAdapter;
+	private ViewPager mViewPager;
+	private MyPagerAdapter mPagerAdapter;
 	
 	private String mChatTabName;
 //	private String mExamplesTabName;
@@ -77,7 +77,7 @@ public class MainView {
 		mSearchButton = (ImageButton) mainActivity.findViewById(R.id.search_button);
 		mBottomBar = mainActivity.findViewById(R.id.bottom_bar);
 		startNewSessionButton = (ImageButton) mainActivity.findViewById(R.id.restart_button);
-//		mViewPager = (ViewPager) mainActivity.findViewById(R.id.viewpager);
+		mViewPager = (ViewPager) mainActivity.findViewById(R.id.viewpager);
 		
 		mChatTabName = mainActivity.getString(R.string.CHAT);
 //		mExamplesTabName = mainActivity.getString(R.string.EXAMPLES);
@@ -91,17 +91,18 @@ public class MainView {
 		mReviewsTabName = mainActivity.getString(R.string.REVIEWS);
 		
 		mTabTitles = tabTitles;
-		
-		mChatFragment = new ChatFragment();
-		mainActivity.getFragmentManager().beginTransaction()
-        		.add(R.id.fragment_container, getChatFragment())
-        		.commit();
+
 		
 		// setup the tab switching
-//		mTabsAdapter = new TabsPagerAdapter(mainActivity.getFragmentManager());
-//		mViewPager.setAdapter(mTabsAdapter);
+		mPagerAdapter = new MyPagerAdapter(mainActivity.getFragmentManager());
+		mViewPager.setAdapter(mPagerAdapter);
 //		mTabs.setViewPager(mViewPager);
 //		mViewPager.setOffscreenPageLimit(5);
+		
+//		mainActivity.getFragmentManager().beginTransaction()
+//		.add(R.id.fragment_container, getChatFragment())
+//		.commit();
+
 		
 		mSoundView.setColor(0xffdd8877);
 		mSoundView.setAlign(Gravity.RIGHT);
@@ -427,30 +428,22 @@ public class MainView {
 
 	
 
-	public class TabsPagerAdapter  {} /*implements ViewPager.OnPageChangeListener  {
+	public class MyPagerAdapter extends FragmentPagerAdapter /*implements ViewPager.OnPageChangeListener */ {
 		
-		//private final ViewPager mViewPager;
-		private final String TAG = TabsPagerAdapter.class.getSimpleName();
-		HotelsMapFragment mMapFragment;
-		HotelListFragment mHotelsListFragment;
-		HotelDetailFragment mHotelDetailFragment;
-		RoomsSelectFragement mRoomSelectFragment;
-		BookingFragement mBookingFragment;
-		ReservationDisplayFragment mReservationFragment;
-		ReviewsFragment mReviewsFragment;
-		ChatFragment mChatFragment;
+		private final String TAG = "MyPagerAdapter";
 		
-		public TabsPagerAdapter(FragmentManager fm) {
+		public MyPagerAdapter(FragmentManager fm) {
+			super(fm);
 			Log.i(TAG, "CTOR");
 			// optimization - create before needed
 			mChatFragment = new ChatFragment(); 
-			mMapFragment = new HotelsMapFragment();
-			mHotelsListFragment = new HotelListFragment();
-			mHotelDetailFragment = new HotelDetailFragment();
-			mRoomSelectFragment = new RoomsSelectFragement();
-			mBookingFragment = new BookingFragement();
-			mReviewsFragment = null;
-			mReservationFragment = null;
+//			mMapFragment = new HotelsMapFragment();
+//			mHotelsListFragment = new HotelListFragment();
+//			mHotelDetailFragment = new HotelDetailFragment();
+//			mRoomSelectFragment = new RoomsSelectFragement();
+//			mBookingFragment = new BookingFragement();
+//			mReviewsFragment = null;
+//			mReservationFragment = null;
 		}
 		
 		@Override public void destroyItem(android.view.ViewGroup container, int position, Object object) {
@@ -472,6 +465,7 @@ public class MainView {
 	    }
 				
 
+	    @Override
 		public Fragment getItem(int position) {// Asks for the main fragment
 			Log.d(TAG, "getItem " + String.valueOf(position));
 			int size = mTabTitles.size();
@@ -560,12 +554,6 @@ public class MainView {
             return mTabTitles.get(position % mTabTitles.size());
         }
 	 	
-		@Override
-		public void notifyDataSetChanged() {
-//			mTabs.notifyDataSetChanged();
-			super.notifyDataSetChanged();
-		}
-		
 //		int lastShown = -1;
 
 //		// Internal helper function
@@ -620,24 +608,14 @@ public class MainView {
 			notifyDataSetChanged();
 		}
 
-		@Override
-		public boolean isViewFromObject(View arg0, Object arg1) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
 	}
-*/
 
 	public int getCurrentPage() {
-	//	return mTabs.getCurrentPage();
-//		return mViewPager.getCurrentItem();
-		return 0;
+		return mViewPager.getCurrentItem();
 	}
 
 	public void setCurrentItem(int tabInd) {
-//		mViewPager.setCurrentItem(tabInd, true);
-//		mTabs.setCurrentItem(tabInd);
+		mViewPager.setCurrentItem(tabInd, true);
 	}
 
 	public void removeTabs() {
@@ -649,15 +627,15 @@ public class MainView {
 				mTabTitles.remove(index);
 		}
 		
-//		mTabsAdapter.notifyDataSetChanged();
+		mPagerAdapter.notifyDataSetChanged();
 	}
 
 	public void addTab(String tabName) {
-//		mTabsAdapter.addTab(tabName);
+		mPagerAdapter.addTab(tabName);
 	}
 
 	public void removeTab(String tabName) {
-//		mTabsAdapter.removeTab(tabName);
+		mPagerAdapter.removeTab(tabName);
 	}
 
 	public void fadeOutView(boolean tabs, boolean pager, boolean buttons) {

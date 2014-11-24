@@ -1,6 +1,7 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -85,6 +86,26 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 		return mView;
 	}
 
+	
+	// http://stackoverflow.com/a/15656428/519995
+	Field childFragmentManager = null;
+	@Override
+	public void onDetach() {
+	    super.onDetach();
+
+	    try {
+	    	if (childFragmentManager == null ) {
+	    		childFragmentManager = Fragment.class.getDeclaredField("mChildFragmentManager");
+	    		childFragmentManager.setAccessible(true);
+	    	}
+	        childFragmentManager.set(this, null);
+
+	    } catch (NoSuchFieldException e) {
+	        throw new RuntimeException(e);
+	    } catch (IllegalAccessException e) {
+	        throw new RuntimeException(e);
+	    }
+	}
 
 	private void setUpMapIfNeeded() {
 		if (mMap == null) {

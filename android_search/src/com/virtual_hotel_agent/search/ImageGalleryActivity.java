@@ -10,7 +10,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-//import android.view.ViewPager;
+//import android.support.v4.view.ViewPager;
 //import android.view.ViewPager.OnPageChangeListener;
 import android.view.View;
 import android.widget.TextView;
