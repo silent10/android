@@ -11,6 +11,7 @@
         android:background="@drawable/bubble2_red"
         android:orientation="horizontal"    
         android:layout_marginRight="2dip"
+        android:elevation="3dp"
         >
          <TextView
             android:id="@+id/label"

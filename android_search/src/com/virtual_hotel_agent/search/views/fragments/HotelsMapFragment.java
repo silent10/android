@@ -4,12 +4,12 @@ import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +25,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -90,9 +90,9 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 		if (mMap == null) {
 			try {
 				FragmentManager fm = getChildFragmentManager();
-				SupportMapFragment mapFragment = (SupportMapFragment)  fm.findFragmentByTag("the_map");
+				MapFragment mapFragment = (MapFragment)  fm.findFragmentByTag("the_map");
 				if (mapFragment == null || mapFragment.isAdded() == false) {
-					mapFragment = SupportMapFragment.newInstance();
+					mapFragment = MapFragment.newInstance();
 			        fm.beginTransaction().replace(R.id.map_container, mapFragment, "the_map").commit();
 			        fm.executePendingTransactions();
 				}
@@ -134,7 +134,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 	@Override
     public void onResume() {
         super.onResume();
-        FragmentActivity activity = this.getActivity();
+        Activity activity = this.getActivity();
 		mCurrency = SettingsAPI.getCurrencySymbol(activity);
 		Log.i(TAG, "Map resumed - checking google play");
         int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);

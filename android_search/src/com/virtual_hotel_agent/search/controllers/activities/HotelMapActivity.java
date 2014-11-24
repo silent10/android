@@ -1,16 +1,16 @@
 package com.virtual_hotel_agent.search.controllers.activities;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.virtual_hotel_agent.search.R;
 
-public class HotelMapActivity extends FragmentActivity {
+public class HotelMapActivity extends Activity {
 	
     public static String HOTEL_NAME="SUMMARY";
     public static String HOTEL_LATITUDE="LATITUDE";
@@ -36,10 +36,10 @@ public class HotelMapActivity extends FragmentActivity {
 
 	private void setUpMapIfNeeded() {
 		if (mMap == null) {
-			FragmentManager fm = getSupportFragmentManager();
-			SupportMapFragment mapFragment = (SupportMapFragment)  fm.findFragmentByTag("the_map");
+			FragmentManager fm = getFragmentManager();
+			MapFragment mapFragment = (MapFragment)  fm.findFragmentByTag("the_map");
 			if (mapFragment == null || mapFragment.isAdded() == false) {
-				mapFragment = SupportMapFragment.newInstance();
+				mapFragment = MapFragment.newInstance();
 		        fm.beginTransaction().replace(R.id.map_container, mapFragment, "the_map").commit();
 		        fm.executePendingTransactions();
 			}

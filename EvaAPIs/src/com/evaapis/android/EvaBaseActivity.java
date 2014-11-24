@@ -1,13 +1,13 @@
 package com.evaapis.android;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 
 
 
 
-abstract public class EvaBaseActivity extends FragmentActivity implements EvaSearchReplyListener { 
+abstract public class EvaBaseActivity extends Activity implements EvaSearchReplyListener { 
 
 	protected EvaComponent eva;
 	

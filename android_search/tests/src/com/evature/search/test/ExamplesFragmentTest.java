@@ -22,7 +22,7 @@ import org.robolectric.shadows.ShadowLog;
 
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
-import android.support.v4.view.ViewPager;
+import android.view.ViewPager;
 import android.widget.ListView;
 
 import com.evature.util.DownloadUrl;

@@ -13,7 +13,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
-import android.support.v4.util.Pair;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;

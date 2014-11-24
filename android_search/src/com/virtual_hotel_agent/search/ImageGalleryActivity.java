@@ -10,8 +10,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+//import android.view.ViewPager;
+//import android.view.ViewPager.OnPageChangeListener;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,12 +20,12 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
-import com.viewpagerindicator.UnderlinePageIndicator;
+//import com.viewpagerindicator.UnderlinePageIndicator;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.BitmapAdapter;
 
-public class ImageGalleryActivity extends Activity implements OnPageChangeListener {
+public class ImageGalleryActivity extends Activity { //implements OnPageChangeListener {
 
 	private static final String TAG = "ImageGalleryActivity";
 
@@ -35,11 +35,11 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 
 	public static final String TITLE = "Title";
 
-
+/*
 	private int initialPage = 99999;
 	private ImageDownloader imageDownloader;
 	private BitmapAdapter adapter;
-	private UnderlinePageIndicator mIndicator;
+//	private UnderlinePageIndicator mIndicator;
 
 	static class DownloadedImg extends Handler {
 		private WeakReference<ImageGalleryActivity> activityRef;
@@ -117,8 +117,8 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		adapter = new BitmapAdapter(this);
 		contentView.setAdapter(adapter);
 		
-		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
-		mIndicator.setViewPager(contentView);
+//		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
+//		mIndicator.setViewPager(contentView);
 		
 		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
 		
@@ -162,7 +162,7 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		}
 		
 		imageDownloader.startDownload(urls);
-		mIndicator.setOnPageChangeListener(this);
+//		mIndicator.setOnPageChangeListener(this);
 		
 		Log.i(TAG, "Showing "+urls.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
 		
@@ -216,5 +216,5 @@ public class ImageGalleryActivity extends Activity implements OnPageChangeListen
 		else {
 			setTitle(mTitle);
 		}
-	}
+	}*/
 }

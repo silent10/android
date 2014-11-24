@@ -3,16 +3,15 @@ package com.virtual_hotel_agent.search.views;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+//import android.view.PagerAdapter;
+//import android.view.ViewPager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -27,7 +26,6 @@ import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.android.SoundLevelView;
 import com.evaapis.android.SpeechAudioStreamer;
 import com.evature.util.Log;
-import com.viewpagerindicator.TitlePageIndicator;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
@@ -57,8 +55,7 @@ public class MainView {
 	private final int search_button_padding = 24;
 
 	private WeakReference<Handler> mUpdateLevel;
-	private ViewPager mViewPager;
-	private TitlePageIndicator mTabs;
+//	private ViewPager mViewPager;
 	private TabsPagerAdapter mTabsAdapter;
 	
 	private String mChatTabName;
@@ -80,8 +77,7 @@ public class MainView {
 		mSearchButton = (ImageButton) mainActivity.findViewById(R.id.search_button);
 		mBottomBar = mainActivity.findViewById(R.id.bottom_bar);
 		startNewSessionButton = (ImageButton) mainActivity.findViewById(R.id.restart_button);
-		mViewPager = (ViewPager) mainActivity.findViewById(R.id.viewpager);
-		mTabs = (TitlePageIndicator) /*(TabPageIndicator)*/ mainActivity.findViewById(R.id.indicator);
+//		mViewPager = (ViewPager) mainActivity.findViewById(R.id.viewpager);
 		
 		mChatTabName = mainActivity.getString(R.string.CHAT);
 //		mExamplesTabName = mainActivity.getString(R.string.EXAMPLES);
@@ -95,50 +91,55 @@ public class MainView {
 		mReviewsTabName = mainActivity.getString(R.string.REVIEWS);
 		
 		mTabTitles = tabTitles;
-
+		
+		mChatFragment = new ChatFragment();
+		mainActivity.getFragmentManager().beginTransaction()
+        		.add(R.id.fragment_container, getChatFragment())
+        		.commit();
+		
 		// setup the tab switching
-		mTabsAdapter = new TabsPagerAdapter(mainActivity.getSupportFragmentManager());
-		mViewPager.setAdapter(mTabsAdapter);
-		mTabs.setViewPager(mViewPager);
-		mViewPager.setOffscreenPageLimit(5);
+//		mTabsAdapter = new TabsPagerAdapter(mainActivity.getFragmentManager());
+//		mViewPager.setAdapter(mTabsAdapter);
+//		mTabs.setViewPager(mViewPager);
+//		mViewPager.setOffscreenPageLimit(5);
 		
 		mSoundView.setColor(0xffdd8877);
 		mSoundView.setAlign(Gravity.RIGHT);
 
-		mTabs.setOnPageChangeListener(new OnPageChangeListener() {
-			private boolean lastShown = true;
-			private boolean hidButtons = false;
-			
-			@Override
-			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-			}
-	
-			@Override
-			public void onPageSelected(int position) {
-				mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(position > 0);
-				if (position > 2) {
-					if (!hidButtons) {
-						// save last shown on first hiding of buttons
-						lastShown = areMainButtonsShown();
-					}
-					toggleMainButtons(false);
-					hidButtons = true;
-				}
-				else {
-					if (lastShown && hidButtons) {
-						toggleMainButtons(true);
-						hidButtons = false;
-						lastShown = true;
-					}
-				}
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-				
-			}
-		});
-		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
+//		mTabs.setOnPageChangeListener(new OnPageChangeListener() {
+//			private boolean lastShown = true;
+//			private boolean hidButtons = false;
+//			
+//			@Override
+//			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//			}
+//	
+//			@Override
+//			public void onPageSelected(int position) {
+//				mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(position > 0);
+//				if (position > 2) {
+//					if (!hidButtons) {
+//						// save last shown on first hiding of buttons
+//						lastShown = areMainButtonsShown();
+//					}
+//					toggleMainButtons(false);
+//					hidButtons = true;
+//				}
+//				else {
+//					if (lastShown && hidButtons) {
+//						toggleMainButtons(true);
+//						hidButtons = false;
+//						lastShown = true;
+//					}
+//				}
+//			}
+//
+//			@Override
+//			public void onPageScrollStateChanged(int arg0) {
+//				
+//			}
+//		});
+//		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
 	}
 	
 	public void activateSearchButton() {
@@ -380,8 +381,8 @@ public class MainView {
 	public void toggleMainButtons(boolean showMainButtons) {
 		mainButtonsShown = showMainButtons;
 		mBottomBar.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
-		mViewPager.invalidate();
-		mTabs.invalidate();
+//		mViewPager.invalidate();
+//		mTabs.invalidate();
 	}
 	
 	//  Tabs handling
@@ -404,18 +405,29 @@ public class MainView {
 	public int getReservationsTabIndex() {  return mTabTitles.indexOf(mReservationsTabName); }
 	public int getReviewsTabIndex() {  return mTabTitles.indexOf(mReviewsTabName); }
 
-	public ChatFragment 		getChatFragment()    {  return mTabsAdapter.mChatFragment; 	}
-	public HotelListFragment 	getHotelsListFragment()  {  return mTabsAdapter.mHotelsListFragment; }
-	public HotelDetailFragment 	getHotelFragment()   {  return mTabsAdapter.mHotelDetailFragment; }
-	public RoomsSelectFragement getRoomsFragment()   {  return mTabsAdapter.mRoomSelectFragment; }
-	public BookingFragement 	getBookingFragment() {  return mTabsAdapter.mBookingFragment; }
-	public HotelsMapFragment 	getMapFragment()     {  return mTabsAdapter.mMapFragment; }
-	public ReservationDisplayFragment getReservationsFragment() {  return mTabsAdapter.mReservationFragment; }
-	public ReviewsFragment 		getReviewsFragment() {  return mTabsAdapter.mReviewsFragment; }
+	
+	private HotelsMapFragment mMapFragment;
+	private HotelListFragment mHotelsListFragment;
+	private HotelDetailFragment mHotelDetailFragment;
+	private RoomsSelectFragement mRoomSelectFragment;
+	private BookingFragement mBookingFragment;
+	private ReservationDisplayFragment mReservationFragment;
+	private ReviewsFragment mReviewsFragment;
+	private ChatFragment mChatFragment;
+	
+	
+	public ChatFragment 		getChatFragment()    {  return mChatFragment; 	}
+	public HotelListFragment 	getHotelsListFragment()  {  return mHotelsListFragment; }
+	public HotelDetailFragment 	getHotelFragment()   {  return mHotelDetailFragment; }
+	public RoomsSelectFragement getRoomsFragment()   {  return mRoomSelectFragment; }
+	public BookingFragement 	getBookingFragment() {  return mBookingFragment; }
+	public HotelsMapFragment 	getMapFragment()     {  return mMapFragment; }
+	public ReservationDisplayFragment getReservationsFragment() {  return mReservationFragment; }
+	public ReviewsFragment 		getReviewsFragment() {  return mReviewsFragment; }
 
 	
 
-	public class TabsPagerAdapter  extends FragmentPagerAdapter /*implements ViewPager.OnPageChangeListener */ {
+	public class TabsPagerAdapter  {} /*implements ViewPager.OnPageChangeListener  {
 		
 		//private final ViewPager mViewPager;
 		private final String TAG = TabsPagerAdapter.class.getSimpleName();
@@ -429,7 +441,6 @@ public class MainView {
 		ChatFragment mChatFragment;
 		
 		public TabsPagerAdapter(FragmentManager fm) {
-			super(fm);
 			Log.i(TAG, "CTOR");
 			// optimization - create before needed
 			mChatFragment = new ChatFragment(); 
@@ -461,7 +472,6 @@ public class MainView {
 	    }
 				
 
-		@Override
 		public Fragment getItem(int position) {// Asks for the main fragment
 			Log.d(TAG, "getItem " + String.valueOf(position));
 			int size = mTabTitles.size();
@@ -552,7 +562,7 @@ public class MainView {
 	 	
 		@Override
 		public void notifyDataSetChanged() {
-			mTabs.notifyDataSetChanged();
+//			mTabs.notifyDataSetChanged();
 			super.notifyDataSetChanged();
 		}
 		
@@ -610,15 +620,24 @@ public class MainView {
 			notifyDataSetChanged();
 		}
 
-	}
+		@Override
+		public boolean isViewFromObject(View arg0, Object arg1) {
+			// TODO Auto-generated method stub
+			return false;
+		}
 
+	}
+*/
 
 	public int getCurrentPage() {
-		return mTabs.getCurrentPage();
+	//	return mTabs.getCurrentPage();
+//		return mViewPager.getCurrentItem();
+		return 0;
 	}
 
 	public void setCurrentItem(int tabInd) {
-		mTabs.setCurrentItem(tabInd);
+//		mViewPager.setCurrentItem(tabInd, true);
+//		mTabs.setCurrentItem(tabInd);
 	}
 
 	public void removeTabs() {
@@ -630,15 +649,15 @@ public class MainView {
 				mTabTitles.remove(index);
 		}
 		
-		mTabsAdapter.notifyDataSetChanged();
+//		mTabsAdapter.notifyDataSetChanged();
 	}
 
 	public void addTab(String tabName) {
-		mTabsAdapter.addTab(tabName);
+//		mTabsAdapter.addTab(tabName);
 	}
 
 	public void removeTab(String tabName) {
-		mTabsAdapter.removeTab(tabName);
+//		mTabsAdapter.removeTab(tabName);
 	}
 
 	public void fadeOutView(boolean tabs, boolean pager, boolean buttons) {
@@ -646,10 +665,10 @@ public class MainView {
 		anim.setDuration(500);
 		anim.setRepeatCount(0);
 		anim.setFillAfter(true);
-		if (tabs)
-			mTabs.startAnimation(anim);
-		if (pager)
-			mViewPager.startAnimation(anim);
+//		if (tabs)
+//			mTabs.startAnimation(anim);
+//		if (pager)
+//			mViewPager.startAnimation(anim);
 		if (buttons)
 			mBottomBar.startAnimation(anim);
 	}
@@ -659,10 +678,10 @@ public class MainView {
 		anim.setFillAfter(true);
 		anim.setRepeatCount(0);
 		anim.setDuration(200);
-		if (tabs)
-			mTabs.startAnimation(anim);
-		if (pager)
-			mViewPager.startAnimation(anim);
+//		if (tabs)
+//			mTabs.startAnimation(anim);
+//		if (pager)
+//			mViewPager.startAnimation(anim);
 		if (buttons)
 			mBottomBar.startAnimation(anim);
 	}

@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 import android.widget.ImageView;
 
 import com.virtual_hotel_agent.search.VHAApplication;

@@ -3,10 +3,10 @@ package com.virtual_hotel_agent.search.views.fragments;
 import java.util.ArrayList;
 import java.util.Random;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;

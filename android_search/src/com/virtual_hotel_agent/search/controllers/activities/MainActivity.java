@@ -26,6 +26,8 @@ import java.util.Map;
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -43,8 +45,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.RecognizerIntent;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -114,7 +114,7 @@ import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends ActionBarActivity implements 
+public class MainActivity extends Activity implements 
 													EvaSearchReplyListener,
 													VolumeListener,
 													OnSharedPreferenceChangeListener {
@@ -374,7 +374,7 @@ public class MainActivity extends ActionBarActivity implements
 
 //		setDebugData(DebugTextType.None, null);
 		
-		ActionBar actionBar = getSupportActionBar();
+		ActionBar actionBar = getActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		
 		// patch for debug - bypass the speech recognition:
@@ -678,12 +678,12 @@ public class MainActivity extends ActionBarActivity implements
 			voiceRecognitionSearch(null, false);
 			break;
 			
-		case R.id.add_utterance_button:
-			ChatFragment chatFragment = mainView.getChatFragment();
-			if (chatFragment != null)
-				chatFragment.addUtterance();
-			mainView.setCurrentItem(mainView.getChatTabIndex());
-			break;
+//		case R.id.add_utterance_button:
+//			ChatFragment chatFragment = mainView.getChatFragment();
+//			if (chatFragment != null)
+//				chatFragment.addUtterance();
+//			mainView.setCurrentItem(mainView.getChatTabIndex());
+//			break;
 		}
 	}
 
@@ -1128,7 +1128,7 @@ public class MainActivity extends ActionBarActivity implements
 						Toast.makeText(MainActivity.this, R.string.children_ages_required, Toast.LENGTH_LONG).show();
 					}
 				});
-		        dialog.show(getSupportFragmentManager(), "NoticeDialogFragment");
+		        dialog.show(getFragmentManager(), "NoticeDialogFragment");
 				
 			}
 			else {

@@ -39,7 +39,6 @@ import org.json.JSONObject;
 
 import com.ean.mobile.exception.EanWsError;
 import com.evature.util.ExternalIpAddressGetter;
-import com.viewpagerindicator.IconPagerAdapter;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.SettingsAPI;
 

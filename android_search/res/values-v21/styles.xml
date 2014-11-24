@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="FullscreenTheme" parent="@android:style/Theme.Material.Light">
+    <style name="FullscreenTheme" parent="@android:style/Theme.Material">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>
@@ -9,18 +9,13 @@
 <!--         <item name="buttonBarButtonStyle">?android:attr/buttonBarButtonStyle</item> -->
     </style>
 
-    <style name="FullscreenActionBarStyle" parent="@android:style/Theme.Material.Light.DarkActionBar">
+    <style name="FullscreenActionBarStyle" parent="@android:style/Theme.Material">
         <item name="android:background">@color/black_overlay</item>
     </style>
         
         
-    <style name="StyledIndicators" parent="@android:style/Theme.Material.Light.DarkActionBar">
+    <style name="StyledIndicators" parent="@android:style/Theme.Material">
         <item name="android:windowBackground">@drawable/splash_screen</item>
-        <item name="vpiCirclePageIndicatorStyle">@style/CustomCirclePageIndicator</item>
-        <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item>
-        <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
-        <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item>
-        <item name="vpiUnderlinePageIndicatorStyle">@style/CustomUnderlinePageIndicator</item>
     </style>
 
 </resources>
