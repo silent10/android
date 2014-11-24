@@ -17,6 +17,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -178,10 +179,15 @@ public class EvaVoiceClient {
 		
 		qparams.add(new BasicNameValuePair("android_ver", String.valueOf(android.os.Build.VERSION.SDK_INT)));
 		qparams.add(new BasicNameValuePair("device", android.os.Build.MODEL));
-
 		
 		if (editLastUtterance) {
 			qparams.add(new BasicNameValuePair("edit_last_utterance", "true"));
+		}
+		
+		for (String key : mConfig.extraParams.keySet()) {
+			String val = mConfig.extraParams.get(key);
+			if (val != null)
+				qparams.add(new BasicNameValuePair(key, val));
 		}
 		
 		String host = mConfig.vproxyHost.toLowerCase();
@@ -240,7 +246,7 @@ public class EvaVoiceClient {
 		}
 		String filepath = null;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-		boolean saveEncoded = prefs.getBoolean("save_encoded", false);
+		boolean saveEncoded = prefs.getBoolean("eva_save_encoded", false);
 		if (saveEncoded) {
 			filepath = Environment.getExternalStorageDirectory().getPath() + "/recording.flac";
 		}
@@ -349,6 +355,9 @@ public class EvaVoiceClient {
 		catch (IOException e) {
 			if (e.getMessage().equals("Connection already shutdown")) {
 				Log.i(TAG, "Connection already shutdown");
+			}
+			if (e.getMessage().equals("Request aborted")) {
+				Log.i(TAG, "Request aborted");
 			}
 			else {
 				Log.e(TAG, "Exception sending voice request", e);

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 
 import com.evature.util.Log;
@@ -18,6 +19,7 @@ public class SoundLevelView extends View {
 	private int peakSound;
 	private int numOfPoints;
 	private int minSound;
+	private int gravity;
 
 	public SoundLevelView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -25,6 +27,15 @@ public class SoundLevelView extends View {
 		this.paint = new Paint();
 		//paint.setColor(Color.GREEN);
 		paint.setColor(0xff44aaff);
+		gravity = Gravity.CENTER_HORIZONTAL;
+	}
+	
+	public void setColor(int color) {
+		paint.setColor(color);
+	}
+	
+	public void setAlign(int gravity) {
+		this.gravity = gravity;
 	}
 
 	@Override
@@ -46,7 +57,16 @@ public class SoundLevelView extends View {
 			float prevY = height;
 			float width = this.getWidth() - 2;
 			float xStep = width / soundBuff.length;
-			float prevX = (width - numOfPoints * xStep) / 2;
+			float prevX;
+			if ((gravity & Gravity.RIGHT) == Gravity.RIGHT){
+				prevX = width - numOfPoints * xStep;
+			}
+			else if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
+				prevX = 0;
+			}
+			else {
+				prevX = (width - numOfPoints * xStep) / 2;
+			}
 
 			for (int i = 0; i < numOfPoints; i++) {
 				pointsBuff[qi] = prevX;

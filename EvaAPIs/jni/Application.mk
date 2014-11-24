@@ -3,6 +3,7 @@ APP_ABI := armeabi armeabi-v7a x86
 
 APP_MODULES = audio-flac audio-native
 APP_OPTIM = release
+APP_PLATFORM = android-19  # mkfifo isn't backwards compatible in 21+
 
 AUDIO_NATIVE_FLAGS = \
 	-Ijni/config \

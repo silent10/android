@@ -51,12 +51,19 @@
             android:entries="@array/entries_vr_service"
             android:entryValues="@array/entryvalues_vr_service"
             />
+        
+        <CheckBoxPreference 
+            android:key="eva_voice_only"
+            android:title="Voice Only"
+            android:summary="Debug only speech recognition"
+            />
+        
         <CheckBoxPreference
-            android:key="save_pcm"
+            android:key="eva_save_pcm"
             android:summary="@string/save_recording_pcm_file_wav_"
             android:title="Save PCM" />
         <CheckBoxPreference
-            android:key="save_encoded"
+            android:key="eva_save_encoded"
             android:summary="@string/save_encoded_file_flac_"
             android:title="@string/save_encoded" />
         
