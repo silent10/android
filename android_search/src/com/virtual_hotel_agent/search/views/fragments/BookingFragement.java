@@ -16,6 +16,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,7 +24,6 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -182,7 +182,7 @@ public class BookingFragement extends Fragment {
 	private void populatePriceBreakdownList(final NumberFormat currencyFormat) {
         final LinearLayout priceBreakdownList = (LinearLayout) mView.findViewById(R.id.priceDetailsBreakdown);
         View view;
-        final LayoutInflater inflater = getLayoutInflater(null);
+        final LayoutInflater inflater = LayoutInflater.from(getActivity());
 
         priceBreakdownList.removeAllViews();
         

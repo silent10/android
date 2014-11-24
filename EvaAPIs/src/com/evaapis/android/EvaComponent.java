@@ -27,7 +27,6 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
-import android.support.v4.util.Pair;
 import android.telephony.TelephonyManager;
 import android.view.Gravity;
 import android.view.View;

@@ -28,9 +28,9 @@ package com.virtual_hotel_agent.search.views.fragments;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -126,7 +126,7 @@ public class ReservationDisplayFragment extends Fragment {
         final TableLayout infoList = (TableLayout) mView.findViewById(R.id.reservationInfoList);
         infoList.removeAllViews();
 
-        final ViewAdder adder = new ViewAdder(infoList, getLayoutInflater(null), getActivity());
+        final ViewAdder adder = new ViewAdder(infoList, LayoutInflater.from(getActivity()), getActivity());
 
         adder.addKeyValue(R.string.itinerary_id, reservationToDisplay.itineraryId);
         adder.addKeyValue(R.string.confirmation_numbers, TextUtils.join(",", reservationToDisplay.confirmationNumbers));

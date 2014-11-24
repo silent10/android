@@ -10,7 +10,8 @@
         android:layout_alignParentRight="true"
         android:background="@drawable/bubble2_red"
         android:layout_marginRight="10dip"
-        android:orientation="horizontal"    
+        android:orientation="horizontal" 
+        android:elevation="3dp"   
         >
     
     <TextView

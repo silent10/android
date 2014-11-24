@@ -11,7 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.VHAApplication;

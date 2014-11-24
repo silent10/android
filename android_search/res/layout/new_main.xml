@@ -15,29 +15,36 @@
 <!--         android:layout_width="fill_parent" -->
 <!--         /> -->
     
-    <com.viewpagerindicator.TitlePageIndicator
-        android:id="@+id/indicator"
-        android:padding="10dip"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"
-        android:background="#ff3b3b3b"
-        android:textColor="#AA88aaee"
-        app:footerColor="#ff88aaee"
-        app:footerLineHeight="2dp"
-        app:footerIndicatorHeight="3dp"
-        app:footerIndicatorStyle="underline"
-        app:selectedColor="#FF88aaee"
-        app:selectedBold="true"
-        />
+    <FrameLayout 
+	    android:id="@+id/fragment_container"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_alignParentBottom="true" />
+        
+    
+<!--     <com.viewpagerindicator.TitlePageIndicator -->
+<!--         android:id="@+id/indicator" -->
+<!--         android:padding="10dip" -->
+<!--         android:layout_height="wrap_content" -->
+<!--         android:layout_width="fill_parent" -->
+<!--         android:background="#ff3b3b3b" -->
+<!--         android:textColor="#AA88aaee" -->
+<!--         app:footerColor="#ff88aaee" -->
+<!--         app:footerLineHeight="2dp" -->
+<!--         app:footerIndicatorHeight="3dp" -->
+<!--         app:footerIndicatorStyle="underline" -->
+<!--         app:selectedColor="#FF88aaee" -->
+<!--         app:selectedBold="true" -->
+<!--         /> -->
     
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewpager"
-        android:layout_width="fill_parent"
-        android:layout_below="@id/indicator"
-        android:layout_alignParentBottom="true"
-        android:background="@drawable/chat_background"
-        android:layout_height="fill_parent" />
+<!--     <android.view.ViewPager -->
+<!--         android:id="@+id/viewpager" -->
+<!--         android:layout_width="fill_parent" -->
+<!--         android:layout_below="@id/indicator" -->
+<!--         android:layout_alignParentBottom="true" -->
+<!--         android:background="@drawable/chat_background" -->
+<!--         android:layout_height="fill_parent" /> -->
 <!--         android:layout_above="@+id/bottom_bar" -->
 
     <LinearLayout
@@ -111,7 +118,7 @@
         android:padding="12dp"
         android:src="@drawable/microphone_icon2"
         android:text="@string/button"
-        android:elevation="6dp"
+        android:elevation="9dp"
          />
      
      
@@ -132,4 +139,6 @@
 <!--          android:padding="3dp" -->
 <!--            /> -->
      </RelativeLayout>
+
+
 </RelativeLayout>

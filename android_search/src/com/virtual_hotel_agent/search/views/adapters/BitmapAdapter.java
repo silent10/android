@@ -6,8 +6,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+//import android.view.PagerAdapter;
+//import android.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +20,7 @@ import com.virtual_hotel_agent.search.R;
 /***
  * Adapter for Bitmaps
  */
-public class BitmapAdapter extends PagerAdapter {
+public class BitmapAdapter {} /*extends PagerAdapter {
 	
 	private Context context;
     private ArrayList<Bitmap> bitmaps;
@@ -69,4 +69,4 @@ public class BitmapAdapter extends PagerAdapter {
         ((ViewPager) container).removeView((RelativeLayout) object);
   
     }
-}
+}*/

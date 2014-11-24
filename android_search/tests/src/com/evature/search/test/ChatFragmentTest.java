@@ -13,10 +13,10 @@ import org.robolectric.shadows.ShadowLog;
 
 import roboguice.RoboGuice;
 import roboguice.inject.RoboInjector;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.view.ViewPager;
 
 import com.google.inject.Inject;
 import com.virtual_hotel_agent.search.R;

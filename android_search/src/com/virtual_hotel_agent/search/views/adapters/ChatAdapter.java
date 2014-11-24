@@ -1,9 +1,9 @@
 // Relevant example: http://windrealm.org/tutorials/android/listview-with-checkboxes-without-listactivity.php
 package com.virtual_hotel_agent.search.views.adapters;
 
+import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +37,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		super(chatList);
 		mChatList = chatList;
 		this.chatFragment = chatFragment;
-		FragmentActivity activity = chatFragment.getActivity();
+		Activity activity = chatFragment.getActivity();
 		mInflater = LayoutInflater.from(activity);
 		
 		Resources resources = activity.getResources();

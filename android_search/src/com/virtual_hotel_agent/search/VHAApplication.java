@@ -23,7 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 import android.widget.Toast;
 
 import com.ean.mobile.hotel.Hotel;

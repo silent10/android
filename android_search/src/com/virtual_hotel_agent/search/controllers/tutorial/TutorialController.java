@@ -1,7 +1,7 @@
 package com.virtual_hotel_agent.search.controllers.tutorial;
 
 import android.app.Activity;
-import android.support.v4.app.FragmentActivity;
+import android.app.FragmentActivity;
 import android.view.View;
 import android.widget.Toast;
 
