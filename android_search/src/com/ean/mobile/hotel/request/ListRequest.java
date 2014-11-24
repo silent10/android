@@ -46,6 +46,7 @@ import com.ean.mobile.hotel.HotelList;
 import com.ean.mobile.hotel.RoomOccupancy;
 import com.ean.mobile.request.CommonParameters;
 import com.ean.mobile.request.Request;
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
@@ -54,6 +55,7 @@ import com.virtual_hotel_agent.search.VHAApplication;
 public final class ListRequest extends Request<HotelList> {
 
     private static final String NUMBER_OF_RESULTS = "20";
+	private static final String TAG = "ListRequest";
 
     /**
      * Uses the EAN API to search for hotels in the given destination using http requests.
@@ -151,6 +153,8 @@ public final class ListRequest extends Request<HotelList> {
         final JSONObject response = jsonObject.getJSONObject("HotelListResponse");
 
         if (response.has("EanWsError")) {
+        	 VHAApplication.logError(TAG, "EAN Error");
+        	 VHAApplication.logError(TAG, response.toString(2));
             throw EanWsError.fromJson(response.getJSONObject("EanWsError"));
         }
 

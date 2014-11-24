@@ -69,15 +69,6 @@
 
     </LinearLayout>
 
-    <com.evaapis.android.SoundLevelView
-        android:id="@+id/surfaceView_sound_wave"
-        android:layout_width="wrap_content"
-        android:layout_height="80dip"
-        android:layout_margin="20dip"
-        android:background="@color/half_black"
-        android:layout_centerInParent="true"
-        android:visibility="gone"
-         />
     
     <ImageView 
         android:id="@+id/trip_advisor_promo"
@@ -92,55 +83,53 @@
         android:layout_height="110dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/bottom_bar_background"
          >
-    
-    
+
+    <com.evaapis.android.SoundLevelView
+        android:id="@+id/surfaceView_sound_wave"
+        android:layout_width="wrap_content"
+        android:layout_height="56dip"
+        android:layout_marginLeft="20dip"
+        android:layout_marginRight="85dip"
+        android:layout_marginBottom="22dp"
+        android:layout_alignParentBottom="true"
+        android:background="#22000000"
+        android:visibility="gone"
+         />
+        
      <ImageButton
         android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="16dp"
         android:background="@drawable/transition_button_activate"
         android:contentDescription="@string/microphone_button"
         android:onClick="myClickHandler"
         android:padding="12dp"
-        android:src="@drawable/microphone_icon"
+        android:src="@drawable/microphone_icon2"
         android:text="@string/button"
-        android:layout_centerHorizontal="true"
+        android:elevation="6dp"
          />
      
-     <ImageButton
-         android:id="@+id/restart_button"
-         style="?android:attr/buttonStyleSmall"
-         android:layout_width="48dp"
-         android:layout_height="48dp"
-         android:layout_alignParentTop="true"
-         android:layout_alignParentRight="true"
-         android:layout_marginTop="30dp"
-         android:layout_marginRight="28dp"
-         android:background="@drawable/custom_button"
-         android:onClick="myClickHandler"
-         android:contentDescription="Restart"
-         android:src="@drawable/session_restart"
-         android:padding="3dp"
-           />
      
-        <ImageButton
-         android:id="@+id/add_utterance_button"
-         style="?android:attr/buttonStyleSmall"
-         android:layout_width="48dp"
-         android:layout_height="48dp"
-         android:layout_alignParentTop="true"
-         android:layout_alignParentLeft="true"
-         android:layout_marginTop="30dp"
-         android:layout_marginLeft="28dp"
-         android:background="@drawable/custom_button"
-         android:onClick="myClickHandler"
-         android:contentDescription="Restart"
-         android:src="@drawable/keyboard_icon"
-         android:padding="3dp"
-           />
+     
+<!--      <ImageButton -->
+<!--          android:id="@+id/restart_button" -->
+<!--          style="?android:attr/buttonStyleSmall" -->
+<!--          android:layout_width="48dp" -->
+<!--          android:layout_height="48dp" -->
+<!--          android:layout_alignParentTop="true" -->
+<!--          android:layout_alignParentRight="true" -->
+<!--          android:layout_marginTop="30dp" -->
+<!--          android:layout_marginRight="28dp" -->
+<!--          android:background="@drawable/custom_button" -->
+<!--          android:onClick="myClickHandler" -->
+<!--          android:contentDescription="Restart" -->
+<!--          android:src="@drawable/session_restart" -->
+<!--          android:padding="3dp" -->
+<!--            /> -->
      </RelativeLayout>
 </RelativeLayout>

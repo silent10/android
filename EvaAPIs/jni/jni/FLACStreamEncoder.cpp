@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/stat.h>  /* Iftah:  for mkfifo */
 
+
 #include "FLAC/metadata.h"
 #include "FLAC/stream_encoder.h"
 
@@ -92,7 +93,7 @@ void throwByName(JNIEnv * env, const char * name, const char * msg)
  * Constants
  **/
 static char const * const FLACStreamEncoder_classname =
-		"com.evaapis.android.FLACStreamEncoder";
+		"com/evaapis/android/FLACStreamEncoder";
 static char const * const FLACStreamEncoder_mObject = "mObject";
 
 static char const * const IllegalArgumentException_classname =

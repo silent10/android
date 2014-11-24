@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.ImageButton;
@@ -101,6 +102,8 @@ public class MainView {
 		mTabs.setViewPager(mViewPager);
 		mViewPager.setOffscreenPageLimit(5);
 		
+		mSoundView.setColor(0xffdd8877);
+		mSoundView.setAlign(Gravity.RIGHT);
 
 		mTabs.setOnPageChangeListener(new OnPageChangeListener() {
 			private boolean lastShown = true;

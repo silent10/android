@@ -719,7 +719,7 @@ public class MainActivity extends ActionBarActivity implements
 	}
 	
 	@Override
-	public void onEvaError(String message, boolean isServerError, Object cookie) {
+	public void onEvaError(String message, EvaApiReply reply, boolean isServerError, Object cookie) {
 		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 		mainView.flashBadSearchButton(2);
 		Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();

@@ -90,9 +90,8 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 			edit.apply();
 		}
 		super.onCreate(savedInstanceState);
-		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
-		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+		this.onSharedPreferenceChanged(sharedPreferences, "");
 		eva.registerPreferenceListener();
 		setContentView(R.layout.activity_main);
 		
@@ -142,8 +141,20 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 	}
 	
 	@Override
-	public void onEvaError(String message, boolean isServerError, Object cookie) {
+	public void onEvaError(String message, EvaApiReply reply, boolean isServerError, Object cookie) {
 		Toast.makeText(this, "Error: "+message, Toast.LENGTH_LONG).show();
+		if (reply != null && reply.JSONReply != null) {
+			String replyStr;
+			try {
+				replyStr = reply.JSONReply.toString(2);
+				SpannableString replySpan = new SpannableString(replyStr);
+				responseText.setText(replySpan);
+			} catch (JSONException e) {
+				e.printStackTrace();
+				responseText.setText("Error: "+message);
+			}
+
+		}
 	}
 	
 	
@@ -217,6 +228,12 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 			String key) {
 		eva.setSiteCode(sharedPreferences.getString("eva_site_code", SITE_CODE));
 		eva.setApiKey(sharedPreferences.getString("eva_key", API_KEY));
+		
+		boolean voice_only = sharedPreferences.getBoolean("eva_voice_only", false);
+		if (voice_only)
+			eva.setParameter("voice_only", "True");
+		else 
+			eva.setParameter("voice_only", null);
 		
 		String language = sharedPreferences.getString("eva_language", "");
 		if (language.equals("")) {

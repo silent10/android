@@ -3,6 +3,7 @@ package com.evaapis.android;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.json.JSONException;
@@ -19,7 +20,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognitionListener;
@@ -27,6 +27,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
+import android.support.v4.util.Pair;
 import android.telephony.TelephonyManager;
 import android.view.Gravity;
 import android.view.View;
@@ -36,7 +37,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.evaapis.BuildConfig;
 import com.evaapis.R;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
@@ -122,12 +122,19 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		public String webServiceHost;
 		public String apiVersion;
 		
+		public HashMap<String, String> extraParams;
+		
 		public EvaConfig() {
 			sessionId = "1";
 			language = "en";
 			webServiceHost = DefaultEvaWSHost;
 			vproxyHost = DefaultVProxyHost;
 			apiVersion = DefaultApiVersion;
+			extraParams = new HashMap<String,String>();
+		}
+
+		public void setParameter(String key, String value) {
+			extraParams.put(key, value);
 		}
 	}
 
@@ -273,7 +280,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		mEvaTextClient = null;
 		if (reply.errorMessage != null) {
 			Log.w(TAG, "Error from Eva: "+reply.errorMessage);
-			replyListener.onEvaError(reply.errorMessage, true, cookie);
+			replyListener.onEvaError(reply.errorMessage, reply, true, cookie);
 			return;
 		}
 
@@ -297,8 +304,8 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	// handling errors
 	@Override
-	public void onEvaError(String message, boolean isServerError, Object cookie) {
-		replyListener.onEvaError(message, isServerError, cookie);
+	public void onEvaError(String message, EvaApiReply reply, boolean isServerError, Object cookie) {
+		replyListener.onEvaError(message, reply, isServerError, cookie);
 	}
 	
 	// Handle the results from the speech recognition activity
@@ -377,7 +384,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	@Override
 	public void speechResultError(String message, Object cookie) {
 		//Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
-		onEvaError(message, false, cookie);
+		onEvaError(message, null, false, cookie);
 	}
 	
 	public String getDeviceId() {
@@ -708,6 +715,15 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void setApiKey(String apiKey) {
 		mConfig.appKey = apiKey;
 	}
+	
+	public void setParameter(String key, String value) {
+		mConfig.setParameter(key, value);
+	}
+	
+	public HashMap<String, String> getExtraParams() {
+		return mConfig.extraParams;
+	}
+
 
 	public String getSiteCode() {
 		return mConfig.siteCode;
@@ -767,4 +783,5 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void setAppVersion(String ver) {
 		mConfig.appVersion = ver;
 	}
+
 }

@@ -2,6 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/restart_button"
+        android:title="New Session"
+        android:icon="@drawable/session_restart"
+        android:showAsAction="always">
+    </item>
+      
+    
+    <item
         android:id="@+id/audio"
         android:title="@string/audio_control"
         android:icon="@drawable/speaker_icon"

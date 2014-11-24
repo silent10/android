@@ -58,9 +58,9 @@ public class EvaApiReply implements Serializable {
 			this.JSONReply = new JSONObject(fullReply);
 			JSONObject jFullReply = JSONReply;
 			Log.d(TAG, "eva_reply: " + jFullReply.toString(2));
-			boolean status = jFullReply.getBoolean("status");
+			boolean status = jFullReply.optBoolean("status", false);
 			if (!status) {
-				errorMessage = jFullReply.optString("message", "Error");
+				errorMessage = jFullReply.optString("message", "Unknown Error");
 			}
 			else {
 				if (jFullReply.has("session_id")) {

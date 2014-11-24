@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -12,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
+import android.support.v4.util.Pair;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;
@@ -127,6 +129,13 @@ import com.evature.util.Log;
 				evatureUrl += "&time_zone="+URLEncoder.encode((""+TimeZone.getDefault().getRawOffset()/3600000.0).replaceFirst("\\.0+$",  ""), "UTF-8");
 				evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.RELEASE), "UTF-8");
 				evatureUrl += "&device="+URLEncoder.encode(android.os.Build.MODEL, "UTF-8");
+				
+				HashMap<String, String> extraParams = mEva.getExtraParams();
+				for (String key : extraParams.keySet()) {
+					String val = extraParams.get(key);
+					if (val != null)
+						evatureUrl += "&"+key+"="+URLEncoder.encode(val, "UTF-8");
+				}
 			} catch (UnsupportedEncodingException e) {
 				Log.e(TAG, "UnsupportedEncodingException", e);
 			}

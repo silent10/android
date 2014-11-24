@@ -17,10 +17,12 @@ import java.nio.channels.WritableByteChannel;
 import org.apache.commons.io.FileUtils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 import com.evaapis.EvaException;
 import com.evature.util.Log;
@@ -68,9 +70,9 @@ public class SpeechAudioStreamer {
 		mSampleRate = sampleRate;
 		totalTimeRecording = 0;
 		
-//		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-//		mDebugSavePCM = prefs.getBoolean("save_pcm", false);
-		mDebugSavePCM = false;
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		mDebugSavePCM = prefs.getBoolean("eva_save_pcm", false);
+//		mDebugSavePCM = false;
 		
 		Log.i(TAG, "Encoder=" + mEncoder.toString());
 	}
@@ -157,7 +159,7 @@ public class SpeechAudioStreamer {
 			mMinSoundLevel = temp;
 		}
 		
-		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
+		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = (int)(5*totalAbsValue); //mSoundLevel;
 		
 		// identifying speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
 //		if (mBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
@@ -340,7 +342,7 @@ public class SpeechAudioStreamer {
 	 */
 	class Uploader implements Runnable {
 		boolean startedReading  = false;
-		InputStream encodedStream;
+		InputStream encodedStream = null;
 		
 		@Override
 		public void run() {
@@ -360,17 +362,18 @@ public class SpeechAudioStreamer {
 //				}
 //			}
 //
-//
-			
+//	
+			encodedStream = null;
 			Log.i(TAG, "initing Fifo");
 			mEncoder.initFifo(fifoPath);
 			try {
-				startedReading = true;
+				startedReading = true; // must be set before encodedStream, since the FileInputStream will be stuck until someone reads from it
 				encodedStream = new FileInputStream(fifoPath);
 			} catch (FileNotFoundException e) {
 				Log.e(TAG, "Failed to open FIFO from encoder");
 				throw new RuntimeException("Failed to open FIFO from encoder");
 			}
+			Log.i(TAG, "Encoded stream ready");
 			/*
 			Log.i(TAG, "<<< reading from encoded Fifo");
 
@@ -472,6 +475,23 @@ public class SpeechAudioStreamer {
 		new Thread(p).start();
 		//new Thread(c).start();
 		Log.i(TAG, "Audio Streamer started!");
+		
+		while (u.encodedStream == null) {
+			iterations++;
+			try {
+				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing 2");
+				Thread.sleep(10);
+				if (iterations > MAX_UPLOADER_WAIT_ITERATIONS) {
+					Log.e(TAG, "Waited too long for uploader to start reading 2");
+					uploaderThread.interrupt();
+					return null;
+				}
+			} catch (InterruptedException e) {
+				Log.e(TAG, "interrupted waiting for uploader", e);
+				return null;
+			}
+		}
+		
 		return u.encodedStream;
 	}
 
