@@ -15,11 +15,11 @@
 <!--         android:layout_width="fill_parent" -->
 <!--         /> -->
     
-    <FrameLayout 
-	    android:id="@+id/fragment_container"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:layout_alignParentBottom="true" />
+<!--     <FrameLayout  -->
+<!-- 	    android:id="@+id/fragment_container" -->
+<!-- 	    android:layout_width="match_parent" -->
+<!-- 	    android:layout_height="match_parent" -->
+<!-- 	    android:layout_alignParentBottom="true" /> -->
         
     
 <!--     <com.viewpagerindicator.TitlePageIndicator -->
@@ -38,13 +38,13 @@
 <!--         /> -->
     
 
-<!--     <android.view.ViewPager -->
-<!--         android:id="@+id/viewpager" -->
-<!--         android:layout_width="fill_parent" -->
-<!--         android:layout_below="@id/indicator" -->
-<!--         android:layout_alignParentBottom="true" -->
-<!--         android:background="@drawable/chat_background" -->
-<!--         android:layout_height="fill_parent" /> -->
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="fill_parent"
+        android:layout_below="@id/indicator"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/chat_background"
+        android:layout_height="fill_parent" />
 <!--         android:layout_above="@+id/bottom_bar" -->
 
     <LinearLayout
