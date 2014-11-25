@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -377,24 +378,24 @@ public class MainView {
 //			mHotelsListFragment = new HotelListFragment();
 		}
 //		
-//		@Override public void destroyItem(android.view.ViewGroup container, int position, Object object) {
-//			if (position >= getCount()) {
-//				Log.d(TAG, "Destryoing tab at position "+position);
-//		        FragmentManager manager = ((Fragment) object).getFragmentManager();
-//		        FragmentTransaction trans = manager.beginTransaction();
-//		        trans.remove((Fragment) object);
-//		        trans.commit();
-//		    }
-//			else {
-//				Log.d(TAG, "Ignoring destroyItem at position "+position);
-//			}
-//		};
+		@Override 
+		public void destroyItem(android.view.ViewGroup container, int position, Object object) {
+			if (position >= getCount()) {
+				Log.d(TAG, "Destryoing tab at position "+position);
+		        FragmentManager manager = ((Fragment) object).getFragmentManager();
+		        FragmentTransaction trans = manager.beginTransaction();
+		        trans.remove((Fragment) object);
+		        trans.commit();
+		    }
+			else {
+				Log.d(TAG, "Ignoring destroyItem at position "+position);
+			}
+		};
 		
 //	    @Override
-//	    public int getItemPosition(Object object){
-//	        return POSITION_NONE;
-//	    }
-//				
+	    public int getItemPosition(Object object){
+	        return POSITION_NONE;
+	    }
 
 	    @Override
 		public Fragment getItem(int position) {// Asks for the main fragment
@@ -442,10 +443,6 @@ public class MainView {
 		return mViewPager.getCurrentItem();
 	}
 
-	public void setCurrentItem(int tabInd) {
-		mViewPager.setCurrentItem(tabInd, true);
-	}
-
 	public void removeTabs() {
 		final String [] tabsToRemove = { mHotelsTabName };
 		for (String tab : tabsToRemove) {
@@ -457,13 +454,10 @@ public class MainView {
 		mPagerAdapter.notifyDataSetChanged();
 	}
 
-//	// Internal helper function
-	private void showTab(int position) {
+	public void showTab(int position) {
 		Log.d(TAG, "showTab "+position);
 //		lastShown = position;
 		mViewPager.setCurrentItem(position, true);
-//		mTabs.onPageSelected(position);
-//		this.notifyDataSetChanged();
 	}
 	
 	public void showTab(String name) {
