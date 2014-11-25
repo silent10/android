@@ -965,9 +965,9 @@ public class MainActivity extends BaseActivity implements
 						// asdf mainView.addTab(mainView.getMapTabName());
 					// asdf mapIndex = mTabTitles.size()-1;
 					// asdf }
-					HotelsMapFragment mapFragment = mainView.getMapFragment();
-					if (mapFragment != null)
-						mapFragment.onHotelsListUpdated();
+					// asdf HotelsMapFragment mapFragment = mainView.getMapFragment();
+					// asdf if (mapFragment != null)
+					// asdf 	mapFragment.onHotelsListUpdated();
 					
 					// asdf mainView.removeTab(mainView.getHotelTabName());
 					// asdf mainView.removeTab(mainView.getRoomsTabName());
@@ -975,8 +975,13 @@ public class MainActivity extends BaseActivity implements
 					// asdf mainView.removeTab(mainView.getBookingTabName());
 					
 					HotelListFragment fragment = mainView.getHotelsListFragment();
+					if (fragment == null) {
+						mainView.addTab(mainView.getHotelsListTabName());
+						fragment = mainView.getHotelsListFragment();
+					}
 					if (fragment != null) {
 						fragment.newHotelsList();
+						mainView.showTab(mainView.getHotelsListTabName());
 					}
 					else {
 						VHAApplication.logError(TAG, "Unexpected hotel list fragment is null");
@@ -1190,15 +1195,15 @@ public class MainActivity extends BaseActivity implements
 			// asdf mainView.addTab(mainView.getRoomsTabName());
 			// asdf index = mTabTitles.size()-1;
 			// asdf }
-			RoomsSelectFragement fragment = mainView.getRoomsFragment();
-			if (fragment != null) // could be null if not instantiated yet
-			{
-				fragment.changeHotelId(mRoomUpdater.hotelId);
-				if (mSwitchToTab) {
+			// asdf RoomsSelectFragement fragment = mainView.getRoomsFragment();
+			// asdf if (fragment != null) // could be null if not instantiated yet
+			// asdf {
+			// asdf 	fragment.changeHotelId(mRoomUpdater.hotelId);
+			// asdf 	if (mSwitchToTab) {
 					// asdf mainView.setCurrentItem(index);
-					mSwitchToTab  = false;
-				}
-			}
+			// asdf mSwitchToTab  = false;
+			// asdf 				}
+			// asdf }
 			mRoomUpdater = null;
 		}
 		
@@ -1254,11 +1259,11 @@ public class MainActivity extends BaseActivity implements
 			// asdf 	index = mTabTitles.size() - 1;
 			// asdf }
 	
-			HotelDetailFragment fragment = mainView.getHotelFragment();
-			if (fragment != null) // could be null if not instantiated yet
-			{
-				fragment.changeHotelId(hotelId);
-			}
+			// asdf HotelDetailFragment fragment = mainView.getHotelFragment();
+			// asdf if (fragment != null) // could be null if not instantiated yet
+			// asdf {
+			// asdf 	fragment.changeHotelId(hotelId);
+			// asdf }
 
 			// asdf index = mainView.getHotelTabIndex();
 			// asdf mainView.setCurrentItem(index);
@@ -1411,10 +1416,10 @@ public class MainActivity extends BaseActivity implements
 		// asdf 	reservationTabIndex = mTabTitles.size() - 1;
 		// asdf }
 		
-		ReservationDisplayFragment frag = (ReservationDisplayFragment)  mainView.getReservationsFragment();
-		if (frag != null) {
-			frag.showLatestReservation();
-		}
+		// asdf ReservationDisplayFragment frag = (ReservationDisplayFragment)  mainView.getReservationsFragment();
+		// asdf if (frag != null) {
+		// asdf frag.showLatestReservation();
+		// asdf }
 		// asdf mainView.setCurrentItem(reservationTabIndex);
 	}
 	
@@ -1429,10 +1434,10 @@ public class MainActivity extends BaseActivity implements
 		// asdf 	mainView.addTab(mainView.getBookingTabName());
 		// asdf 	bookingIndex = mTabTitles.size() - 1;
 		// asdf }
-		BookingFragement frag = (BookingFragement)  mainView.getBookingFragment();
-		if (frag != null) {
-			frag.changeHotelRoom(hotel, event.room);
-		}
+		// asdf BookingFragement frag = (BookingFragement)  mainView.getBookingFragment();
+		// asdf if (frag != null) {
+		// asdf frag.changeHotelRoom(hotel, event.room);
+		// asdf }
 		// asdf mainView.setCurrentItem(bookingIndex);
 	}
 	
