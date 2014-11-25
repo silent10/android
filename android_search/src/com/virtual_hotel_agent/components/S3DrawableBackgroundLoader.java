@@ -91,6 +91,9 @@ public class S3DrawableBackgroundLoader {
 				if (mUrl == null) {
 					mUrl= "<null>";
 				}
+				else if (mUrl.equals("")) {
+					mUrl = "<empty>";
+				}
 				VHAApplication.logError(TAG, "Maformed URL in S3Drawable: "+mUrl, e);
 				return null;
 			}
