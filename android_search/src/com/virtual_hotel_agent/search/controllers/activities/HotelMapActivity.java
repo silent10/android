@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.virtual_hotel_agent.search.R;
 
-public class HotelMapActivity extends Activity {
+public class HotelMapActivity extends BaseActivity {
 	
     public static String HOTEL_NAME="SUMMARY";
     public static String HOTEL_LATITUDE="LATITUDE";

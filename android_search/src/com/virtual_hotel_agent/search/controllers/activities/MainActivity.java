@@ -27,7 +27,6 @@ import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -108,13 +107,12 @@ import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
 import com.virtual_hotel_agent.search.views.fragments.ReservationDisplayFragment;
-import com.virtual_hotel_agent.search.views.fragments.ReviewsFragment;
 //import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
 import de.greenrobot.event.EventBus;
 
-public class MainActivity extends Activity implements 
+public class MainActivity extends BaseActivity implements 
 													EvaSearchReplyListener,
 													VolumeListener,
 													OnSharedPreferenceChangeListener {
@@ -461,14 +459,16 @@ public class MainActivity extends Activity implements
 
 
 
-
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
 		Intent intent;
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			mainView.setCurrentItem(mainView.getChatTabIndex());
+			return true;
+			
+		case R.id.restart_button:
+			startNewSession();
 			return true;
 
 		case R.id.settings: // Did the user select "settings"?
@@ -670,9 +670,6 @@ public class MainActivity extends Activity implements
 	// http://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
 	public void myClickHandler(View view) {
 		switch (view.getId()) {
-		case R.id.restart_button:
-			startNewSession();
-			break;
 
 		case R.id.search_button:
 			voiceRecognitionSearch(null, false);
@@ -952,30 +949,30 @@ public class MainActivity extends Activity implements
 			// tabName is HOTELS, FLIGHTS, etc.. depending on chatItem downloader id
 			
 			if (id == R.string.HOTELS && (VHAApplication.FOUND_HOTELS.size() == 0)) {
-				mainView.removeTabs();
+				// asdf mainView.removeTabs();
 				Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
 			}
 			else {
 				int index = mTabTitles.indexOf(tabName);
 				if (index == -1) {
-					mainView.addTab(tabName);
+					// asdf mainView.addTab(tabName);
 					index = mTabTitles.size()-1;
 				} 
 
 				if (id == R.string.HOTELS) {
-					int mapIndex = mainView.getMapTabIndex();
-					if (mapIndex == -1) {
-						mainView.addTab(mainView.getMapTabName());
-						mapIndex = mTabTitles.size()-1;
-					}
+					// asdf int mapIndex = mainView.getMapTabIndex();
+					// asdf if (mapIndex == -1) {
+						// asdf mainView.addTab(mainView.getMapTabName());
+					// asdf mapIndex = mTabTitles.size()-1;
+					// asdf }
 					HotelsMapFragment mapFragment = mainView.getMapFragment();
 					if (mapFragment != null)
 						mapFragment.onHotelsListUpdated();
 					
-					mainView.removeTab(mainView.getHotelTabName());
-					mainView.removeTab(mainView.getRoomsTabName());
-					mainView.removeTab(mainView.getReviewsTabName());
-					mainView.removeTab(mainView.getBookingTabName());
+					// asdf mainView.removeTab(mainView.getHotelTabName());
+					// asdf mainView.removeTab(mainView.getRoomsTabName());
+					// asdf mainView.removeTab(mainView.getReviewsTabName());
+					// asdf mainView.removeTab(mainView.getBookingTabName());
 					
 					HotelListFragment fragment = mainView.getHotelsListFragment();
 					if (fragment != null) {
@@ -1041,7 +1038,7 @@ public class MainActivity extends Activity implements
 			// ??? mViewPager.setAdapter(null);
 			//mTabs.setAdapter(null);
 			
-			mainView.removeTabs();
+			// asdf mainView.removeTabs();
 			
 			//mSwipeyAdapter.stuffChanged(mainView.getChatTabIndex());
 			
@@ -1188,17 +1185,17 @@ public class MainActivity extends Activity implements
 			mainView.hideStatus();
 			
 			
-			int index = mainView.getRoomsTabIndex();
-			if (index == -1) {
-				mainView.addTab(mainView.getRoomsTabName());
-				index = mTabTitles.size()-1;
-			}
+			// asdf int index = mainView.getRoomsTabIndex();
+			// asdf if (index == -1) {
+			// asdf mainView.addTab(mainView.getRoomsTabName());
+			// asdf index = mTabTitles.size()-1;
+			// asdf }
 			RoomsSelectFragement fragment = mainView.getRoomsFragment();
 			if (fragment != null) // could be null if not instantiated yet
 			{
 				fragment.changeHotelId(mRoomUpdater.hotelId);
 				if (mSwitchToTab) {
-					mainView.setCurrentItem(index);
+					// asdf mainView.setCurrentItem(index);
 					mSwitchToTab  = false;
 				}
 			}
@@ -1212,14 +1209,14 @@ public class MainActivity extends Activity implements
 			if (mRoomUpdater.eanWsError != null) {
 				EanWsError err = mRoomUpdater.eanWsError;
 				if ("SOLD_OUT".equals(err.category)) {
-					int index = mainView.getHotelTabIndex();
-					if (index != -1) {
-						HotelDetailFragment fragment = mainView.getHotelFragment();
-						if (fragment != null) // could be null if not instantiated yet
-						{
-							fragment.hotelSoldOut();
-						}
-					}
+					// asdf int index = mainView.getHotelTabIndex();
+					// asdf if (index != -1) {
+					// asdf HotelDetailFragment fragment = mainView.getHotelFragment();
+					// asdf if (fragment != null) // could be null if not instantiated yet
+					// asdf {
+					// asdf 							fragment.hotelSoldOut();
+					// asdf }
+					// asdf }
 					if (err.presentationMessage.equals("") == false)
 						Toast.makeText(MainActivity.this, err.presentationMessage, Toast.LENGTH_LONG).show();
 				}
@@ -1251,11 +1248,11 @@ public class MainActivity extends Activity implements
 			onEvent(new HotelsListUpdated());
 
 			// add hotel tab again
-			int index = mainView.getHotelTabIndex();
-			if (index == -1) {
-				mainView.addTab(mainView.getHotelTabName());
-				index = mTabTitles.size() - 1;
-			}
+			// asdf int index = mainView.getHotelTabIndex();
+			// asdf if (index == -1) {
+			// asdf 	mainView.addTab(mainView.getHotelTabName());
+			// asdf 	index = mTabTitles.size() - 1;
+			// asdf }
 	
 			HotelDetailFragment fragment = mainView.getHotelFragment();
 			if (fragment != null) // could be null if not instantiated yet
@@ -1263,15 +1260,15 @@ public class MainActivity extends Activity implements
 				fragment.changeHotelId(hotelId);
 			}
 
-			index = mainView.getHotelTabIndex();
-			mainView.setCurrentItem(index);
+			// asdf index = mainView.getHotelTabIndex();
+			// asdf mainView.setCurrentItem(index);
 
-			index = mainView.getReviewsTabIndex();
-			if (index == -1) {
-				mainView.addTab(mainView.getReviewsTabName());
-			}
-			ReviewsFragment reviews = mainView.getReviewsFragment();
-			reviews.hotelChanged(hotelId);
+			// asdf index = mainView.getReviewsTabIndex();
+			// asdf if (index == -1) {
+			// asdf 	mainView.addTab(mainView.getReviewsTabName());
+			// asdf }
+			// asdf ReviewsFragment reviews = mainView.getReviewsFragment();
+			// asdf reviews.hotelChanged(hotelId);
 			
 			startRoomSearch(hotelId);
 			mHotelDownloader = null;
@@ -1383,7 +1380,7 @@ public class MainActivity extends Activity implements
 		// ??? mViewPager.setAdapter(null);
 		//mTabs.setAdapter(null);
 		
-		mainView.removeTabs();
+		// asdf mainView.removeTabs();
 
 		VHAApplication.clearSearch();
 	}
@@ -1392,33 +1389,33 @@ public class MainActivity extends Activity implements
 
 	// this event happens after a next page of hotel list results is downloaded
 	public void onEvent( HotelsListUpdated event) {
-		int mapTabIndex = mainView.getMapTabIndex();
-		if (mapTabIndex != -1) {
-			HotelsMapFragment frag = (HotelsMapFragment) mainView.getMapFragment();
-			if (frag != null) {
-				frag.onHotelsListUpdated();
-			}
-		}
+		// asdf int mapTabIndex = mainView.getMapTabIndex();
+		// asdf if (mapTabIndex != -1) {
+		// asdf 	HotelsMapFragment frag = (HotelsMapFragment) mainView.getMapFragment();
+		// asdf 	if (frag != null) {
+		// asdf 		frag.onHotelsListUpdated();
+		// asdf 	}
+		// asdf }
 	}
 	
 	public void onEvent( RatingClickedEvent event) {
-		int reviewsIndex = mainView.getReviewsTabIndex();
-		if (reviewsIndex != -1)
-			mainView.setCurrentItem(reviewsIndex);
+		// asdf int reviewsIndex = mainView.getReviewsTabIndex();
+		// asdf if (reviewsIndex != -1)
+		// asdf 	mainView.setCurrentItem(reviewsIndex);
 	}
 	
 	public void onEvent( BookingCompletedEvent event) {
-		int reservationTabIndex = mainView.getReservationsTabIndex();
-		if (reservationTabIndex == -1) {
-			mainView.addTab(mainView.getReservationsTabName());
-			reservationTabIndex = mTabTitles.size() - 1;
-		}
+		// asdf int reservationTabIndex = mainView.getReservationsTabIndex();
+		// asdf if (reservationTabIndex == -1) {
+		// asdf 	mainView.addTab(mainView.getReservationsTabName());
+		// asdf 	reservationTabIndex = mTabTitles.size() - 1;
+		// asdf }
 		
 		ReservationDisplayFragment frag = (ReservationDisplayFragment)  mainView.getReservationsFragment();
 		if (frag != null) {
 			frag.showLatestReservation();
 		}
-		mainView.setCurrentItem(reservationTabIndex);
+		// asdf mainView.setCurrentItem(reservationTabIndex);
 	}
 	
 	
@@ -1427,16 +1424,16 @@ public class MainActivity extends Activity implements
 		Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(event.hotelId);
 		VHAApplication.selectedRoom = event.room;
 		
-		int bookingIndex = mainView.getBookingTabIndex();
-		if (bookingIndex == -1) {
-			mainView.addTab(mainView.getBookingTabName());
-			bookingIndex = mTabTitles.size() - 1;
-		}
+		// asdf int bookingIndex = mainView.getBookingTabIndex();
+		// asdf if (bookingIndex == -1) {
+		// asdf 	mainView.addTab(mainView.getBookingTabName());
+		// asdf 	bookingIndex = mTabTitles.size() - 1;
+		// asdf }
 		BookingFragement frag = (BookingFragement)  mainView.getBookingFragment();
 		if (frag != null) {
 			frag.changeHotelRoom(hotel, event.room);
 		}
-		mainView.setCurrentItem(bookingIndex);
+		// asdf mainView.setCurrentItem(bookingIndex);
 	}
 	
 	public void onEvent( HotelItemClicked event) {
@@ -1496,18 +1493,18 @@ public class MainActivity extends Activity implements
 	public void onEvent( HotelSelected event) {
 		Log.d(TAG, "onHotelSelected("+event.hotelId+")");
 
-		int index = mainView.getRoomsTabIndex();
-		if (index == -1) {
+		// asdf int index = mainView.getRoomsTabIndex();
+		// asdf if (index == -1) {
 			// no rooms tab - will be soon - so mark as switch to it
-			if (mRoomUpdater == null) {
-				startRoomSearch(event.hotelId);
-			}
-			mRoomUpdaterListener.switchToTab();
-		}
-		else {
+		// asdf 	if (mRoomUpdater == null) {
+		// asdf 				startRoomSearch(event.hotelId);
+		// asdf }
+		// asdf mRoomUpdaterListener.switchToTab();
+		// asdf }
+		// asdf else {
 			// room fragment is available - this is in sync with the selected hotel
-			mainView.setCurrentItem(index);
-		}
+		// asdf mainView.setCurrentItem(index);
+		// asdf }
 	}
 	
 	public void onEvent( ToggleMainButtonsEvent event) {
@@ -1523,9 +1520,9 @@ public class MainActivity extends Activity implements
 			}
 		}
 		
-		mainView.removeTab(mainView.getRoomsTabName());
-		mainView.removeTab(mainView.getBookingTabName());
-		mainView.removeTab(mainView.getReservationsTabName());
+		// asdf mainView.removeTab(mainView.getRoomsTabName());
+		// asdf mainView.removeTab(mainView.getBookingTabName());
+		// asdf mainView.removeTab(mainView.getReservationsTabName());
 		mRoomUpdater = new RoomsUpdaterTask(hotelId);
 		mRoomUpdater.attach(mRoomUpdaterListener);
 		List<HotelRoom> rooms = VHAApplication.HOTEL_ROOMS.get(hotelId);

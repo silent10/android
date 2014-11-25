@@ -17,6 +17,8 @@ import org.acra.ACRA;
 import org.acra.annotation.ReportsCrashes;
 import org.joda.time.LocalDate;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
@@ -84,6 +86,18 @@ public class VHAApplication extends Application {
 		EXTENDED_INFOS.trimToSize(1);
 		super.onLowMemory();
 	}
+
+
+    // http://stackoverflow.com/questions/11411395/how-to-get-current-foreground-activity-context-in-android 
+    private static Activity mCurrentActivity = null;
+    public static Activity getCurrentActivity(){
+          return mCurrentActivity;
+    }
+    public static void setCurrentActivity(Activity currentActivity){
+          mCurrentActivity = currentActivity;
+    }
+
+
 	
 	public static void logError(String tag, String desc) {
 		logError(tag, desc, null);
@@ -95,26 +109,39 @@ public class VHAApplication extends Application {
 		else {
 			Log.e(tag, desc);
 		}
-				
-		try {
-			Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
-			if (defaultTracker != null) {
-				if (exception != null) {
-					defaultTracker.send(MapBuilder
-						    .createException(desc+ '\n' + Log.getStackTraceString(exception), false)
-						    .build()
-						   );	
-				}
-				else {
-					defaultTracker.send(MapBuilder
-						    .createEvent("Error_log", tag, desc, 0l)
-						    .build()
-						   );
-				}
+		
+
+		if (BuildConfig.DEBUG) {
+			Toast.makeText(context, "Error: "+desc, Toast.LENGTH_LONG).show();
+			if (exception != null) {
+				new AlertDialog.Builder(context)
+			    	.setTitle("Exception")
+			    	.setMessage(Log.getStackTraceString(exception))
+			    .setIcon(android.R.drawable.ic_dialog_alert)
+			     .show();
 			}
 		}
-		catch (Exception e) {
-			Log.e(tag, "Exception sending error event", e);
+ 		else { 
+			try {
+				Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
+				if (defaultTracker != null) {
+					if (exception != null) {
+						defaultTracker.send(MapBuilder
+							    .createException(desc+ '\n' + Log.getStackTraceString(exception), false)
+							    .build()
+							   );	
+					}
+					else {
+						defaultTracker.send(MapBuilder
+							    .createEvent("Error_log", tag, desc, 0l)
+							    .build()
+							   );
+					}
+				}
+			}
+			catch (Exception e) {
+				Log.e(tag, "Exception sending error event", e);
+			}
 		}
 			
 	}

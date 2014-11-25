@@ -5,13 +5,12 @@ import java.util.List;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v13.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.modified.v13.app.FragmentPagerAdapter;
+import android.support.modified.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -61,12 +60,6 @@ public class MainView {
 	private String mChatTabName;
 //	private String mExamplesTabName;
 	private String mHotelsTabName;
-	private String mHotelTabName;
-	private String mRoomsTabName;
-	private String mBookingTabName;
-	private String mMapTabName;
-	private String mReservationsTabName;
-	private String mReviewsTabName;
 	private List<String> mTabTitles;
 	
 	public MainView(final MainActivity mainActivity, List<String> tabTitles) {
@@ -196,6 +189,7 @@ public class MainView {
 		mSearchButton.post(new Runnable() {
 			@Override
 			public void run() {
+				// TODO: disable button?
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -397,15 +391,10 @@ public class MainView {
 	public String getReservationsTabName() {  return mReservationsTabName; }
 	public String getReviewsTabName() {  return mReviewsTabName; }
 
-	public int getChatTabIndex()    {  return mTabTitles.indexOf(mChatTabName); 	}
-	public int getHotelsListTabIndex()  {  return mTabTitles.indexOf(mHotelsTabName); }
-	public int getHotelTabIndex()   {  return mTabTitles.indexOf(mHotelTabName); }
-	public int getRoomsTabIndex()   {  return mTabTitles.indexOf(mRoomsTabName); }
-	public int getBookingTabIndex() {  return mTabTitles.indexOf(mBookingTabName); }
-	public int getMapTabIndex()     {  return mTabTitles.indexOf(mMapTabName); }
-	public int getReservationsTabIndex() {  return mTabTitles.indexOf(mReservationsTabName); }
-	public int getReviewsTabIndex() {  return mTabTitles.indexOf(mReviewsTabName); }
+	public int getChatTabIndex()    {  return  0; }
+	public int getHotelsListTabIndex()  {  return mHotelsListFragment == visibleFragment ? 1 : -1; }
 
+	private Fragment visibleFragment;
 	
 	private HotelsMapFragment mMapFragment;
 	private HotelListFragment mHotelsListFragment;
@@ -445,25 +434,25 @@ public class MainView {
 //			mReviewsFragment = null;
 //			mReservationFragment = null;
 		}
+//		
+//		@Override public void destroyItem(android.view.ViewGroup container, int position, Object object) {
+//			if (position >= getCount()) {
+//				Log.d(TAG, "Destryoing tab at position "+position);
+//		        FragmentManager manager = ((Fragment) object).getFragmentManager();
+//		        FragmentTransaction trans = manager.beginTransaction();
+//		        trans.remove((Fragment) object);
+//		        trans.commit();
+//		    }
+//			else {
+//				Log.d(TAG, "Ignoring destroyItem at position "+position);
+//			}
+//		};
 		
-		@Override public void destroyItem(android.view.ViewGroup container, int position, Object object) {
-			if (position >= getCount()) {
-				Log.d(TAG, "Destryoing tab at position "+position);
-		        FragmentManager manager = ((Fragment) object).getFragmentManager();
-		        FragmentTransaction trans = manager.beginTransaction();
-		        trans.remove((Fragment) object);
-		        trans.commit();
-		    }
-			else {
-				Log.d(TAG, "Ignoring destroyItem at position "+position);
-			}
-		};
-		
-	    @Override
-	    public int getItemPosition(Object object){
-	        return POSITION_NONE;
-	    }
-				
+//	    @Override
+//	    public int getItemPosition(Object object){
+//	        return POSITION_NONE;
+//	    }
+//				
 
 	    @Override
 		public Fragment getItem(int position) {// Asks for the main fragment
@@ -618,7 +607,7 @@ public class MainView {
 		mViewPager.setCurrentItem(tabInd, true);
 	}
 
-	public void removeTabs() {
+	private void removeTabs() {
 		final String [] tabsToRemove = { mHotelsTabName, mHotelTabName, mMapTabName, mRoomsTabName, 
 				mReviewsTabName, mBookingTabName, mReservationsTabName };
 		for (String tab : tabsToRemove) {
@@ -630,11 +619,11 @@ public class MainView {
 		mPagerAdapter.notifyDataSetChanged();
 	}
 
-	public void addTab(String tabName) {
+	private void addTab(String tabName) {
 		mPagerAdapter.addTab(tabName);
 	}
 
-	public void removeTab(String tabName) {
+	private void removeTab(String tabName) {
 		mPagerAdapter.removeTab(tabName);
 	}
 
