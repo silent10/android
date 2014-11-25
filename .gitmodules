@@ -10,3 +10,9 @@
 [submodule "android_search/third_party/EventBus"]
 	path = android_search/third_party/EventBus
 	url = git@github.com:Iftahh/EventBus.git
+[submodule "android_search/third_party/galgo"]
+	path = android_search/third_party/galgo
+	url = git@github.com:Iftahh/galgo.git
+[submodule "android_search/third_party/Folding-Android"]
+	path = android_search/third_party/Folding-Android
+	url = git@github.com:Iftahh/Folding-Android.git

@@ -29,7 +29,7 @@ import android.widget.Toast;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
 
-public class BugReportDialog extends Activity implements
+public class BugReportDialog extends BaseActivity implements
 		DialogInterface.OnClickListener, DialogInterface.OnDismissListener {
 	private static final String STATE_COMMENT = "comment";
 	protected static final String TAG = "BugReportDialog";

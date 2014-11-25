@@ -16,7 +16,7 @@ import android.widget.ScrollView;
 
 import com.virtual_hotel_agent.search.R;
 
-public class AboutDialog extends Activity implements  DialogInterface.OnDismissListener   {
+public class AboutDialog extends BaseActivity implements  DialogInterface.OnDismissListener   {
 	protected static final String TAG = "AboutDialog";
 	AlertDialog mDialog;
 

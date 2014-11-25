@@ -1,6 +1,5 @@
 package com.virtual_hotel_agent.search.controllers.activities;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.media.AudioManager;
@@ -15,7 +14,7 @@ import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.util.VolumeUtil;
 import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
 
-public class VolumeSettingsDialog extends Activity 
+public class VolumeSettingsDialog extends BaseActivity 
 	implements 
 		VolumeListener,
 		DialogInterface.OnDismissListener,

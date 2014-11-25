@@ -1,6 +1,9 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 import android.app.Fragment;
@@ -210,14 +213,10 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 
 
 	private static Random randomGenerator = new Random();
-	private static final String exampleMonth = "June";
 
 	private static final float FADE_TO = 0.14f;
 	
-	private final String tests[] = { "Hotel tonight", 
-			"Hotel in Madrid "+exampleMonth+" 22nd to 24th", 
-			"Hotel in Paris "+exampleMonth+" 22nd to 24th", 
-			"Hilton Hotel in Miami "+exampleMonth+" 22nd to 24th" };
+	private String tests[];
 
 	
 	@Override
@@ -247,6 +246,19 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 		case VirtualAgentContinued:
 			// only on debug build - click examples runs a random example
 			if (BuildConfig.DEBUG) {
+				if (tests == null) {
+					Calendar calendar = Calendar.getInstance();
+				    calendar.setTime(new Date());
+				    calendar.add(Calendar.MONTH, 1);
+				    Date nextMonth = calendar.getTime();
+					String exampleMonth = new SimpleDateFormat("MMMM").format(nextMonth);
+					tests = new String[] { 
+						"Hotel tonight", 
+						"Hotel in Madrid "+exampleMonth+" 22nd to 24th", 
+						"Hotel in Paris "+exampleMonth+" 22nd to 24th", 
+						"Hilton Hotel in Miami "+exampleMonth+" 22nd to 24th" 
+					};
+				}
 				String t = tests[randomGenerator.nextInt(tests.length)];
 				addChatItem(new ChatItem(t));
 				VHAApplication.EVA.searchWithText(t, null, false);
