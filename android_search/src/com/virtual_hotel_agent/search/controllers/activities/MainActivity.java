@@ -417,7 +417,7 @@ public class MainActivity extends BaseActivity implements
 	   }
 	   else {
 		   // switch to Chat tab if not there 
-		   mainView.setCurrentItem(chatInd);
+		   mainView.showTab(chatInd);
 	   }
 	}
 	
@@ -464,7 +464,7 @@ public class MainActivity extends BaseActivity implements
 		Intent intent;
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			mainView.setCurrentItem(mainView.getChatTabIndex());
+			mainView.showTab(mainView.getChatTabIndex());
 			return true;
 			
 		case R.id.restart_button:
@@ -991,7 +991,7 @@ public class MainActivity extends BaseActivity implements
 				if (this.switchToResult) {
 					// do not switch tabs in the middle of a tutorial
 //					if (TutorialController.currentTutorial == TutorialController.NO_TUTORIAL)
-						mainView.setCurrentItem(index);
+						mainView.showTab(index);
 				}
 			}
 			
@@ -1302,7 +1302,7 @@ public class MainActivity extends BaseActivity implements
 	}
 	private void startNewSession(boolean speakGreeting) {
 //		if (isNewSession() == false) {
-			mainView.setCurrentItem(mainView.getChatTabIndex());
+			mainView.showTab(mainView.getChatTabIndex());
 			VHAApplication.EVA.resetSession();
 			VHAApplication.EVA.stopSearch();
 			ChatItem myChat = new ChatItem(ChatItem.START_NEW_SESSION);
@@ -1381,11 +1381,8 @@ public class MainActivity extends BaseActivity implements
 //		lastFlightCompleted = null;
 		lastHotelCompleted = null;
 
-		mainView.setCurrentItem(mainView.getChatTabIndex());
-		// ??? mViewPager.setAdapter(null);
-		//mTabs.setAdapter(null);
-		
-		// asdf mainView.removeTabs();
+		mainView.showTab(mainView.getChatTabIndex());
+		mainView.removeTabs();
 
 		VHAApplication.clearSearch();
 	}
