@@ -1,10 +1,16 @@
 package com.virtual_hotel_agent.search.controllers.activities;
 
+import android.app.Activity;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.View;
+
+import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
 
-import android.app.Activity;
-
-public class BaseActivity extends Activity {
+public class BaseActivity extends ActionBarActivity {
+	
 	@Override
 	protected void onResume() {
 	    super.onResume();

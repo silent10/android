@@ -13,10 +13,17 @@ import android.os.Message;
 import android.support.modified.v13.app.FragmentPagerAdapter;
 import android.support.modified.v4.view.ViewPager;
 import android.support.modified.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +51,7 @@ public class MainView {
 	private ProgressBar mProgressBar;
 	private SoundLevelView mSoundView;
 	private ImageButton mSearchButton;
-	public ImageButton startNewSessionButton;
+
 //	private ImageButton mTextButton;
 	private View mBottomBar;
 	private final int search_button_padding = 24;
@@ -65,7 +72,6 @@ public class MainView {
 		mSoundView = (SoundLevelView)mainActivity.findViewById(R.id.surfaceView_sound_wave);
 		mSearchButton = (ImageButton) mainActivity.findViewById(R.id.search_button);
 		mBottomBar = mainActivity.findViewById(R.id.bottom_bar);
-		startNewSessionButton = (ImageButton) mainActivity.findViewById(R.id.restart_button);
 		mViewPager = (ViewPager) mainActivity.findViewById(R.id.viewpager);
 		
 		mChatTabName = mainActivity.getString(R.string.CHAT);
@@ -75,6 +81,40 @@ public class MainView {
 		
 		mTabTitles = tabTitles;
 
+
+		Toolbar toolbar = (Toolbar) mainActivity.findViewById(R.id.toolbar);
+		toolbar.setTitle(mainActivity.getString(R.string.app_name));
+		mainActivity.setSupportActionBar(toolbar);
+		
+		
+		final ActionBar supportActionBar = mainActivity.getSupportActionBar();
+		supportActionBar.setDisplayHomeAsUpEnabled(false);
+		supportActionBar.setHomeButtonEnabled(true);
+
+		
+		final String[] drawerItems = {
+				//mainActivity.getString(R.string.tutorial),
+				mainActivity.getString(R.string.faq),
+				mainActivity.getString(R.string.settings),
+				mainActivity.getString(R.string.report_a_bug),
+				mainActivity.getString(R.string.about)
+		};
+        ListView drawerList = (ListView) mainActivity.findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view
+        drawerList.setAdapter(new ArrayAdapter<String>(mainActivity,
+                R.layout.drawer_list_item, drawerItems));
+        // Set the list's click listener
+//        drawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        drawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
+
+    		@Override
+    		public void onItemClick(android.widget.AdapterView<?> parent,
+    				View view, int position, long id) {
+    			mainActivity.selectDrawerItem(position, drawerItems[position]);
+    		}
+        });
 		
 		// setup the tab switching
 		mPagerAdapter = new MyPagerAdapter(mainActivity.getFragmentManager());
@@ -93,7 +133,7 @@ public class MainView {
 	
 			@Override
 			public void onPageSelected(int position) {
-				mainActivity.getActionBar().setDisplayHomeAsUpEnabled(position > 0);
+				supportActionBar.setDisplayHomeAsUpEnabled(position > 0);
 			}
 
 			@Override
@@ -394,6 +434,9 @@ public class MainView {
 		
 //	    @Override
 	    public int getItemPosition(Object object){
+	    	if (object == mChatFragment) {
+	    		return POSITION_UNCHANGED;
+	    	}
 	        return POSITION_NONE;
 	    }
 

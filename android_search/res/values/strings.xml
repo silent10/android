@@ -131,4 +131,7 @@
     <string name="low_volume_header">Your volume is too low!</string>
     <string name="volume_">Volume:</string>
     <string name="tutorial">Tutorial</string>
+    
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 </resources>
