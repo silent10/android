@@ -131,7 +131,8 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (mView != null) {
 			Log.w(TAG, "Fragment initialized twice");
-			((ViewGroup) mView.getParent()).removeView(mView);
+			if (mView.getParent() != null)
+				((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
 		}
 		eventBus.register(this);		

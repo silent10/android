@@ -1,8 +1,16 @@
-<!-- Based on this blog post: http://blog.peterkuterna.net/2011/09/viewpager-meets-swipey-tabs.html -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/the_main_layout"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+<!--     android:fitsSystemWindows="true" -->
+
+<RelativeLayout 
+    
+    android:id="@+id/the_main_layout"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:background="@drawable/chat_background"
@@ -14,13 +22,6 @@
 <!--         android:layout_height="wrap_content" -->
 <!--         android:layout_width="fill_parent" -->
 <!--         /> -->
-    
-<!--     <FrameLayout  -->
-<!-- 	    android:id="@+id/fragment_container" -->
-<!-- 	    android:layout_width="match_parent" -->
-<!-- 	    android:layout_height="match_parent" -->
-<!-- 	    android:layout_alignParentBottom="true" /> -->
-        
     
 <!--     <com.viewpagerindicator.TitlePageIndicator -->
 <!--         android:id="@+id/indicator" -->
@@ -37,15 +38,26 @@
 <!--         app:selectedBold="true" -->
 <!--         /> -->
     
+    
+    <android.support.v7.widget.Toolbar
+	    android:id="@+id/toolbar"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:minHeight="?attr/actionBarSize"
+	    android:layout_alignParentTop="true"
+	    android:background="?attr/colorPrimaryDark"
+	    />
 
     <android.support.modified.v4.view.ViewPager
         android:id="@+id/viewpager"
         android:layout_width="fill_parent"
-        android:layout_below="@id/indicator"
         android:layout_alignParentBottom="true"
         android:background="@drawable/chat_background"
-        android:layout_height="fill_parent" />
+        android:layout_below="@id/toolbar"
+        android:layout_height="fill_parent" >
 <!--         android:layout_above="@+id/bottom_bar" -->
+
+</android.support.modified.v4.view.ViewPager>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -142,3 +154,18 @@
 
 
 </RelativeLayout>
+
+<ListView android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111" >
+        <!-- Drawer content -->
+
+
+    </ListView>
+
+</android.support.v4.widget.DrawerLayout>

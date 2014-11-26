@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/restart_button"
         android:title="New Session"
         android:icon="@drawable/session_restart"
-        android:showAsAction="always">
+        app:showAsAction="always">
     </item>
       
     
@@ -13,34 +14,10 @@
         android:id="@+id/audio"
         android:title="@string/audio_control"
         android:icon="@drawable/speaker_icon"
-        android:showAsAction="ifRoom">
+        app:showAsAction="ifRoom"
+        android:visible="false">
     </item>
     
     
-    
-<!--     <item -->
-<!--         android:id="@+id/tutorial" -->
-<!--         android:title="@string/tutorial"> -->
-<!--     </item> -->
-    
-    <item
-        android:id="@+id/faq"
-        android:title="@string/faq">
-    </item>
-    
-    <item
-        android:id="@+id/settings"
-        android:title="@string/settings">
-    </item>
-    
-    <item
-        android:id="@+id/bug_report"
-        
-        android:title="@string/report_a_bug">
-    </item>
-    <item
-        android:id="@+id/about"
-        android:title="@string/about">
-    </item>
 
 </menu>

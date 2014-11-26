@@ -26,7 +26,6 @@ import java.util.Map;
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -36,6 +35,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -44,6 +44,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.RecognizerIntent;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -53,6 +55,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.ean.mobile.exception.EanWsError;
@@ -99,18 +102,13 @@ import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
 import com.virtual_hotel_agent.search.util.VolumeUtil;
 import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
 import com.virtual_hotel_agent.search.views.MainView;
-import com.virtual_hotel_agent.search.views.fragments.BookingFragement;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
-//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
-import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
-import com.virtual_hotel_agent.search.views.fragments.HotelsMapFragment;
-import com.virtual_hotel_agent.search.views.fragments.ReservationDisplayFragment;
-//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
-import com.virtual_hotel_agent.search.views.fragments.RoomsSelectFragement;
 
 import de.greenrobot.event.EventBus;
+//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment;
+//import com.virtual_hotel_agent.search.views.fragments.ExamplesFragment.ExampleClickedHandler;
 
 public class MainActivity extends BaseActivity implements 
 													EvaSearchReplyListener,
@@ -141,6 +139,15 @@ public class MainActivity extends BaseActivity implements
 
 
 	private MenuItem soundControlMenuItem;
+
+
+	private ActionBarDrawerToggle mDrawerToggle;
+
+
+	private DrawerLayout mDrawerLayout;
+
+
+	private ListView mDrawerList;
 
 	
 	@Override
@@ -352,6 +359,34 @@ public class MainActivity extends BaseActivity implements
 		
 		mainView = new MainView(this, mTabTitles);
 //		TutorialController.mainView = mainView; // accessible to all tutorials
+
+		mDrawerList = (ListView) findViewById(R.id.left_drawer);
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                ) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //mainActivity.getActionBar().setTitle(mTitle);
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //mainActivity.getActionBar().setTitle(mDrawerTitle);
+            }
+        };
+        
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
 		
 		if (savedInstanceState == null) {
 			clearChatList();
@@ -371,10 +406,7 @@ public class MainActivity extends BaseActivity implements
 		}
 
 //		setDebugData(DebugTextType.None, null);
-		
-		ActionBar actionBar = getActionBar();
-		actionBar.setHomeButtonEnabled(true);
-		
+
 		// patch for debug - bypass the speech recognition:
 		// Intent data = new Intent();
 		// Bundle a_bundle = new Bundle();
@@ -424,10 +456,15 @@ public class MainActivity extends BaseActivity implements
 
 	
 //	@Override
-//	public boolean onPrepareOptionsMenu (Menu menu) {
-//		//menu.getItem(2).setVisible(eva.isDebug());
-//		return super.onPrepareOptionsMenu(menu);
-//	}
+	public boolean onPrepareOptionsMenu (Menu menu) {
+		//menu.getItem(2).setVisible(eva.isDebug());
+		/* Called whenever we call invalidateOptionsMenu() */
+
+		// If the nav drawer is open, hide action items related to the content view
+	    //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+	    //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+		return super.onPrepareOptionsMenu(menu);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -442,6 +479,18 @@ public class MainActivity extends BaseActivity implements
 	}
 	
 	
+	@Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+	
+	@Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
 
 	private void setVolumeIcon() {
 		if (soundControlMenuItem == null) {
@@ -449,6 +498,7 @@ public class MainActivity extends BaseActivity implements
 		}
 		VolumeUtil.checkVolume(this);
 		soundControlMenuItem.setIcon(VolumeUtil.getVolumeIcon());
+		soundControlMenuItem.setVisible(VolumeUtil.isLowVolume());
 	}
 	
 
@@ -462,6 +512,11 @@ public class MainActivity extends BaseActivity implements
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
 		Intent intent;
+		
+		if (mDrawerToggle.onOptionsItemSelected(item)) {
+          return true;
+        }
+		
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			mainView.showTab(mainView.getChatTabIndex());
@@ -471,33 +526,12 @@ public class MainActivity extends BaseActivity implements
 			startNewSession();
 			return true;
 
-		case R.id.settings: // Did the user select "settings"?
-			intent = new Intent();
-			// Then set the activity class that needs to be launched/started.
-			intent.setClass(this, MyPreferences.class);
-//			Bundle a_bundle = new Bundle(); // Lets send some data to the preferences activity
-		//	a_bundle.putStringArrayList("mLanguages", (ArrayList<String>) mSpeechRecognition.getmGoogleLanguages());
-//			intent.putExtras(a_bundle);
-			startActivity(intent);
-			return true;
-
-//		case R.id.tutorial:
-//			TutorialController.showRecordButtonTutorial(this);
-//	        return true;
-	        
 		case R.id.audio:
 			intent = new Intent(this, VolumeSettingsDialog.class);
 			startActivity(intent);
 			return true;
 		
-		case R.id.faq:
-			String faqUrl = "http://www.travelnow.com/templates/352395/faq";
-			Uri uri = Uri.parse(Html.fromHtml(faqUrl).toString());
-			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(uri);
-			Log.i(TAG, "Setting Browser to url:  "+uri);
-			startActivity(i);
-			return true;
+		
 //		case R.id.help:
 //			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 //			builder.setTitle(getString(R.string.app_name));
@@ -512,21 +546,46 @@ public class MainActivity extends BaseActivity implements
 //			builder.create().show();
 //			return true;
 //			
-		case R.id.bug_report:
-			// Then set the activity class that needs to be launched/started.
-			intent = new Intent(this, BugReportDialog.class);
-			startActivity(intent);
-			return true;
-		case R.id.about: // Did the user select "About us"?
-			intent = new Intent(this, AboutDialog.class);
-			startActivity(intent);
-			return true;
+		
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 
 	
+
+	public void selectDrawerItem(int position, String item) {
+		if (item.equals(getString(R.string.report_a_bug))) {
+			startActivity(new Intent(this, BugReportDialog.class));	
+		}
+		else if (item.equals(getString(R.string.about))) {
+			// Did the user select "About us"?
+			startActivity(new Intent(this, AboutDialog.class));
+		}
+		else if (item.equals(getString(R.string.settings))) {
+			Intent intent = new Intent();
+			// Then set the activity class that needs to be launched/started.
+			intent.setClass(this, MyPreferences.class);
+			startActivity(intent);
+		}
+		else if (item.equals(getString(R.string.faq))) {
+			String faqUrl = "http://www.travelnow.com/templates/352395/faq";
+			Uri uri = Uri.parse(Html.fromHtml(faqUrl).toString());
+			Intent i = new Intent(Intent.ACTION_VIEW);
+			i.setData(uri);
+			Log.i(TAG, "Setting Browser to url:  "+uri);
+			startActivity(i);
+		}
+		
+
+
+//	case R.id.tutorial:
+//		TutorialController.showRecordButtonTutorial(this);
+//        return true;
+	    // Highlight the selected item, update the title, and close the drawer
+	    mDrawerList.setItemChecked(position, true);
+	    mDrawerLayout.closeDrawer(mDrawerList);
+	}
 
 
 
@@ -949,13 +1008,13 @@ public class MainActivity extends BaseActivity implements
 			// tabName is HOTELS, FLIGHTS, etc.. depending on chatItem downloader id
 			
 			if (id == R.string.HOTELS && (VHAApplication.FOUND_HOTELS.size() == 0)) {
-				// asdf mainView.removeTabs();
+				mainView.removeTabs();
 				Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
 			}
 			else {
 				int index = mTabTitles.indexOf(tabName);
 				if (index == -1) {
-					// asdf mainView.addTab(tabName);
+					mainView.addTab(tabName);
 					index = mTabTitles.size()-1;
 				} 
 
@@ -974,14 +1033,10 @@ public class MainActivity extends BaseActivity implements
 					// asdf mainView.removeTab(mainView.getReviewsTabName());
 					// asdf mainView.removeTab(mainView.getBookingTabName());
 					
+					mainView.showTab(mainView.getHotelsListTabName());
 					HotelListFragment fragment = mainView.getHotelsListFragment();
-					if (fragment == null) {
-						mainView.addTab(mainView.getHotelsListTabName());
-						fragment = mainView.getHotelsListFragment();
-					}
 					if (fragment != null) {
 						fragment.newHotelsList();
-						mainView.showTab(mainView.getHotelsListTabName());
 					}
 					else {
 						VHAApplication.logError(TAG, "Unexpected hotel list fragment is null");
