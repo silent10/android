@@ -397,7 +397,7 @@ public class VHAApplication extends Application {
                 final File httpCacheDir = new File(getCacheDir(), "http");
                 HttpResponseCache.install(httpCacheDir, TEN_MEGABYTES);
             } catch (IOException ioe) {
-                Log.e(TAG, "Could not install http cache on this device.");
+                logError(TAG, "Could not install http cache on this device.", ioe);
             }
         }
     }

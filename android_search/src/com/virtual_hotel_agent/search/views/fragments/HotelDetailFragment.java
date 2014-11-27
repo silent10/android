@@ -69,7 +69,7 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
 	private Button mMapButton;
-	private ScrollView mScrollView;
+	//private ScrollView mScrollView;
 	
 
 	private EventBus eventBus;
@@ -170,7 +170,7 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 
 		mBookButton = (Button) mView.findViewById(R.id.selectButton);
 		mMapButton = (Button) mView.findViewById(R.id.mapButton);
-		mScrollView = (ScrollView) mView.findViewById(R.id.scrollView1);
+		//mScrollView = (ScrollView) mView.findViewById(R.id.scrollView1);
 		
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
 		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
@@ -201,6 +201,10 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 			changeHotelId(VHAApplication.selectedHotel.hotelId);
 		}
 
+		if (mHotelId != -1) {
+			fillData();
+		}
+		
 		return mView;
 	}
 
@@ -287,8 +291,11 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 	
 	void fillData() {
 		Log.i(TAG, "Filling data for hotel "+mHotelId);
+		if (mPropertyDescription == null) {
+			return;
+		}
 		mPropertyDescription.loadData("","text/html", "utf-8");
-		mScrollView.setScrollY(0);
+		//mScrollView.setScrollY(0);
 		
 		final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 		if (hotel == null) {

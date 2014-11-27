@@ -3,6 +3,10 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+        android:listSelector="@android:color/transparent"
+        android:focusableInTouchMode="false"
+        android:focusable="false"
+        android:clickable="false"
      >
 
     <View
