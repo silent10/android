@@ -210,9 +210,17 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 				   );
 		
 //		mHotelListView.setItemChecked(position, true);
-		mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
+		//mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
 		//mHotelListView.requestFocus();
-		eventBus.post(new HotelItemClicked(position));
+		if (position >= VHAApplication.FOUND_HOTELS.size()) {
+			Log.e(TAG, "position "+position+" is greater than "+VHAApplication.FOUND_HOTELS.size()+ " found hotels");
+			return;
+		}
+		eventBus.post(new HotelItemClicked(position,
+							VHAApplication.FOUND_HOTELS.get(position).hotelId,
+							view.findViewById(R.id.hotelName),
+							view.findViewById(R.id.tripAdvisorStrip),
+							view.findViewById(R.id.rating)));
 		Log.d(TAG, "running showHotelDetails()");
 
 	}

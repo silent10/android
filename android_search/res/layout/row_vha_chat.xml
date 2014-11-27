@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:layout_marginRight="2dip"
      >
 
     <LinearLayout 
@@ -10,7 +11,6 @@
         android:layout_alignParentRight="true"
         android:background="@drawable/bubble2_red"
         android:orientation="horizontal"    
-        android:layout_marginRight="2dip"
         android:elevation="3dp"
         >
          <TextView

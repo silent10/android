@@ -9,6 +9,7 @@
         android:id="@+id/titleLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:elevation="6dp"
         android:background="@drawable/vha_background"
         android:padding="4dp" >
 
@@ -20,7 +21,9 @@
             android:text="..."
             android:textColor="#fff"
             android:textSize="24dip"
-            android:textStyle="bold" >
+            android:textStyle="bold"
+            android:transitionName="hotelName"
+             >
 
 	    </TextView>
     
@@ -39,6 +42,7 @@
         android:id="@+id/hotelGallery"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:elevation="4dp"
         android:layout_alignParentLeft="true"
         android:layout_below="@id/titleLayout" />
 
@@ -47,6 +51,7 @@
        android:id="@+id/hotelButtonBar"
        android:layout_width="fill_parent"
        android:layout_height="42dp"
+       android:elevation="4dp"
        android:layout_below="@id/hotelGallery">
         
 <!-- 	   <Button -->
@@ -79,52 +84,58 @@
 	            android:paddingRight="11dip"
 	            android:textColor="#FFFFFFFF"
 	            android:textSize="12sp" 
+	            android:elevation="6dp"
 	            android:layout_alignParentRight="true"
 	            />
 <!-- 	            android:layout_toLeftOf="@id/selectButton" -->
          
-	<RatingBar
-        android:id="@+id/ratingBarStar"
-        android:layout_width="118dp"
-        android:layout_height="32dp"
-        android:layout_alignParentBottom="true"
-        android:isIndicator="true"
-        android:paddingRight="10dp"
-        android:progressDrawable="@drawable/rating_layers" 
-		android:layout_toLeftOf="@+id/mapButton"     
-        >
-
-     </RatingBar>
+		<RatingBar
+	        android:id="@+id/ratingBarStar"
+	        android:layout_width="118dp"
+	        android:layout_height="32dp"
+	        android:layout_alignParentBottom="true"
+	        android:isIndicator="true"
+	        android:paddingRight="10dp"
+	        android:progressDrawable="@drawable/rating_layers" 
+			android:layout_toLeftOf="@+id/mapButton"
+			android:transitionName="hotelStarRating"     
+	        >
+	
+	     </RatingBar>
+	    
+		 <ImageView
+	                android:id="@+id/tripadvisor_ratingBar_image"
+	                android:layout_width="100dip"
+	                android:layout_height="22dip"
+	                android:layout_alignParentLeft="true"
+	                android:layout_marginRight="5dip"
+	                android:layout_marginBottom="9dip"
+	                android:layout_toLeftOf="@+id/ratingBarStar"
+	                android:layout_alignParentBottom="true"
+	                android:contentDescription="@string/trip_advisor_icon"
+	                android:transitionName="hotelTripAdvRating"
+	                />
+	
+		 <ImageView
+	        android:id="@+id/dividerElement"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"        
+	        android:src="@drawable/divider" >
+	    </ImageView>
     
-	 <ImageView
-                android:id="@+id/tripadvisor_ratingBar_image"
-                android:layout_width="100dip"
-                android:layout_height="22dip"
-                android:layout_alignParentLeft="true"
-                android:layout_marginRight="5dip"
-                android:layout_marginBottom="9dip"
-                android:layout_toLeftOf="@+id/ratingBarStar"
-                android:layout_alignParentBottom="true"
-                android:contentDescription="@string/trip_advisor_icon"
-                />
-	 
     </RelativeLayout>
     
-    <ImageView
-        android:id="@+id/dividerElement"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/hotelButtonBar"        
-        android:src="@drawable/divider" >
-    </ImageView>
+    
     
 
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="fill_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/dividerElement"
+        android:layout_below="@id/hotelButtonBar"
          >
+<!--         android:layout_below="@id/dividerElement" -->
 
         <LinearLayout
             android:id="@+id/detailsLayout"

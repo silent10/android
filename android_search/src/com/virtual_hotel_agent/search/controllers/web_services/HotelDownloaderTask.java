@@ -9,18 +9,19 @@ import com.ean.mobile.request.RequestProcessor;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
 public class HotelDownloaderTask extends DownloaderTask {
 	private static final String TAG = HotelDownloaderTask.class.getSimpleName();
-	private long mHotelId;
+	private HotelItemClicked hotelItemSelectedEvent;
 	public EanWsError eanWsError;
 
-	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, long hotelId) {
+	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, HotelItemClicked event) {
 		super( R.string.HOTEL);
 		Log.d(TAG, "CTOR");
 		attach(listener);
-		mHotelId = hotelId;
+		hotelItemSelectedEvent = event;
 	}
 
 	@Override
@@ -38,9 +39,9 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 		try {
 			eanWsError = null;
-			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
+			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(hotelItemSelectedEvent.hotelId);
 			HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel));
-			VHAApplication.EXTENDED_INFOS.put(mHotelId, hotelInformation);
+			VHAApplication.EXTENDED_INFOS.put(hotelItemSelectedEvent.hotelId, hotelInformation);
 			mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
             Log.d(TAG, "Unexpected error occurred within the api", ewe);
@@ -79,8 +80,8 @@ public class HotelDownloaderTask extends DownloaderTask {
 //		}
 //	}
 
-	public long getHotelId() {
-		return mHotelId;
+	public HotelItemClicked getHotelEvent() {
+		return hotelItemSelectedEvent;
 	}
 
 }

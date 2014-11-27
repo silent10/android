@@ -26,6 +26,8 @@ import java.util.Map;
 import org.acra.ACRA;
 import org.acra.ErrorReporter;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -40,6 +42,7 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,6 +52,7 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -58,7 +62,6 @@ import android.widget.Toast;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
-import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
@@ -89,7 +92,6 @@ import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelDownloaderTask;
 import com.virtual_hotel_agent.search.controllers.web_services.HotelListDownloaderTask;
-import com.virtual_hotel_agent.search.controllers.web_services.RoomsUpdaterTask;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
@@ -128,7 +130,6 @@ public class MainActivity extends BaseActivity implements
 	private boolean mIsNetworkingOk = false;
 
 	static private HotelListDownloaderTask mSearchExpediaTask = null;
-	static private RoomsUpdaterTask mRoomUpdater = null;
 	static private HotelDownloaderTask mHotelDownloader = null;
 	
 	private EvaSpeechComponent speechSearch = null;
@@ -1213,77 +1214,20 @@ public class MainActivity extends BaseActivity implements
 		
 		}
 	}
-
-
-	/**
-	 * Listener to Room-information request complete
-	 */
-	private class RoomTaskListener extends DownloaderTaskListener {
-		private boolean mSwitchToTab = false;
-
-		@Override
-		public void endProgressDialog(int id, Object result) { // we got the hotel rooms reply successfully
-			Log.d(TAG, "endProgressDialog() for hotel rooms for hotel "+mRoomUpdater.hotelId);
-			mainView.hideStatus();
-			
-			
-			// asdf int index = mainView.getRoomsTabIndex();
-			// asdf if (index == -1) {
-			// asdf mainView.addTab(mainView.getRoomsTabName());
-			// asdf index = mTabTitles.size()-1;
-			// asdf }
-			// asdf RoomsSelectFragement fragment = mainView.getRoomsFragment();
-			// asdf if (fragment != null) // could be null if not instantiated yet
-			// asdf {
-			// asdf 	fragment.changeHotelId(mRoomUpdater.hotelId);
-			// asdf 	if (mSwitchToTab) {
-					// asdf mainView.setCurrentItem(index);
-			// asdf mSwitchToTab  = false;
-			// asdf 				}
-			// asdf }
-			mRoomUpdater = null;
-		}
-		
-		@Override
-		public void endProgressDialogWithError(int id, Object result) {
-//			setDebugData(DebugTextType.ExpediaDebug, result);
-			mainView.hideStatus();
-			if (mRoomUpdater.eanWsError != null) {
-				EanWsError err = mRoomUpdater.eanWsError;
-				if ("SOLD_OUT".equals(err.category)) {
-					// asdf int index = mainView.getHotelTabIndex();
-					// asdf if (index != -1) {
-					// asdf HotelDetailFragment fragment = mainView.getHotelFragment();
-					// asdf if (fragment != null) // could be null if not instantiated yet
-					// asdf {
-					// asdf 							fragment.hotelSoldOut();
-					// asdf }
-					// asdf }
-					if (err.presentationMessage.equals("") == false)
-						Toast.makeText(MainActivity.this, err.presentationMessage, Toast.LENGTH_LONG).show();
-				}
-			}
-			mRoomUpdater = null;
-		}
-
-		public void switchToTab() {
-			mSwitchToTab  = true;
-		}
-	};
-	
-	private RoomTaskListener mRoomUpdaterListener = new RoomTaskListener(); 
-	
+ 
 	/****
 	 * Listening to end of hotel-details request
 	 */
 	private DownloaderTaskListener mHotelDownloadListener = new DownloaderTaskListener() {
 		
+		@SuppressLint("NewApi")
 		@Override
 		public void endProgressDialog(int id, Object result) { // we got the hotel details reply successfully
 			mainView.hideStatus();
 //			setDebugData(DebugTextType.ExpediaDebug, result);
 			
-			long hotelId = mHotelDownloader.getHotelId();
+			HotelItemClicked event = mHotelDownloader.getHotelEvent();
+			long hotelId = event.hotelId;
 			VHAApplication.selectedHotel = VHAApplication.HOTEL_ID_MAP.get(hotelId);
 			Log.d(TAG, "endProgressDialog() Hotel # " + hotelId+ " - "+VHAApplication.selectedHotel.name);
 
@@ -1301,7 +1245,21 @@ public class MainActivity extends BaseActivity implements
 				// for the selected item ID.
 				Intent detailIntent = new Intent(MainActivity.this, HotelDetailActivity.class);
 				detailIntent.putExtra(HotelDetailActivity.HOTEL_ID_PARAM, hotelId);
-				startActivity(detailIntent);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					if (event != null && event.hotelName != null) {
+						Pair<View, String> p1 = Pair.create(event.hotelName, "hotelName");
+						Pair<View, String> p2 = Pair.create(event.hotelStarRating, "hotelStarRating");
+						Pair<View, String> p3 = Pair.create(event.hotelTripAdvRating, "hotelTripAdvRating"); 
+						ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, p1, p2,p3);
+						startActivity(detailIntent, options.toBundle());
+					}
+					else {
+						startActivity(detailIntent);
+					}
+				}
+				else {
+					startActivity(detailIntent);
+				}
 			}
 			// add hotel tab again
 			// asdf int index = mainView.getHotelTabIndex();
@@ -1326,7 +1284,6 @@ public class MainActivity extends BaseActivity implements
 			// asdf ReviewsFragment reviews = mainView.getReviewsFragment();
 			// asdf reviews.hotelChanged(hotelId);
 			
-			startRoomSearch(hotelId);
 			mHotelDownloader = null;
 		}
 
@@ -1383,10 +1340,6 @@ public class MainActivity extends BaseActivity implements
 		if (mHotelDownloader != null) {
 			mHotelDownloader.cancel(true);
 			mHotelDownloader = null;
-		}
-		if (mRoomUpdater != null) {
-			mRoomUpdater.cancel(true);
-			mRoomUpdater = null;
 		}
 		VHAApplication.EVA.stopSearch();
 		if (speechSearch != null) {
@@ -1505,7 +1458,7 @@ public class MainActivity extends BaseActivity implements
 		
 		Hotel hotel = VHAApplication.FOUND_HOTELS.get(event.hotelIndex);
 		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotel.hotelId);
-		mHotelDownloader = new HotelDownloaderTask(mHotelDownloadListener, hotel.hotelId);
+		mHotelDownloader = new HotelDownloaderTask(mHotelDownloadListener, event);
 		if (info != null) {
 			Log.d(TAG, "Loaded info for hotel "+hotel.name+" from cache");
 			// restored from cache - fake downloader progress
@@ -1564,30 +1517,6 @@ public class MainActivity extends BaseActivity implements
 		mainView.toggleMainButtons(event.showMainButtons);
 	}
 	
-	private void startRoomSearch(long hotelId) {
-		if (mRoomUpdater != null) {
-			if (false == mRoomUpdater.cancel(true)) {
-				Log.d(TAG, "false == mRoomUpdater.cancel(true)");
-				mRoomUpdater = null;
-				// return;
-			}
-		}
-		
-		// asdf mainView.removeTab(mainView.getRoomsTabName());
-		// asdf mainView.removeTab(mainView.getBookingTabName());
-		// asdf mainView.removeTab(mainView.getReservationsTabName());
-		mRoomUpdater = new RoomsUpdaterTask(hotelId);
-		mRoomUpdater.attach(mRoomUpdaterListener);
-		List<HotelRoom> rooms = VHAApplication.HOTEL_ROOMS.get(hotelId);
-		if (rooms != null) {
-			// restored from cache - fake downloader progress
-			mRoomUpdaterListener.endProgressDialog(-1, null);
-		}
-		else {
-			mainView.showStatus("Getting Rooms info for hotel");
-			mRoomUpdater.execute();
-		}
-	}
 
 
 
