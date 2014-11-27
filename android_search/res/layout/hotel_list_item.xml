@@ -47,7 +47,8 @@
 	           android:text="Hotel Name Bla Bla Yada Yada"
 	           android:textColor="#FF000000"
 	           android:textSize="18sp"
-	           android:textStyle="bold" />
+	           android:textStyle="bold"
+	           android:transitionName="hotelName" />
 	<!--            android:freezesText="true" -->
             
             <RatingBar
@@ -57,6 +58,7 @@
                 android:layout_marginTop="2dip"
                 android:layout_weight="0"
                 android:isIndicator="true"
+                android:transitionName="hotelStarRating"
                 android:progressDrawable="@drawable/rating_layers_tiny" 
                 />
     
@@ -118,6 +120,7 @@
                     android:id="@+id/tripAdvisorStrip"
                     android:layout_width="100dip"
                     android:layout_height="20dip"
+                    android:transitionName="hotelTripAdvRating"
                     android:contentDescription="@string/trip_advisor_icon" />
                 
                 <TextView

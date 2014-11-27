@@ -3,6 +3,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -27,12 +28,14 @@ import android.widget.Gallery;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
+import com.ean.mobile.hotel.HotelRoom;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.ImageGalleryActivity;
@@ -42,6 +45,8 @@ import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
+import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
+import com.virtual_hotel_agent.search.controllers.web_services.RoomsUpdaterTask;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
@@ -221,6 +226,7 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 			return;
 		}
 		mHotelId = hotelId;
+		startRoomSearch();
 		VHAApplication.selectedRoom = null;
 		fillData();
 	}
@@ -252,6 +258,101 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 			eventBus.post(new HotelSelected(hotel.hotelId));
 		}
 	};
+	
+
+	static private RoomsUpdaterTask mRoomUpdater = null;
+
+	@Override public void onPause() {
+		if (mRoomUpdater != null) {
+			mRoomUpdater.cancel(true);
+			mRoomUpdater = null;
+		}
+		super.onPause();
+	};
+	
+
+	private void startRoomSearch() {
+		if (mRoomUpdater != null) {
+			if (false == mRoomUpdater.cancel(true)) {
+				Log.d(TAG, "false == mRoomUpdater.cancel(true)");
+				mRoomUpdater = null;
+				// return;
+			}
+		}
+		
+		// asdf mainView.removeTab(mainView.getRoomsTabName());
+		// asdf mainView.removeTab(mainView.getBookingTabName());
+		// asdf mainView.removeTab(mainView.getReservationsTabName());
+		mRoomUpdater = new RoomsUpdaterTask(mHotelId);
+		mRoomUpdater.attach(mRoomUpdaterListener);
+		List<HotelRoom> rooms = VHAApplication.HOTEL_ROOMS.get(mHotelId);
+		if (rooms != null) {
+			// restored from cache - fake downloader progress
+			mRoomUpdaterListener.endProgressDialog(-1, null);
+		}
+		else {
+			//mainView.showStatus("Getting Rooms info for hotel");
+			mRoomUpdater.execute();
+		}
+	}
+
+	/**
+	 * Listener to Room-information request complete
+	 */
+	private class RoomTaskListener extends DownloaderTaskListener {
+		private boolean mSwitchToTab = false;
+
+		@Override
+		public void endProgressDialog(int id, Object result) { // we got the hotel rooms reply successfully
+			Log.d(TAG, "endProgressDialog() for hotel rooms for hotel "+mRoomUpdater.hotelId);
+			//mainView.hideStatus();
+			
+			
+			// asdf int index = mainView.getRoomsTabIndex();
+			// asdf if (index == -1) {
+			// asdf mainView.addTab(mainView.getRoomsTabName());
+			// asdf index = mTabTitles.size()-1;
+			// asdf }
+			// asdf RoomsSelectFragement fragment = mainView.getRoomsFragment();
+			// asdf if (fragment != null) // could be null if not instantiated yet
+			// asdf {
+			// asdf 	fragment.changeHotelId(mRoomUpdater.hotelId);
+			// asdf 	if (mSwitchToTab) {
+					// asdf mainView.setCurrentItem(index);
+			// asdf mSwitchToTab  = false;
+			// asdf 				}
+			// asdf }
+			mRoomUpdater = null;
+		}
+		
+		@Override
+		public void endProgressDialogWithError(int id, Object result) {
+//			setDebugData(DebugTextType.ExpediaDebug, result);
+			//mainView.hideStatus();
+			if (mRoomUpdater.eanWsError != null) {
+				EanWsError err = mRoomUpdater.eanWsError;
+				if ("SOLD_OUT".equals(err.category)) {
+					// asdf int index = mainView.getHotelTabIndex();
+					// asdf if (index != -1) {
+					// asdf HotelDetailFragment fragment = mainView.getHotelFragment();
+					// asdf if (fragment != null) // could be null if not instantiated yet
+					// asdf {
+					// asdf 							fragment.hotelSoldOut();
+					// asdf }
+					// asdf }
+					if (err.presentationMessage.equals("") == false)
+						Toast.makeText(getActivity(), err.presentationMessage, Toast.LENGTH_LONG).show();
+				}
+			}
+			mRoomUpdater = null;
+		}
+
+		public void switchToTab() {
+			mSwitchToTab  = true;
+		}
+	};
+	
+	private RoomTaskListener mRoomUpdaterListener = new RoomTaskListener();
 	
 	private final OnClickListener mMapButtonLisener = new OnClickListener() {
 

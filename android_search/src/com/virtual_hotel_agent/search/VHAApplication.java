@@ -112,7 +112,9 @@ public class VHAApplication extends Application {
 		
 
 		if (BuildConfig.DEBUG) {
-			Toast.makeText(context, "Error: "+desc, Toast.LENGTH_LONG).show();
+			if (mCurrentActivity != null) {
+				Toast.makeText(mCurrentActivity, "Error: "+desc, Toast.LENGTH_LONG).show();
+			}
 			if (exception != null) {
 				new AlertDialog.Builder(context)
 			    	.setTitle("Exception")

@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.R.id;
-import com.virtual_hotel_agent.search.R.layout;
 import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 
 /**
@@ -20,6 +18,7 @@ import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 public class HotelDetailActivity extends BaseActivity {
 
 	public static String HOTEL_ID_PARAM = "hotel_id";
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
