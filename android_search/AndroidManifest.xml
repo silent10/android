@@ -33,16 +33,16 @@
 
     <!-- android:icon="@drawable/original_icon_512" -->
     <application
-        android:name="com.virtual_hotel_agent.search.VHAApplication"
+        android:name=".VHAApplication"
         android:icon="@drawable/hotel_icon512"
         android:label="@string/app_name" >
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.MainActivity"
+            android:name=".controllers.activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme"
             android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan" 
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustPan" >
 
             <!-- android:theme="@android:style/Theme.NoTitleBar"> -->
             <intent-filter>
@@ -54,38 +54,40 @@
                 <action android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
             </intent-filter>
             <intent-filter>
-		        <action android:name="com.google.android.gms.actions.SEARCH_ACTION"/>
-		        <category android:name="android.intent.category.DEFAULT"/>
-		    </intent-filter>
+                <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity"
+            android:name=".controllers.activities.HotelMapActivity"
             android:label="Hotel Area"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" />
+            android:theme="@style/Theme.AppCompat.Light"
+             />
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.MyPreferences"
-            android:theme="@android:style/Theme.Holo.Light.DarkActionBar" >
+            android:name=".controllers.activities.MyPreferences"
+            android:theme="@style/Theme.AppCompat.Light" >
         </activity>
 
         <uses-library android:name="com.google.android.maps" />
 
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.BugReportDialog"
+            android:name=".controllers.activities.BugReportDialog"
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Holo.Light.Dialog" />
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.AboutDialog"
+            android:name=".controllers.activities.AboutDialog"
             android:excludeFromRecents="true"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Holo.Light.Dialog" />
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.VolumeSettingsDialog"
+            android:name=".controllers.activities.VolumeSettingsDialog"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:theme="@android:style/Theme.Holo.Light.Dialog" />
+            android:theme="@style/Theme.AppCompat.Light.Dialog" />
 
         <service android:name="com.google.analytics.tracking.android.CampaignTrackingService" />
 
@@ -104,7 +106,7 @@
 
 
         <!-- Release: -->
-<!--         	android:value="AIzaSyAy9PYM3qzNSfg9vv-d4C_c1OD6ULAA-Yc"/> -->
+        <!-- android:value="AIzaSyAy9PYM3qzNSfg9vv-d4C_c1OD6ULAA-Yc"/> -->
         <!-- Debug from Mac -->
         <!-- android:value="AIzaSyBPnkaWt4r_z86YQihDfDHH3armRZNTnrs" /> -->
 
@@ -113,10 +115,19 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.virtual_hotel_agent.search.ImageGalleryActivity"
+            android:name=".ImageGalleryActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_image_gallery"
             android:theme="@style/FullscreenTheme" >
+        </activity>
+        <activity
+            android:name="com.virtual_hotel_agent.search.controllers.activities.HotelDetailActivity"
+            android:label="@string/title_hotel_detail"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:parentActivityName=".controllers.activities.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.virtual_hotel_agent.search.controllers.activities.MainActivity" />
         </activity>
     </application>
 

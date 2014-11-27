@@ -17,6 +17,9 @@ import com.evature.util.Log;
 
 public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2141166/78234
 	
+	private static final long serialVersionUID = 1L;
+
+
 	public enum ChatType {
 		Me,
 		VirtualAgentWelcome,

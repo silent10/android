@@ -2,11 +2,9 @@
 <resources>
 
     <string name="app_name">Virtual Hotel Agent</string>
-    <string name="lots_of_text">
-          Hotel Rating and Reviews powered by TripAdvisor.\n
+    <string name="lots_of_text">          Hotel Rating and Reviews powered by TripAdvisor.\n
 		  Hotel Search and booking by Expedia.\n
-		  Text parsing by Evature.\n
-	</string> 
+		  Text parsing by Evature.\n</string>
     <string name="help_text">	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".</string>
     <string name="ok_button">OK, got it.</string>
     <string name="_ok">OK</string>
@@ -28,7 +26,7 @@
     <string name="button_stop">Stop</string>
     <string name="people_per_room">Adults per room:</string>
     <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
-<!--     <string name="EXAMPLES">EXAMPLES</string> -->
+    <!-- <string name="EXAMPLES">EXAMPLES</string> -->
     <string name="hotel_image">Hotel Image</string>
     <string name="from">From</string>
     <string name="per_night">/night</string>
@@ -67,7 +65,6 @@
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
     <string name="show_fullscreen">Show Fullscreen</string>
     <string name="room_photo">Room Photo</string>
-
     <string name="arrival">Check in:</string>
     <string name="departure">Check out:</string>
     <string name="adults">Adults:</string>
@@ -80,8 +77,7 @@
     <string name="total_charges">Total Charges</string>
     <string name="security_notice_title">Secure Booking</string>
     <string name="security_notice_text">We keep all your personal information secure and encrypted.\nWe won\'t share or
-        sell your personal information.
-    </string>
+        sell your personal information.</string>
     <string name="guest_information">Guest Information:</string>
     <string name="guest_first_name">First Name</string>
     <string name="guest_last_name">Last Name</string>
@@ -98,15 +94,11 @@
     <string name="billing_cc_expmo">MM</string>
     <string name="billing_cc_expyr">YY</string>
     <string name="billing_cc_security">Security Code (See back of credit card):</string>
-    
-        <string name="complete_booking">Complete Booking</string>
-    <string name="incorrect_expiration_year">
-        Incorrect credit card expiration year detected. Ensure that you use a
+    <string name="complete_booking">Complete Booking</string>
+    <string name="incorrect_expiration_year">        Incorrect credit card expiration year detected. Ensure that you use a
         two-digit number for the year.</string>
-    <string name="incorrect_expiration_month">
-        Incorrect credit card expiration month detected. Ensure that you use
-        a two-digit month between 01 and 12.
-    </string>
+    <string name="incorrect_expiration_month">        Incorrect credit card expiration month detected. Ensure that you use
+        a two-digit month between 01 and 12.</string>
     <string name="load_default_billing_info">Load Default Billing Info</string>
     <string name="itinerary_id">Itinerary ID</string>
     <string name="confirmation_numbers">Confirmation Numbers</string>
@@ -131,7 +123,10 @@
     <string name="low_volume_header">Your volume is too low!</string>
     <string name="volume_">Volume:</string>
     <string name="tutorial">Tutorial</string>
-    
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="new_session">New Session</string>
+    <string name="title_hotel_list">Hotels</string>
+    <string name="title_hotel_detail">Hotel Detail</string>
+
 </resources>

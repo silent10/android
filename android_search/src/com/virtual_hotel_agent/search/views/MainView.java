@@ -6,6 +6,7 @@ import java.util.List;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.res.Configuration;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +19,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -64,6 +65,9 @@ public class MainView {
 	private String mHotelsTabName;
 
 	private List<String> mTabTitles;
+	private ListView mDrawerList;
+	private DrawerLayout mDrawerLayout;
+	private ActionBarDrawerToggle mDrawerToggle;
 	
 	public MainView(final MainActivity mainActivity, List<String> tabTitles) {
 		mStatusPanel = mainActivity.findViewById(R.id.status_panel);
@@ -88,26 +92,27 @@ public class MainView {
 		
 		
 		final ActionBar supportActionBar = mainActivity.getSupportActionBar();
-		supportActionBar.setDisplayHomeAsUpEnabled(false);
 		supportActionBar.setHomeButtonEnabled(true);
 
 		
 		final String[] drawerItems = {
+				"Chat with Virtual Agent",
+				"Search Results",
+				"My Bookings",
+				"-",
 				//mainActivity.getString(R.string.tutorial),
 				mainActivity.getString(R.string.faq),
 				mainActivity.getString(R.string.settings),
 				mainActivity.getString(R.string.report_a_bug),
 				mainActivity.getString(R.string.about)
 		};
-        ListView drawerList = (ListView) mainActivity.findViewById(R.id.left_drawer);
+        mDrawerList = (ListView) mainActivity.findViewById(R.id.left_drawer);
 
         // Set the adapter for the list view
-        drawerList.setAdapter(new ArrayAdapter<String>(mainActivity,
+        mDrawerList.setAdapter(new ArrayAdapter<String>(mainActivity,
                 R.layout.drawer_list_item, drawerItems));
         // Set the list's click listener
-//        drawerList.setOnItemClickListener(new DrawerItemClickListener());
-
-        drawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
+        mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
 
     		@Override
     		public void onItemClick(android.widget.AdapterView<?> parent,
@@ -115,6 +120,38 @@ public class MainView {
     			mainActivity.selectDrawerItem(position, drawerItems[position]);
     		}
         });
+        
+        
+		mDrawerLayout = (DrawerLayout) mainActivity.findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(
+        		mainActivity,                  /* host Activity */
+                mDrawerLayout,         /* DrawerLayout object */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+                ) {
+        	
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //mainActivity.getActionBar().setTitle(mTitle);
+                mainActivity.invalidateOptionsMenu();
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //mainActivity.getActionBar().setTitle(mDrawerTitle);
+                mainActivity.invalidateOptionsMenu();
+            }
+        };
+        
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+
+        
 		
 		// setup the tab switching
 		mPagerAdapter = new MyPagerAdapter(mainActivity.getFragmentManager());
@@ -126,6 +163,7 @@ public class MainView {
 		mSoundView.setColor(0xffdd8877);
 		mSoundView.setAlign(Gravity.RIGHT);
 
+		// TODO: change toolbar based on 
 		mViewPager.setOnPageChangeListener( new OnPageChangeListener() {
 			@Override
 			public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -133,7 +171,7 @@ public class MainView {
 	
 			@Override
 			public void onPageSelected(int position) {
-				supportActionBar.setDisplayHomeAsUpEnabled(position > 0);
+				//supportActionBar.setDisplayHomeAsUpEnabled(position > 0);
 			}
 
 			@Override
@@ -565,6 +603,28 @@ public class MainView {
 			mViewPager.startAnimation(anim);
 		if (buttons)
 			mBottomBar.startAnimation(anim);
+	}
+
+	public void onPostCreate() {
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+	}
+
+	public void onConfigurationChanged(Configuration newConfig) {
+		mDrawerToggle.onConfigurationChanged(newConfig);
+	}
+
+	public boolean isDrawerSelected(MenuItem item) {
+		// return true if DrawerToggle handled this menu option click
+		return mDrawerToggle.onOptionsItemSelected(item);
+	}
+
+	public void closeDrawer() {
+		mDrawerLayout.closeDrawer(mDrawerList);
+	}
+
+	public boolean isDrawerOpen() {
+		return mDrawerLayout.isDrawerOpen(mDrawerList);
 	}
 
 

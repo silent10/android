@@ -44,8 +44,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.speech.RecognizerIntent;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -55,7 +53,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.ean.mobile.exception.EanWsError;
@@ -104,6 +101,7 @@ import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
 import com.virtual_hotel_agent.search.views.MainView;
 import com.virtual_hotel_agent.search.views.fragments.ChatFragment;
 import com.virtual_hotel_agent.search.views.fragments.ChildAgeDialogFragment;
+import com.virtual_hotel_agent.search.views.fragments.HotelDetailFragment;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
 import de.greenrobot.event.EventBus;
@@ -137,17 +135,9 @@ public class MainActivity extends BaseActivity implements
 	
 	MainView mainView;
 
+	private boolean mMultiPane;
 
 	private MenuItem soundControlMenuItem;
-
-
-	private ActionBarDrawerToggle mDrawerToggle;
-
-
-	private DrawerLayout mDrawerLayout;
-
-
-	private ListView mDrawerList;
 
 	
 	@Override
@@ -328,8 +318,6 @@ public class MainActivity extends BaseActivity implements
 		EventBus.getDefault().register(this);
 		setVolumeControlStream(VolumeUtil.currentStream); // TODO: move to EvaComponent?
 		speechSearch = new EvaSpeechComponent(eva);
-		setContentView(R.layout.new_main);
-		
 		eva.registerPreferenceListener();
 		eva.setScope("h");
 		
@@ -342,6 +330,18 @@ public class MainActivity extends BaseActivity implements
 			eva.setAppVersion("vha_unknown");
 		}
 		
+
+		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+		if (networkInfo != null && networkInfo.isConnected()) {
+			Log.d(TAG, "Progress: We are connected to the network");
+			mIsNetworkingOk = true;
+			// fetch data
+			// new GetExternalIpAddress().execute();
+		}
+		if (!mIsNetworkingOk) {
+			fatal_error(R.string.network_error);
+		}
 		
 		eva.setApiKey(SettingsAPI.getEvaKey(this));
 		eva.setSiteCode(SettingsAPI.getEvaSiteCode(this));
@@ -356,36 +356,23 @@ public class MainActivity extends BaseActivity implements
 //			Log.d(TAG, "no saved instance state");
 			mTabTitles = new ArrayList<String>(Arrays.asList(/*mExamplesTabName,*/ getString(R.string.CHAT)));
 //		}
+			
+
+		setContentView(R.layout.activity_main);
+
+		if (findViewById(R.id.hotel_detail_container) != null) {
+			// The detail container view will be present only in the
+			// large-screen layouts (res/values-large and
+			// res/values-sw600dp). If this view is present, then the
+			// activity should be in two-pane mode.
+			mMultiPane = true;
+		}
+
+		// TODO: If exposing deep links into your app, handle intents here.
+			
 		
 		mainView = new MainView(this, mTabTitles);
 //		TutorialController.mainView = mainView; // accessible to all tutorials
-
-		mDrawerList = (ListView) findViewById(R.id.left_drawer);
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.string.drawer_open,  /* "open drawer" description */
-                R.string.drawer_close  /* "close drawer" description */
-                ) {
-
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                //mainActivity.getActionBar().setTitle(mTitle);
-            }
-
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                //mainActivity.getActionBar().setTitle(mDrawerTitle);
-            }
-        };
-        
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-
-        // Set the drawer toggle as the DrawerListener
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		
 		if (savedInstanceState == null) {
@@ -393,17 +380,6 @@ public class MainActivity extends BaseActivity implements
 		}
 		
 	
-		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-		if (networkInfo != null && networkInfo.isConnected()) {
-			Log.d(TAG, "Progress: We are connected to the network");
-			mIsNetworkingOk = true;
-			// fetch data
-			// new GetExternalIpAddress().execute();
-		}
-		if (!mIsNetworkingOk) {
-			fatal_error(R.string.network_error);
-		}
 
 //		setDebugData(DebugTextType.None, null);
 
@@ -457,12 +433,18 @@ public class MainActivity extends BaseActivity implements
 	
 //	@Override
 	public boolean onPrepareOptionsMenu (Menu menu) {
-		//menu.getItem(2).setVisible(eva.isDebug());
 		/* Called whenever we call invalidateOptionsMenu() */
 
+		//menu.getItem(2).setVisible(eva.isDebug());
 		// If the nav drawer is open, hide action items related to the content view
-	    //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-	    //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+	    boolean drawerOpen = mainView.isDrawerOpen();
+	    menu.findItem(R.id.restart_button).setVisible(!drawerOpen);
+	    if (drawerOpen) {
+	    	soundControlMenuItem.setVisible(false);
+	    }
+	    else {
+	    	setVolumeIcon();
+	    }
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -482,14 +464,13 @@ public class MainActivity extends BaseActivity implements
 	@Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
+        mainView.onPostCreate();
     }
 	
 	@Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        mainView.onConfigurationChanged(newConfig);
     }
 
 	private void setVolumeIcon() {
@@ -513,7 +494,7 @@ public class MainActivity extends BaseActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) { // user pressed the menu button
 		Intent intent;
 		
-		if (mDrawerToggle.onOptionsItemSelected(item)) {
+		if (mainView.isDrawerSelected(item)) {
           return true;
         }
 		
@@ -555,6 +536,7 @@ public class MainActivity extends BaseActivity implements
 	
 
 	public void selectDrawerItem(int position, String item) {
+		
 		if (item.equals(getString(R.string.report_a_bug))) {
 			startActivity(new Intent(this, BugReportDialog.class));	
 		}
@@ -583,8 +565,7 @@ public class MainActivity extends BaseActivity implements
 //		TutorialController.showRecordButtonTutorial(this);
 //        return true;
 	    // Highlight the selected item, update the title, and close the drawer
-	    mDrawerList.setItemChecked(position, true);
-	    mDrawerLayout.closeDrawer(mDrawerList);
+		mainView.closeDrawer();
 	}
 
 
@@ -1012,6 +993,7 @@ public class MainActivity extends BaseActivity implements
 				Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
 			}
 			else {
+				//startActivity(new Intent(MainActivity.this, HotelListActivity.class));
 				int index = mTabTitles.indexOf(tabName);
 				if (index == -1) {
 					mainView.addTab(tabName);
@@ -1307,6 +1289,20 @@ public class MainActivity extends BaseActivity implements
 
 			onEvent(new HotelsListUpdated());
 
+			if (mMultiPane) {
+				HotelDetailFragment fragment = (HotelDetailFragment) getFragmentManager().findFragmentById(R.id.hotel_detail_fragment);
+				fragment.changeHotelId(hotelId);
+				//HotelDetailFragment fragment = new HotelDetailFragment();
+//				getFragmentManager().beginTransaction()
+//						.replace(R.id.hotel_detail_container, fragment).commit();
+			}
+			else {
+				// In single-pane mode, simply start the detail activity
+				// for the selected item ID.
+				Intent detailIntent = new Intent(MainActivity.this, HotelDetailActivity.class);
+				detailIntent.putExtra(HotelDetailActivity.HOTEL_ID_PARAM, hotelId);
+				startActivity(detailIntent);
+			}
 			// add hotel tab again
 			// asdf int index = mainView.getHotelTabIndex();
 			// asdf if (index == -1) {
@@ -1364,7 +1360,7 @@ public class MainActivity extends BaseActivity implements
 			addChatItem(myChat);
 			String greeting = "Starting a new search. How may I help you?";
 			int pos = greeting.length();
-			String seeExamples = "\nClick here to see some examples.";
+			String seeExamples = "\nTap here to see some examples.";
 			SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
 			int col = getResources().getColor(R.color.vha_chat_no_session_text);
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);

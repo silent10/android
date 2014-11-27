@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:id="@+id/hotel_detail_fragment"
     android:background="@drawable/search_background" >
 
     <RelativeLayout
@@ -121,14 +122,16 @@
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/dividerElement" >
+        android:layout_height="match_parent"
+        android:layout_below="@id/dividerElement"
+         >
 
         <LinearLayout
             android:id="@+id/detailsLayout"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" 
+            android:paddingBottom="110dp"
              >
 
     
@@ -198,20 +201,21 @@
 	                
 	            </RelativeLayout>
             
+            <LinearLayout 
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"
+                >
+                
             <WebView
                 android:id="@+id/propertyDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                  >
             </WebView>
-
-            <View
-		        android:id="@+id/view1"
-		        android:layout_width="fill_parent"
-		        android:layout_height="110dip" />
+            </LinearLayout>
+            
         </LinearLayout>
-    </ScrollView>
-
+	</ScrollView>
     
     
     <RelativeLayout
