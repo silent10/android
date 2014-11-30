@@ -14,34 +14,22 @@
 	    />
         
 
-    <android.support.v4.view.ViewPager
+
+       <android.support.v4.view.ViewPager
         android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
         android:layout_below="@id/toolbar" />
 
-    <!--
-         This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows.
-    -->
-
-            
-            <com.viewpagerindicator.UnderlinePageIndicator
-		        android:id="@+id/indicator"
-		        android:layout_height="2dp"
-		        android:layout_width="fill_parent"
-		        android:layout_alignParentBottom="true"
-		    />
-      
-            <TextView 
-                android:id="@+id/photo_caption"
-                android:layout_above="@id/indicator"
-                android:background="@color/black_overlay"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:visibility="gone"
-                />
-<!--                 style="?buttonBarButtonStyle" -->
+                   
+        <com.viewpagerindicator.UnderlinePageIndicator
+	        android:id="@+id/indicator"
+	        android:layout_height="3dp"
+	        android:layout_width="match_parent"
+	        android:layout_alignParentBottom="true"
+	    />
+       
+        
             
 </RelativeLayout>

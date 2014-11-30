@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -75,7 +76,8 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 			setStatus(Status.None);
 		}
 	}
-	
+
+	Pattern removeP = Pattern.compile("^<p[^>]*?>(.*?)</p>$", Pattern.DOTALL);
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		// default serialization for everything except the SpannableString chat 
@@ -87,7 +89,7 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 		// this makes the ChatItem show empty space below the text after restore -
 		// trimming the restored string isn't simple because it is a "spannedString"
 		// solution - remove the <p> wrapping before 
-		html = html.replaceAll("<p[^>]*?>(.*?)</p>", "$1");
+		html = removeP.matcher(html).replaceFirst("$1");
 		oos.writeObject(html);
 	}
 	
