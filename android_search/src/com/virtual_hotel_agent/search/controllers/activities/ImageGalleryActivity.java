@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -111,13 +112,13 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 				mTitle = "";
 			}
 		}
+		
 
 		WeakReference<ImageGalleryActivity> _this = new WeakReference<ImageGalleryActivity>(this);
 		mHandlerImgDownloaded = new DownloadedImg(_this);
 
 		//final View controlsView = findViewById(R.id.fullscreen_content_controls);
 		contentView = (ViewPager) findViewById(R.id.fullscreen_content);
-		captionView = (TextView) findViewById(R.id.photo_caption);
 
 		adapter = new BitmapAdapter(this);
 		contentView.setAdapter(adapter);
@@ -163,16 +164,18 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		mToolbar.setTitle(getString(R.string.app_name));
 		setSupportActionBar(mToolbar);
 		
+		mToolbar.setTitle(mTitle);
+		
 		final ActionBar supportActionBar = getSupportActionBar();
 		supportActionBar.setHomeButtonEnabled(true);
 
 		
 		initialPage = intent.getIntExtra(PHOTO_INDEX, 99999);
 		if (initialPage != 99999) {
-			setCaption(initialPage);
+			setCaption(initialPage, 0);
 		}
 		else {
-			setCaption(0);
+			setCaption(0, 0);
 		}
 		
 		imageDownloader.startDownload(urls);
@@ -188,7 +191,6 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 
 
 	private ViewPager contentView;
-	private TextView captionView;
 
 	
 	@Override
@@ -203,60 +205,112 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 	}
 
 	@Override
-	public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-	}
-
-	@Override
-	public void onPageSelected(final int position) {
-		captionView.post(new Runnable() {
-			
+	public void onPageScrolled(final int position, final float positionOffset, int positionOffsetPixels) {
+		contentView.post(new Runnable() {
 			@Override
 			public void run() {
-				setCaption(position);
+				setCaption(position, positionOffset);
 			}
 		});
 	}
 
-	protected void setCaption(int position) {
+	@Override
+	public void onPageSelected(final int position) {
+		contentView.post(new Runnable() {
+			@Override
+			public void run() {
+				setCaption(position, 0);
+			}
+		});
+	}
+	
+	private int transitionColor(int color1, int color2, float offset) {
+		float[] hsv1 = {0,0,0};
+		float[] hsv2 = {0,0,0};
+		Color.RGBToHSV(Color.red(color1), Color.green(color1), Color.blue(color1), hsv1);
+		Color.RGBToHSV(Color.red(color2), Color.green(color2), Color.blue(color2), hsv2);
+		if (Math.abs(hsv1[0]-hsv2[0]) > 180.0) {
+			if (hsv1[0] < hsv2[0]) {
+				hsv1[0] += 360.0;
+			}
+			else {
+				hsv2[0] += 360.0;
+			}
+		}
+		float invOff = 1-offset;
+		float hue = hsv1[0]* invOff + hsv2[0]*offset;
+		if (hue > 360.0) {
+			hue -= 360.0;
+		}
+		float sat = hsv1[1]* invOff + hsv2[1]*offset;
+		float val = hsv1[2]* invOff + hsv2[2]*offset;
+		
+		return Color.HSVToColor(new float[] {hue, sat,val});
+	}
+
+	protected void setCaption(final int position, final float offset) {
 		if (position < adapter.getCount()) {
-			Bitmap bitmap = adapter.getBitmap(position);
-			Palette.generateAsync(bitmap, new Palette.PaletteAsyncListener() {
+			adapter.getPalette(position,  new Palette.PaletteAsyncListener() {
 				@Override
-				public void onGenerated(Palette palette) {
-					Palette.Swatch vibrant = palette.getVibrantSwatch();
-					if (vibrant != null) {
-						// If we have a vibrant color update the title TextView
-						mToolbar.setBackgroundColor(vibrant.getRgb());
-						mToolbar.setTitleTextColor(vibrant.getTitleTextColor());
-						mToolbar.setSubtitleTextColor(vibrant.getTitleTextColor());
+				public void onGenerated(final Palette paletteLeft) {
+					if (position+1 < adapter.getCount()) {
+						adapter.getPalette(position+1,  new Palette.PaletteAsyncListener() { 
+							@Override
+							public void onGenerated(Palette paletteRight) {
+								Palette.Swatch vibrantL = paletteLeft.getLightVibrantSwatch();
+								Palette.Swatch vibrantR = paletteRight.getLightVibrantSwatch();
+								if (vibrantL != null && vibrantR != null) {
+									// If we have a vibrant color update the title TextView
+									int textColor = transitionColor(vibrantL.getTitleTextColor(), vibrantR.getTitleTextColor(), offset) ;
+									int bgColor = transitionColor(vibrantL.getRgb(), vibrantR.getRgb(), offset);
+									mToolbar.setBackgroundColor(bgColor);
+									mToolbar.setTitleTextColor(textColor );
+									mToolbar.setSubtitleTextColor(textColor);
+									mIndicator.setSelectedColor(bgColor);
+								}
+								Palette.Swatch mutedL = paletteLeft.getDarkMutedSwatch();
+								Palette.Swatch mutedR = paletteRight.getDarkMutedSwatch();
+								if (mutedL != null && mutedR != null) {
+									int muted = transitionColor(mutedL.getRgb(), mutedR.getRgb(), offset);
+									contentView.setBackgroundColor(muted);
+								}
+								
+							}
+						});
 					}
-					Palette.Swatch muted = palette.getLightMutedSwatch();
-					if (muted != null) {
-						contentView.setBackgroundColor(muted.getRgb());
+					else {
+						Palette.Swatch vibrant = paletteLeft.getVibrantSwatch();
+						if (vibrant != null) {
+							// If we have a vibrant color update the title TextView
+							mToolbar.setBackgroundColor(vibrant.getRgb());
+							mToolbar.setTitleTextColor(vibrant.getTitleTextColor());
+							mToolbar.setSubtitleTextColor(vibrant.getTitleTextColor());
+							mIndicator.setSelectedColor(vibrant.getRgb());
+						}
+						Palette.Swatch muted = paletteLeft.getDarkMutedSwatch();
+						if (muted != null) {
+							contentView.setBackgroundColor(muted.getRgb());
+						}
 					}
 				}
 			});
 		}
 		
-		captionView.setVisibility(View.GONE);
-		if (captions != null && captions.size() > position) {
-			String text = "";
-			if (captions.get(position) != null) {
-				text = captions.get(position).trim();
+		int curPosition = position;
+		if (offset > 0.5) {
+			curPosition++;
+		}
+		if (captions != null && captions.size() > curPosition) {
+			String text = (curPosition + 1) + "/" + captions.size();
+			if (captions.get(curPosition) != null) {
+				String caption = captions.get(curPosition).trim();
+				if (caption.equals("") == false && caption.equals("todo") == false) {
+					text += " - "+caption;
+				}
 			}
-			mToolbar.setTitle((position + 1) + "/" + captions.size() + " - " + mTitle);
-			if (text.equals("") == false && text.equals("todo") == false) {
-				//captionView.setText(text);
-				mToolbar.setSubtitle(text);
-				//captionView.setVisibility(View.VISIBLE);
-			}
-			else {
-				mToolbar.setSubtitle("");
-			}
-			//setTitle((position + 1) + "/" + captions.size() + " - " + mTitle);
+			mToolbar.setSubtitle(text);
 		} else {
-			//setTitle(mTitle);
-			mToolbar.setTitle(mTitle);
+			mToolbar.setSubtitle("");
 		}
 	}
 }
