@@ -2,6 +2,7 @@
 <resources>
 
     <color name="colorPrimary">#ffdd4444</color>
+    <color name="colorPrimaryDark">#ffcc3333</color>
     
     <color name="picker_text_color">#ff101010</color>
     <color name="toolbar_logo_divider">#ff576eb1</color>

@@ -28,10 +28,10 @@ import com.ean.mobile.hotel.HotelRoom.ValueAdd;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
+import com.virtual_hotel_agent.search.controllers.activities.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.controllers.events.RoomSelectedEvent;
 
 import de.greenrobot.event.EventBus;

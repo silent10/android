@@ -1247,10 +1247,11 @@ public class MainActivity extends BaseActivity implements
 				detailIntent.putExtra(HotelDetailActivity.HOTEL_ID_PARAM, hotelId);
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 					if (event != null && event.hotelName != null) {
-						Pair<View, String> p1 = Pair.create(event.hotelName, "hotelName");
-						Pair<View, String> p2 = Pair.create(event.hotelStarRating, "hotelStarRating");
-						Pair<View, String> p3 = Pair.create(event.hotelTripAdvRating, "hotelTripAdvRating"); 
-						ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, p1, p2,p3);
+						ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, 
+								Pair.create(event.hotelName, "hotelName"),
+								Pair.create(event.hotelStarRating, "hotelStarRating"),
+								Pair.create(event.hotelTripAdvRating, "hotelTripAdvRating")
+								);
 						startActivity(detailIntent, options.toBundle());
 					}
 					else {

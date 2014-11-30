@@ -366,10 +366,12 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 	}
 
 	public void clearChat() {
+		Log.d(TAG, "Clearing chat Fragment");
 		shownExamples = false;
 		editedChatItemIndex = -1;
 		mAnimAdapter.reset();
 		mChatListModel.clear();
+		mAnimAdapter.notifyDataSetChanged();
 	}
 
 
