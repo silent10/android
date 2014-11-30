@@ -261,12 +261,6 @@
         <item name="android:textColor">@color/destination_search_highlight</item>
     </style>
 
-    <style name="FullscreenTheme" parent="android:Theme.NoTitleBar">
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@null</item>
-<!--         <item name="buttonBarStyle">@style/ButtonBar</item> -->
-<!--         <item name="buttonBarButtonStyle">@style/ButtonBarButton</item> -->
-    </style>
 
     <style name="ButtonBar">
         <item name="android:paddingLeft">2dp</item>
@@ -283,18 +277,14 @@
     
     <style name="AppTheme.Base"   parent="Theme.AppCompat">
   	    <item name="android:windowBackground">@drawable/splash_screen</item>
+        <!-- colorPrimary is used for the default action bar background -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
+<!--     colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         
         
-        <!-- colorPrimary is used for the default action bar background -->
-<!--     <item name="colorPrimary">@color/my_awesome_color</item> -->
-
-<!--     colorPrimaryDark is used for the status bar -->
-<!--     <item name="colorPrimaryDark">@color/my_awesome_darker_color</item> -->
-
 <!--     colorAccent is used as the default value for colorControlActivated -->
 <!--          which is used to tint widgets -->
 <!--     <item name="colorAccent">@color/accent</item> -->
@@ -303,7 +293,7 @@
 <!--         <item name="vpiLinePageIndicatorStyle">@style/CustomLinePageIndicator</item> -->
 <!--         <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item> -->
 <!--         <item name="vpiTabPageIndicatorStyle">@style/CustomTabPageIndicator</item> -->
-<!--         <item name="vpiUnderlinePageIndicatorStyle">@style/CustomUnderlinePageIndicator</item> -->
+        <item name="vpiUnderlinePageIndicatorStyle">@style/CustomUnderlinePageIndicator</item>
     </style>
 
 <!--     <style name="CustomTitlePageIndicator"> -->
@@ -360,12 +350,12 @@
 <!--         <item name="android:typeface">monospace</item> -->
 <!--     </style> -->
 
-<!--     <style name="CustomUnderlinePageIndicator"> -->
-<!--         <item name="selectedColor">#FFCC0000</item> -->
-<!--         <item name="android:background">#FFCCCCCC</item> -->
-<!--         <item name="fadeLength">1000</item> -->
-<!--         <item name="fadeDelay">1000</item> -->
-<!--     </style> -->
+    <style name="CustomUnderlinePageIndicator">
+        <item name="selectedColor">#FFCC0000</item>
+        <item name="android:background">#FFCCCCCC</item>
+        <item name="fadeLength">1000</item>
+        <item name="fadeDelay">1000</item>
+    </style>
     
     
 </resources>

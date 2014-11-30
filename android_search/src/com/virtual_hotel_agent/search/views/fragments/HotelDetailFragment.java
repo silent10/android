@@ -5,12 +5,15 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -28,6 +31,7 @@ import android.widget.Gallery;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RatingBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,11 +42,11 @@ import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
-import com.virtual_hotel_agent.search.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.HotelMapActivity;
+import com.virtual_hotel_agent.search.controllers.activities.ImageGalleryActivity;
 import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
@@ -53,7 +57,8 @@ import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
 
 import de.greenrobot.event.EventBus;
 
-public class HotelDetailFragment extends Fragment implements OnItemClickListener {
+@SuppressLint("NewApi")
+public class HotelDetailFragment extends Fragment implements  OnItemClickListener {
 
 	protected static final String TAG = HotelDetailFragment.class.getSimpleName();
 
@@ -74,7 +79,7 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 	private GridView mAmenitiesGridView;
 	private Button mBookButton;
 	private Button mMapButton;
-	//private ScrollView mScrollView;
+	private ScrollView mScrollView;
 	
 
 	private EventBus eventBus;
@@ -175,7 +180,7 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 
 		mBookButton = (Button) mView.findViewById(R.id.selectButton);
 		mMapButton = (Button) mView.findViewById(R.id.mapButton);
-		//mScrollView = (ScrollView) mView.findViewById(R.id.scrollView1);
+		mScrollView = (ScrollView) mView.findViewById(R.id.scrollView1);
 		
 		mHotelGallery = (Gallery) mView.findViewById(R.id.hotelGallery);
 		mHotelName = (TextView) mView.findViewById(R.id.hotelName);
@@ -396,7 +401,7 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 			return;
 		}
 		mPropertyDescription.loadData("","text/html", "utf-8");
-		//mScrollView.setScrollY(0);
+		mScrollView.setScrollY(0);
 		
 		final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 		if (hotel == null) {
@@ -535,10 +540,18 @@ public class HotelDetailFragment extends Fragment implements OnItemClickListener
 			long id) {
 		
 		if (isAdded()) {
+
 			Intent intent = new Intent(this.getActivity(), ImageGalleryActivity.class);
 			intent.putExtra(ImageGalleryActivity.PHOTO_INDEX, (int) id);
 			intent.putExtra(ImageGalleryActivity.HOTEL_ID, mHotelId);
-			startActivity(intent);
+			
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(getActivity(), view, "fullscreen_image");
+				startActivity(intent, options.toBundle());
+			}
+			else {
+				startActivity(intent);
+			}
 		}
 	}
 

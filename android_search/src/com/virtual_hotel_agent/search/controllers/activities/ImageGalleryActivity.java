@@ -1,17 +1,19 @@
-package com.virtual_hotel_agent.search;
+package com.virtual_hotel_agent.search.controllers.activities;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-//import android.support.v4.view.ViewPager;
-//import android.view.ViewPager.OnPageChangeListener;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.ActionBar;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,12 +22,13 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
-//import com.viewpagerindicator.UnderlinePageIndicator;
-import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
+import com.viewpagerindicator.UnderlinePageIndicator;
+import com.virtual_hotel_agent.search.R;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.BitmapAdapter;
 
-public class ImageGalleryActivity extends Activity { //implements OnPageChangeListener {
+public class ImageGalleryActivity extends BaseActivity implements OnPageChangeListener {
 
 	private static final String TAG = "ImageGalleryActivity";
 
@@ -35,11 +38,11 @@ public class ImageGalleryActivity extends Activity { //implements OnPageChangeLi
 
 	public static final String TITLE = "Title";
 
-/*
+
 	private int initialPage = 99999;
 	private ImageDownloader imageDownloader;
 	private BitmapAdapter adapter;
-//	private UnderlinePageIndicator mIndicator;
+	private UnderlinePageIndicator mIndicator;
 
 	static class DownloadedImg extends Handler {
 		private WeakReference<ImageGalleryActivity> activityRef;
@@ -69,6 +72,8 @@ public class ImageGalleryActivity extends Activity { //implements OnPageChangeLi
 	private ArrayList<String> captions;
 
 	private String mTitle;
+
+	private Toolbar mToolbar;
 
 
 	
@@ -117,8 +122,8 @@ public class ImageGalleryActivity extends Activity { //implements OnPageChangeLi
 		adapter = new BitmapAdapter(this);
 		contentView.setAdapter(adapter);
 		
-//		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
-//		mIndicator.setViewPager(contentView);
+		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
+		mIndicator.setViewPager(contentView);
 		
 		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
 		
@@ -153,6 +158,15 @@ public class ImageGalleryActivity extends Activity { //implements OnPageChangeLi
 			this.finish();
 			return;
 		}
+		
+		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		mToolbar.setTitle(getString(R.string.app_name));
+		setSupportActionBar(mToolbar);
+		
+		final ActionBar supportActionBar = getSupportActionBar();
+		supportActionBar.setHomeButtonEnabled(true);
+
+		
 		initialPage = intent.getIntExtra(PHOTO_INDEX, 99999);
 		if (initialPage != 99999) {
 			setCaption(initialPage);
@@ -162,7 +176,7 @@ public class ImageGalleryActivity extends Activity { //implements OnPageChangeLi
 		}
 		
 		imageDownloader.startDownload(urls);
-//		mIndicator.setOnPageChangeListener(this);
+		mIndicator.setOnPageChangeListener(this);
 		
 		Log.i(TAG, "Showing "+urls.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
 		
@@ -204,17 +218,45 @@ public class ImageGalleryActivity extends Activity { //implements OnPageChangeLi
 	}
 
 	protected void setCaption(int position) {
+		if (position < adapter.getCount()) {
+			Bitmap bitmap = adapter.getBitmap(position);
+			Palette.generateAsync(bitmap, new Palette.PaletteAsyncListener() {
+				@Override
+				public void onGenerated(Palette palette) {
+					Palette.Swatch vibrant = palette.getVibrantSwatch();
+					if (vibrant != null) {
+						// If we have a vibrant color update the title TextView
+						mToolbar.setBackgroundColor(vibrant.getRgb());
+						mToolbar.setTitleTextColor(vibrant.getTitleTextColor());
+						mToolbar.setSubtitleTextColor(vibrant.getTitleTextColor());
+					}
+					Palette.Swatch muted = palette.getLightMutedSwatch();
+					if (muted != null) {
+						contentView.setBackgroundColor(muted.getRgb());
+					}
+				}
+			});
+		}
+		
 		captionView.setVisibility(View.GONE);
-		if (captions != null && captions.size() > position && captions.get(position) != null) {
-			 String text = captions.get(position).trim();
-			 if (text.equals("Exterior")==false && text.equals("") == false) {
-				captionView.setText(text);
-				captionView.setVisibility(View.VISIBLE);
-			 }
-			 setTitle((position+1)+"/"+captions.size() + " - "+ mTitle);
+		if (captions != null && captions.size() > position) {
+			String text = "";
+			if (captions.get(position) != null) {
+				text = captions.get(position).trim();
+			}
+			mToolbar.setTitle((position + 1) + "/" + captions.size() + " - " + mTitle);
+			if (text.equals("") == false && text.equals("todo") == false) {
+				//captionView.setText(text);
+				mToolbar.setSubtitle(text);
+				//captionView.setVisibility(View.VISIBLE);
+			}
+			else {
+				mToolbar.setSubtitle("");
+			}
+			//setTitle((position + 1) + "/" + captions.size() + " - " + mTitle);
+		} else {
+			//setTitle(mTitle);
+			mToolbar.setTitle(mTitle);
 		}
-		else {
-			setTitle(mTitle);
-		}
-	}*/
+	}
 }

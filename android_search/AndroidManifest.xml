@@ -115,19 +115,19 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".ImageGalleryActivity"
+            android:name=".controllers.activities.ImageGalleryActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_image_gallery"
-            android:theme="@style/FullscreenTheme" >
+            android:theme="@style/AppTheme" >
         </activity>
         <activity
-            android:name="com.virtual_hotel_agent.search.controllers.activities.HotelDetailActivity"
+            android:name=".controllers.activities.HotelDetailActivity"
             android:label="@string/title_hotel_detail"
             android:theme="@style/Theme.AppCompat.Light"
             android:parentActivityName=".controllers.activities.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.virtual_hotel_agent.search.controllers.activities.MainActivity" />
+                android:value=".controllers.activities.MainActivity" />
         </activity>
     </application>
 

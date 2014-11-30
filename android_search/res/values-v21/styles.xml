@@ -1,20 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="FullscreenTheme" parent="@android:style/Theme.Material">
-        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowBackground">@null</item>
-<!--         <item name="buttonBarStyle">?android:attr/buttonBarStyle</item> -->
-<!--         <item name="buttonBarButtonStyle">?android:attr/buttonBarButtonStyle</item> -->
-    </style>
-
-    <style name="FullscreenActionBarStyle" parent="@android:style/Theme.Material">
-        <item name="android:background">@color/black_overlay</item>
-    </style>
-
 
     <style name="AppTheme" parent="AppTheme.Base">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        
 	    <item name="android:windowContentTransitions">true</item>
 	    <item name="android:windowAllowEnterTransitionOverlap">true</item>
 	    <item name="android:windowAllowReturnTransitionOverlap">true</item>

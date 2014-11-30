@@ -1,9 +1,10 @@
 package com.virtual_hotel_agent.search.views.adapters;
 
 import java.util.ArrayList;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -36,6 +37,7 @@ public class PhotoGalleryAdapter extends BaseAdapter {
 		return position  % mBitmaps.size();
 	}
 
+	@SuppressLint("NewApi")
 	public View getView(final int position, final View contentView, final ViewGroup viewGroup) {
 		ImageView myView;
 
@@ -50,6 +52,9 @@ public class PhotoGalleryAdapter extends BaseAdapter {
 		myView.setLayoutParams(new Gallery.LayoutParams(300, 200));
 		myView.setScaleType(ImageView.ScaleType.FIT_XY);
 		myView.setBackgroundResource(mGalleryItemBackground);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			myView.setTransitionName("fullscreen_image");
+		}
 
 		return myView;
 	}
