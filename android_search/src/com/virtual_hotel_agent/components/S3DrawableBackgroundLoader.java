@@ -16,6 +16,7 @@ import android.os.Message;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import com.evature.util.Log;
 import com.virtual_hotel_agent.search.VHAApplication;
 
 public class S3DrawableBackgroundLoader {
@@ -24,7 +25,7 @@ public class S3DrawableBackgroundLoader {
 	private final Map<ImageView, String> mImageViews = Collections
 			.synchronizedMap(new WeakHashMap<ImageView, String>());
 
-	public static int MAX_CACHE_SIZE = 80;
+	public static int MAX_CACHE_SIZE = 160;
 	public int THREAD_POOL_SIZE = 5;
 
 	static S3DrawableBackgroundLoader mTheObject = null;
@@ -47,6 +48,10 @@ public class S3DrawableBackgroundLoader {
 		mThreadPool = createThreadPool();
 	}
 
+	public static interface LoadedCallback {
+		void drawableLoaded(boolean success, Drawable drawable);
+	}
+	
 	/**
 	 * Clears all instance data and stops running threads
 	 */
@@ -119,28 +124,132 @@ public class S3DrawableBackgroundLoader {
 		}
 	}
 
-	public void loadDrawable(String url, final ImageView imageView, Drawable placeholder) {
-		loadDrawable(new SourceContainerWebUrl(url), url, imageView, placeholder);
+	public void loadDrawable(String url, final ImageView imageView, Drawable placeholder, LoadedCallback callback) {
+		loadDrawable(new SourceContainerWebUrl(url), url, imageView, placeholder, callback);
 	}
+	/*
+	private static String HIGH_RES_LOADED = "high-res";
+	
+	public void replaceWithHighRes(final long hotelId, final ImageView imageView) {
+		// remove old thumbnail lookup from cache 
+		String thumbnailLookup = mImageViews.get(imageView);
+		if (thumbnailLookup.equals(HIGH_RES_LOADED)) {
+			// already replaced with high res
+			return;
+		}
+		mImageViews.put(imageView, HIGH_RES_LOADED);
+		mCache.remove(thumbnailLookup);
+
+		final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(hotelId);
+		if (hotel == null) {
+			VHAApplication.logError(TAG, "Unexpected null hotel "+hotelId);
+			return;
+		}
+		
+		Bitmap highRes = null;
+		if (hotel.mainHotelImageTuple.mainUrl != null) {
+			highRes = VHAApplication.HOTEL_PHOTOS.get(hotel.mainHotelImageTuple.mainUrl.toString());
+		}
+		// check in UI thread, so no concurrency issues
+		if (highRes != null) {
+			// Log.d(null, "Item loaded from mCache: " + url);
+			imageView.setImageBitmap(highRes);
+		} else {
+			// Create handler in UI thread. 
+			final Handler handler = new Handler(Looper.getMainLooper()) {
+				@Override
+				public void handleMessage(Message msg) {
+//					if (imageView.isShown()) {
+						if (msg.obj != null) {
+							imageView.setImageDrawable((Drawable) msg.obj);
+						}
+//					}
+				}
+			};
+			
+			//queueJob(sourceContainer, lookup, imageView, null, callback);
+			mThreadPool.submit(new Runnable() {
+
+				@Override
+				public void run() {
+					Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+					
+					// get the hotel information - images only
+					if (hotel.mainHotelImageTuple.mainUrl == null) {
+						try {
+							Log.i(TAG, "Fetching info for hotel "+hotelId);
+							HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel, true));
+							if (hotelInformation != null && hotelInformation.images != null && hotelInformation.images.size() > 0) {
+								hotel.mainHotelImageTuple.mainUrl = hotelInformation.images.get(0).mainUrl;
+							}
+							else {
+								Log.w(TAG, "No photo for hotel "+hotelId);
+							}
+						} catch (EanWsError e) {
+							VHAApplication.logError(TAG, "EAN Error", e);
+						} catch (UrlRedirectionException e) {
+							VHAApplication.logError(TAG, "EAN Redirection Error", e);
+						}
+						return;
+					}
+					
+					// get the first image of the hotel
+					if (hotel.mainHotelImageTuple.mainUrl != null) {
+						String url = hotel.mainHotelImageTuple.mainUrl.toString();
+						Bitmap highRes = VHAApplication.HOTEL_PHOTOS.get(url);
+						if (highRes == null) {
+							Log.i(TAG, "Downloading high res photo "+url); 
+							highRes = ImageDownloader.download_Image(url);
+							Log.i(TAG, "Downloaded high res photo size "+highRes.getByteCount());
+							VHAApplication.HOTEL_PHOTOS.put(url, highRes);
+						}
+					
+						//if (imageView.isShown()) {
+							Message message = Message.obtain();
+							message.obj = highRes;
+
+							handler.sendMessage(message);
+						//}
+
+					}
+					
+				}
+				
+			});
+		}
+	}*/
 
 	private void loadDrawable(SourceContainer sourceContainer, String lookup, final ImageView imageView,
-			Drawable placeholder) {
+			Drawable placeholder, LoadedCallback callback) {
+
+		Log.d(TAG, "Loading url "+lookup +" to imageView "+imageView);
 
 		mImageViews.put(imageView, lookup);
 		Drawable drawable = getDrawableFromCache(lookup);
 
 		// check in UI thread, so no concurrency issues
 		if (drawable != null) {
+			Log.d(TAG, "Found in cache "+lookup);
 			// Log.d(null, "Item loaded from mCache: " + url);
 			imageView.setImageDrawable(drawable);
+			if (callback != null)
+				callback.drawableLoaded(true, drawable);
 		} else {
-			imageView.setImageDrawable(placeholder);
-			queueJob(sourceContainer, lookup, imageView, placeholder);
+			if (placeholder != null)
+				imageView.setImageDrawable(placeholder);
+			queueJob(sourceContainer, lookup, imageView, placeholder, callback);
 		}
 	}
 
 	public Drawable getDrawableFromCache(String lookup) {
-		return mCache.get(lookup);
+		if (lookup != null)
+			return mCache.get(lookup);
+		return null;
+	}
+	
+	private synchronized void removeFromCache(String lookup) {
+		if (lookup != null)
+			mCache.remove(lookup);
 	}
 
 	private synchronized void putDrawableInCache(String lookup, Drawable drawable) {
@@ -154,7 +263,7 @@ public class S3DrawableBackgroundLoader {
 	}
 
 	private void queueJob(final SourceContainer sourceContainer, final String lookup, final ImageView imageView,
-			final Drawable placeholder) {
+			final Drawable placeholder, final LoadedCallback callback) {
 		/* Create handler in UI thread. */
 		final Handler handler = new Handler() {
 			@Override
@@ -163,9 +272,15 @@ public class S3DrawableBackgroundLoader {
 				if (tag != null && tag.equals(lookup)) {
 					if (imageView.isShown())
 						if (msg.obj != null) {
+							Log.d(TAG, "Setting bitmap to imageView "+imageView);
 							imageView.setImageDrawable((Drawable) msg.obj);
+							if (callback != null)
+								callback.drawableLoaded(true, (Drawable) msg.obj);
 						} else {
-							imageView.setImageDrawable(placeholder);
+							if (placeholder != null)
+								imageView.setImageDrawable(placeholder);
+							if (callback != null)
+								callback.drawableLoaded(false, placeholder);
 						}
 				}
 			}

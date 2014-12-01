@@ -51,23 +51,37 @@ public final class HotelImageTuple {
     /**
      * The URL from whence to retrieve the main image.
      */
-    public final URL mainUrl;
+    public URL mainUrl;
 
     /**
      * The caption for the image.
      */
     public final String caption;
+    
+    public final int category;
 
+    public static final String[] CATEGORY_TITLES = {
+    	"Unknown",   "Exterior",   "Lobby",   "Guest Room", "Recreation", "Property Choice",
+    	"Property Choice","Collage", "Restaurant", "Interior", "Outdoor Pool", "Indoor Pool", "Private Pool",
+    	"Children's Pool", "Sauna", "Hot Tub", "Marina", "Beach", "Poolside Bar", "Lounge/Bar", "Tennis Court",
+    	"Volleyball Court", "Game Room", "Golf Course", "Fitness Facility", "Day Spa", "Casino",
+    	"Beauty Salon", "BBQ", "Basketball Court", "Patio/Balcony", "Courtyard", "View", "Terrace",
+    	"Room", "Studio", "Suite", "Efficiency", "Master Bedroom", "Living Area", "Kitchen", "Dining Area",
+    	"Breakfast Area", "Bathroom", "Meeting Facility", "Ballroom", "Business Center", "Coffee Shop",
+    	"Gift Shop" };
+    
+    
     /**
      * Constructs the object with final values.
      * @param thumbnailUrl The URL of the thumbnail image.
      * @param mainUrl The URL of the main image.
      * @param caption The caption for the image.
      */
-    public HotelImageTuple(final URL thumbnailUrl, final URL mainUrl, final String caption) {
+    public HotelImageTuple(final URL thumbnailUrl, final URL mainUrl, final String caption, final int category) {
         this.thumbnailUrl = thumbnailUrl;
         this.mainUrl = mainUrl;
         this.caption = caption;
+        this.category = category;
     }
 
     /**
@@ -80,13 +94,20 @@ public final class HotelImageTuple {
      * @throws MalformedURLException If either partial url cannot be turned into a full url. Not affected by
      * nulls. In the case of nulls, the particular URL will be null.
      */
-    public HotelImageTuple(final String partialThumbnailUrl, final String partialMainUrl, final String caption)
+    public HotelImageTuple(final String partialThumbnailUrl, final String partialMainUrl, final String caption, final int category)
             throws MalformedURLException {
         this.thumbnailUrl = getFullImageUrl(partialThumbnailUrl);
         this.mainUrl = getFullImageUrl(partialMainUrl);
         this.caption = caption;
+        this.category = category;
     }
 
+    public String getCategoryTitle() {
+    	if (category > 0 && category < CATEGORY_TITLES.length) {
+    		return CATEGORY_TITLES[category];
+    	}
+    	return "";
+    }
 
     /**
      * Gets the full image url, based simply on the partial url which does not include the protocol or host.

@@ -451,7 +451,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		else {
 			S3DrawableBackgroundLoader loader = S3DrawableBackgroundLoader.getInstance();
 			Drawable placeHolder = getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
-			loader.loadDrawable(hotel.tripAdvisorRatingUrl, mTripAdvisorRatingBar_image, placeHolder);
+			loader.loadDrawable(hotel.tripAdvisorRatingUrl, mTripAdvisorRatingBar_image, placeHolder, null);
 			if (hotel.tripAdvisorReviewCount > 0) {
 				mTripAdvisorRatingBar_text.setText("Based on "+hotel.tripAdvisorReviewCount+" ratings");
 				mTripAdvisorRatingBar_text.setVisibility(View.VISIBLE);

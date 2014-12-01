@@ -83,6 +83,7 @@ public class ImageDownloader {
 			@Override
 			public void run() {
 				Log.d(TAG, "Starting downloading "+Thread.currentThread().getId());
+				Thread.currentThread().setPriority(MIN_PRIORITY);
 				Bitmap bmp;
 				
 				if(urls == null || urls.size() == 0) {

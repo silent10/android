@@ -2,10 +2,16 @@ package com.virtual_hotel_agent.search.views.adapters;
 
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v7.graphics.Palette;
+import android.support.v7.graphics.Palette.PaletteAsyncListener;
+import android.support.v7.graphics.Palette.Swatch;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +23,10 @@ import android.widget.TextView;
 import com.ean.mobile.hotel.Hotel;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
-import com.virtual_hotel_agent.search.VHAApplication;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader.LoadedCallback;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
+import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
 public class HotelListAdapter extends BaseAdapter {
@@ -83,7 +90,7 @@ public class HotelListAdapter extends BaseAdapter {
 	public long getItemId(int position) {
 		return position;
 	}
-
+	
 	private View fillerView(View view, ViewGroup parent) {
 		if (view == null) {
 			view = mInflater.inflate(R.layout.row_filler, parent, false);
@@ -92,10 +99,12 @@ public class HotelListAdapter extends BaseAdapter {
 		}
 		return view;
 	}
+	
+	static private Pattern thumbnailToLandscape = Pattern.compile("_n\\.(jpg|png|gif|bmp)$", Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		ViewHolder holder;
+		final ViewHolder holder;
 		
 		List<Hotel> hotels = getHotels();
 		if (hotels == null || position >= hotels.size()) {
@@ -121,7 +130,7 @@ public class HotelListAdapter extends BaseAdapter {
 		}
 
 		
-		Hotel hotel = hotels.get(position);
+		final Hotel hotel = hotels.get(position);
 		if (hotel == null) {
 			Log.w(TAG, "No hotel info for adapter position "+position);
 			return convertView;
@@ -144,54 +153,99 @@ public class HotelListAdapter extends BaseAdapter {
 		// name+="...";
 		// }
 
-		holder.name.setText(name);
-
-		// Calculate hotel distance
-		double distance = hotel.getDistanceFromMe();
-		if (distance > 0 && distance < DISTANCE_DELTA) {
-			DecimalFormat distanceFormat = new DecimalFormat("#.#");
-			String formattedDistance = distanceFormat.format(distance);
-			holder.distance.setText(formattedDistance + "km");
-		} else {
-			holder.distance.setVisibility(View.GONE);
-		}
+		if (holder.name.getText().equals(name) == false) {
+			holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+			holder.name.setText(name);
+			if (holder.name.getHeight() > 100) {
+				holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+			}
 		
-		String location = hotel.locationDescription;
-		if (location != null && location.equals("") == false) {
-			location = Html.fromHtml(location).toString();
-			holder.location.setText(location);
-			holder.location.setVisibility(View.VISIBLE);
+	
+			// Calculate hotel distance
+			double distance = hotel.getDistanceFromMe();
+			if (distance > 0 && distance < DISTANCE_DELTA) {
+				DecimalFormat distanceFormat = new DecimalFormat("#.#");
+				String formattedDistance = distanceFormat.format(distance);
+				holder.distance.setText(formattedDistance + "km");
+			} else {
+				holder.distance.setVisibility(View.GONE);
+			}
+			
+			String location = hotel.locationDescription;
+			if (location != null && location.equals("") == false) {
+				location = Html.fromHtml(location).toString();
+				holder.location.setText(location);
+				holder.location.setVisibility(View.VISIBLE);
+			}
+			else {
+				holder.location.setVisibility(View.GONE);
+			}
+	
+			
+	
+			// Format price
+			DecimalFormat rateFormat = new DecimalFormat("#.00");
+			String formattedRate = rateFormat.format(hotel.lowPrice.doubleValue());
+			String rate = SettingsAPI.getCurrencySymbol(mParent.getActivity()) + " " + formattedRate;
+	
+			holder.rate.setText(rate);
+	
+			holder.rating.setRating(hotel.starRating.floatValue());
+	
+			final S3DrawableBackgroundLoader loader = S3DrawableBackgroundLoader.getInstance();
+	
+			loader.loadDrawable(
+					hotel.mainHotelImageTuple.thumbnailUrl.toString(), holder.image, mHotelIcon, new LoadedCallback() {
+						
+						@Override
+						public void drawableLoaded(boolean success, Drawable drawable) {
+							Palette.generateAsync(((BitmapDrawable) drawable).getBitmap(), new PaletteAsyncListener() {
+								
+								@Override
+								public void onGenerated(Palette palette) {
+									Swatch swatch = palette.getDarkVibrantSwatch();
+									int bgCol = palette.getDarkVibrantColor(0xff444444);
+									holder.image.setBackgroundColor(bgCol);
+									holder.name.setBackgroundColor(bgCol);
+									holder.distance.setBackgroundColor(palette.getDarkMutedColor(0xff444444));
+									if (swatch != null) {
+										holder.name.setTextColor(swatch.getTitleTextColor());
+										holder.distance.setTextColor(swatch.getBodyTextColor());
+									}
+									HotelListAdapter.this.notifyDataSetChanged();
+								}
+							});
+							// load a high resolution bitmap
+							//loader.replaceWithHighRes(hotel.hotelId, holder.image);
+							final String highResUrl = thumbnailToLandscape.matcher(hotel.mainHotelImageTuple.thumbnailUrl.toString()).replaceAll("_l.$1");
+							loader.loadDrawable(
+									highResUrl, holder.image, null, new LoadedCallback() {
+										
+										@Override
+										public void drawableLoaded(boolean success, Drawable drawable) {
+											if (success) {
+												//VHAApplication.HOTEL_PHOTOS.put(highResUrl, ((BitmapDrawable)drawable).getBitmap());
+	//											ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.image.getLayoutParams(); 
+	//										    params.width *= 1.5;
+	//										    holder.image.setLayoutParams(params);
+	//											    
+												HotelListAdapter.this.notifyDataSetChanged();
+											}
+										}
+									});
+						}
+					});
+	
+			if (hotel.tripAdvisorRatingUrl == null) {//hotel.tripAdvisorRating < TRIP_ADVISOR_GOOD_RATING) {
+				holder.tripAdvisorStrip.setVisibility(View.GONE);
+			} else {
+				// TODO: show rating instead of just strip?
+				holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
+	//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
+				holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
+				loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder, null);
+			}
 		}
-		else {
-			holder.location.setVisibility(View.GONE);
-		}
-
-		
-
-		// Format price
-		DecimalFormat rateFormat = new DecimalFormat("#.00");
-		String formattedRate = rateFormat.format(hotel.lowPrice.doubleValue());
-		String rate = SettingsAPI.getCurrencySymbol(mParent.getActivity()) + " " + formattedRate;
-
-		holder.rate.setText(rate);
-
-		holder.rating.setRating(hotel.starRating.floatValue());
-
-		S3DrawableBackgroundLoader loader = S3DrawableBackgroundLoader.getInstance();
-
-		loader.loadDrawable(
-				hotel.mainHotelImageTuple.thumbnailUrl.toString(), holder.image, mHotelIcon);
-
-		if (hotel.tripAdvisorRatingUrl == null) {//hotel.tripAdvisorRating < TRIP_ADVISOR_GOOD_RATING) {
-			holder.tripAdvisorStrip.setVisibility(View.GONE);
-		} else {
-			// TODO: show rating instead of just strip?
-			holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
-//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
-			holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
-			loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder);
-		}
-
 		
 		return convertView;
 	}

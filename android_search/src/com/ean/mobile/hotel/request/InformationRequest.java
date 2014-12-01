@@ -56,23 +56,34 @@ import com.virtual_hotel_agent.search.VHAApplication;
 public final class InformationRequest extends Request<HotelInformation> {
 
 	private Hotel hotel;
+	private boolean onlyPhotos;
     /**
      * Gets the rest of the information about a hotel not included in previous calls.
      * @param hotelId The hotelId for which to gather more information.
      */
-    public InformationRequest(final Hotel hotel) {
+	public InformationRequest(final Hotel hotel) {
+		this(hotel, false);
+	}
+    public InformationRequest(final Hotel hotel, boolean onlyPhotos) {
     	this.hotel = hotel;
-        final List<NameValuePair> requestParameters = Arrays.<NameValuePair>asList(
-            new BasicNameValuePair("hotelId", Long.toString(hotel.hotelId)),
-            new BasicNameValuePair("options", "HOTEL_SUMMARY,HOTEL_DETAILS,PROPERTY_AMENITIES,HOTEL_IMAGES")
-        );
-
+    	this.onlyPhotos = onlyPhotos;
         final List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         urlParameters.addAll(getBasicUrlParameters());
-        urlParameters.addAll(requestParameters);
+        urlParameters.add(new BasicNameValuePair("hotelId", Long.toString(hotel.hotelId)));
+        if (onlyPhotos) {
+        	urlParameters.add(
+        			new BasicNameValuePair("options", "HOTEL_IMAGES")
+        		);
+        }
+        else {
+        	urlParameters.add(
+        			new BasicNameValuePair("options", "HOTEL_SUMMARY,HOTEL_DETAILS,PROPERTY_AMENITIES,HOTEL_IMAGES")
+        		);
+        }
+
         setUrlParameters(urlParameters);
     }
-
+    
     
     private void optionalAppend(StringBuilder sb, JSONObject jObj, String element, String title) {
 		String value = jObj.optString(element, "").trim();
@@ -127,10 +138,15 @@ public final class InformationRequest extends Request<HotelInformation> {
         }
 
         final JSONObject infoResp = jsonObject.getJSONObject("HotelInformationResponse");
-        final JSONObject details = infoResp.getJSONObject("HotelDetails");
         final JSONArray images = infoResp.getJSONObject("HotelImages").getJSONArray("HotelImage");
-
-        final String longDescription = getHotelDescription(details);
+        
+        String longDescription = "";
+        
+        if (onlyPhotos == false) {
+	        final JSONObject details = infoResp.getJSONObject("HotelDetails");
+	
+	        longDescription = getHotelDescription(details);
+        }
 
         final List<HotelImageTuple> imageTuples = new ArrayList<HotelImageTuple>();
 
@@ -140,7 +156,7 @@ public final class InformationRequest extends Request<HotelInformation> {
             try {
                 imageTuples.add(
                     new HotelImageTuple(new URL(image.optString("thumbnailUrl")),
-                        new URL(image.optString("url")), image.optString("caption")));
+                        new URL(image.optString("url")), image.optString("caption"), image.optInt("category", 0)));
             } catch (MalformedURLException me) {
                 VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON: "+
                 				image.optString("url","<null>")+" "+image.optString("thumbnailUrl","<null>"), me);
