@@ -124,7 +124,7 @@ public final class Hotel {
         this.locationDescription = Html.fromHtml(hotelSummary.optString("locationDescription")).toString();
         this.starRating = parseStarRating(hotelSummary.optString("hotelRating"));
         final String thumbnailString = hotelSummary.optString("thumbNailUrl").replace("_t.jpg", "_n.jpg");
-        this.mainHotelImageTuple = new HotelImageTuple(thumbnailString, null, null);
+        this.mainHotelImageTuple = new HotelImageTuple(thumbnailString, null, null, 0);
         this.highPrice = new BigDecimal(hotelSummary.getDouble("highRate")).setScale(2, RoundingMode.HALF_EVEN);
         this.lowPrice = new BigDecimal(hotelSummary.getDouble("lowRate")).setScale(2, RoundingMode.HALF_EVEN);
         this.currencyCode = hotelSummary.optString("rateCurrencyCode");

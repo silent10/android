@@ -146,7 +146,10 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 								captions.add(hotelImage.caption);
 							}
 							else {
-								captions.add("");
+								if (hotelImage.getCategoryTitle().equals("") == false) {
+									Log.i(TAG, "Category: "+hotelImage.getCategoryTitle());
+								}
+								captions.add(hotelImage.getCategoryTitle());
 							}
 						}
 					}

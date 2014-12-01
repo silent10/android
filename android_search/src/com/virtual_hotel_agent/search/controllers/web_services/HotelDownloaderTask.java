@@ -42,6 +42,9 @@ public class HotelDownloaderTask extends DownloaderTask {
 			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(hotelItemSelectedEvent.hotelId);
 			HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel));
 			VHAApplication.EXTENDED_INFOS.put(hotelItemSelectedEvent.hotelId, hotelInformation);
+			if (hotelInformation != null && hotelInformation.images != null && hotelInformation.images.size() > 0) {
+				hotel.mainHotelImageTuple.mainUrl = hotelInformation.images.get(0).mainUrl;
+			}
 			mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
             Log.d(TAG, "Unexpected error occurred within the api", ewe);
