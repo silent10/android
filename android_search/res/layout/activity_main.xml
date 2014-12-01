@@ -134,7 +134,7 @@ android:layout_height="match_parent">
         android:padding="12dp"
         android:src="@drawable/microphone_icon2"
         android:text="@string/button"
-        android:elevation="9dp"
+        android:elevation="8dp"
          />
      
     
