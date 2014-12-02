@@ -7,16 +7,13 @@ import java.util.Arrays;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ean.mobile.hotel.Hotel;
@@ -24,9 +21,10 @@ import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.evature.util.Log;
 import com.viewpagerindicator.UnderlinePageIndicator;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader.LoadedCallback;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
-import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.BitmapAdapter;
 
 public class ImageGalleryActivity extends BaseActivity implements OnPageChangeListener {
@@ -41,10 +39,10 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 
 
 	private int initialPage = 99999;
-	private ImageDownloader imageDownloader;
+	//private ImageDownloader imageDownloader;
 	private BitmapAdapter adapter;
 	private UnderlinePageIndicator mIndicator;
-
+/*
 	static class DownloadedImg extends Handler {
 		private WeakReference<ImageGalleryActivity> activityRef;
 
@@ -68,13 +66,15 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		}
 	}
 	
-	private Handler mHandlerImgDownloaded;
+	private Handler mHandlerImgDownloaded;*/
 	
 	private ArrayList<String> captions;
 
 	private String mTitle;
 
 	private Toolbar mToolbar;
+
+	private S3DrawableBackgroundLoader mLoader;
 
 
 	
@@ -86,7 +86,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 
 		Intent intent = getIntent();
 		
-		String[] urlsArray = intent.getStringArrayExtra(PHOTO_URLS);
+		HotelImageTuple[] urlsArray = null;//intent.getExtra(PHOTO_URLS);
 		
 		long hotelId = intent.getLongExtra(HOTEL_ID, -1l);
 		if (hotelId == -1 && urlsArray == null) {
@@ -115,7 +115,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		
 
 		WeakReference<ImageGalleryActivity> _this = new WeakReference<ImageGalleryActivity>(this);
-		mHandlerImgDownloaded = new DownloadedImg(_this);
+		//mHandlerImgDownloaded = new DownloadedImg(_this);
 
 		//final View controlsView = findViewById(R.id.fullscreen_content_controls);
 		contentView = (ViewPager) findViewById(R.id.fullscreen_content);
@@ -126,22 +126,23 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
 		mIndicator.setViewPager(contentView);
 		
-		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
+		//imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerImgDownloaded);//, mHandlerAllDone);
+		mLoader = new S3DrawableBackgroundLoader(3, VHAApplication.HOTEL_PHOTOS);
 		
 		ArrayList<String> urls;
 		if (urlsArray != null) {
 			captions = null;
-			urls = new ArrayList<String>(Arrays.asList(urlsArray));
+			//urls = new ArrayList<String>(Arrays.asList(urlsArray));
 		}
 		else {
 			captions = new ArrayList<String>();
-			urls = new ArrayList<String>();
+			//urls = new ArrayList<String>();
 			if (hotelData != null) {
 				HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotelData.hotelId);
 				if (info != null && info.images.size() > 0 ) {
 					for (HotelImageTuple hotelImage : info.images) {
 						if (hotelImage.mainUrl != null) {
-							urls.add(hotelImage.mainUrl.toString());
+							//urls.add(hotelImage.mainUrl.toString());
 							if (hotelImage.caption != null) {
 								captions.add(hotelImage.caption);
 							}
@@ -151,13 +152,24 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 								}
 								captions.add(hotelImage.getCategoryTitle());
 							}
+							mLoader.loadDrawable(hotelImage, false, null, null, new LoadedCallback() {
+								
+								@Override
+								public void drawableLoaded(boolean success, BitmapDrawable drawable) {
+									adapter.addBitmap((Bitmap) drawable.getBitmap());
+									// downloaded the right bitmap - switch to page chosen in intent
+									if (contentView != null && initialPage == adapter.getCount()-1) {
+										contentView.setCurrentItem(initialPage);
+									}
+								}
+							});
 						}
 					}
 				}
 			}
 		}
 
-		if (urls.size() == 0) {
+		if (captions.size() == 0) {
 			VHAApplication.logError(TAG, "No images");
 			this.finish();
 			return;
@@ -181,12 +193,12 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 			setCaption(0, 0);
 		}
 		
-		imageDownloader.startDownload(urls);
+		//imageDownloader.startDownload(urls);
 		mIndicator.setOnPageChangeListener(this);
 		
-		Log.i(TAG, "Showing "+urls.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
+		Log.i(TAG, "Showing "+captions.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
 		
-		if (urls.size() > 1) {
+		if (captions.size() > 1) {
 			Toast.makeText(this, "Swipe left and right to view other photos\nPress 'back' to close", Toast.LENGTH_LONG).show();
 		}
 	}
@@ -198,8 +210,8 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 	
 	@Override
 	protected void onDestroy() {
-		if (imageDownloader != null)
-			imageDownloader.stopDownload();
+		if (mLoader != null)
+			mLoader.Reset();
 		super.onDestroy();
 	}
 

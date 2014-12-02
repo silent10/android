@@ -26,6 +26,7 @@
 package com.ean.mobile.hotel;
 
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -90,7 +91,7 @@ public final class HotelRoom {
     /**
      * Urls to photos of room
      */
-    public String[] imageUrls;
+    public HotelImageTuple[] images;
 
     /**
      * Array of "added value" items
@@ -134,7 +135,7 @@ public final class HotelRoom {
         this.rate = Rate.parseFromRateInformations(roomRateDetail).get(0);
         this.cancellationPolicy = new CancellationPolicy(roomRateDetail, arrivalDate);
 
-		imageUrls = null;
+        images = null;
         if (roomRateDetail.has("RoomImages")) {
         	try {
 				JSONObject jRoomImages;
@@ -144,15 +145,31 @@ public final class HotelRoom {
 				if(size==-1) 
 					size = 1;
 				if (size > 0) {
-					imageUrls = new String[size];
+					images = new HotelImageTuple[size];
 					if (size == 1) {
 						JSONObject jImg = jRoomImages.getJSONObject("RoomImage");
-						imageUrls[0] = jImg.optString("url");
+						try {
+							images[0] = new HotelImageTuple(jImg.optString("thumbnailUrl"),
+												jImg.optString("url"), 
+												jImg.optString("caption"), jImg.optInt("category", 0));
+						}
+						catch (MalformedURLException e) {
+							VHAApplication.logError(TAG, "Malformed URL for room image", e);
+						}
 					}
 					else {
 						JSONArray jImgs = jRoomImages.getJSONArray("RoomImage");
 						for(int i=0;i<size;i++)	{
-							imageUrls[i] = jImgs.getJSONObject(i).optString("url");
+							JSONObject jImg = jImgs.getJSONObject(i);
+							try {
+								images[i] = new HotelImageTuple(jImg.optString("thumbnailUrl"),
+													jImg.optString("url"), 
+													jImg.optString("caption"), jImg.optInt("category", 0));
+							}
+							catch (MalformedURLException e) {
+								VHAApplication.logError(TAG, "Malformed URL for room image", e);
+							}
+
 						}
 					}
 				}
@@ -185,7 +202,7 @@ public final class HotelRoom {
 				}
 	        } catch (JSONException e) {
 	    		VHAApplication.logError(TAG, "Error parsing hotel room", e);
-	    		imageUrls = null;
+	    		images = null;
 	    	}
 		}
         

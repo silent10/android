@@ -41,7 +41,7 @@
 	              android:layout_height="wrap_content"
 	              android:layout_alignParentTop="true"
 	              android:layout_alignParentLeft="true"
-	              android:inputType="textMultiLine"
+	              android:inputType="text"
 	              android:layout_toLeftOf="@+id/buttonDelete"
 	              android:layout_marginLeft="-2dip"
 	              android:gravity="top"

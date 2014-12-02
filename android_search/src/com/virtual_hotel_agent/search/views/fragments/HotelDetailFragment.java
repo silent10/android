@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader.LoadedCallback;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -51,7 +53,6 @@ import com.virtual_hotel_agent.search.controllers.events.HotelSelected;
 import com.virtual_hotel_agent.search.controllers.events.RatingClickedEvent;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListener;
 import com.virtual_hotel_agent.search.controllers.web_services.RoomsUpdaterTask;
-import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.ImageAdapter;
 import com.virtual_hotel_agent.search.views.adapters.PhotoGalleryAdapter;
 
@@ -148,8 +149,8 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 	
 
 	private AllDoneHandler mAllDoneHandler;
-	private DownloadedImg mHandlerFinish;
-	private ImageDownloader imageDownloader;
+	//private DownloadedImg mHandlerFinish;
+	//private ImageDownloader imageDownloader;
 
 	private OnClickListener mRatingClickHandler = new OnClickListener() {
 		
@@ -194,7 +195,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		mTripAdvisorRatingBar.setOnClickListener(mRatingClickHandler);
 		mTripAdvisorRatingBar_image.setOnClickListener(mRatingClickHandler);
 		WeakReference<HotelDetailFragment> _this = new WeakReference<HotelDetailFragment>(this);
-		mHandlerFinish = new DownloadedImg(_this);
+		//mHandlerFinish = new DownloadedImg(_this);
 		mAllDoneHandler = new AllDoneHandler(_this);
 		
 		mHotelGalleryAdapter = new PhotoGalleryAdapter(getActivity());
@@ -238,8 +239,9 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 
 	@Override
 	public void onDestroy() {
-		if (imageDownloader != null)
-			imageDownloader.stopDownload();
+//		if (imageDownloader != null)
+//			imageDownloader.stopDownload();
+		
 		if (mPropertyDescription != null) {
 			mPropertyDescription.destroy();
 		}
@@ -394,6 +396,8 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		}
 	};
 
+	private S3DrawableBackgroundLoader mPhotoLoader;
+
 	
 	void fillData() {
 		Log.i(TAG, "Filling data for hotel "+mHotelId);
@@ -449,9 +453,9 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 			mTripAdvisorRatingBar.setVisibility(View.GONE);
 		}
 		else {
-			S3DrawableBackgroundLoader loader = S3DrawableBackgroundLoader.getInstance();
-			Drawable placeHolder = getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
-			loader.loadDrawable(hotel.tripAdvisorRatingUrl, mTripAdvisorRatingBar_image, placeHolder, null);
+			S3DrawableBackgroundLoader loader = VHAApplication.thumbnailLoader;
+			//BitmapDrawable placeHolder = (BitmapDrawable) getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
+			loader.loadDrawable(hotel.tripAdvisorRatingUrl, mTripAdvisorRatingBar_image, null, null);
 			if (hotel.tripAdvisorReviewCount > 0) {
 				mTripAdvisorRatingBar_text.setText("Based on "+hotel.tripAdvisorReviewCount+" ratings");
 				mTripAdvisorRatingBar_text.setVisibility(View.VISIBLE);
@@ -464,8 +468,8 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 
 		mStarRatingBar.setRating(hotel.starRating.floatValue());
 
-		if (imageDownloader != null) {
-			imageDownloader.stopDownload();
+		if (mPhotoLoader != null) {
+			mPhotoLoader.Reset();
 		}
 		
 		mVhaBmp = mEvaBmpCached;
@@ -476,15 +480,25 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		mHotelGallery.setAdapter(mHotelGalleryAdapter);
 
 
-		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish, mAllDoneHandler);
+		//imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish, mAllDoneHandler);
+		mPhotoLoader = new S3DrawableBackgroundLoader(3, VHAApplication.HOTEL_PHOTOS);
 		
 		if (info.images.size() > 0 ) {
 			Log.i(TAG, "gallery showing "+info.images.size()+" imgs for hotel "+mHotelId);
-			ArrayList<String> urls = new ArrayList<String>(info.images.size());
 			for (HotelImageTuple image : info.images) {
-				urls.add(image.mainUrl.toString());
+				mPhotoLoader.loadDrawable(image, false, null, null, new LoadedCallback() {
+					
+					@Override
+					public void drawableLoaded(boolean success, BitmapDrawable drawable) {
+						if (mVhaBmp != null) {
+							mHotelGalleryAdapter.removeBitmap(mVhaBmp);
+							mVhaBmp = null;
+						}
+						
+						mHotelGalleryAdapter.addBitmap(drawable.getBitmap());
+					}
+				});
 			}
- 			imageDownloader.startDownload(urls);
 		}
 
 		

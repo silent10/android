@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:minHeight="116dip"
             android:orientation="horizontal"
-            android:background="@color/white" >
+             >
 
             <ImageView
                 android:id="@+id/hotelImage"

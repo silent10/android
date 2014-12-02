@@ -155,8 +155,9 @@ public final class InformationRequest extends Request<HotelInformation> {
             image = images.getJSONObject(i);
             try {
                 imageTuples.add(
-                    new HotelImageTuple(new URL(image.optString("thumbnailUrl")),
-                        new URL(image.optString("url")), image.optString("caption"), image.optInt("category", 0)));
+                    new HotelImageTuple(image.optString("thumbnailUrl"),
+                        image.optString("url"), 
+                        image.optString("caption"), image.optInt("category", 0)));
             } catch (MalformedURLException me) {
                 VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON: "+
                 				image.optString("url","<null>")+" "+image.optString("thumbnailUrl","<null>"), me);

@@ -53,32 +53,32 @@ public class RoomsSelectFragement extends Fragment {//implements OnItemClickList
 	private RoomListAdapter mAdapter;
 	private long mHotelId = -1;
 	
-	static class DownloadedImg extends Handler {
-		private WeakReference<RoomsSelectFragement> fragmentRef;
-
-		public DownloadedImg(WeakReference<RoomsSelectFragement> fragmentRef) {
-			this.fragmentRef = fragmentRef;
-		}
-		
-		@Override
-		public void handleMessage(Message msg) {
-			if (fragmentRef != null) {
-				RoomsSelectFragement rsf = fragmentRef.get();
-				if (rsf != null) {
-					if (msg.arg1 == 0)
-						rsf.mHotelImage.setImageBitmap((Bitmap)msg.obj);
-					else {
-						rsf.mAdapter.notifyDataSetChanged();
-					}
-				}
-			}
-			super.handleMessage(msg);
-		}
-	}
-	
-	
-	private DownloadedImg mHandlerFinish; 
-	private ImageDownloader imageDownloader;
+//	static class DownloadedImg extends Handler {
+//		private WeakReference<RoomsSelectFragement> fragmentRef;
+//
+//		public DownloadedImg(WeakReference<RoomsSelectFragement> fragmentRef) {
+//			this.fragmentRef = fragmentRef;
+//		}
+//		
+//		@Override
+//		public void handleMessage(Message msg) {
+//			if (fragmentRef != null) {
+//				RoomsSelectFragement rsf = fragmentRef.get();
+//				if (rsf != null) {
+//					if (msg.arg1 == 0)
+//						rsf.mHotelImage.setImageBitmap((Bitmap)msg.obj);
+//					else {
+//						rsf.mAdapter.notifyDataSetChanged();
+//					}
+//				}
+//			}
+//			super.handleMessage(msg);
+//		}
+//	}
+//	
+//	
+//	private DownloadedImg mHandlerFinish; 
+//	private ImageDownloader imageDownloader;
 
 
 	@Override
@@ -131,42 +131,39 @@ public class RoomsSelectFragement extends Fragment {//implements OnItemClickList
 			return;
 		}
 		
-		Drawable drawable = S3DrawableBackgroundLoader.getInstance().getDrawableFromCache(hotel.mainHotelImageTuple.thumbnailUrl.toString());
-		if (drawable != null) {
-			Log.d(TAG, "Showing thumbnail from cache");
-			mHotelImage.setImageDrawable(drawable);
-		}
+		VHAApplication.fullResLoader.loadDrawable(hotel.mainHotelImageTuple, false, mHotelImage, null, null);
 		
-		WeakReference<RoomsSelectFragement> fragmentRef = new WeakReference<RoomsSelectFragement>(this);
-		mHandlerFinish = new DownloadedImg(fragmentRef);
-		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish);
-		
+//		WeakReference<RoomsSelectFragement> fragmentRef = new WeakReference<RoomsSelectFragement>(this);
+//		mHandlerFinish = new DownloadedImg(fragmentRef);
+//		imageDownloader = new ImageDownloader(VHAApplication.HOTEL_PHOTOS, mHandlerFinish);
+//		
 		// if already loaded full image - no need for downloader thread
-		ArrayList<String> urls = new ArrayList<String>();
-		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotel.hotelId);
-		if (info != null && info.images.size() > 0) {
-			for (HotelImageTuple photo : info.images) {
-				if (photo.mainUrl != null) {
-					urls.add(photo.mainUrl.toString());
-					break;
-				}
-			}
-		}
+//		ArrayList<String> urls = new ArrayList<String>();
+//		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotel.hotelId);
+//		if (info != null && info.images.size() > 0) {
+//			for (HotelImageTuple photo : info.images) {
+//				if (photo.mainUrl != null) {
+//					urls.add(photo.mainUrl.toString());
+//					break;
+//				}
+//			}
+//		}
 	
 		List<HotelRoom> rooms = VHAApplication.HOTEL_ROOMS.get(hotel.hotelId);
 		if (rooms != null && rooms.size() > 0) {
 			for (HotelRoom rd : rooms) {
-				if (rd.imageUrls != null && rd.imageUrls.length > 0) {
-					urls.add(rd.imageUrls[0]);
+				if (rd.images != null && rd.images.length > 0) {
+					//urls.add(rd.imageUrls[0]);
+					VHAApplication.fullResLoader.loadDrawable(rd.images[0], false, mHotelImage, null, null);
 				}
 			}
 		}
-		Bitmap fullImage = VHAApplication.HOTEL_PHOTOS.get(urls.get(0));
-		if (fullImage != null) {
-			Log.d(TAG, "Showing full Image from cache");
-			mHotelImage.setImageBitmap(fullImage);
-		}
-		imageDownloader.startDownload(urls);
+//		Bitmap fullImage = VHAApplication.HOTEL_PHOTOS.get(urls.get(0));
+//		if (fullImage != null) {
+//			Log.d(TAG, "Showing full Image from cache");
+//			mHotelImage.setImageBitmap(fullImage);
+//		}
+		//imageDownloader.startDownload(urls);
 
 		String name = hotel.name;
 
