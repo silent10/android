@@ -1,5 +1,6 @@
 package com.virtual_hotel_agent.components;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -10,46 +11,52 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.LruCache;
 import android.widget.ImageView;
 
+import com.ean.mobile.hotel.HotelImageTuple;
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.VHAApplication;
 
+/***
+ * Loads images in background
+ * Thread pooled and cached
+ */
 public class S3DrawableBackgroundLoader {
-	private final LruCache<String, Drawable> mCache = new LruCache<String, Drawable>(MAX_CACHE_SIZE);
+	private final LruCache<String, BitmapDrawable> mCache;
 	private ExecutorService mThreadPool;
+
+	// from imageView to cache key
 	private final Map<ImageView, String> mImageViews = Collections
 			.synchronizedMap(new WeakHashMap<ImageView, String>());
+	private int mThreadPoolSize;
 
-	public static int MAX_CACHE_SIZE = 160;
-	public int THREAD_POOL_SIZE = 5;
+	private static int THREAD_POOL_SIZE = 5;
 
 	static S3DrawableBackgroundLoader mTheObject = null;
 
 	private static final String TAG = "DrawableBackgroundLoader";
 
-	private static class DrawableBackgroundLoaderHolder {
-		public static final S3DrawableBackgroundLoader instance = new S3DrawableBackgroundLoader();
-	}
-
-	public static S3DrawableBackgroundLoader getInstance() {
-		return DrawableBackgroundLoaderHolder.instance;
-	}
 
 	ExecutorService createThreadPool() {
-		return S3LifoThreadPoolExecutor.createInstance(THREAD_POOL_SIZE);
+		return S3LifoThreadPoolExecutor.createInstance(mThreadPoolSize);
 	}
 
-	S3DrawableBackgroundLoader() {
+	public S3DrawableBackgroundLoader(int threadPoolSize, LruCache<String, BitmapDrawable> cache) {
+		if (threadPoolSize <= 0) {
+			threadPoolSize = THREAD_POOL_SIZE;
+		}
+		mThreadPoolSize = threadPoolSize;
 		mThreadPool = createThreadPool();
+		mCache = cache;
 	}
 
 	public static interface LoadedCallback {
-		void drawableLoaded(boolean success, Drawable drawable);
+		void drawableLoaded(boolean success, BitmapDrawable drawable);
 	}
 	
 	/**
@@ -60,15 +67,14 @@ public class S3DrawableBackgroundLoader {
 		mThreadPool = createThreadPool();
 		oldThreadPool.shutdownNow();
 
-		//mChacheController.clear();
-		//mCache.clear();
-		mCache.evictAll();
+		// mCache.evictAll(); 
 		mImageViews.clear();
 	}
 
 	abstract class SourceContainer {
 		public static final int SOURCE_CONTACTS_CONTENT_RESOLVER = 1;
 		public static final int SOURCE_WEB_URL = 2;
+		public static final int SOURCE_EXPEDIA_IMG = 3;
 
 		int mType;
 
@@ -76,7 +82,7 @@ public class S3DrawableBackgroundLoader {
 			mType = type;
 		}
 
-		abstract public Drawable getDrawable(String lookup);
+		abstract public BitmapDrawable getDrawable() throws IOException;
 	}
 
 	class SourceContainerWebUrl extends SourceContainer {
@@ -88,7 +94,7 @@ public class S3DrawableBackgroundLoader {
 		}
 
 		@Override
-		public Drawable getDrawable(String lookup) {
+		public BitmapDrawable getDrawable() throws IOException {
 			URL url = null;
 			try {
 				url = new URL(mUrl);
@@ -106,126 +112,79 @@ public class S3DrawableBackgroundLoader {
 			URLConnection connection = null;
 
 			Object response = null;
-			try {
-				connection = url.openConnection();
-				connection.setUseCaches(true); //
-				response = connection.getContent();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				VHAApplication.logError(TAG, "IO exception", e);
-				return null;
-			} catch (OutOfMemoryError e) {
-				VHAApplication.logError(TAG, "Out of memory", e);
-				return null;
-			}
+			connection = url.openConnection();
+			connection.setUseCaches(true); //
+			response = connection.getContent();
 
-			return Drawable.createFromStream((InputStream) response, mUrl);
+			return new BitmapDrawable((InputStream) response);
 
 		}
 	}
+	
+	class ExpediaSourceContainerUrl extends SourceContainer {
+		
+		private HotelImageTuple imgData;
+		private boolean isThumbnail;
 
-	public void loadDrawable(String url, final ImageView imageView, Drawable placeholder, LoadedCallback callback) {
+		ExpediaSourceContainerUrl(HotelImageTuple imgData, boolean isThumbnail) {
+			super(SOURCE_EXPEDIA_IMG);
+			this.imgData = imgData;
+			this.isThumbnail = isThumbnail;
+		}
+
+		@Override
+		public BitmapDrawable getDrawable() throws IOException {
+			URL url = null;
+			if (isThumbnail) {
+				url = imgData.thumbnailUrl;
+			}
+			else {
+				url = imgData.mainUrl;
+			}
+			if (url == null)
+				return null;
+
+			while (true) {
+				SourceContainerWebUrl source = new SourceContainerWebUrl(url.toString());
+				try {
+					BitmapDrawable result = source.getDrawable();
+					return result;
+				}
+				catch(FileNotFoundException e) {
+					boolean downgraded;
+					if (isThumbnail) {
+						downgraded = imgData.downgradeThumbnailResolution();
+					}
+					else {
+						downgraded = imgData.downgradeImgResolution();
+					}
+					if (!downgraded) {
+						// can't downgrade anymore - raise the Not Found exception
+						throw e;
+					}
+					// else - downgraded image resolution - now try again
+				}
+			}
+		}
+	}
+
+	public void loadDrawable(String url, final ImageView imageView, BitmapDrawable placeholder, LoadedCallback callback) {
 		loadDrawable(new SourceContainerWebUrl(url), url, imageView, placeholder, callback);
 	}
-	/*
-	private static String HIGH_RES_LOADED = "high-res";
 	
-	public void replaceWithHighRes(final long hotelId, final ImageView imageView) {
-		// remove old thumbnail lookup from cache 
-		String thumbnailLookup = mImageViews.get(imageView);
-		if (thumbnailLookup.equals(HIGH_RES_LOADED)) {
-			// already replaced with high res
-			return;
-		}
-		mImageViews.put(imageView, HIGH_RES_LOADED);
-		mCache.remove(thumbnailLookup);
-
-		final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(hotelId);
-		if (hotel == null) {
-			VHAApplication.logError(TAG, "Unexpected null hotel "+hotelId);
-			return;
-		}
-		
-		Bitmap highRes = null;
-		if (hotel.mainHotelImageTuple.mainUrl != null) {
-			highRes = VHAApplication.HOTEL_PHOTOS.get(hotel.mainHotelImageTuple.mainUrl.toString());
-		}
-		// check in UI thread, so no concurrency issues
-		if (highRes != null) {
-			// Log.d(null, "Item loaded from mCache: " + url);
-			imageView.setImageBitmap(highRes);
-		} else {
-			// Create handler in UI thread. 
-			final Handler handler = new Handler(Looper.getMainLooper()) {
-				@Override
-				public void handleMessage(Message msg) {
-//					if (imageView.isShown()) {
-						if (msg.obj != null) {
-							imageView.setImageDrawable((Drawable) msg.obj);
-						}
-//					}
-				}
-			};
-			
-			//queueJob(sourceContainer, lookup, imageView, null, callback);
-			mThreadPool.submit(new Runnable() {
-
-				@Override
-				public void run() {
-					Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-					
-					// get the hotel information - images only
-					if (hotel.mainHotelImageTuple.mainUrl == null) {
-						try {
-							Log.i(TAG, "Fetching info for hotel "+hotelId);
-							HotelInformation hotelInformation = RequestProcessor.run(new InformationRequest(hotel, true));
-							if (hotelInformation != null && hotelInformation.images != null && hotelInformation.images.size() > 0) {
-								hotel.mainHotelImageTuple.mainUrl = hotelInformation.images.get(0).mainUrl;
-							}
-							else {
-								Log.w(TAG, "No photo for hotel "+hotelId);
-							}
-						} catch (EanWsError e) {
-							VHAApplication.logError(TAG, "EAN Error", e);
-						} catch (UrlRedirectionException e) {
-							VHAApplication.logError(TAG, "EAN Redirection Error", e);
-						}
-						return;
-					}
-					
-					// get the first image of the hotel
-					if (hotel.mainHotelImageTuple.mainUrl != null) {
-						String url = hotel.mainHotelImageTuple.mainUrl.toString();
-						Bitmap highRes = VHAApplication.HOTEL_PHOTOS.get(url);
-						if (highRes == null) {
-							Log.i(TAG, "Downloading high res photo "+url); 
-							highRes = ImageDownloader.download_Image(url);
-							Log.i(TAG, "Downloaded high res photo size "+highRes.getByteCount());
-							VHAApplication.HOTEL_PHOTOS.put(url, highRes);
-						}
-					
-						//if (imageView.isShown()) {
-							Message message = Message.obtain();
-							message.obj = highRes;
-
-							handler.sendMessage(message);
-						//}
-
-					}
-					
-				}
-				
-			});
-		}
-	}*/
-
+	public void loadDrawable(HotelImageTuple image, boolean thumbnail, final ImageView imageView, BitmapDrawable placeholder, LoadedCallback callback) {
+		loadDrawable(new ExpediaSourceContainerUrl(image, thumbnail), 
+				thumbnail ? image.thumbnailUrl.toString() : image.mainUrl.toString(), 
+						imageView, placeholder, callback);
+	}
+	
 	private void loadDrawable(SourceContainer sourceContainer, String lookup, final ImageView imageView,
-			Drawable placeholder, LoadedCallback callback) {
+			BitmapDrawable placeholder, LoadedCallback callback) {
 
 		Log.d(TAG, "Loading url "+lookup +" to imageView "+imageView);
 
 		mImageViews.put(imageView, lookup);
-		Drawable drawable = getDrawableFromCache(lookup);
+		BitmapDrawable drawable = getDrawableFromCache(lookup);
 
 		// check in UI thread, so no concurrency issues
 		if (drawable != null) {
@@ -241,7 +200,7 @@ public class S3DrawableBackgroundLoader {
 		}
 	}
 
-	public Drawable getDrawableFromCache(String lookup) {
+	public BitmapDrawable getDrawableFromCache(String lookup) {
 		if (lookup != null)
 			return mCache.get(lookup);
 		return null;
@@ -252,7 +211,7 @@ public class S3DrawableBackgroundLoader {
 			mCache.remove(lookup);
 	}
 
-	private synchronized void putDrawableInCache(String lookup, Drawable drawable) {
+	private synchronized void putDrawableInCache(String lookup, BitmapDrawable drawable) {
 //		int chacheControllerSize = mChacheController.size();
 //		if (chacheControllerSize > MAX_CACHE_SIZE)
 //			mChacheController.subList(0, MAX_CACHE_SIZE / 2).clear();
@@ -263,7 +222,7 @@ public class S3DrawableBackgroundLoader {
 	}
 
 	private void queueJob(final SourceContainer sourceContainer, final String lookup, final ImageView imageView,
-			final Drawable placeholder, final LoadedCallback callback) {
+			final BitmapDrawable placeholder, final LoadedCallback callback) {
 		/* Create handler in UI thread. */
 		final Handler handler = new Handler() {
 			@Override
@@ -275,7 +234,7 @@ public class S3DrawableBackgroundLoader {
 							Log.d(TAG, "Setting bitmap to imageView "+imageView);
 							imageView.setImageDrawable((Drawable) msg.obj);
 							if (callback != null)
-								callback.drawableLoaded(true, (Drawable) msg.obj);
+								callback.drawableLoaded(true, (BitmapDrawable) msg.obj);
 						} else {
 							if (placeholder != null)
 								imageView.setImageDrawable(placeholder);
@@ -292,11 +251,24 @@ public class S3DrawableBackgroundLoader {
 			public void run() {
 				Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-				final Drawable bmp = downloadDrawable(sourceContainer, lookup);
+				BitmapDrawable bmp = null;
+				int error = 0;
+				try {
+					bmp = downloadDrawable(sourceContainer, lookup);
+				}
+				catch (FileNotFoundException e) {
+					Log.w(TAG, "Image not found");
+					error = 2;
+				} catch (IOException e) {
+					VHAApplication.logError(TAG, "Error loading image", e);
+					error = 1;
+				}
+				
 				// if the view is not visible anymore, the image will be ready for next time in cache
 				if (imageView.isShown()) {
 					Message message = Message.obtain();
 					message.obj = bmp;
+					message.what = error;
 
 					handler.sendMessage(message);
 				}
@@ -305,10 +277,11 @@ public class S3DrawableBackgroundLoader {
 		});
 	}
 
-	private Drawable downloadDrawable(SourceContainer sourceContainer, String lookup) {
+	private BitmapDrawable downloadDrawable(SourceContainer sourceContainer, String lookup) throws IOException {
 
-		Drawable drawable = sourceContainer.getDrawable(lookup);
-		putDrawableInCache(lookup, drawable);
+		BitmapDrawable drawable = sourceContainer.getDrawable();
+		if (drawable != null)
+			putDrawableInCache(lookup, drawable);
 		return drawable;
 	}
 }

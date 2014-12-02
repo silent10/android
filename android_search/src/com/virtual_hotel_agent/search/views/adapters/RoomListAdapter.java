@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.LruCache;
 import android.text.Html;
 import android.text.Spanned;
@@ -44,7 +45,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	private Context mParent;
 	static final DecimalFormat formatter = new DecimalFormat("#.##");
 	private String disclaimer;
-	private Bitmap mEvaBmpCached;
+	private BitmapDrawable mEvaBmpCached;
 	protected static final String TAG = "RoomListAdapter";
 	private int selectedColor;
 	private int selectedNonRefundColor;
@@ -59,7 +60,7 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		selectedColor = resources.getColor(R.color.selected_room_list_item);
 		selectedNonRefundColor = resources.getColor(R.color.selected_non_refundable_room_list_item);
 		disclaimer = "";
-		mEvaBmpCached = BitmapFactory.decodeResource(resources, R.drawable.slanted_icon_512);
+		mEvaBmpCached = new BitmapDrawable(resources, BitmapFactory.decodeResource(resources, R.drawable.slanted_icon_512));
 	}
 	
 	public void setDisclaimer(String disclaimer) {
@@ -124,15 +125,8 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 	//		 		 		 		 
 			 holder.promo.setText(name);
 			 
-			 if (roomDetails.imageUrls != null && roomDetails.imageUrls.length > 0 && roomDetails.imageUrls[0] != null) {
-				 LruCache<String, Bitmap> cache = VHAApplication.HOTEL_PHOTOS;
-				 Bitmap cachedPhoto = cache.get(roomDetails.imageUrls[0]);
-				 if (cachedPhoto != null) {
-					 holder.photo.setImageBitmap(cachedPhoto);
-				 }
-				 else {
-					 holder.photo.setImageBitmap(mEvaBmpCached);
-				 }
+			 if (roomDetails.images != null && roomDetails.images.length > 0 && roomDetails.images[0] != null) {
+				 VHAApplication.fullResLoader.loadDrawable(roomDetails.images[0], false, holder.photo, mEvaBmpCached, null);
 				 holder.photo.setVisibility(View.VISIBLE);
 			 }
 			 else {
@@ -255,22 +249,23 @@ public class RoomListAdapter extends BaseExpandableListAdapter {
 		
 		View photoContainer = convertView.findViewById(R.id.roomImage_container);
 		ImageView photoHolder = (ImageView) convertView.findViewById(R.id.roomImage);
-		if (room.imageUrls != null && room.imageUrls.length > 0) {
-			 LruCache<String, Bitmap> cache = VHAApplication.HOTEL_PHOTOS;
-			 Bitmap cachedPhoto = cache.get(room.imageUrls[0]);
-			 if (cachedPhoto != null) {
-				 photoHolder.setImageBitmap(cachedPhoto);
-			 }
-			 else {
-				 photoHolder.setImageBitmap(mEvaBmpCached);
-			 }
+		if (room.images != null && room.images.length > 0) {
+//			 LruCache<String, Bitmap> cache = VHAApplication.HOTEL_PHOTOS;
+//			 Bitmap cachedPhoto = cache.get(room.imageUrls[0]);
+//			 if (cachedPhoto != null) {
+//				 photoHolder.setImageBitmap(cachedPhoto);
+//			 }
+//			 else {
+//				 photoHolder.setImageBitmap(mEvaBmpCached);
+//			 }
+			 VHAApplication.fullResLoader.loadDrawable(room.images[0], false, photoHolder, mEvaBmpCached, null);
 			 photoContainer.setVisibility(View.VISIBLE);
 			 photoHolder.setOnClickListener(new OnClickListener() {
 				
 				@Override
 				public void onClick(View v) {
 					Intent intent = new Intent(mParent, ImageGalleryActivity.class);
-					intent.putExtra(ImageGalleryActivity.PHOTO_URLS, room.imageUrls);
+					intent.putExtra(ImageGalleryActivity.PHOTO_URLS, room.images);
 					Spanned spannedName = Html.fromHtml(room.description);
 					String name = spannedName.toString();
 					 

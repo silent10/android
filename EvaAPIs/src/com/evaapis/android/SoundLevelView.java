@@ -27,6 +27,8 @@ public class SoundLevelView extends View {
 		this.paint = new Paint();
 		//paint.setColor(Color.GREEN);
 		paint.setColor(0xff44aaff);
+		paint.setAntiAlias(true);
+		paint.setStyle(Paint.Style.STROKE); 
 		gravity = Gravity.CENTER_HORIZONTAL;
 	}
 	

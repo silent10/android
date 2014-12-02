@@ -64,7 +64,6 @@ public class ImageDownloader {
 			response = connection.getContent();
 			bmp = BitmapFactory.decodeStream((InputStream) response);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			VHAApplication.logError(TAG, "IOException loading bitmap", e);
 			return null;
 		} catch (OutOfMemoryError e) {
@@ -105,6 +104,11 @@ public class ImageDownloader {
 											cache.put(url, bmp);
 										}
 									}
+								}
+								else {
+									// TODO
+									// try replacing the url with "_n" instead of "_y" - 
+									// some photos are not available at "_y" high res but available at "_n" mid res 
 								}
 								//Log.d(TAG, "Now in cache: "+cache.size()+" kb");
 							}

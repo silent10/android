@@ -6,18 +6,18 @@ import android.os.Bundle;
 
 public class ChatItemList extends ArrayList<ChatItem> {
 	static final String TAG = "ChatItemList";
-	private static ChatItemList instance;  
 	
 	private ChatItemList() {
 	}
 	
-	
-	public static ChatItemList getInstance() {
-		if (instance == null) {
-			instance = new ChatItemList();
-		}
-		return instance;
+	private static class ChatItemListHolder {
+		public static final ChatItemList instance = new ChatItemList();
 	}
+
+	public static ChatItemList getInstance() {
+		return ChatItemListHolder.instance;
+	}
+
 
 	public void saveInstanceState(Bundle instanceState) {
 //		Bundle replyCache = new Bundle();

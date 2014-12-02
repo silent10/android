@@ -22,7 +22,7 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.util.LruCache;
@@ -41,6 +41,7 @@ import com.evature.util.Log;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
+import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class VHAApplication extends Application {
@@ -60,7 +61,7 @@ public class VHAApplication extends Application {
 			AcraInitialized = true;
 		}
 		Log.DEBUG = BuildConfig.DEBUG;
-		Log.d(TAG, "onCreate");
+		Log.i(TAG, "Application onCreate,  photo cache: "+PHOTO_CACHE_SIZE+ "kb");
 		
 		setupHttpConnectionStuff();
 		
@@ -84,6 +85,7 @@ public class VHAApplication extends Application {
 		logError(TAG, "onLowMemory");
 		HOTEL_ROOMS.trimToSize(1);
 		EXTENDED_INFOS.trimToSize(1);
+		HOTEL_PHOTOS.trimToSize((int)(PHOTO_CACHE_SIZE*0.5));
 		super.onLowMemory();
 	}
 
@@ -112,15 +114,20 @@ public class VHAApplication extends Application {
 		
 
 		if (BuildConfig.DEBUG) {
-			if (mCurrentActivity != null) {
-				Toast.makeText(mCurrentActivity, "Error: "+desc, Toast.LENGTH_LONG).show();
+			try {
+				if (mCurrentActivity != null) {
+						Toast.makeText(mCurrentActivity, "Error: "+desc, Toast.LENGTH_LONG).show();
+				}
+				if (exception != null) {
+					new AlertDialog.Builder(context)
+				    	.setTitle("Exception")
+				    	.setMessage(Log.getStackTraceString(exception))
+				    .setIcon(android.R.drawable.ic_dialog_alert)
+				     .show();
+				}
 			}
-			if (exception != null) {
-				new AlertDialog.Builder(context)
-			    	.setTitle("Exception")
-			    	.setMessage(Log.getStackTraceString(exception))
-			    .setIcon(android.R.drawable.ic_dialog_alert)
-			     .show();
+			catch (RuntimeException e) {
+				Log.w(TAG, "Failed to show Debug toast");
 			}
 		}
  		else { 
@@ -259,14 +266,20 @@ public class VHAApplication extends Application {
 
     // fill up to 30% of maxMemory with images
  	private final static int PHOTO_CACHE_SIZE = (int) (0.3 * Runtime.getRuntime().maxMemory() / 1024);
-    public static LruCache<String, Bitmap> HOTEL_PHOTOS = new LruCache<String, Bitmap>(PHOTO_CACHE_SIZE) {
+    public static LruCache<String, BitmapDrawable> HOTEL_PHOTOS = new LruCache<String, BitmapDrawable>(PHOTO_CACHE_SIZE) {
 		@Override
-		protected int sizeOf(final String key, final Bitmap bitmap) {
+		protected int sizeOf(final String key, final BitmapDrawable bitmap) {
 			// The cache size will be measured in kilobytes rather than
 			// number of items.
-			return bitmap.getByteCount()/ 1024;
+			return bitmap.getBitmap().getByteCount()/ 1024;
 		}
 	};
+	
+	public static S3DrawableBackgroundLoader  fullResLoader = new S3DrawableBackgroundLoader(3, HOTEL_PHOTOS);
+	
+	// loading hotel thumbnails and tripadvisor strips
+	private static LruCache<String, BitmapDrawable> THUMBNAIL_PHOTOS = new LruCache<String, BitmapDrawable>(80);
+	public static S3DrawableBackgroundLoader  thumbnailLoader = new S3DrawableBackgroundLoader(5, THUMBNAIL_PHOTOS); 
 	
     
     /**

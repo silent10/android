@@ -89,8 +89,9 @@ public class SpeechAudioStreamer {
 			if (bufferSize <= 0) {
 				throw new EvaException("bufferSize = "+bufferSize);
 			}
-			bufferSize *= 1.5;
+			bufferSize *= 1.25;
 			mBuffer = new byte[bufferSize];
+			Log.i(TAG, "Initialized buffer to "+bufferSize);
 			mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 					AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 					bufferSize);
@@ -115,12 +116,15 @@ public class SpeechAudioStreamer {
 		return (int)mMinSoundLevel;
 	}
 
+	// called roughly every 50ms with 1600 bytes
 	private Boolean checkForSilence(int numberOfReadBytes) {
 		float totalAbsValue = 0.0f;
 		short sample = 0;
 
 		if (numberOfReadBytes == 0)
 			return null;
+		
+		Log.d(TAG, "Read "+numberOfReadBytes);
 		
 		if (mBuffer.length != numberOfReadBytes) {
 			Log.w(TAG, "unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
@@ -159,7 +163,7 @@ public class SpeechAudioStreamer {
 			mMinSoundLevel = temp;
 		}
 		
-		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = (int)(5*totalAbsValue); //mSoundLevel;
+		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
 		
 		// identifying speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
 //		if (mBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
@@ -201,6 +205,7 @@ public class SpeechAudioStreamer {
 	 */
 	class Producer implements Runnable {
 		private static final long MAX_TIME_WAIT_ITERATIONS = 300; // wait maximum 3 seconds
+		private static final int MAX_ERROR_ITERATIONS = 5;
 		DataOutputStream dos = null;
 		FileOutputStream fos = null;
 
@@ -208,7 +213,7 @@ public class SpeechAudioStreamer {
 		}
 		
 		private void encode(byte[] chunk, int readSize) throws IOException {
-//			Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
+			Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
 
 			// encoded = mEncoder.encode(chunk);
 
@@ -260,15 +265,26 @@ public class SpeechAudioStreamer {
 				}
 
 				int iterations = 0;
+				int errorIterations = 0;
 				while (mIsRecording) {
 					// int packetSize = 2 * CHANNELS *
 					// mEncoder.speexEncoder.getFrameSize();
 					int readSize = mRecorder.read(mBuffer, 0, mBuffer.length);
+					
 
 					// Log.i("EVA","Read:"+readSize);
 
 					iterations++;
-					if (readSize == 0) {
+					if (readSize < 0) {
+						Log.w(TAG, "Error reading from recorder "+readSize);
+						Thread.sleep(10);
+						errorIterations++;
+						if (errorIterations > MAX_ERROR_ITERATIONS) {
+							Log.e(TAG, "Errors - quiting");
+							break;
+						}
+					}
+					else if (readSize == 0) {
 						try {
 							Log.i(TAG, "Waiting for microphone to produce data");
 							Thread.sleep(10);

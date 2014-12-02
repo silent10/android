@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Palette.PaletteAsyncListener;
 import android.support.v7.graphics.Palette.Swatch;
+import android.support.v7.widget.CardView;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.TypedValue;
@@ -36,17 +37,17 @@ public class HotelListAdapter extends BaseAdapter {
 	private static final String TAG = "HotelListAdapter";
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
-	static Drawable mHotelIcon;
-	static Drawable mTripadvisorPlaceHolder;
+	static BitmapDrawable mHotelIcon;
+//	static Drawable mTripadvisorPlaceHolder;
 
 	public HotelListAdapter(HotelListFragment parent) {
 
 		mInflater = LayoutInflater.from(parent.getActivity());
 		mParent = parent;
 		if (mHotelIcon == null)
-			mHotelIcon = parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_72);
-		if (mTripadvisorPlaceHolder == null)
-			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
+			mHotelIcon = (BitmapDrawable) parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_72);
+//		if (mTripadvisorPlaceHolder == null)
+//			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
 	}
 	
 	private List<Hotel>  getHotels() {
@@ -121,6 +122,7 @@ public class HotelListAdapter extends BaseAdapter {
 			holder.layout = (ViewGroup) convertView.findViewById(R.id.hotel_list_item_layout);
 			holder.distance = (TextView) convertView.findViewById(R.id.hotelDistance);
 			holder.location = (TextView) convertView.findViewById(R.id.hotelLocation);
+			holder.cardView = (CardView) convertView.findViewById(R.id.card_view);
 			holder.reviews = (TextView) convertView.findViewById(R.id.tripAdvisorReviews);
 			holder.rating = (RatingBar) convertView.findViewById(R.id.rating);
 			holder.layout.setTag(holder);
@@ -192,47 +194,52 @@ public class HotelListAdapter extends BaseAdapter {
 	
 			holder.rating.setRating(hotel.starRating.floatValue());
 	
-			final S3DrawableBackgroundLoader loader = S3DrawableBackgroundLoader.getInstance();
+			final S3DrawableBackgroundLoader loader = VHAApplication.thumbnailLoader;
 	
 			loader.loadDrawable(
-					hotel.mainHotelImageTuple.thumbnailUrl.toString(), holder.image, mHotelIcon, new LoadedCallback() {
+					hotel.mainHotelImageTuple, true, holder.image, mHotelIcon, new LoadedCallback() {
 						
 						@Override
-						public void drawableLoaded(boolean success, Drawable drawable) {
+						public void drawableLoaded(boolean success, BitmapDrawable drawable) {
 							Palette.generateAsync(((BitmapDrawable) drawable).getBitmap(), new PaletteAsyncListener() {
 								
 								@Override
 								public void onGenerated(Palette palette) {
-									Swatch swatch = palette.getDarkVibrantSwatch();
-									int bgCol = palette.getDarkVibrantColor(0xff444444);
+									int bgCol = palette.getLightVibrantColor(0xff444444);
 									holder.image.setBackgroundColor(bgCol);
 									holder.name.setBackgroundColor(bgCol);
-									holder.distance.setBackgroundColor(palette.getDarkMutedColor(0xff444444));
+									Swatch swatch = palette.getLightVibrantSwatch();
 									if (swatch != null) {
 										holder.name.setTextColor(swatch.getTitleTextColor());
 										holder.distance.setTextColor(swatch.getBodyTextColor());
+									}
+									swatch = palette.getLightMutedSwatch();
+									int lightMuted = palette.getLightMutedColor(0xffdddddd);
+									holder.distance.setBackgroundColor(lightMuted);
+									holder.cardView.setCardBackgroundColor(lightMuted);
+									if (swatch != null) {
+										holder.distance.setTextColor(swatch.getTitleTextColor());
 									}
 									HotelListAdapter.this.notifyDataSetChanged();
 								}
 							});
 							// load a high resolution bitmap
-							//loader.replaceWithHighRes(hotel.hotelId, holder.image);
-							final String highResUrl = thumbnailToLandscape.matcher(hotel.mainHotelImageTuple.thumbnailUrl.toString()).replaceAll("_l.$1");
-							loader.loadDrawable(
-									highResUrl, holder.image, null, new LoadedCallback() {
-										
-										@Override
-										public void drawableLoaded(boolean success, Drawable drawable) {
-											if (success) {
-												//VHAApplication.HOTEL_PHOTOS.put(highResUrl, ((BitmapDrawable)drawable).getBitmap());
-	//											ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.image.getLayoutParams(); 
-	//										    params.width *= 1.5;
-	//										    holder.image.setLayoutParams(params);
-	//											    
-												HotelListAdapter.this.notifyDataSetChanged();
-											}
-										}
-									});
+//							final String highResUrl = thumbnailToLandscape.matcher(hotel.mainHotelImageTuple.thumbnailUrl.toString()).replaceAll("_l.$1");
+//							loader.loadDrawable(
+//									highResUrl, holder.image, null, new LoadedCallback() {
+//										
+//										@Override
+//										public void drawableLoaded(boolean success, Drawable drawable) {
+//											if (success) {
+//												//VHAApplication.HOTEL_PHOTOS.put(highResUrl, ((BitmapDrawable)drawable).getBitmap());
+//	//											ViewGroup.LayoutParams params = (ViewGroup.LayoutParams) holder.image.getLayoutParams(); 
+//	//										    params.width *= 1.5;
+//	//										    holder.image.setLayoutParams(params);
+//	//											    
+//												HotelListAdapter.this.notifyDataSetChanged();
+//											}
+//										}
+//									});
 						}
 					});
 	
@@ -243,7 +250,7 @@ public class HotelListAdapter extends BaseAdapter {
 				holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
 	//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
 				holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
-				loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, mTripadvisorPlaceHolder, null);
+				loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, null, null);
 			}
 		}
 		
@@ -255,6 +262,7 @@ public class HotelListAdapter extends BaseAdapter {
 		public ViewGroup layout;
 		public ImageView tripAdvisorStrip;
 //		TextView tripAdvisorRating;
+		CardView cardView;
 		ImageView image;
 		TextView name;
 		TextView rate;

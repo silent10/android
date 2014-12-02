@@ -343,14 +343,7 @@ public class MainView {
 			SpeechAudioStreamer  speechAudioStreamer = speechSearch.getSpeechAudioStreamer();
 			
 			if (speechAudioStreamer.wasNoise) {
-				if (speechAudioStreamer.getIsRecording() == false) {
-					if (!processing) {
-						processing = true;
-						view.disableSearchButton();
-						view.showStatus("Processing...");
-					}
-				}
-				else {
+				if (speechAudioStreamer.getIsRecording()) {
 					view.mSoundView.setSoundData(
 							speechAudioStreamer.getSoundLevelBuffer(), 
 							speechAudioStreamer.getBufferIndex(),
@@ -360,6 +353,13 @@ public class MainView {
 					if (view.mSoundView.getVisibility() != View.VISIBLE)
 						view.mSoundView.setVisibility(View.VISIBLE);
 					view.mSoundView.invalidate();
+				}
+				else {
+					if (!processing) {
+						processing = true;
+						view.disableSearchButton();
+						view.showStatus("Processing...");
+					}
 				}
 			}
 			
