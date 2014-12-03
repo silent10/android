@@ -14,6 +14,7 @@ public class EvaMoney  implements Serializable {
 	public String Amount; 		// the amount of money.
 	public String Currency;		// the currency used, per ISO 4217 codes
 	public enum RestrictionType {
+		Unknown, 
 		Less,
 		More,
 		Least,
@@ -33,7 +34,14 @@ public class EvaMoney  implements Serializable {
 				Currency = jMoney.getString("Currency");
 			}
 			if (jMoney.has("Restriction")) {
-				Restriction = RestrictionType.valueOf( jMoney.getString("Restriction"));
+				try {
+					Restriction = RestrictionType.valueOf( jMoney.getString("Restriction"));
+				}
+				catch(IllegalArgumentException e) {
+					parseErrors.add( "Unexpected Restriction"+jMoney.optString("Restriction"));
+					Log.w(TAG, "Unexpected Restriction", e);
+					Restriction = RestrictionType.Unknown;
+				}
 			}
 			if (jMoney.has("Per Person")) {
 				PerPerson = jMoney.getBoolean("Per Person");

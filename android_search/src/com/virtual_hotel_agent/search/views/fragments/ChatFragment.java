@@ -381,7 +381,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 //		return false;
 //	}
 	
-	public void voiceResponseToChatItem(ChatItem chatItem, SpannableString chat) {
+	public void storeResponseInChatItem(ChatItem chatItem, SpannableString chat) {
 		if (editedChatItemIndex == -1) {
 			Log.w(TAG, "voice response but no edited item");
 			return;

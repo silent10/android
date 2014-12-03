@@ -39,7 +39,12 @@ public class EvaLocation implements Serializable {
 
 	public double Latitude;
 	public double Longitude;
-	public String Type;
+	public enum TypeEnum {
+		Unknown,
+		City, Airport, Country, Area, State, Property, Company, Chain, Postal_Code, Address, Island, Landmark, Generic_Location
+		
+	};
+	public TypeEnum Type;
 	public String Name;
 	public EvaTime Departure = null; // Complex Eva Time object
 	public EvaTime Arrival = null; // Complex Eva Time object
@@ -97,7 +102,14 @@ public class EvaLocation implements Serializable {
 				}
 			}
 			if (location.has("Type")) {
-				Type = location.getString("Type");
+				try {
+					Type = TypeEnum.valueOf(location.getString("Type").replace(' ', '_'));
+				}
+				catch(IllegalArgumentException e) {
+					parseErrors.add( "Unexpected Location Type"+location.optString("Type"));
+					Log.w(TAG, "Unexpected Location Type", e);
+					Type = TypeEnum.Unknown;
+				}
 			}
 			if (location.has("Longitude")) {
 				Longitude = location.getDouble("Longitude");

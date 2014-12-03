@@ -16,6 +16,7 @@ public class RequestAttributes  implements Serializable {
 	public List<String> transportType = new ArrayList<String>();
 
 	public enum SortEnum {
+		unknown,
 		reviews, location, price, price_per_person, distance, rating, guest_rating, 
 		stars, time, total_time, duration, arrival_time, departure_time, outbound_arrival_time, 
 		outbound_departure_time, inbound_arrival_time, inbound_departure_time, airline, operator, 
@@ -23,6 +24,7 @@ public class RequestAttributes  implements Serializable {
 	}
 
 	public enum SortOrderEnum {
+		unknown,
 		ascending, descending, reverse
 	}
 
@@ -49,12 +51,24 @@ public class RequestAttributes  implements Serializable {
 			try {
 				JSONObject jSort = requestAttributes.getJSONObject("Sort");
 				if (jSort.has("By")) {
-					sortBy = SortEnum.valueOf(jSort.getString("By").replace(
-							' ', '_'));
+					try {
+						sortBy = SortEnum.valueOf(jSort.getString("By").replace(
+								' ', '_'));
+					}
+					catch(IllegalArgumentException e) {
+						Log.w(TAG, "Unexpected SortBy", e);
+						sortBy = SortEnum.unknown;
+					}
 				}
 				if (jSort.has("Order")) {
-					sortOrder = SortOrderEnum.valueOf(jSort.getString("Order").replace(
-							' ', '_'));
+					try {
+						sortOrder = SortOrderEnum.valueOf(jSort.getString("Order").replace(
+								' ', '_'));
+					}
+					catch(IllegalArgumentException e) {
+						Log.w(TAG, "Unexpected SortOrder", e);
+						sortOrder = SortOrderEnum.unknown;
+					}
 				}
 			} catch (JSONException e) {
 				Log.e(TAG, "Problem parsing JSON", e);

@@ -124,7 +124,7 @@ public class SpeechAudioStreamer {
 		if (numberOfReadBytes == 0)
 			return null;
 		
-		Log.d(TAG, "Read "+numberOfReadBytes);
+		//Log.d(TAG, "Read "+numberOfReadBytes);
 		
 		if (mBuffer.length != numberOfReadBytes) {
 			Log.w(TAG, "unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
@@ -213,7 +213,7 @@ public class SpeechAudioStreamer {
 		}
 		
 		private void encode(byte[] chunk, int readSize) throws IOException {
-			Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
+			//Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
 
 			// encoded = mEncoder.encode(chunk);
 
