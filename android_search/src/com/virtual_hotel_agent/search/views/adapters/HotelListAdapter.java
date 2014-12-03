@@ -101,7 +101,6 @@ public class HotelListAdapter extends BaseAdapter {
 		return view;
 	}
 	
-	static private Pattern thumbnailToLandscape = Pattern.compile("_n\\.(jpg|png|gif|bmp)$", Pattern.CASE_INSENSITIVE);
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -201,28 +200,39 @@ public class HotelListAdapter extends BaseAdapter {
 						
 						@Override
 						public void drawableLoaded(boolean success, BitmapDrawable drawable) {
-							Palette.generateAsync(((BitmapDrawable) drawable).getBitmap(), new PaletteAsyncListener() {
-								
-								@Override
-								public void onGenerated(Palette palette) {
-									int bgCol = palette.getLightVibrantColor(0xff444444);
-									holder.image.setBackgroundColor(bgCol);
-									holder.name.setBackgroundColor(bgCol);
-									Swatch swatch = palette.getLightVibrantSwatch();
-									if (swatch != null) {
-										holder.name.setTextColor(swatch.getTitleTextColor());
-										holder.distance.setTextColor(swatch.getBodyTextColor());
+							Palette palette = Palette.generate(((BitmapDrawable) drawable).getBitmap()); 
+							Swatch swatch1 = palette.getLightVibrantSwatch();
+							Swatch swatch2 = palette.getLightMutedSwatch();
+							if (swatch1== null || swatch2 == null) {
+								swatch1 = palette.getDarkVibrantSwatch();
+								swatch2 = palette.getDarkMutedSwatch();
+								if (swatch1== null || swatch2 == null) {
+									List<Swatch> swatches = palette.getSwatches();
+									if (swatches.size() > 1) {
+										swatch1 = swatches.get(0);
+										swatch2 = swatches.get(0);
 									}
-									swatch = palette.getLightMutedSwatch();
-									int lightMuted = palette.getLightMutedColor(0xffdddddd);
-									holder.distance.setBackgroundColor(lightMuted);
-									holder.cardView.setCardBackgroundColor(lightMuted);
-									if (swatch != null) {
-										holder.distance.setTextColor(swatch.getTitleTextColor());
-									}
-									HotelListAdapter.this.notifyDataSetChanged();
 								}
-							});
+							}
+							
+							if (swatch1 != null) {
+								holder.image.setBackgroundColor(swatch1.getRgb());
+								holder.name.setBackgroundColor(swatch1.getRgb());
+								holder.name.setTextColor(swatch1.getTitleTextColor());
+								holder.distance.setTextColor(swatch1.getBodyTextColor());
+							}
+							else {
+								holder.image.setBackgroundColor(0xffff44ff);
+							}
+							if (swatch2 != null) {
+								holder.distance.setBackgroundColor(swatch2.getRgb());
+								holder.cardView.setCardBackgroundColor(swatch2.getRgb());
+								holder.distance.setTextColor(swatch2.getTitleTextColor());
+							}
+							else {
+								holder.cardView.setCardBackgroundColor(0xffff44ff);
+							}
+							HotelListAdapter.this.notifyDataSetChanged();
 							// load a high resolution bitmap
 //							final String highResUrl = thumbnailToLandscape.matcher(hotel.mainHotelImageTuple.thumbnailUrl.toString()).replaceAll("_l.$1");
 //							loader.loadDrawable(

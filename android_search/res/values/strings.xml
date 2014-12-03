@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <resources>
 
     <string name="app_name">Virtual Hotel Agent</string>
     <string name="lots_of_text">          Hotel Rating and Reviews powered by TripAdvisor.\n
 		  Hotel Search and booking by Expedia.\n
 		  Text parsing by Evature.\n</string>
-    <string name="help_text">	    Search for hotels using natural language, eg "Hotel in London, Friday to Monday".</string>
     <string name="ok_button">OK, got it.</string>
     <string name="_ok">OK</string>
     <string name="cancel">Cancel</string>
@@ -18,35 +17,22 @@
     <string name="CHAT">CHAT</string>
     <string name="HOTELS">HOTELS</string>
     <string name="HOTEL">HOTEL</string>
-    <string name="REVIEWS">REVIEWS</string>
-    <string name="ROOMS">ROOMS</string>
-    <string name="BOOKING">BOOKING</string>
-    <string name="RESERVATIONS">RESERVATIONS</string>
-    <string name="MAP">MAP</string>
     <string name="button_stop">Stop</string>
     <string name="people_per_room">Adults per room:</string>
-    <string name="nothing_to_see_here_move_along">Nothing to see here - move along</string>
     <!-- <string name="EXAMPLES">EXAMPLES</string> -->
     <string name="hotel_image">Hotel Image</string>
-    <string name="from">From</string>
     <string name="per_night">/night</string>
     <string name="trip_advisor_icon">Trip Advisor Icon</string>
-    <string name="distance">Distance</string>
-    <string name="_new">New</string>
     <string name="settings">Settings</string>
     <string name="report_a_bug">Report a bug</string>
     <string name="about">About</string>
-    <string name="bugreport_toast_text">Please wait&#8230;</string>
     <string name="bugreport_dialog_text">Please leave a comment describing what went wrong.</string>
     <string name="bugreport_dialog_title">Bug Report</string>
     <string name="bugreport_dialog_comment_prompt">Comment:</string>
-    <string name="bugreport_dialog_ok_toast">Thank you !</string>
     <string name="currency_pref_title">Default Currency</string>
     <string name="internalization_title">Internalization</string>
     <string name="currency_summary">Show results using this currency</string>
     <string name="no_rooms">There are no rooms available for the selected dates.</string>
-    <string name="search_icon">Search</string>
-    <string name="save_encoded">Save Encoded</string>
     <string name="room_price_disclaimer">The room rates listed are for double occupancy per room unless 
         otherwise stated and exclude tax recovery charges and service fees. See <a href="http://www.travelnow.com/templates/352395/faq#9">FAQs</a> for more details.</string>
     <string name="room_price_disclaimer_hotel_collect">        This hotel can be booked online only.
@@ -54,25 +40,19 @@
         unless otherwise specified. Some rates may require special identification. Our booking  fee, taxes, and other surcharges 
         imposed by the hotel are not included. Any extra adults or children above the room\'s listed occupancy may be subject to 
         additional charges at the property\'s discretion.</string>
-    <string name="star_rating">Star Rating</string>
     <string name="faq">FAQ</string>
-    <string name="help">help</string>
     <string name="children_per_room_">Children per room (3 max):</string>
     <string name="guest_num">Number of Guests in room:</string>
     <string name="greeting">Hello, I am your hotel agent.\nYou can tell me what you would like to find using voice.</string>
     <string name="examples_greetings">You can try me by tapping on the microphone and saying any of these examples:</string>
     <string name="checkout">Checkout</string>
     <string name="title_activity_image_gallery">ImageGalleryActivity</string>
-    <string name="show_fullscreen">Show Fullscreen</string>
     <string name="room_photo">Room Photo</string>
     <string name="arrival">Check in:</string>
     <string name="departure">Check out:</string>
-    <string name="adults">Adults:</string>
-    <string name="children">Children:</string>
     <string name="guests">Guests:</string>
     <string name="room_type">Room Type:</string>
     <string name="bed_type">Bed Type:</string>
-    <string name="book">Book</string>
     <string name="price_details">Price Details</string>
     <string name="total_charges">Total Charges</string>
     <string name="security_notice_title">Secure Booking</string>
@@ -95,10 +75,6 @@
     <string name="billing_cc_expyr">YY</string>
     <string name="billing_cc_security">Security Code (See back of credit card):</string>
     <string name="complete_booking">Complete Booking</string>
-    <string name="incorrect_expiration_year">        Incorrect credit card expiration year detected. Ensure that you use a
-        two-digit number for the year.</string>
-    <string name="incorrect_expiration_month">        Incorrect credit card expiration month detected. Ensure that you use
-        a two-digit month between 01 and 12.</string>
     <string name="load_default_billing_info">Load Default Billing Info</string>
     <string name="itinerary_id">Itinerary ID</string>
     <string name="confirmation_numbers">Confirmation Numbers</string>
@@ -122,11 +98,9 @@
     <string name="low_volume_warning">Our experience shows that users with low volume settings do not notice when the they are being asked a question by the Virtual Hotel Agent, eg. being asked about missing stay duration or about missing check in date.</string>
     <string name="low_volume_header">Your volume is too low!</string>
     <string name="volume_">Volume:</string>
-    <string name="tutorial">Tutorial</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
     <string name="new_session">New Session</string>
-    <string name="title_hotel_list">Hotels</string>
     <string name="title_hotel_detail">Hotel Detail</string>
 
 </resources>
