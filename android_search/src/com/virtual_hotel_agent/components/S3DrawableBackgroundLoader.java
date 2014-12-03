@@ -183,17 +183,19 @@ public class S3DrawableBackgroundLoader {
 
 //		Log.d(TAG, "Loading url "+lookup +" to imageView "+imageView);
 
-		mImageViews.put(imageView, lookup);
+		if (imageView != null)
+			mImageViews.put(imageView, lookup);
 		BitmapDrawable drawable = getDrawableFromCache(lookup);
 
 		// check in UI thread, so no concurrency issues
 		if (drawable != null) {
 			// Log.d(null, "Item loaded from mCache: " + url);
-			imageView.setImageDrawable(drawable);
+			if (imageView != null)
+				imageView.setImageDrawable(drawable);
 			if (callback != null)
 				callback.drawableLoaded(true, drawable);
 		} else {
-			if (placeholder != null)
+			if (placeholder != null && imageView != null)
 				imageView.setImageDrawable(placeholder);
 			queueJob(sourceContainer, lookup, imageView, placeholder, callback);
 		}
@@ -230,11 +232,12 @@ public class S3DrawableBackgroundLoader {
 				if (tag != null && tag.equals(lookup)) {
 					if (imageView.isShown())
 						if (msg.obj != null) {
-							imageView.setImageDrawable((Drawable) msg.obj);
+							if (imageView != null)
+								imageView.setImageDrawable((Drawable) msg.obj);
 							if (callback != null)
 								callback.drawableLoaded(true, (BitmapDrawable) msg.obj);
 						} else {
-							if (placeholder != null)
+							if (placeholder != null && imageView != null)
 								imageView.setImageDrawable(placeholder);
 							if (callback != null)
 								callback.drawableLoaded(false, placeholder);
