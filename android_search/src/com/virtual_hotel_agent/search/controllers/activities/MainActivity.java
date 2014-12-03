@@ -98,6 +98,7 @@ import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
 import com.virtual_hotel_agent.search.models.chat.ChatItemList;
 import com.virtual_hotel_agent.search.models.chat.DialogAnswerChatItem;
 import com.virtual_hotel_agent.search.models.chat.DialogQuestionChatItem;
+import com.virtual_hotel_agent.search.util.ErrorSpan;
 import com.virtual_hotel_agent.search.util.VolumeUtil;
 import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
 import com.virtual_hotel_agent.search.views.MainView;
@@ -315,6 +316,7 @@ public class MainActivity extends BaseActivity implements
 		VHAApplication.EVA = new EvaComponent(this, this);
 		EvaComponent eva = VHAApplication.EVA;
 		eva.onCreate(savedInstanceState);
+		eva.setParameter("add_text", "true");
 		
 		EventBus.getDefault().register(this);
 		setVolumeControlStream(VolumeUtil.currentStream); // TODO: move to EvaComponent?
@@ -768,6 +770,9 @@ public class MainActivity extends BaseActivity implements
 				   );
 
 	}
+	
+	
+
 
 	@Override
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
@@ -822,15 +827,18 @@ public class MainActivity extends BaseActivity implements
 				// reply of voice -  add a "Me" chat item for the input text
 				chat = new SpannableString(reply.processedText);
 				if (reply.evaWarnings.size() > 0) {
-					int col = getResources().getColor(R.color.my_chat_no_session_text);
+					//int col = getResources().getColor(R.color.my_chat_no_session_text);
+					
 					for (EvaWarning warning: reply.evaWarnings) {
 						if (warning.position == -1) {
 							continue;
 						}
-						chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
-						//chat.setSpan( new StyleSpan(Typeface.ITALIC), warning.position, warning.position+warning.text.length(), 0);
+						//chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
+						chat.setSpan( new ErrorSpan(getResources()), warning.position, warning.position+warning.text.length(), 0);
 					}
 				}
+				
+				
 			}
 			if (chat != null) {
 				if (VOICE_COOKIE.storeResultInItem != null) {

@@ -1,17 +1,11 @@
 package com.virtual_hotel_agent.search.views.fragments;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.app.Fragment;
+import android.content.Context;
+import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,8 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ean.mobile.hotel.Hotel;
-import com.ean.mobile.hotel.HotelImageTuple;
-import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.hotel.SupplierType;
 import com.evature.util.Log;
@@ -33,10 +25,8 @@ import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
-import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
-import com.virtual_hotel_agent.search.util.ImageDownloader;
 import com.virtual_hotel_agent.search.views.adapters.RoomListAdapter;
 
 @SuppressLint("ValidFragment")
