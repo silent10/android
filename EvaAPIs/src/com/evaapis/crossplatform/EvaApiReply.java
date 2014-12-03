@@ -44,8 +44,10 @@ public class EvaApiReply implements Serializable {
 	public String errorMessage = null; // error code returned from Eva service
 	public List<EvaWarning> evaWarnings = new ArrayList<EvaWarning>();
 	public List<String>  parseErrors = new ArrayList<String>();  // errors identified during the parsing
+	public ParsedText parsedText;
 	
 	public transient JSONObject JSONReply;
+
 
 	public EvaApiReply(String fullReply) {
 		initFromJson(fullReply);
@@ -84,6 +86,9 @@ public class EvaApiReply implements Serializable {
 							// warnings may contain some non-array that we can ignore
 						}
 					}
+				}
+				if (jApiReply.has("Parsed Text")) {
+					parsedText = new ParsedText(jApiReply.getJSONObject("Parsed Text"), parseErrors);
 				}
 				if (jApiReply.has("Chat")) {
 					chat = new EvaChat(jApiReply.getJSONObject("Chat"), parseErrors);

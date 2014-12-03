@@ -7,18 +7,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.EvaLocation;
+import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evature.util.Log;
 
 public class QuestionElement extends FlowElement {
 
 	private final static String TAG = "QuestionElement";
 	public enum QuestionType {
+		Unknown,
 		Open,
 		Multiple_Choice,
 		YesNo
 	};
 	public QuestionType questionType;
 	public enum QuestionCategory {
+		Unknown, 
 		Location_Ambiguity, 
 		Missing_Date,
 		Missing_Duration,
@@ -38,11 +41,23 @@ public class QuestionElement extends FlowElement {
 		
 		try {
 			if (jFlowElement.has("QuestionType")) {
-				questionType = QuestionType.valueOf(jFlowElement.getString("QuestionType").replace(' ','_'));
+				try {
+					questionType = QuestionType.valueOf(jFlowElement.getString("QuestionType").replace(' ','_'));
+				}
+				catch(IllegalArgumentException e) {
+					Log.w(TAG, "Unexpected QuestionType in Flow element", e);
+					questionType = QuestionType.Unknown;
+				}
 			}
 			
 			if (jFlowElement.has("QuestionCategory")) {
-				questionCategory = QuestionCategory.valueOf(jFlowElement.getString("QuestionCategory").replace(' ', '_'));
+				try {
+					questionCategory = QuestionCategory.valueOf(jFlowElement.getString("QuestionCategory").replace(' ', '_'));
+				}
+				catch(IllegalArgumentException e) {
+					Log.w(TAG, "Unexpected Question Category in Flow element", e);
+					questionCategory = QuestionCategory.Unknown;
+				}
 			}
 			
 			if (jFlowElement.has("QuestionSubCategory")) {

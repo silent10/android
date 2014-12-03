@@ -68,6 +68,7 @@ import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
+import com.evaapis.crossplatform.ParsedText.TimesMarkup;
 import com.evaapis.crossplatform.flow.FlowElement;
 import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evaapis.crossplatform.flow.QuestionElement;
@@ -159,12 +160,12 @@ public class MainActivity extends BaseActivity implements
 					Bundle bundle = data.getExtras();
 					ArrayList<String> matches = bundle.getStringArrayList(RecognizerIntent.EXTRA_RESULTS);
 					if (matches.size() > 0) {
-						if (VOICE_COOKIE.storeResultInItem == null) {
+						if (ADDED_TEXT_COOKIE.storeResultInItem == null) {
 							ChatItem newChatItem = new ChatItem(matches.get(0));
-							VOICE_COOKIE.storeResultInItem = newChatItem;
+							ADDED_TEXT_COOKIE.storeResultInItem = newChatItem;
 							addChatItem(newChatItem);
 						} else {
-							VOICE_COOKIE.storeResultInItem.setChat(matches.get(0));
+							ADDED_TEXT_COOKIE.storeResultInItem.setChat(matches.get(0));
 						}
 					}
 				}
@@ -184,7 +185,7 @@ public class MainActivity extends BaseActivity implements
 	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
 
 
-	static class VoiceCookie {
+	static class AddedTextCookie {
 		ChatItem storeResultInItem;
 	}
 
@@ -192,9 +193,8 @@ public class MainActivity extends BaseActivity implements
 	// (eg text vs voice, add vs delete or replace)
 	// the "cookie" parameter that you use for the request is returned in the
 	// callback, so you can differentiate between the different calls
-	private static final VoiceCookie VOICE_COOKIE = new VoiceCookie();
+	private static final AddedTextCookie ADDED_TEXT_COOKIE = new AddedTextCookie();
 	private static final Object DELETED_UTTERANCE_COOKIE = new Object();
-	private static final Object TEXT_TYPED_COOKIE = new Object();
 	 /*
 	   * Given a URI, returns a map of campaign data that can be sent with
 	   * any GA hit.
@@ -283,8 +283,8 @@ public class MainActivity extends BaseActivity implements
 			String searchString = myIntent.getStringExtra(SearchManager.QUERY);
 			ChatItem chat = new ChatItem(searchString);
 			addChatItem(chat);
-			VOICE_COOKIE.storeResultInItem = chat;
-			VHAApplication.EVA.searchWithText(searchString, VOICE_COOKIE, false);
+			ADDED_TEXT_COOKIE.storeResultInItem = chat;
+			VHAApplication.EVA.searchWithText(searchString, ADDED_TEXT_COOKIE, false);
 			
 			// clear the intent - it shouldn't run again resuming!
 			onNewIntent(new Intent());
@@ -677,7 +677,7 @@ public class MainActivity extends BaseActivity implements
 		// MainActivity.this.eva.searchWithVoice("voice");
 		
 		if ("google_local".equals(VHAApplication.EVA.getVrService())) {
-			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, VOICE_COOKIE, editLastUtterance);
+			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, ADDED_TEXT_COOKIE, editLastUtterance);
 			Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
 			if (defaultTracker != null) 
 				defaultTracker.send(MapBuilder
@@ -695,7 +695,7 @@ public class MainActivity extends BaseActivity implements
 		
 //		TutorialController.onMicrophonePressed(this);
 		
-		VOICE_COOKIE.storeResultInItem = chatItem;
+		ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
 		
 		VHAApplication.EVA.speak("");
 		Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
@@ -706,7 +706,7 @@ public class MainActivity extends BaseActivity implements
 				   );
 		
 		
-		mainView.startSpeechSearch(speechSearch, VOICE_COOKIE, editLastUtterance);
+		mainView.startSpeechSearch(speechSearch, ADDED_TEXT_COOKIE, editLastUtterance);
 	}
 	
 	// search button click handler ("On Click property" of the button in the xml)
@@ -798,7 +798,7 @@ public class MainActivity extends BaseActivity implements
 		}
 //		TutorialController.onEvaReply(this, reply);
 		
-		if (VOICE_COOKIE == cookie) {
+		if (ADDED_TEXT_COOKIE == cookie) {
 			if (reply.errorMessage != null) {
 				mainView.flashBadSearchButton(2);
 				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
@@ -837,13 +837,22 @@ public class MainActivity extends BaseActivity implements
 						chat.setSpan( new ErrorSpan(getResources()), warning.position, warning.position+warning.text.length(), 0);
 					}
 				}
+				if (reply.parsedText != null) {
+					if (reply.parsedText.times != null) {
+						int col = getResources().getColor(R.color.times_markup);
+						
+						for (TimesMarkup time : reply.parsedText.times) {
+							chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
+						}
+					}
+				}
 				
 				
 			}
 			if (chat != null) {
-				if (VOICE_COOKIE.storeResultInItem != null) {
+				if (ADDED_TEXT_COOKIE.storeResultInItem != null) {
 					// this voice recognition replaces the last utterance
-					mainView.getChatFragment().voiceResponseToChatItem(VOICE_COOKIE.storeResultInItem, chat);
+					mainView.getChatFragment().storeResponseInChatItem(ADDED_TEXT_COOKIE.storeResultInItem, chat);
 				}
 				else {
 					addChatItem(new ChatItem(chat));
@@ -882,19 +891,6 @@ public class MainActivity extends BaseActivity implements
 			}
 		}
 		
-		if (cookie == TEXT_TYPED_COOKIE) {
-			if (reply.errorMessage != null) {
-				mainView.flashBadSearchButton(2);
-				Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
-				if (defaultTracker != null) 
-					defaultTracker.send(MapBuilder
-						    .createEvent("text_search", "text_search_end_bad", reply.errorMessage, 0l)
-						    .build()
-						   );
-				
-				// TODO: there was an error - restore the pre-modified text
-			}
-		}
 		
 //		if (reply.JSONReply != null) {
 //			setDebugData(DebugTextType.EvaDebug, reply.JSONReply);
@@ -1499,7 +1495,8 @@ public class MainActivity extends BaseActivity implements
 			}
 			else {
 				searchText = event.chatItem.getChat().toString();
-				cookie = TEXT_TYPED_COOKIE;
+				ADDED_TEXT_COOKIE.storeResultInItem = event.chatItem;
+				cookie = ADDED_TEXT_COOKIE;
 			}
 			VHAApplication.EVA.searchWithText(searchText, cookie, event.editLastUtterance);
 		}

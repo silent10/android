@@ -21,9 +21,10 @@ public class FlightAttributes  implements Serializable {
 							// 1/26/2011-1/30/2011????????
 	public String[] airlines;
 	public String food;
-	public enum SeatType { Window, Aisle };
+	public enum SeatType { Unknown, Window, Aisle };
 	public SeatType seatType;
 	public enum SeatClass {
+		Unknown,
 		First, Business, Premium, Economy
 	};
 	public SeatClass[] seatClass;
@@ -52,13 +53,27 @@ public class FlightAttributes  implements Serializable {
 			}
 			
 			if (jFlightAttributes.has("Seat")) {
-				seatType = SeatType.valueOf(jFlightAttributes.getString("Seat"));
+				try {
+					seatType = SeatType.valueOf(jFlightAttributes.getString("Seat"));
+				}
+				catch(IllegalArgumentException e) {
+					parseErrors.add( "Unexpected SeatType "+jFlightAttributes.optString("Seat"));
+					Log.w(TAG, "Unexpected SeatType", e);
+					seatType = SeatType.Unknown;
+				}
 			}
 			if (jFlightAttributes.has("Seat Class")) {
 				JSONArray jSeatClass = jFlightAttributes.getJSONArray("Seat Class");
 				seatClass = new SeatClass[jSeatClass.length()];
 				for (int i=0; i<jSeatClass.length(); i++) {
-					seatClass[i] = SeatClass.valueOf(jSeatClass.getString(i));
+					try {
+						seatClass[i] = SeatClass.valueOf(jSeatClass.getString(i));
+					}
+					catch(IllegalArgumentException e) {
+						parseErrors.add( "Unexpected SeatClass"+jSeatClass.optString(i));
+						Log.w(TAG, "Unexpected SeatClass", e);
+						seatClass[i] = SeatClass.Unknown;
+					}
 				}
 			}
 			

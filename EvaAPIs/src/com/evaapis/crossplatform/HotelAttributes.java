@@ -103,11 +103,13 @@ public class HotelAttributes  implements Serializable {
 	}
 	
 	public static enum PoolType {
+		Unknown,
 	    Any, Indoor, Outdoor
 	}
 	public PoolType pool;
 	
 	public static enum AccommodationType {
+		Unknown, 
 		Chalet, Villa, Apartment, Motel, Camping, Hostel, MobileHome, GuestHouse, HolidayVillage,
 		HotelResidence, GuestAccommodations, Resort, Hotel,	Zimmer, Farm, YouthHostel, Bungalow, Inn
 	}
@@ -170,12 +172,24 @@ public class HotelAttributes  implements Serializable {
 			
 			if (jHotelAttributes.has("Pool")) {
 				String poolType = jHotelAttributes.getString("Pool");
-				pool = PoolType.valueOf(poolType);
+				try {
+					pool = PoolType.valueOf(poolType);
+				}
+				catch(IllegalArgumentException e) {
+					Log.w(TAG, "Unexpected PoolType", e);
+					pool = PoolType.Unknown;
+				}
 			}
 
 			if (jHotelAttributes.has("Accommodation Type")) {
 				String accomodationType = jHotelAttributes.getString("Accommodation Type");
-				accomodation = AccommodationType.valueOf(accomodationType.replaceAll(" ", ""));
+				try {
+					accomodation = AccommodationType.valueOf(accomodationType.replaceAll(" ", ""));
+				}
+				catch(IllegalArgumentException e) {
+					Log.w(TAG, "Unexpected AccommodationType in Flow element", e);
+					accomodation = AccommodationType.Unknown;
+				}
 			}
 			
 			if (jHotelAttributes.has("Parking")) {
