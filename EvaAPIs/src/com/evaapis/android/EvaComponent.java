@@ -579,6 +579,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, nbest);
 		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, getPreferedLanguage());
 		intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+		// bug fix for android 4.4 - see http://stackoverflow.com/a/25962203/519995
+		intent.putExtra("android.speech.extra.EXTRA_ADDITIONAL_LANGUAGES", new String[]{});
+				
 		
 		final SpeechRecognizer recognizer = SpeechRecognizer.createSpeechRecognizer(activity.getApplicationContext());
 		
