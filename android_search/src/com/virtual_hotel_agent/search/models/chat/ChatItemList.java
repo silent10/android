@@ -43,18 +43,7 @@ public class ChatItemList extends ArrayList<ChatItem> {
 		if (savedInstanceState != null) {
 //			Log.d(TAG, "Loading ChatItems from savedInstanceState");
 //			
-//			HashMap<String, EvaApiReply> replyCache = new HashMap<String, EvaApiReply>();
-//			Bundle savedReplies = savedInstanceState.getBundle("reply_cache");
-//			for (String key : savedReplies.keySet()) {
-//				String json = savedReplies.getString(key);
-//				EvaApiReply reply = new EvaApiReply(json);
-//				replyCache.put(reply.transactionId, reply);
-//			}
-//			
 //			// Restore last state for checked position.
-//			ArrayList<ChatItem> parcelableArrayList = savedInstanceState.getParcelableArrayList("mChatListEva");
-//			ArrayList<String> transactionIds = savedInstanceState.getStringArrayList("chat_items_transactions");
-//			int i=0;
 			ArrayList<ChatItem> list = (ArrayList<ChatItem>) savedInstanceState.getSerializable("chat-item-list");
 			clear();
 			if (list != null) {
@@ -62,11 +51,8 @@ public class ChatItemList extends ArrayList<ChatItem> {
 					add(ci);
 				}
 			}
-//				String transaction = transactionIds.get(i++);
-//				if (transaction.equals("") == false) {
-//					ci.setApiReply(replyCache.get(transaction));
-//				}
-//			}
+			
+			// connect this fragment to the MainView -
 		}
 	}
 

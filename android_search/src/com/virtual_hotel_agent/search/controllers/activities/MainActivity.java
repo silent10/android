@@ -374,7 +374,7 @@ public class MainActivity extends BaseActivity implements
 		// TODO: If exposing deep links into your app, handle intents here.
 			
 		
-		mainView = new MainView(this, mTabTitles);
+		mainView = new MainView(this, savedInstanceState, mTabTitles);
 //		TutorialController.mainView = mainView; // accessible to all tutorials
 
 		
@@ -416,7 +416,7 @@ public class MainActivity extends BaseActivity implements
 //		   return;
 //	   }
 	   
-	   int chatInd = mainView.getChatTabIndex();
+	   int chatInd = mainView.CHAT_TAB_INDEX;
 	   if (mainView.getCurrentPage() == chatInd) {
 		   // close edit text if chat text is being edited
 		   boolean handled = mainView.getChatFragment().handleBackPressed();
@@ -503,7 +503,7 @@ public class MainActivity extends BaseActivity implements
 		
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			mainView.showTab(mainView.getChatTabIndex());
+			mainView.showTab(mainView.CHAT_TAB_INDEX);
 			return true;
 			
 		case R.id.restart_button:
@@ -1318,7 +1318,7 @@ public class MainActivity extends BaseActivity implements
 	}
 	private void startNewSession(boolean speakGreeting) {
 //		if (isNewSession() == false) {
-			mainView.showTab(mainView.getChatTabIndex());
+			mainView.showTab(mainView.CHAT_TAB_INDEX);
 			VHAApplication.EVA.resetSession();
 			VHAApplication.EVA.stopSearch();
 			ChatItem myChat = new ChatItem(ChatItem.START_NEW_SESSION);
@@ -1393,7 +1393,7 @@ public class MainActivity extends BaseActivity implements
 //		lastFlightCompleted = null;
 		lastHotelCompleted = null;
 
-		mainView.showTab(mainView.getChatTabIndex());
+		mainView.showTab(mainView.CHAT_TAB_INDEX);
 		mainView.removeTabs();
 
 		VHAApplication.clearSearch();
