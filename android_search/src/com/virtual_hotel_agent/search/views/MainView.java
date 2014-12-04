@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -69,7 +70,7 @@ public class MainView {
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
 	
-	public MainView(final MainActivity mainActivity, List<String> tabTitles) {
+	public MainView(final MainActivity mainActivity, Bundle savedInstanceState, List<String> tabTitles) {
 		mStatusPanel = mainActivity.findViewById(R.id.status_panel);
 		mStatusText = (TextView)mainActivity.findViewById(R.id.text_listeningStatus);
 		mProgressBar = (ProgressBar)mainActivity.findViewById(R.id.progressBar1);
@@ -151,13 +152,11 @@ public class MainView {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 
-        
-		
-		// setup the tab switching
+		//---------------
+        // setup the tab switching
 		mPagerAdapter = new MyPagerAdapter(mainActivity.getFragmentManager());
 		mViewPager.setAdapter(mPagerAdapter);
-//		mTabs.setViewPager(mViewPager);
-//		mViewPager.setOffscreenPageLimit(5);
+		mViewPager.setOffscreenPageLimit(3);
 		
 		
 		mSoundView.setColor(0xffdd8877);
@@ -180,6 +179,7 @@ public class MainView {
 			}
 		});
 //		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
+
 	}
 	
 	public void activateSearchButton() {
@@ -412,10 +412,8 @@ public class MainView {
 		}
 	}
 
-	
-	public int getChatTabIndex() {
-		return 0;
-	}
+	public final int CHAT_TAB_INDEX = 0;
+	public final int HOTEL_LIST_TAB_INDEX = 1;
 
 	private boolean mainButtonsShown = true;
 	
@@ -451,9 +449,6 @@ public class MainView {
 		public MyPagerAdapter(FragmentManager fm) {
 			super(fm);
 			Log.i(TAG, "CTOR");
-			// optimization - create before needed
-			mChatFragment = new ChatFragment(); 
-//			mHotelsListFragment = new HotelListFragment();
 		}
 //		
 		@Override 
@@ -469,6 +464,20 @@ public class MainView {
 				Log.d(TAG, "Ignoring destroyItem at position "+position);
 			}
 		};
+		
+		@Override public Object instantiateItem (ViewGroup container, int position) {
+			Log.d(TAG, "instantiateItem "+position);
+			Object result = super.instantiateItem(container, position);
+			
+			// hack to restore pointer to fragments:
+			if (position == CHAT_TAB_INDEX) {
+				mChatFragment = (ChatFragment)result;
+			}
+			else if (position == HOTEL_LIST_TAB_INDEX) {
+				mHotelsListFragment = (HotelListFragment) result;
+			}
+			return result;
+		}
 		
 //	    @Override
 	    public int getItemPosition(Object object){

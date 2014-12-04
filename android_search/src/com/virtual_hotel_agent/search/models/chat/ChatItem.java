@@ -4,16 +4,22 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.regex.Pattern;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Html;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.flow.FlowElement;
 import com.evature.util.Log;
+import com.virtual_hotel_agent.search.VHAApplication;
+import com.virtual_hotel_agent.search.util.ErrorSpan;
 
 
 public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2141166/78234
@@ -77,29 +83,64 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 		}
 	}
 
-	Pattern removeP = Pattern.compile("^<p[^>]*?>(.*?)</p>$", Pattern.DOTALL);
 
 	private void writeObject(ObjectOutputStream oos) throws IOException {
 		// default serialization for everything except the SpannableString chat 
 		oos.defaultWriteObject();
-		// write the chat as html
-		String html = Html.toHtml(chat);
-		// Html module converts "chat..." to "<p>chat...</p>\n" when serializing,
-		// and the <p> element is converted to "chat...\n\n" when deserializing -
-		// this makes the ChatItem show empty space below the text after restore -
-		// trimming the restored string isn't simple because it is a "spannedString"
-		// solution - remove the <p> wrapping before 
-		html = removeP.matcher(html).replaceFirst("$1");
-		oos.writeObject(html);
+
+		// save the chat
+		SpannableStringBuilder logText = new SpannableStringBuilder(chat);
+		oos.writeUTF(logText.toString());
+		Object[] spans = logText.getSpans(0, logText.length(), Object.class);
+		oos.writeInt((int)spans.length);
+	    for (int i = 0; i < spans.length; i++){
+	    	Object span = spans[i];
+	    	int start = logText.getSpanStart(spans[i]);
+	    	int end = logText.getSpanEnd(spans[i]);
+
+	    	oos.writeUTF(span.getClass().getName());
+	    	oos.writeInt(start);
+	    	oos.writeInt(end);
+	    	if (span instanceof ForegroundColorSpan) {
+	    		oos.writeInt(((ForegroundColorSpan)span).getForegroundColor());
+	    	}
+	    	else if (span instanceof StyleSpan) {
+	    		oos.writeInt(((StyleSpan)span).getStyle());
+	    	}
+	    }
 	}
 	
 	private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
 		// default deserialization for everything except the SpannableString
 		ois.defaultReadObject();
-		// load the chat from html string
-		String html = (String) ois.readObject();
-		Log.i(TAG, "Restoring: "+html);
-		chat = new SpannableString(Html.fromHtml(html)); //(SpannableString) Html.fromHtml(html);
+
+		// load the chat
+		String chatText = ois.readUTF();
+	    chat = new SpannableString(chatText);
+	    int numSpans = ois.readInt();
+	    for (int i = 0; i < numSpans; i++){
+	    	
+	    	String className = ois.readUTF();
+	        int start = ois.readInt();
+	        int end = ois.readInt();
+	        Class<?> clazz = Class.forName(className);
+	        if (clazz.equals(ForegroundColorSpan.class)) {
+	        	chat.setSpan(new ForegroundColorSpan(ois.readInt()), start, end, 0);
+	        }
+	        else if (clazz.equals(StyleSpan.class)) {
+	        	chat.setSpan(new StyleSpan(ois.readInt()), start, end, 0);
+	        }
+	        else {
+	        	try {
+					chat.setSpan(clazz.getConstructor().newInstance(), start, end, 0);
+				} catch (InstantiationException | IllegalAccessException
+						| IllegalArgumentException | InvocationTargetException
+						| NoSuchMethodException e) {
+					VHAApplication.logError(TAG, "Failed to create span "+className+"  ["+start+"-"+end+"]");
+				}
+	        }
+	        	
+	    }
 	}
 
 

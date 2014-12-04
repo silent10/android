@@ -73,15 +73,16 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		Log.d(TAG, "onCreateView");
-
+		
 		if (root != null) {
 			Log.w(TAG, "Fragment initialized twice");
 			((ViewGroup) root.getParent()).removeView(root);
 			return root;
 		}
+		
 		eventBus = EventBus.getDefault();
 		mChatListModel = ChatItemList.getInstance();
-		root = (ViewGroup) inflater.inflate(R.layout.fragment_chat, null);
+		root = (ViewGroup) inflater.inflate(R.layout.fragment_chat, container, false);
 		mChatListView = (ListView) root.findViewById(R.id.chat_list);
 		
 		// Connect the data of the chat history to the view:
@@ -96,8 +97,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 //		chatListView.setAdapter(mChatAdapter);
 		
 		mChatListView.setOnItemClickListener(this);
-		
-		
+
 		return root;
 	}
 	
