@@ -4,15 +4,14 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v7.internal.widget.AdapterViewCompat;
+import android.support.v7.internal.widget.AdapterViewCompat.OnItemClickListener;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.OnScrollListener;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.evature.util.Log;
@@ -21,8 +20,6 @@ import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
 import com.nhaarman.listviewanimations.appearance.AnimationAdapter;
-import com.nhaarman.listviewanimations.appearance.simple.ScaleInAnimationAdapter;
-import com.nhaarman.listviewanimations.appearance.simple.SwingBottomInAnimationAdapter;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -40,14 +37,15 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 
 	private EventBus eventBus;
 	ListContinuationDownloaderTask mContinuationLoader = null;
-	private LinearLayout mFooterView;
+	private View mFooterView;
 	boolean mClickEnabled = true;
 	View mView;
-	ListView mHotelListView;
+	RecyclerView mHotelListView;
 	private HotelListAdapter mAdapter;
 	private final String TAG = "HotelListFragment";
 
-	private AnimationAdapter mAnimAdapter;
+	//private AnimationAdapter mAnimAdapter;
+	private StaggeredGridLayoutManager mLayoutManager;
 
 	@Override
 	public void onDestroyView() {
@@ -137,12 +135,19 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 		}
 		eventBus.register(this);		
 		mView = inflater.inflate(R.layout.fragment_hotel_list_portrait, container, false);
-		mHotelListView = (ListView) mView.findViewById(R.id.hotelListView);
-		mHotelListView.clearChoices();
-		if (VHAApplication.selectedHotel != null) {
-			mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
-//			mHotelListView.requestFocus();
-		}
+		mHotelListView = (RecyclerView) mView.findViewById(R.id.hotelListView);
+		mFooterView = mView.findViewById(R.id.hotelListFooter);
+		mHotelListView.setHasFixedSize(true);
+		
+		// use a linear layout manager
+        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mHotelListView.setLayoutManager(mLayoutManager);
+		
+		//mHotelListView.clearChoices();
+//		if (VHAApplication.selectedHotel != null) {
+//			mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
+////			mHotelListView.requestFocus();
+//		}
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
 			mContinuationLoader.cancel(true);
@@ -157,9 +162,8 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 
 	private void setAdapter() {
 		
-		if (mEnabledPaging && mFooterView != null)
-			mHotelListView.removeFooterView(mFooterView);
-
+		mFooterView.setVisibility(View.GONE);
+		
 		mEnabledPaging = false;
 
 		if (VHAApplication.FOUND_HOTELS.size() > 0) {
@@ -167,8 +171,6 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 			if (VHAApplication.cacheLocation != null && VHAApplication.moreResultsAvailable) {
 				if (getActivity() != null) {
 					LayoutInflater li = getActivity().getLayoutInflater();
-					mFooterView = (LinearLayout) li.inflate(R.layout.listfoot, null);
-					mHotelListView.addFooterView(mFooterView);
 					mHotelListView.setOnScrollListener(mListScroll);
 					mEnabledPaging = true;
 				}
@@ -177,28 +179,29 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 
 		mAdapter = new HotelListAdapter(this);
 		
-		mAnimAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
-		mAnimAdapter.setAbsListView(mHotelListView);
-		mHotelListView.setAdapter(mAnimAdapter);
+		//mAnimAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
+		//mAnimAdapter.setAbsListView(mHotelListView);
+		//mHotelListView.setAdapter(mAnimAdapter);
+		mHotelListView.setAdapter(mAdapter);
 		
-		mHotelListView.setOnItemClickListener(this);
+		//mHotelListView.setOnClickListener(this);
 	}
 
 	public void onEvent( HotelItemClicked event) {
 		
-		final int hotelIndex = event.hotelIndex;
-		if (mHotelListView.getCheckedItemPosition() != hotelIndex) {
-			mHotelListView.post(new Runnable() {
-				@Override
-				public void run() {
-					mHotelListView.setItemChecked(hotelIndex, true);
-				}
-			});
-		}
+//		final int hotelIndex = event.hotelIndex;
+//		if (mHotelListView.getCheckedItemPosition() != hotelIndex) {
+//			mHotelListView.post(new Runnable() {
+//				@Override
+//				public void run() {
+//					mHotelListView.setItemChecked(hotelIndex, true);
+//				}
+//			});
+//		}
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,	long id) {		
+	public void onItemClick(AdapterViewCompat<?> parent, View view, int position, long id) {
 		Log.d(TAG, "onItemClick "+position);
 
 
@@ -229,21 +232,21 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 
 	private OnScrollListener mListScroll = new OnScrollListener() {
 
-		private final int distanceFromLastPositionToLoad = 5;
-		
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			// TODO Auto-generated method stub
-
-		}
+		private final int distanceFromLastPositionToLoad = 10;
 
 		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-			if ((visibleItemCount > 0) && (firstVisibleItem + visibleItemCount >= totalItemCount - distanceFromLastPositionToLoad) 
+		public void	onScrolled(RecyclerView recyclerView, int dx, int dy) {
+			int [] positions = mLayoutManager.findLastVisibleItemPositions(null);
+			int maxPosition = positions[0];
+			if (positions[1] > maxPosition) { 
+				maxPosition = positions[1]; 
+			}
+			int totalItemCount = mAdapter.getItemCount();
+			if ((maxPosition > 0) && (maxPosition >= totalItemCount - distanceFromLastPositionToLoad) 
 					&& mContinuationLoader == null
 					&& mEnabledPaging) {
 				Log.d(TAG, "-Last Scroll-");
-
+				mFooterView.setVisibility(View.VISIBLE);
 				//String nextQuery = MyApplication.getDb().getNextQuery();
 				mContinuationLoader = new ListContinuationDownloaderTask(HotelListFragment.this, 
 						SettingsAPI.getCurrencyCode(getActivity()));
@@ -269,8 +272,9 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 			mAdapter.notifyDataSetChanged();
 		}
 
+		mFooterView.setVisibility(View.GONE);
+		
 		if (!VHAApplication.moreResultsAvailable) {
-			mHotelListView.removeFooterView(mFooterView);
 			mEnabledPaging = false;
 		}
 		
@@ -336,12 +340,12 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 			VHAApplication.logError(TAG, "Unexpected adapter is null");
 			return;
 		}
-		Log.d(TAG, "New Hotel list updated to size "+mAdapter.getCount());
-		mAnimAdapter.reset();
-		mHotelListView.clearChoices();
-		mHotelListView.setScrollY(0);
-		setAdapter(); // for some reason starting a new adapter is the only way to scroll to top
+		Log.d(TAG, "New Hotel list updated to size "+(mAdapter.getItemCount()-1));
+		//mAnimAdapter.reset();
+		//mHotelListView.clearChoices();
+		setAdapter();
 		//mAdapter.notifyDataSetChanged();
 	}
+
 
 }

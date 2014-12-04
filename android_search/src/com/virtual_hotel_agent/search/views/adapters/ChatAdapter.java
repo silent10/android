@@ -30,8 +30,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	private final ChatFragment chatFragment;
 	private final LayoutInflater mInflater;
 
-	int  myChatInSessionText,  myChatNoSessionText;
-	int  vhaChatInSessionText,  vhaChatNoSessionText;
+	int  myChatTextColor;
+	int  vhaChatTextColor;
 	
 	public ChatAdapter(final ChatFragment chatFragment, int resource, int textViewResourceId, final ChatItemList chatList) {
 		super(chatList);
@@ -41,10 +41,8 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		mInflater = LayoutInflater.from(activity);
 		
 		Resources resources = activity.getResources();
-		myChatInSessionText = resources.getColor(R.color.my_chat_in_session_text);
-		myChatNoSessionText = resources.getColor(R.color.my_chat_no_session_text);
-		vhaChatInSessionText = resources.getColor(R.color.vha_chat_in_session_text);
-		vhaChatNoSessionText = resources.getColor(R.color.vha_chat_no_session_text);
+		myChatTextColor = resources.getColor(R.color.my_chat_text);
+		vhaChatTextColor = resources.getColor(R.color.vha_chat_text);
 	}
 	
 	@Override
@@ -170,7 +168,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		// some row types require more than label setting...
 		switch (viewType) {
 		case VirtualAgentContinued:
-			label.setTextColor(vhaChatInSessionText);
+			label.setTextColor(vhaChatTextColor);
 			label.setTypeface(null, Typeface.NORMAL);
 			break;
 			
@@ -194,7 +192,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 ////				icon.setTextColor(myChatInSessionText);
 //			}
 //			else {
-				label.setTextColor(myChatNoSessionText);
+				label.setTextColor(myChatTextColor);
 //				icon.setTextColor(myChatNoSessionText);
 //			}
 			
@@ -255,7 +253,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			}*/
 			
 //			if (chatItem.isInSession()) {
-				label.setTextColor(vhaChatInSessionText);
+				label.setTextColor(vhaChatTextColor);
 //			}
 //			else {
 //				label.setTextColor(vhaChatNoSessionText);

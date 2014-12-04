@@ -4,18 +4,23 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Palette.PaletteAsyncListener;
 import android.support.v7.graphics.Palette.Swatch;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -30,11 +35,15 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
-public class HotelListAdapter extends BaseAdapter {
+public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
 //	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
 	private static final double DISTANCE_DELTA = 200;
 	private static final String TAG = "HotelListAdapter";
+
+	private static final int VIEW_TYPE_FILLER = 0;
+	private static final int VIEW_TYPE_HOTEL = 1;
+	
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
 	static BitmapDrawable mHotelIcon;
@@ -45,7 +54,7 @@ public class HotelListAdapter extends BaseAdapter {
 		mInflater = LayoutInflater.from(parent.getActivity());
 		mParent = parent;
 		if (mHotelIcon == null)
-			mHotelIcon = (BitmapDrawable) parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_72);
+			mHotelIcon = (BitmapDrawable) parent.getActivity().getResources().getDrawable(R.drawable.slanted_icon_128);
 //		if (mTripadvisorPlaceHolder == null)
 //			mTripadvisorPlaceHolder = parent.getActivity().getResources().getDrawable(R.drawable.transparent_overlay);
 	}
@@ -55,7 +64,7 @@ public class HotelListAdapter extends BaseAdapter {
 	}
 
 	@Override
-	public int getCount() {
+	public int getItemCount() {
 		List<Hotel> hotels = getHotels();
 		if (hotels != null && hotels.size() > 0) {
 			return hotels.size()+1;
@@ -67,78 +76,36 @@ public class HotelListAdapter extends BaseAdapter {
 	public int getItemViewType(int position){
 		List<Hotel> hotels = getHotels();
 		if (hotels == null || position >= hotels.size()) {
-			return 1;
+			return VIEW_TYPE_FILLER;
 		}
-		return 0; 
+		return VIEW_TYPE_HOTEL; 
 	}
 	
-	
-	@Override
-	public int getViewTypeCount(){
-	  return 2;
-	}
-
-	@Override
-	public Object getItem(int position) {
-		List<Hotel> hotels = getHotels();
-		if (hotels != null && position < hotels.size()) {
-			return hotels.get(position);
-		}
-		return null;
-	}
-
 	@Override
 	public long getItemId(int position) {
 		return position;
 	}
 	
-	private View fillerView(View view, ViewGroup parent) {
-		if (view == null) {
-			view = mInflater.inflate(R.layout.row_filler, parent, false);
-			view.setClickable(false);
-			view.setEnabled(false);
-		}
-		return view;
-	}
-	
-
+	// Replace the contents of a view. This is invoked by the layout manager.
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		final ViewHolder holder;
-		
+	public void onBindViewHolder(ViewHolder itemHolder, int position) {
+
 		List<Hotel> hotels = getHotels();
 		if (hotels == null || position >= hotels.size()) {
-			return fillerView(convertView, parent);
+			return; // nothing to do for filler view
 		}
-		if (convertView == null || convertView.getTag() == null) {
-			convertView = mInflater.inflate(R.layout.hotel_list_item, null);
-			holder = new ViewHolder();
-			holder.image = (ImageView) convertView.findViewById(R.id.hotelImage);
-			holder.tripAdvisorStrip = (ImageView) convertView.findViewById(R.id.tripAdvisorStrip);
-//			holder.tripAdvisorRating = (TextView)convertView.findViewById(R.id.tripAdvisorRating);
-			holder.name = (TextView) convertView.findViewById(R.id.hotelName);
-			holder.rate = (TextView) convertView.findViewById(R.id.pricePerNight);
-			holder.layout = (ViewGroup) convertView.findViewById(R.id.hotel_list_item_layout);
-			holder.distance = (TextView) convertView.findViewById(R.id.hotelDistance);
-			holder.location = (TextView) convertView.findViewById(R.id.hotelLocation);
-			holder.cardView = (CardView) convertView.findViewById(R.id.card_view);
-			holder.reviews = (TextView) convertView.findViewById(R.id.tripAdvisorReviews);
-			holder.rating = (RatingBar) convertView.findViewById(R.id.rating);
-			holder.layout.setTag(holder);
-			convertView.setTag(holder);
-		} else {
-			holder = (ViewHolder) convertView.getTag();
-		}
-
+		
 		
 		final Hotel hotel = hotels.get(position);
 		if (hotel == null) {
 			Log.w(TAG, "No hotel info for adapter position "+position);
-			return convertView;
+			return;
 		}
+		final HotelViewHolder holder = (HotelViewHolder)itemHolder;
 
 		Spanned spannedName = Html.fromHtml(hotel.name);
 		String name = spannedName.toString();
+		Log.d(TAG, "binding View to hotel "+name+",   holder had "+holder.name.getText());
 
 //		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -155,11 +122,7 @@ public class HotelListAdapter extends BaseAdapter {
 		// }
 
 		if (holder.name.getText().equals(name) == false) {
-			holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 			holder.name.setText(name);
-			if (holder.name.getHeight() > 100) {
-				holder.name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-			}
 		
 	
 			// Calculate hotel distance
@@ -195,44 +158,42 @@ public class HotelListAdapter extends BaseAdapter {
 	
 			final S3DrawableBackgroundLoader loader = VHAApplication.thumbnailLoader;
 	
+			holder.name.setBackgroundColor(0xffffffff);
+			holder.name.setTextColor(0xff222222);
+			
 			loader.loadDrawable(
 					hotel.mainHotelImageTuple, true, holder.image, mHotelIcon, new LoadedCallback() {
 						
 						@Override
 						public void drawableLoaded(boolean success, BitmapDrawable drawable) {
-							Palette palette = Palette.generate(((BitmapDrawable) drawable).getBitmap()); 
-							Swatch swatch1 = palette.getLightVibrantSwatch();
-							Swatch swatch2 = palette.getLightMutedSwatch();
-							if (swatch1== null || swatch2 == null) {
-								swatch1 = palette.getDarkVibrantSwatch();
-								swatch2 = palette.getDarkMutedSwatch();
-								if (swatch1== null || swatch2 == null) {
+							if (!success) {
+								Log.w(TAG, "Failed download img for hotel "+holder.name.getText());
+								return;
+							}
+							Bitmap bmp = ((BitmapDrawable) drawable).getBitmap();
+							
+							//Palette.generateAsync(((BitmapDrawable) drawable).getBitmap(), new PaletteAsyncListener() {
+							Palette palette = Palette.generate(bmp);
+								
+							Swatch swatch = palette.getDarkVibrantSwatch();
+							if (swatch== null) {
+								swatch = palette.getLightVibrantSwatch();
+								if (swatch== null) {
 									List<Swatch> swatches = palette.getSwatches();
 									if (swatches.size() > 1) {
-										swatch1 = swatches.get(0);
-										swatch2 = swatches.get(0);
+										swatch = swatches.get(0);
 									}
 								}
 							}
 							
-							if (swatch1 != null) {
-								holder.image.setBackgroundColor(swatch1.getRgb());
-								holder.name.setBackgroundColor(swatch1.getRgb());
-								holder.name.setTextColor(swatch1.getTitleTextColor());
-								holder.distance.setTextColor(swatch1.getBodyTextColor());
+							if (swatch != null) {
+								holder.name.setBackgroundColor(swatch.getRgb());
+								holder.name.setTextColor(swatch.getTitleTextColor());
 							}
 							else {
-								holder.image.setBackgroundColor(0xffff44ff);
+								Log.w(TAG, "No swatch made for photo?  hotel: "+holder.name.getText() );
 							}
-							if (swatch2 != null) {
-								holder.distance.setBackgroundColor(swatch2.getRgb());
-								holder.cardView.setCardBackgroundColor(swatch2.getRgb());
-								holder.distance.setTextColor(swatch2.getTitleTextColor());
-							}
-							else {
-								holder.cardView.setCardBackgroundColor(0xffff44ff);
-							}
-							HotelListAdapter.this.notifyDataSetChanged();
+
 							// load a high resolution bitmap
 //							final String highResUrl = thumbnailToLandscape.matcher(hotel.mainHotelImageTuple.thumbnailUrl.toString()).replaceAll("_l.$1");
 //							loader.loadDrawable(
@@ -256,7 +217,6 @@ public class HotelListAdapter extends BaseAdapter {
 			if (hotel.tripAdvisorRatingUrl == null) {//hotel.tripAdvisorRating < TRIP_ADVISOR_GOOD_RATING) {
 				holder.tripAdvisorStrip.setVisibility(View.GONE);
 			} else {
-				// TODO: show rating instead of just strip?
 				holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
 	//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
 				holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
@@ -264,10 +224,16 @@ public class HotelListAdapter extends BaseAdapter {
 			}
 		}
 		
-		return convertView;
 	}
 
-	private static class ViewHolder {
+	private class FillerHolder extends RecyclerView.ViewHolder {
+
+		public FillerHolder(View itemView) {
+			super(itemView);
+		}
+	}
+	
+	static class HotelViewHolder extends RecyclerView.ViewHolder {
 		public TextView reviews;
 		public ViewGroup layout;
 		public ImageView tripAdvisorStrip;
@@ -279,6 +245,42 @@ public class HotelListAdapter extends BaseAdapter {
 		TextView distance;
 		TextView location;
 		RatingBar rating;
+
+		public HotelViewHolder(View itemView) {
+			super(itemView);
+			image = (ImageView) itemView.findViewById(R.id.hotelImage);
+			tripAdvisorStrip = (ImageView) itemView.findViewById(R.id.tripAdvisorStrip);
+//			tripAdvisorRating = (TextView)itemView.findViewById(R.id.tripAdvisorRating);
+			name = (TextView) itemView.findViewById(R.id.hotelName);
+			rate = (TextView) itemView.findViewById(R.id.pricePerNight);
+			layout = (ViewGroup) itemView.findViewById(R.id.hotel_list_item_layout);
+			distance = (TextView) itemView.findViewById(R.id.hotelDistance);
+			location = (TextView) itemView.findViewById(R.id.hotelLocation);
+			cardView = (CardView) itemView.findViewById(R.id.card_view);
+			reviews = (TextView) itemView.findViewById(R.id.tripAdvisorReviews);
+			rating = (RatingBar) itemView.findViewById(R.id.rating);			
+		}
+	}
+
+		
+	private FillerHolder fillerHolder = null;
+	
+	// Create new views. This is invoked by the layout manager.
+	@Override
+	public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+		if (viewType == VIEW_TYPE_FILLER) {
+			if (fillerHolder == null) {
+				View view = mInflater.inflate(R.layout.row_filler, parent, false);
+				view.setClickable(false);
+				view.setEnabled(false);
+				fillerHolder = new FillerHolder(view);
+			}
+			return fillerHolder; // not going to be in use, but sadly required
+		}
+		
+		View view = mInflater.inflate(R.layout.hotel_list_item, parent, false);
+		ViewHolder holder = new HotelViewHolder(view);
+		return holder;
 	}
 
 //	public static void stopBackgroundLoader() {

@@ -21,7 +21,7 @@
             android:layout_alignParentRight="true"
             android:visibility="visible"
             android:background="@android:drawable/picture_frame"
-            android:src="@drawable/slanted_icon_72"
+            android:src="@drawable/slanted_icon_128"
             />
         
         <LinearLayout 
