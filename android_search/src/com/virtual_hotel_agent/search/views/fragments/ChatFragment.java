@@ -35,6 +35,7 @@ import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
+import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.events.ChatItemModified;
 import com.virtual_hotel_agent.search.controllers.events.ToggleMainButtonsEvent;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
@@ -182,6 +183,8 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 			examplesString += "\n"+example;
 		}
 		SpannableString chatFormatted = new SpannableString(greeting+examplesString);
+		int col = getResources().getColor(R.color.vha_chat_secondary_text);
+		chatFormatted.setSpan( new ForegroundColorSpan(col), greeting.length(), chatFormatted.length(), 0);
 		chatFormatted.setSpan( new StyleSpan(Typeface.ITALIC), greeting.length(), chatFormatted.length(), 0);
 
 		ChatItem chatItem = new ChatItem(chatFormatted, null, null, ChatType.VirtualAgentContinued);
@@ -201,7 +204,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 			String seeExamples = "\nTap here to see some examples.";
 			greeting += new SpannedString(seeExamples);
 			SpannableString sgreet = new SpannableString(greeting);
-			int col = getResources().getColor(R.color.vha_chat_no_session_text);
+			int col = getResources().getColor(R.color.vha_chat_secondary_text);
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);
@@ -260,8 +263,9 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 					};
 				}
 				String t = tests[randomGenerator.nextInt(tests.length)];
-				addChatItem(new ChatItem(t));
-				VHAApplication.EVA.searchWithText(t, null, false);
+				ChatItem ci = new ChatItem(t);
+				addChatItem(ci);
+				eventBus.post(new ChatItemModified(ci, false, false));
 			}
 			else {
 				editVirtualAgentChat(item, position);
@@ -369,9 +373,15 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 		Log.d(TAG, "Clearing chat Fragment");
 		shownExamples = false;
 		editedChatItemIndex = -1;
-		mAnimAdapter.reset();
-		mChatListModel.clear();
-		mAnimAdapter.notifyDataSetChanged();
+		getActivity().runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				mAnimAdapter.reset();
+				mChatListModel.clear();
+				mAnimAdapter.notifyDataSetChanged();
+			}
+		});
 	}
 
 
@@ -382,18 +392,11 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 //	}
 	
 	public void storeResponseInChatItem(ChatItem chatItem, SpannableString chat) {
-		if (editedChatItemIndex == -1) {
-			Log.w(TAG, "voice response but no edited item");
-			return;
-		}
-		ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);
-		if (editedChatItem != chatItem) {
-			Log.w(TAG, "voice response to item, but editing another item");
-			return;
-		}
 		chatItem.setChat(chat);
-		dismissItemsFromPosition(editedChatItemIndex+1);
-		closeEditChatItem(false);
+		if (editedChatItemIndex != -1) {
+			dismissItemsFromPosition(editedChatItemIndex+1);
+			closeEditChatItem(false);
+		}
 	}
 
 	public View getViewForChatItem(ChatItem chatItem) {

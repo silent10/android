@@ -838,16 +838,19 @@ public class MainActivity extends BaseActivity implements
 					}
 				}
 				if (reply.parsedText != null) {
-					if (reply.parsedText.times != null) {
-						int col = getResources().getColor(R.color.times_markup);
-						
-						for (TimesMarkup time : reply.parsedText.times) {
-							chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
+					try {
+						if (reply.parsedText.times != null) {
+							int col = getResources().getColor(R.color.times_markup);
+							
+							for (TimesMarkup time : reply.parsedText.times) {
+								chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
+							}
 						}
 					}
+					catch (IndexOutOfBoundsException e) {
+						VHAApplication.logError(TAG, "Index out of bounds setting spans of chat ["+chat+"]", e);
+					}
 				}
-				
-				
 			}
 			if (chat != null) {
 				if (ADDED_TEXT_COOKIE.storeResultInItem != null) {
@@ -1324,7 +1327,7 @@ public class MainActivity extends BaseActivity implements
 			int pos = greeting.length();
 			String seeExamples = "\nTap here to see some examples.";
 			SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-			int col = getResources().getColor(R.color.vha_chat_no_session_text);
+			int col = getResources().getColor(R.color.vha_chat_secondary_text);
 			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 			ChatItem chat = new ChatItem(sgreet,null, null, ChatType.VirtualAgentWelcome);

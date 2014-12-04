@@ -15,7 +15,7 @@ android:orientation="horizontal"
         android:layout_marginRight="5dip"
         android:layout_marginTop="2dip"
         android:text="3"
-        android:textColor="@color/vha_chat_in_session_text"
+        android:textColor="@color/vha_chat_text"
         android:textSize="20sp"
         />
     
@@ -25,6 +25,6 @@ android:orientation="horizontal"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:paddingLeft="5dp"
-        android:textColor="@color/vha_chat_no_session_text"
+        android:textColor="@color/vha_chat_text"
         android:text="Bla bla lorem ipsum sdfg as asdf" />
 </LinearLayout>

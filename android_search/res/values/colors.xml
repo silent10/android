@@ -6,6 +6,13 @@
 
     <color name="times_markup">#ff4455ff</color>
     
+    <color name="chat_background">#ffeeeeee</color>
+    
+    <color name="my_chat_text">#202050</color>
+    <color name="vha_chat_text">#f5f5f5</color>
+    <color name="vha_chat_secondary_text">#d5d5df</color>
+    
+    
     <color name="actionbar_title">@android:color/white</color>
     <color name="calendar_nav_bar_gradient_end">#ffd7e0e7</color>
     <color name="calendar_row_days_background">@color/calendar_nav_bar_gradient_end</color>
@@ -40,10 +47,6 @@
     <color name="searchresults_tableheader_text_normal">@android:color/black</color>
     <color name="destination_search_highlight_normal">#ff406acf</color>
     <color name="picker_wheel_overlay">#ff60636b</color>
-    <color name="my_chat_in_session_text">#202050</color>
-    <color name="my_chat_no_session_text">#353565</color>
-    <color name="vha_chat_no_session_text">#756060</color>
-    <color name="vha_chat_in_session_text">#502020</color>
     <color name="white">#fff</color>
     <color name="half_black">#88000000</color>
     <color name="text">#ff333333</color>

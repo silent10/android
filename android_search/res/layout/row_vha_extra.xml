@@ -8,10 +8,9 @@
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:background="@drawable/bubble2_red"
+        android:background="@drawable/vha_chat_bubble"
         android:layout_marginRight="10dip"
         android:orientation="horizontal" 
-        android:elevation="3dp"   
         >
     
     <TextView
@@ -19,7 +18,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:textColor="@color/vha_chat_no_session_text"
+        android:textColor="@color/vha_chat_text"
         android:text="Bla bla lorem ipsum" />
 	</LinearLayout>
 </RelativeLayout>

@@ -10,7 +10,7 @@
       <LinearLayout
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:background="@drawable/bubble2_blue"
+          android:background="@drawable/me_chat_bubble"
           android:animateLayoutChanges="true"
           android:orientation="horizontal"
            >
