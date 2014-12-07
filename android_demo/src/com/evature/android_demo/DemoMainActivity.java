@@ -1,14 +1,10 @@
 package com.evature.android_demo;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONException;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -17,7 +13,6 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.speech.RecognizerIntent;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -49,36 +44,6 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 	Button startOverButton;
 	Button searchText;
 
-	public class LanguageDetailsChecker extends BroadcastReceiver
-	{
-	    private List<String> supportedLanguages;
-
-	    private String languagePreference;
-
-	    @Override
-	    public void onReceive(Context context, Intent intent)
-	    {
-	        Bundle results = getResultExtras(true);
-	        String text = "";
-	        if (results.containsKey(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE))
-	        {
-	            languagePreference =
-	                    results.getString(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE);
-	            text += "Prefrence: "+languagePreference +"\n";
-	        }
-	        if (results.containsKey(RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES))
-	        {
-	            supportedLanguages =
-	                    results.getStringArrayList(
-	                            RecognizerIntent.EXTRA_SUPPORTED_LANGUAGES);
-	            text += "Supported Languages:\n";
-	            for (String supported: supportedLanguages) {
-	            	text += " - "+supported+"\n";
-	            }
-	        }
-            responseText.setText(text);
-	    }
-	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -128,9 +93,6 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 		});
         responseText = (TextView) findViewById(R.id.textView_response_text);
         
-        Intent detailsIntent =  new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
-        sendOrderedBroadcast(
-                detailsIntent, null, new LanguageDetailsChecker(), null, Activity.RESULT_OK, null, null);
 	}
 
 	@Override
@@ -175,16 +137,16 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 	public void onEvaReply(EvaApiReply reply, Object cookie) {
 		try {
 			startOverButton.setVisibility(View.VISIBLE);
+			
+			// Show reply JSON
 			String replyStr = reply.JSONReply.toString(2);
-//			Log.d(TAG, "Reply is: "+replyStr);
 			SpannableString replySpan = new SpannableString(replyStr);
 			
 			Resources resources = getResources();
-			// highlight sayit
+			// highlight SayIt
 			int col = resources.getColor(R.color.sayit);
 			Matcher matcher = sayitPatten.matcher(replyStr);
 			while (matcher.find()) {
-//				Log.d(TAG, "Found sayit: "+matcher.start(1) + "-" + (matcher.end(1)+1));
 				replySpan.setSpan( new ForegroundColorSpan(col), matcher.start(1), matcher.end(1)+1, 0);
 			}
 			

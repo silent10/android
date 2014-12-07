@@ -29,10 +29,11 @@ import com.virtual_hotel_agent.search.controllers.events.HotelsListUpdated;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface;
 import com.virtual_hotel_agent.search.controllers.web_services.ListContinuationDownloaderTask;
 import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter;
+import com.virtual_hotel_agent.search.views.adapters.HotelListAdapter.OnHotelClickListener;
 
 import de.greenrobot.event.EventBus;
 
-public class HotelListFragment extends Fragment implements OnItemClickListener, DownloaderTaskListenerInterface {
+public class HotelListFragment extends Fragment implements OnHotelClickListener, DownloaderTaskListenerInterface {
 
 
 	private EventBus eventBus;
@@ -201,8 +202,8 @@ public class HotelListFragment extends Fragment implements OnItemClickListener, 
 	}
 
 	@Override
-	public void onItemClick(AdapterViewCompat<?> parent, View view, int position, long id) {
-		Log.d(TAG, "onItemClick "+position);
+	public void onHotelClick(int position, View view) {
+		Log.d(TAG, "onHotelClick "+position);
 
 
 		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();

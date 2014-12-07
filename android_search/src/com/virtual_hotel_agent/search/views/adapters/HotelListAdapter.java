@@ -2,26 +2,20 @@ package com.virtual_hotel_agent.search.views.adapters;
 
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.v7.graphics.Palette;
-import android.support.v7.graphics.Palette.PaletteAsyncListener;
 import android.support.v7.graphics.Palette.Swatch;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
 import android.text.Spanned;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -35,7 +29,7 @@ import com.virtual_hotel_agent.search.SettingsAPI;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 
-public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
+public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 //	private static final double TRIP_ADVISOR_GOOD_RATING = 4.0;
 	private static final double DISTANCE_DELTA = 200;
@@ -48,6 +42,10 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 	private HotelListFragment mParent;
 	static BitmapDrawable mHotelIcon;
 //	static Drawable mTripadvisorPlaceHolder;
+
+	public interface OnHotelClickListener {
+		void onHotelClick(int position, View view);
+	}
 
 	public HotelListAdapter(HotelListFragment parent) {
 
@@ -95,13 +93,13 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 			return; // nothing to do for filler view
 		}
 		
-		
 		final Hotel hotel = hotels.get(position);
 		if (hotel == null) {
 			Log.w(TAG, "No hotel info for adapter position "+position);
 			return;
 		}
 		final HotelViewHolder holder = (HotelViewHolder)itemHolder;
+		holder.position = position;
 
 		Spanned spannedName = Html.fromHtml(hotel.name);
 		String name = spannedName.toString();
@@ -233,7 +231,8 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 		}
 	}
 	
-	static class HotelViewHolder extends RecyclerView.ViewHolder {
+	static class HotelViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
+		public int position;
 		public TextView reviews;
 		public ViewGroup layout;
 		public ImageView tripAdvisorStrip;
@@ -245,9 +244,11 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 		TextView distance;
 		TextView location;
 		RatingBar rating;
+		OnHotelClickListener listener;
 
-		public HotelViewHolder(View itemView) {
+		public HotelViewHolder(View itemView, OnHotelClickListener listener) {
 			super(itemView);
+			this.listener = listener;
 			image = (ImageView) itemView.findViewById(R.id.hotelImage);
 			tripAdvisorStrip = (ImageView) itemView.findViewById(R.id.tripAdvisorStrip);
 //			tripAdvisorRating = (TextView)itemView.findViewById(R.id.tripAdvisorRating);
@@ -258,7 +259,13 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 			location = (TextView) itemView.findViewById(R.id.hotelLocation);
 			cardView = (CardView) itemView.findViewById(R.id.card_view);
 			reviews = (TextView) itemView.findViewById(R.id.tripAdvisorReviews);
-			rating = (RatingBar) itemView.findViewById(R.id.rating);			
+			rating = (RatingBar) itemView.findViewById(R.id.rating);
+			cardView.setOnClickListener(this);
+		}
+
+		@Override
+		public void onClick(View v) {
+			listener.onHotelClick(position, cardView);
 		}
 	}
 
@@ -279,9 +286,10 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 		}
 		
 		View view = mInflater.inflate(R.layout.hotel_list_item, parent, false);
-		ViewHolder holder = new HotelViewHolder(view);
+		ViewHolder holder = new HotelViewHolder(view, mParent);
 		return holder;
 	}
+
 
 //	public static void stopBackgroundLoader() {
 //		S3DrawableBackgroundLoader.getInstance().Reset();
