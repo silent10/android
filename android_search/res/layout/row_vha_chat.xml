@@ -1,32 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:layout_marginRight="2dip"
      >
-<!--     android:layout_marginRight="2dip" -->
 
-    <com.virtual_hotel_agent.search.util.ChatBalloon 
-        android:id="@+id/chat_balloon"
+    <LinearLayout 
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginTop="3dp"
-        card_view:cardBackgroundColor="#6666ee"
-        card_view:cardElevation="6dp"
-            
+        android:layout_alignParentRight="true"
+        android:background="@drawable/vha_chat_bubble"
+        android:orientation="horizontal"    
         >
-<!--         android:background="@drawable/vha_chat_bubble" -->
          <TextView
             android:id="@+id/label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text=""
+            android:text="Hello bubbles!"
             
             android:layout_margin="2dip"
             android:textSize="16sp"
@@ -64,7 +55,7 @@
 <!--             android:layout_height="match_parent" /> -->
 
 <!--     </FrameLayout> -->
-    </com.virtual_hotel_agent.search.util.ChatBalloon>
+    </LinearLayout>
     
      
      <!-- 
