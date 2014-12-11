@@ -28,8 +28,12 @@
     *;
 }
 
-# Events - https://github.com/roboguice/roboguice/wiki/ProGuard
-# use the on*Event convention to identify event handlers
+# https://developers.facebook.com/docs/android/getting-started#proguard
+-keep class com.facebook.** { *; }
+-keepattributes Signature
+
+# Events - 
+# use the onEvent convention to identify event handlers
 -keep class com.virtual_hotel_agent.search.controllers.events.*
 -keepclasseswithmembers class * { 
 	void onEvent*(**); 

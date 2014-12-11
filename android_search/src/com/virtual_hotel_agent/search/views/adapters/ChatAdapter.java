@@ -1,9 +1,14 @@
 // Relevant example: http://windrealm.org/tutorials/android/listview-with-checkboxes-without-listactivity.php
 package com.virtual_hotel_agent.search.views.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,6 +104,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	}
 	
 	
+	@SuppressLint("NewApi")
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (position >= mChatList.size()) {
@@ -122,14 +128,27 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				holder.label = (TextView) row.findViewById(R.id.label);
 				holder.inEdit = row.findViewById(R.id.edit_chat_item);
 				row.setTag(R.id.chat_row_holder, holder);
+//				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//					View v = row.findViewById(R.id.chat_balloon);
+//					Drawable d = v.getBackground();
+//					d.setTintMode(Mode.MULTIPLY);
+//					d.setTint(Color.rgb(250,250,50));
+//				}
 				break;
 			case DialogQuestion:
+			case VirtualAgentError:
 			case VirtualAgent:
 			case VirtualAgentWelcome:
 				row = mInflater.inflate(R.layout.row_vha_chat, parent, false);
 				break;
 			case VirtualAgentContinued:
 				row = mInflater.inflate(R.layout.row_vha_extra, parent, false);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					View v = row.findViewById(R.id.chat_balloon);
+					Drawable d = v.getBackground();
+					d.setTintMode(Mode.MULTIPLY);
+					d.setTint(Color.rgb(60,20,20));
+				}
 				break;
 			case DialogAnswer:
 				row = mInflater.inflate(R.layout.row_vha_dialog, parent, false);

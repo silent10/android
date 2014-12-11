@@ -32,6 +32,7 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 		VirtualAgentWelcome,
 		VirtualAgent,
 		VirtualAgentContinued,
+		VirtualAgentError,
 		DialogQuestion,
 		DialogAnswer
 	}

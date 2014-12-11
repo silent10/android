@@ -13,19 +13,24 @@ public class ParsedText {
 
 	static public class TimesMarkup {
 		public String text;
-		public String type;
+		public String type; // eg. departure, arrival
 		public int position;
 		// value, related location
 	}
 	
+	static public class LocationMarkup {
+		public String text;
+		public int position;
+	}
+	
 	public ArrayList<TimesMarkup> times;
+	public ArrayList<LocationMarkup> locations;
 	
 	public ParsedText(JSONObject jsonObject, List<String> parseErrors) {
 		if (jsonObject.has("Times")) {
-			times = new ArrayList<ParsedText.TimesMarkup>();
-			JSONArray jTimes;
 			try {
-				jTimes = jsonObject.getJSONArray("Times");
+				times = new ArrayList<ParsedText.TimesMarkup>();
+				JSONArray jTimes = jsonObject.getJSONArray("Times");
 				for (int index = 0; index < jTimes.length(); index++) {
 					JSONObject jTime = jTimes.getJSONObject(index);
 					TimesMarkup time = new TimesMarkup();
@@ -37,6 +42,23 @@ public class ParsedText {
 			} catch (JSONException e) {
 				Log.e("ParsedText", "Error parsing JSON",e);
 				parseErrors.add("Failed to parse Times in ParsedText");
+			}
+		}
+		
+		if (jsonObject.has("Locations")) {
+			try {
+				locations = new ArrayList<ParsedText.LocationMarkup>();
+				JSONArray jLocations = jsonObject.getJSONArray("Locations");
+				for (int index = 0; index < jLocations.length(); index++) {
+					JSONObject jLocation = jLocations.getJSONObject(index);
+					LocationMarkup location = new LocationMarkup();
+					location.text = jLocation.optString("Text");
+					location.position = jLocation.optInt("Position", -1);
+					locations.add(location);
+				}
+			} catch (JSONException e) {
+				Log.e("ParsedText", "Error parsing JSON",e);
+				parseErrors.add("Failed to parse Locations in ParsedText");
 			}
 
 		}

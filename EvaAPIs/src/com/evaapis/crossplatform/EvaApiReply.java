@@ -87,8 +87,8 @@ public class EvaApiReply implements Serializable {
 						}
 					}
 				}
-				if (jApiReply.has("Parsed Text")) {
-					parsedText = new ParsedText(jApiReply.getJSONObject("Parsed Text"), parseErrors);
+				if (jApiReply.has("Last Utterance Parsed Text")) {
+					parsedText = new ParsedText(jApiReply.getJSONObject("Last Utterance Parsed Text"), parseErrors);
 				}
 				if (jApiReply.has("Chat")) {
 					chat = new EvaChat(jApiReply.getJSONObject("Chat"), parseErrors);

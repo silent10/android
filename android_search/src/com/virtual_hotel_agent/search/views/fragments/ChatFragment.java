@@ -258,8 +258,8 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 					tests = new String[] { 
 						"Hotel tonight", 
 						"Hotel in Madrid "+exampleMonth+" 22nd to 24th", 
-						"Hotel in Paris "+exampleMonth+" 22nd to 24th", 
-						"Hilton Hotel in Miami "+exampleMonth+" 22nd to 24th" 
+						"Hotel in Paris "+exampleMonth+" 23rd to 26th", 
+						"Hilton Hotel in Miami "+exampleMonth+" 21st to 23rd" 
 					};
 				}
 				String t = tests[randomGenerator.nextInt(tests.length)];

@@ -158,6 +158,9 @@ public class MainView {
 		mViewPager.setAdapter(mPagerAdapter);
 		mViewPager.setOffscreenPageLimit(3);
 		
+		if (savedInstanceState == null) {
+			mChatFragment = new ChatFragment();
+		}
 		
 		mSoundView.setColor(0xffdd8877);
 		mSoundView.setAlign(Gravity.RIGHT);

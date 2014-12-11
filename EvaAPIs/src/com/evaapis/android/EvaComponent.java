@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -27,7 +29,6 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
-import android.telephony.TelephonyManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -58,6 +59,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public static final String LOCALE_PREF_KEY = "eva_preference_locale";
 	public static final String LANG_PREF_KEY   = "eva_preference_language";
 	public static final String VRSERV_PREF_KEY = "eva_vr_service";
+	public static final String DEVICE_ID_PREF_KEY = "eva_device_id";
 	
 	public static final String VPROXY_HOST_PREF_KEY = "eva_vproxy_host";
 	public static final String WEBSERV_HOST_PREF_KEY = "eva_web_service_host";
@@ -388,13 +390,15 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public String getDeviceId() {
 		if (mConfig.deviceId == null) {
-			try {
-				TelephonyManager telephonyManager = (TelephonyManager) activity.getSystemService(Context.TELEPHONY_SERVICE);
-				mConfig.deviceId=telephonyManager.getDeviceId();
-			}
-			catch(SecurityException e) {
-				Log.i("EvaAPIs", "Can't get Device Id because missing READ_PHONE_STATE permission");
-			}
+	        SharedPreferences sharedPrefs = activity.getSharedPreferences(
+	        		DEVICE_ID_PREF_KEY, Context.MODE_PRIVATE);
+	        mConfig.deviceId = sharedPrefs.getString(DEVICE_ID_PREF_KEY, null);
+	        if (mConfig.deviceId == null) {
+	        	mConfig.deviceId = UUID.randomUUID().toString();
+	            Editor editor = sharedPrefs.edit();
+	            editor.putString(DEVICE_ID_PREF_KEY, mConfig.deviceId);
+	            editor.commit();
+	        }
 		}
 		return mConfig.deviceId;
 	}

@@ -5,6 +5,7 @@
     <color name="colorPrimaryDark">#ffcc3333</color>
 
     <color name="times_markup">#ff4455ff</color>
+    <color name="locations_markup">#ffff4455</color>
     
     <color name="chat_background">#ffeeeeee</color>
     

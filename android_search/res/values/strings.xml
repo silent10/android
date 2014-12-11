@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-
+	<string name="facebook_app_id">1583420058547606</string>
+    
     <string name="app_name">Virtual Hotel Agent</string>
     <string name="lots_of_text">          Hotel Rating and Reviews powered by TripAdvisor.\n
 		  Hotel Search and booking by Expedia.\n

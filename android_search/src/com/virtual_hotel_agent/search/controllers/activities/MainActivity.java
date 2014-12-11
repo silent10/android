@@ -57,6 +57,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.ean.mobile.exception.EanWsError;
@@ -68,6 +69,7 @@ import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechComponent;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
+import com.evaapis.crossplatform.ParsedText.LocationMarkup;
 import com.evaapis.crossplatform.ParsedText.TimesMarkup;
 import com.evaapis.crossplatform.flow.FlowElement;
 import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
@@ -333,6 +335,9 @@ public class MainActivity extends BaseActivity implements
 			eva.setAppVersion("vha_unknown");
 		}
 		
+//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//			getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//		}
 
 		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -846,6 +851,14 @@ public class MainActivity extends BaseActivity implements
 								chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
 							}
 						}
+						
+						if (reply.parsedText.locations != null) {
+							int col = getResources().getColor(R.color.locations_markup);
+							
+							for (LocationMarkup location: reply.parsedText.locations) {
+								chat.setSpan( new ForegroundColorSpan(col), location.position, location.position+location.text.length(), 0);
+							}
+						}
 					}
 					catch (IndexOutOfBoundsException e) {
 						VHAApplication.logError(TAG, "Index out of bounds setting spans of chat ["+chat+"]", e);
@@ -998,7 +1011,9 @@ public class MainActivity extends BaseActivity implements
 			
 			if (id == R.string.HOTELS && (VHAApplication.FOUND_HOTELS.size() == 0)) {
 				mainView.removeTabs();
-				Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
+				//Toast.makeText(MainActivity.this, R.string.no_hotels, Toast.LENGTH_LONG ).show();
+				ChatItem noHotelsChatItem = new ChatItem(getString(R.string.no_hotels), null, null, ChatType.VirtualAgentError);
+				addChatItem(noHotelsChatItem);
 			}
 			else {
 				//startActivity(new Intent(MainActivity.this, HotelListActivity.class));

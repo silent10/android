@@ -51,8 +51,6 @@ public class ChatItemList extends ArrayList<ChatItem> {
 					add(ci);
 				}
 			}
-			
-			// connect this fragment to the MainView -
 		}
 	}
 
