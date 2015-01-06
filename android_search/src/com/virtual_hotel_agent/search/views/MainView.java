@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.res.Configuration;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -162,8 +163,8 @@ public class MainView {
 			mChatFragment = new ChatFragment();
 		}
 		
-		mSoundView.setColor(0xffdd8877);
-		mSoundView.setAlign(Gravity.RIGHT);
+		mSoundView.setColor(0xffffffff);
+		mSoundView.setAlign(Gravity.CENTER);
 
 		// TODO: change toolbar based on 
 		mViewPager.setOnPageChangeListener( new OnPageChangeListener() {
@@ -194,6 +195,9 @@ public class MainView {
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
 				drawable.startTransition(100);
+				AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.avd);
+				mSearchButton.setImageDrawable(animatedDrawable);
+				animatedDrawable.start();
 		    }
 		});
 	}
@@ -208,6 +212,7 @@ public class MainView {
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
+		    	mSearchButton.setImageResource(R.drawable.microphone_icon2);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -239,6 +244,7 @@ public class MainView {
 			@Override
 			public void run() {
 				// TODO: disable button?
+				mSearchButton.setImageResource(R.drawable.microphone_icon2);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -290,6 +296,7 @@ public class MainView {
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
+		    	mSearchButton.setImageResource(R.drawable.microphone_icon2);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_bad);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();

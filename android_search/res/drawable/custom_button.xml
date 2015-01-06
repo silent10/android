@@ -23,28 +23,38 @@
         <shape>
             <padding android:top="1dp" android:right="1dp" android:bottom="1dp" android:left="1dp" />
             <solid
-                android:color="#947474" />
+                android:color="#a74747" />
             <stroke
                 android:width="1dp"
-                android:color="#ffaa88" />
+                android:color="#a34343" />
             <corners android:radius="200dp" />
            
         </shape>
+         <objectAnimator
+            android:duration="@android:integer/config_shortAnimTime"
+            android:propertyName="translationZ"
+            android:valueTo="@dimen/touch_raise"
+            android:valueType="floatType" />
     </item>
     <item>
         <shape>
             <padding android:top="1dp" android:right="1dp" android:bottom="1dp" android:left="1dp" />
             <gradient
-                android:startColor="#d48484"
+                android:startColor="#b45454"
                 android:endColor="#a74747"
                 android:angle="315" />
             <stroke
                 android:width="1dp"
-                android:color="#672828" />
+                android:color="#b35353" />
             <corners
                 android:radius="200dp" />
             
         </shape>
+         <objectAnimator
+            android:duration="@android:integer/config_shortAnimTime"
+            android:propertyName="translationZ"
+            android:valueTo="0dp"
+            android:valueType="floatType" />
     </item>
     </selector>
 <!-- </layer-list> -->

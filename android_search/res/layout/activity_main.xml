@@ -108,34 +108,34 @@ android:layout_height="match_parent">
         android:layout_centerHorizontal="true"
          >
 
-    <com.evaapis.android.SoundLevelView
-        android:id="@+id/surfaceView_sound_wave"
-        android:layout_width="wrap_content"
-        android:layout_height="56dip"
-        android:layout_marginLeft="20dip"
-        android:layout_marginRight="85dip"
-        android:layout_marginBottom="22dp"
-        android:layout_alignParentBottom="true"
-        android:background="#22000000"
-        android:visibility="gone"
-         />
-        
      <ImageButton
         android:id="@+id/search_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
         android:layout_marginBottom="16dp"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/transition_button_activate"
+        android:layout_centerHorizontal="true"
         android:contentDescription="@string/microphone_button"
         android:onClick="myClickHandler"
         android:padding="12dp"
-        android:src="@drawable/microphone_icon2"
+        android:src="@drawable/avd"
         android:text="@string/button"
         android:elevation="8dp"
+        android:background="@drawable/transition_button_activate"
          />
+<!--         android:background="@drawable/transition_button_activate" -->
+     
+    <com.evaapis.android.SoundLevelView
+        android:id="@+id/surfaceView_sound_wave"
+        android:layout_width="76dp"
+        android:layout_height="64dp"
+    	android:layout_centerHorizontal="true"    
+        android:layout_marginBottom="20dp"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone"
+        android:elevation="9dp"
+         />
+        
      
     
      </RelativeLayout>

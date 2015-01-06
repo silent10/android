@@ -143,12 +143,12 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				break;
 			case VirtualAgentContinued:
 				row = mInflater.inflate(R.layout.row_vha_extra, parent, false);
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-					View v = row.findViewById(R.id.chat_balloon);
-					Drawable d = v.getBackground();
-					d.setTintMode(Mode.MULTIPLY);
-					d.setTint(Color.rgb(60,20,20));
-				}
+//				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//					View v = row.findViewById(R.id.chat_balloon);
+//					Drawable d = v.getBackground();
+//					d.setTintMode(Mode.MULTIPLY);
+//					d.setTint(Color.rgb(60,20,20));
+//				}
 				break;
 			case DialogAnswer:
 				row = mInflater.inflate(R.layout.row_vha_dialog, parent, false);
