@@ -39,6 +39,7 @@ public class SpeechAudioStreamer {
 	private AudioRecord mRecorder;
 	private FLACStreamEncoder mEncoder;
 	private byte[] mBuffer = null;
+//	private int[] mBufferShorts = null;
 	private boolean mIsRecording = false;
 
 	public static final int TEMP_BUFFER_SIZE = 5;
@@ -52,7 +53,7 @@ public class SpeechAudioStreamer {
 
 	int mBufferIndex = 0;
 	float mSilenceAccumulationBuffer[] = new float[TEMP_BUFFER_SIZE];
-	int mSoundLevelBuffer[] = new int[250];
+	float mSoundLevelBuffer[] = new float[25];
 
 	long mLastStart = -1;
 	private int mSoundLevel;
@@ -91,6 +92,7 @@ public class SpeechAudioStreamer {
 			}
 			bufferSize *= 1.25;
 			mBuffer = new byte[bufferSize];
+//			mBufferShorts = new int[bufferSize/2+1];
 			Log.i(TAG, "Initialized buffer to "+bufferSize);
 			mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 					AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
@@ -102,10 +104,12 @@ public class SpeechAudioStreamer {
 	}
 	
 	
-	public int[] getSoundLevelBuffer() {
+	public float[] getSoundLevelBuffer() {
 		return mSoundLevelBuffer;
+		//return mBufferShorts;
 	}
 	public int getBufferIndex() {
+		//return Math.min(mBufferIndex, mBuffer.length) / 2;
 		return mBufferIndex;
 	}
 	
@@ -119,7 +123,6 @@ public class SpeechAudioStreamer {
 	// called roughly every 50ms with 1600 bytes
 	private Boolean checkForSilence(int numberOfReadBytes) {
 		float totalAbsValue = 0.0f;
-		short sample = 0;
 
 		if (numberOfReadBytes == 0)
 			return null;
@@ -134,8 +137,8 @@ public class SpeechAudioStreamer {
 		}
 		// Analyze Sound.
 		for (int i = 0; i < numberOfReadBytes; i += 2) {
-			sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
-			
+			short sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
+//			mBufferShorts[i/2] = sample;
 			totalAbsValue += Math.abs(sample);
 		}
 		// average "sound level" of the current chunk
@@ -163,7 +166,7 @@ public class SpeechAudioStreamer {
 			mMinSoundLevel = temp;
 		}
 		
-		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = mSoundLevel;
+		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] =  mSoundLevel;
 		
 		// identifying speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
 //		if (mBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
@@ -390,67 +393,7 @@ public class SpeechAudioStreamer {
 				throw new RuntimeException("Failed to open FIFO from encoder");
 			}
 			Log.i(TAG, "Encoded stream ready");
-			/*
-			Log.i(TAG, "<<< reading from encoded Fifo");
-
-			while(true) {
-				
-				byte[] encodeBuffer = new byte[32000];
-				int encodedLength = 0;
-				try {
-					encodedLength = encodedFifo.read(encodeBuffer);
-				} catch (IOException e1) {
-					Log.e(TAG, "IO exception reading encoded Fifo", e1);
-				}
-				//Log.i(TAG, "got " + encodedLength + " encoded bytes");
-				if (encodedLength == 0) {
-					continue;
-				}
-				if (encodedLength < 0) {
-					break;
-				}
-				byte[] encoded = new byte[encodedLength];
-				System.arraycopy(encodeBuffer, 0, encoded, 0, encodedLength);
-
-				try {
-					long startTime = System.nanoTime();
-					pipedOut.write(encoded);
-					long duration = (System.nanoTime() - startTime)/1000000;
-					totalTimeUploading += duration;
-					Log.i(TAG, "<<< Sending "+encoded.length+" bytes to upload took "+duration+" ms");
-					
-				} catch (IOException e) {
-					Log.e(TAG, "Exception writing to upload stream", e);
-				}
-					
-				if (mDebugSaveEncoded) {
-					try {
-						dos.write(encoded);
-					} catch (IOException e) {
-						Log.w(TAG, "Exception writing debug file",e ); 
-					}
-				}
-
-			}
-			Log.i(TAG, "<<< Read last encoded chunk - closing pipe");
-			try {
-				pipedOut.flush();
-				pipedOut.close();
-			} catch (IOException e1) {
-				Log.e(TAG, "Exception flusing upload stream", e1);
-			}
 			
-			if (mDebugSaveEncoded) {
-				try {
-				dos.flush();
-				dos.close(); 
-				} catch (IOException e) {
-					Log.e(TAG, "Exception flusing debug file", e);
-				}
-			}
-			timeDoneUploading = System.nanoTime();
-			Log.i(TAG, "<<< Done uploading");
-			*/
 		}
 
 	}

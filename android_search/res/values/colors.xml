@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
 
-    <color name="colorPrimary">#ffdd4444</color>
-    <color name="colorPrimaryDark">#ffcc3333</color>
+    <color name="colorPrimary">#C62828</color>
+    <color name="colorPrimaryDark">#B71C1C</color>
 
-    <color name="times_markup">#ff4455ff</color>
-    <color name="locations_markup">#ffff4455</color>
+    <color name="times_markup">#4CAF50</color>
+    <color name="locations_markup">#03A9F4</color>
     
     <color name="chat_background">#ffeeeeee</color>
     

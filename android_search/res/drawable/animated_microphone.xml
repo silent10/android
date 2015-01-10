@@ -1,8 +1,8 @@
  <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-   android:drawable="@drawable/vectordrawable" >
-     <target
-         android:name="rotationGroup"
-         android:animation="@anim/mic_rotation" />
+   android:drawable="@drawable/vector_microphone" >
+<!--      <target -->
+<!--          android:name="rotationGroup" -->
+<!--          android:animation="@anim/mic_rotation" /> -->
      <target
          android:name="top"
          android:animation="@anim/mic_top_path_morph" />

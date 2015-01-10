@@ -3,27 +3,31 @@
     <item android:state_pressed="true" >
         <shape>
             <solid
-                android:color="#745454" />
-            <stroke
-                android:width="2dp"
-                android:color="#ffffbb99" />
+                android:color="#EF5350" />
             <corners
                 android:radius="200dp" />
             
         </shape>
+        <objectAnimator
+            android:duration="@android:integer/config_shortAnimTime"
+            android:propertyName="translationZ"
+            android:valueTo="@dimen/touch_raise"
+            android:valueType="floatType" />
     </item>
     <item>
         <shape>
-            <gradient
-                android:startColor="#d48484"
-                android:endColor="#a74747"
-                android:angle="315" />
+            <solid android:color="#EF5350" />
             <stroke
-                android:width="2dp"
-                android:color="#ffff9955" />
+                android:width="1dp"
+                android:color="#E57373" />
             <corners
                 android:radius="200dp" />
             
         </shape>
+        <objectAnimator
+            android:duration="@android:integer/config_shortAnimTime"
+            android:propertyName="translationZ"
+            android:valueTo="0dp"
+            android:valueType="floatType" />
     </item>
 </selector>

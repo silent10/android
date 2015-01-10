@@ -117,11 +117,11 @@ android:layout_height="match_parent">
 
     <com.evaapis.android.SoundLevelView
         android:id="@+id/surfaceView_sound_wave"
-        android:layout_width="wrap_content"
-        android:layout_height="56dip"
+        android:layout_width="70dp"
+        android:layout_height="46dp"
         android:layout_marginLeft="20dip"
         android:layout_marginRight="85dip"
-        android:layout_marginBottom="22dp"
+        android:layout_marginBottom="27dp"
         android:layout_alignParentBottom="true"
         android:background="#22000000"
         android:visibility="gone"
@@ -139,7 +139,7 @@ android:layout_height="match_parent">
         android:contentDescription="@string/microphone_button"
         android:onClick="myClickHandler"
         android:padding="12dp"
-        android:src="@drawable/microphone_icon2"
+        android:src="@drawable/animated_microphone"
         android:text="@string/button"
         android:elevation="9dp"
          />

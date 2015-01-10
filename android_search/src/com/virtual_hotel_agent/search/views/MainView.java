@@ -49,6 +49,7 @@ import com.virtual_hotel_agent.search.views.fragments.HotelListFragment;
 public class MainView {
 
 	private static final String TAG = "MainView";
+	public static final long UPDATE_SOUND_VIEW_INTERVAL = 60; // update the soundView every such ms
 	private View mStatusPanel;
 	private TextView mStatusText;
 	private ProgressBar mProgressBar;
@@ -71,6 +72,14 @@ public class MainView {
 	private DrawerLayout mDrawerLayout;
 	private ActionBarDrawerToggle mDrawerToggle;
 	
+	enum MicButtonShow{
+		icon,
+		flat,
+		none
+	};
+	
+	MicButtonShow micButtonShow;
+	
 	public MainView(final MainActivity mainActivity, Bundle savedInstanceState, List<String> tabTitles) {
 		mStatusPanel = mainActivity.findViewById(R.id.status_panel);
 		mStatusText = (TextView)mainActivity.findViewById(R.id.text_listeningStatus);
@@ -87,6 +96,7 @@ public class MainView {
 		
 		mTabTitles = tabTitles;
 
+		micButtonShow = MicButtonShow.icon;
 
 		Toolbar toolbar = (Toolbar) mainActivity.findViewById(R.id.toolbar);
 		toolbar.setTitle(mainActivity.getString(R.string.app_name));
@@ -96,6 +106,7 @@ public class MainView {
 		final ActionBar supportActionBar = mainActivity.getSupportActionBar();
 		supportActionBar.setHomeButtonEnabled(true);
 
+		mProgressBar.getIndeterminateDrawable().setColorFilter(0xFFFFFFFF, android.graphics.PorterDuff.Mode.SRC_ATOP);
 		
 		final String[] drawerItems = {
 				"Chat with Virtual Agent",
@@ -183,7 +194,29 @@ public class MainView {
 			}
 		});
 //		mTabs.setCurrentItem(mTabTitles.indexOf(mChatTabName));
-
+	}
+	
+	private void showMicButton(MicButtonShow what) {
+		if (micButtonShow == what) {
+			return;
+		}
+		if (what == MicButtonShow.flat) {
+			AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.animated_microphone);
+			mSearchButton.setImageDrawable(animatedDrawable);
+			animatedDrawable.start();
+		}
+		else if (what == MicButtonShow.icon) {
+//			if (speechSearch.getSpeechAudioStreamer().getIsRecording()) {
+//				return; // don't change back to icon if recording
+//			}
+			AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.animated_microphone_reverse);
+			mSearchButton.setImageDrawable(animatedDrawable);
+			animatedDrawable.start();
+		}
+		else {
+			mSearchButton.setImageDrawable(null);
+		}
+		micButtonShow = what;
 	}
 	
 	public void activateSearchButton() {
@@ -195,9 +228,7 @@ public class MainView {
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
 				drawable.startTransition(100);
-				AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.avd);
-				mSearchButton.setImageDrawable(animatedDrawable);
-				animatedDrawable.start();
+				showMicButton(MicButtonShow.flat);
 		    }
 		});
 	}
@@ -212,7 +243,7 @@ public class MainView {
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
-		    	mSearchButton.setImageResource(R.drawable.microphone_icon2);
+		    	showMicButton(MicButtonShow.icon);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -244,7 +275,7 @@ public class MainView {
 			@Override
 			public void run() {
 				// TODO: disable button?
-				mSearchButton.setImageResource(R.drawable.microphone_icon2);
+				showMicButton(MicButtonShow.none);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -267,6 +298,7 @@ public class MainView {
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
+		    	showMicButton(MicButtonShow.icon);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_activate);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -296,7 +328,7 @@ public class MainView {
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
-		    	mSearchButton.setImageResource(R.drawable.microphone_icon2);
+		    	showMicButton(MicButtonShow.icon);
 				mSearchButton.setBackgroundResource(R.drawable.transition_button_bad);
 				mSearchButton.setPadding(search_button_padding, search_button_padding, search_button_padding, search_button_padding);
 				TransitionDrawable drawable = (TransitionDrawable) mSearchButton.getBackground();
@@ -356,24 +388,26 @@ public class MainView {
 				if (speechAudioStreamer.getIsRecording()) {
 					view.mSoundView.setSoundData(
 							speechAudioStreamer.getSoundLevelBuffer(), 
-							speechAudioStreamer.getBufferIndex(),
-							speechAudioStreamer.getPeakLevel(),
-							speechAudioStreamer.getMinSoundLevel()
+							speechAudioStreamer.getBufferIndex()
+							//speechAudioStreamer.getPeakLevel(),
+							//speechAudioStreamer.getMinSoundLevel()
 					);
+					view.mSoundView.stopSpringAnimation();
 					if (view.mSoundView.getVisibility() != View.VISIBLE)
 						view.mSoundView.setVisibility(View.VISIBLE);
-					view.mSoundView.invalidate();
+					
 				}
 				else {
 					if (!processing) {
 						processing = true;
 						view.disableSearchButton();
 						view.showStatus("Processing...");
+						view.mSoundView.startSpringAnimation();
 					}
 				}
 			}
 			
-			sendEmptyMessageDelayed(0, 200);
+			sendEmptyMessageDelayed(0, UPDATE_SOUND_VIEW_INTERVAL);
 			super.handleMessage(msg);
 		}
 	};
@@ -400,7 +434,7 @@ public class MainView {
 	};
 	
 	public void startSpeechSearch(final EvaSpeechComponent speechSearch, Object cookie, boolean editLastUtterance) {
-		showStatus("Listening...");
+		//showStatus("Listening...");
 		
 		activateSearchButton();
 		//view.setBackgroundResource(R.drawable.custom_button_active);

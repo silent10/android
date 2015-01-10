@@ -1,0 +1,9 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+     <objectAnimator
+         android:duration="450"
+         android:propertyName="pathData"
+         android:valueFrom="@string/flat_microphone_top"
+         android:valueTo="@string/microphone_top"
+         android:valueType="pathType"/>
+ </set>
+<!--          android:valueTo=  "M290.991,240.991c0,26.392-21.602,47.999-48.002,47.999 h-11.529 c-26.4,0-48.002-21.607-48.002-47.999V104.002   c0-26.4,21.602-48.004,48.002-48.004h11.529c26.4,0,48.002,21.604,48.002,48.004V240.991z" -->

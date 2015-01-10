@@ -60,9 +60,9 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 				else {
 					esra.mSoundView.setSoundData(
 							speechAudioStreamer.getSoundLevelBuffer(), 
-							speechAudioStreamer.getBufferIndex(),
-							speechAudioStreamer.getPeakLevel(),
-							speechAudioStreamer.getMinSoundLevel()
+							speechAudioStreamer.getBufferIndex()
+							//speechAudioStreamer.getPeakLevel(),
+							//speechAudioStreamer.getMinSoundLevel()
 					);
 					esra.mSoundView.invalidate();
 				}

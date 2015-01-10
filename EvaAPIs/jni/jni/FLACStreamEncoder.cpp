@@ -204,6 +204,7 @@ public:
 		ok &= FLAC__stream_encoder_set_verify(m_encoder, true);
 		ok &= FLAC__stream_encoder_set_compression_level(m_encoder,
 				COMPRESSION_LEVEL);
+		ok &= FLAC__stream_encoder_set_blocksize(m_encoder, 256); // Iftah: attempt to write smaller chunks in higher frequency
 		if (!ok) {
 			return "Could not set up FLAC__StreamEncoder with the given parameters!";
 		}
@@ -219,7 +220,9 @@ public:
 
 		// Allocate write buffer. Based on observations noted down in issue #106, we'll
 		// choose this to be 32k in size. Actual allocation happens lazily.
-		m_write_buffer_size = 32768;
+		//m_write_buffer_size = 32768;
+		// Iftah: attempt to write smaller chunks in higher frequency
+		m_write_buffer_size = 512;
 
 		// The write FIFO gets created lazily. But we'll initialize the mutex for it
 		// here.
