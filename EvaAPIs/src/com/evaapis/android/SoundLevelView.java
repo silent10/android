@@ -73,7 +73,7 @@ public class SoundLevelView extends View {
 		int startOfBuff = 0;
 		int numOfPoints = soundBuffIndex;
 		if (soundBuffIndex > soundBuff.length) {
-			startOfBuff = soundBuffIndex + 1;
+			startOfBuff = soundBuffIndex;
 			numOfPoints = soundBuff.length;
 		}
 			
@@ -88,7 +88,7 @@ public class SoundLevelView extends View {
 			setXStep(xStep);
 		}
 		float xStep2 = 2*xStep;
-		float centerStep = (2.5f*xStep);
+		float centerStep = (1.5f*xStep);
 		float xStep3 = 3*xStep;
 		float xStep4 = 4*xStep;
 		
@@ -136,7 +136,7 @@ public class SoundLevelView extends View {
 				
 				
 				path.cubicTo(curX+xStep, y, curX+xStep2, y, curX+xStep3, 0);
-				curX += xStep4;
+				curX += xStep3;
 			}
 		}
 		
@@ -165,7 +165,6 @@ public class SoundLevelView extends View {
 			this.soundBuff = new float[buff.length];
 			velocities = new float[buff.length]; // need velocities for y values
 		}
-		Log.d(TAG, "@@@@ setSoundData buff size "+buff.length+"   index="+index);
 		// append new data to end of soundBuff
 		int numOfPoints = (index-soundBuffIndex);
 		int startOfBuff = index-numOfPoints;

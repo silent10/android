@@ -53,7 +53,7 @@ public class SpeechAudioStreamer {
 
 	int mBufferIndex = 0;
 	float mMovingAverageBuffer[] = new float[MOVING_AVERAGE_BUFFER_SIZE];
-	float mSoundLevelBuffer[] = new float[25];
+	float mSoundLevelBuffer[] = new float[26];
 
 	long mLastStart = -1;
 	private int mSoundLevel;
@@ -122,7 +122,6 @@ public class SpeechAudioStreamer {
 
 	// called roughly every 50ms with 1600 bytes
 	private Boolean checkForSilence(int numberOfReadBytes) {
-		float currentVolume = 0.0f;
 
 		if (numberOfReadBytes == 0)
 			return null;
@@ -135,11 +134,13 @@ public class SpeechAudioStreamer {
 				numberOfReadBytes = mBuffer.length;
 			}
 		}
+
 		// Analyze Sound.
+		float currentVolume = 0.0f;
 		for (int i = 0; i < numberOfReadBytes; i += 2) {
 			short sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
 //			mBufferShorts[i/2] = sample;
-			currentVolume += Math.abs(sample);
+			currentVolume += sample * sample;  // Math.abs(sample)
 		}
 		// volume: average of the current chunk
 		currentVolume /= numberOfReadBytes;
@@ -166,12 +167,12 @@ public class SpeechAudioStreamer {
 			mMinSoundLevel = movingAverage;
 		}
 		
-		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = movingAverage; // mSoundLevel;
+		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] =  currentVolume; // movingAverage;
+		//Log.d(TAG, "@@@ added "+mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ]+"  to buffer, index now at "+mBufferIndex);
 		mBufferIndex++;
-		//Log.d(TAG, "@@@ added "+currentVolume+"  to buffer, index now at "+mBufferIndex);
 		
-		// identifying speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
-//		if (mBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
+		// identifying speech start by sudden volume up in the last sample relative to the previous MOVING_AVERAGE_BUFFER_SIZE samples
+//		if (mBufferIndex > MOVING_AVERAGE_BUFFER_SIZE && currentVolume > (2.0/MOVING_AVERAGE_BUFFER_SIZE) * movingAverage) {
 //			// this last sample was half of the twice its part of last accumulation buffer
 //			// this was a noise sample
 //			return false;
