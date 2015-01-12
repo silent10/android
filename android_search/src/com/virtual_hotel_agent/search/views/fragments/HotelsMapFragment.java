@@ -289,7 +289,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 	        				    .createEvent("ui_action", "hotel_click", "hotels_map", (long) i)
 	        				    .build()
 	        				   );
-	        		eventBus.post(new HotelItemClicked(i, hotel.hotelId, null, null, null));
+	        		eventBus.post(new HotelItemClicked(i, hotel.hotelId, null, null));
 	        	}
 	        }
         }

@@ -75,7 +75,7 @@ public class SoundLevelView extends View {
 			numOfPoints = soundBuff.length;
 		}
 			
-		float delta = Math.max(500f, peakSound - minSound);
+		float delta = Math.max(50f, peakSound - minSound);
 
 		canvas.save();
 		canvas.translate(0, height);
@@ -150,13 +150,10 @@ public class SoundLevelView extends View {
 			this.soundBuff = new float[buff.length];
 			velocities = new float[buff.length]; // need velocities for y values
 		}
-		
+		Log.d(TAG, "@@@@ setSoundData buff size "+buff.length+"   index="+index);
 		// append new data to end of soundBuff
 		int numOfPoints = (index-soundBuffIndex);
-		int startOfBuff = 0;
-		if (index > soundBuff.length) {
-			startOfBuff = index+1;
-		}
+		int startOfBuff = index-numOfPoints;
 		if (autoMinMax) {
 			for (int i=0; i<numOfPoints; i++) {
 				float volume = buff[(startOfBuff+i)% buff.length];
@@ -171,8 +168,7 @@ public class SoundLevelView extends View {
 			}
 		}
 		soundBuffIndex = index;
-		Log.i(TAG, "Setting points buff for " + buff.length
-				+ " sound samples");
+		Log.i(TAG, "@@@ added "+numOfPoints+"  to buffer, peak="+peakSound+"  minSound="+minSound);
 		
 //		if (springiness != 0) {
 //			postDelayed(animator, 15);
@@ -190,6 +186,7 @@ public class SoundLevelView extends View {
 			//minSound = Integer.MAX_VALUE;
 			soundBuff = null;
 			velocities = null;
+			soundBuffIndex = 0;
 		}
 	};
 	
@@ -222,7 +219,7 @@ public class SoundLevelView extends View {
 	        int startOfBuff = 0;
 			int numOfPoints = soundBuffIndex;
 			if (soundBuffIndex > soundBuff.length) {
-				startOfBuff = soundBuffIndex + 1;
+				startOfBuff = soundBuffIndex;
 				numOfPoints = soundBuff.length;
 			}
 			

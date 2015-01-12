@@ -42,7 +42,7 @@ public class SpeechAudioStreamer {
 //	private int[] mBufferShorts = null;
 	private boolean mIsRecording = false;
 
-	public static final int TEMP_BUFFER_SIZE = 5;
+	public static final int MOVING_AVERAGE_BUFFER_SIZE = 5;
 	private static final long SILENCE_PERIOD = 700;
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
@@ -52,7 +52,7 @@ public class SpeechAudioStreamer {
 	private int mSampleRate;
 
 	int mBufferIndex = 0;
-	float mSilenceAccumulationBuffer[] = new float[TEMP_BUFFER_SIZE];
+	float mMovingAverageBuffer[] = new float[MOVING_AVERAGE_BUFFER_SIZE];
 	float mSoundLevelBuffer[] = new float[25];
 
 	long mLastStart = -1;
@@ -122,7 +122,7 @@ public class SpeechAudioStreamer {
 
 	// called roughly every 50ms with 1600 bytes
 	private Boolean checkForSilence(int numberOfReadBytes) {
-		float totalAbsValue = 0.0f;
+		float currentVolume = 0.0f;
 
 		if (numberOfReadBytes == 0)
 			return null;
@@ -139,19 +139,19 @@ public class SpeechAudioStreamer {
 		for (int i = 0; i < numberOfReadBytes; i += 2) {
 			short sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
 //			mBufferShorts[i/2] = sample;
-			totalAbsValue += Math.abs(sample);
+			currentVolume += Math.abs(sample);
 		}
-		// average "sound level" of the current chunk
-		totalAbsValue /= numberOfReadBytes;
+		// volume: average of the current chunk
+		currentVolume /= numberOfReadBytes;
 
-		// Analyze temp buffer.
-		mSilenceAccumulationBuffer[mBufferIndex % TEMP_BUFFER_SIZE] = totalAbsValue;
-		float temp = 0.0f;
-		for (int i = 0; i < TEMP_BUFFER_SIZE; ++i)
-			temp += mSilenceAccumulationBuffer[i];
+		// Analyze movingAverage buffer.
+		mMovingAverageBuffer[mBufferIndex % MOVING_AVERAGE_BUFFER_SIZE] = currentVolume;
+		float movingAverage = 0.0f;
+		for (int i = 0; i < MOVING_AVERAGE_BUFFER_SIZE; ++i)
+			movingAverage += mMovingAverageBuffer[i];
 
-		this.mSoundLevel = (int) temp;
-		mBufferIndex++;
+		movingAverage /= MOVING_AVERAGE_BUFFER_SIZE;
+		this.mSoundLevel = (int) movingAverage;
 
 		// reduce Peak and increase minSound - to allow temporary peak/min to disappear over time
 //		float dist = mPeakSoundLevel - mMinSoundLevel;
@@ -159,14 +159,16 @@ public class SpeechAudioStreamer {
 //		mPeakSoundLevel -= factor;
 //		mMinSoundLevel += factor;
 //		
-		if (temp > mPeakSoundLevel) {
-			mPeakSoundLevel = temp;
+		if (movingAverage > mPeakSoundLevel) {
+			mPeakSoundLevel = movingAverage;
 		}
-		if (temp < mMinSoundLevel) {
-			mMinSoundLevel = temp;
+		if (movingAverage < mMinSoundLevel) {
+			mMinSoundLevel = movingAverage;
 		}
 		
-		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] =  mSoundLevel;
+		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] = movingAverage; // mSoundLevel;
+		mBufferIndex++;
+		//Log.d(TAG, "@@@ added "+currentVolume+"  to buffer, index now at "+mBufferIndex);
 		
 		// identifying speech start by sudden volume up in the last sample relative to the previous TEMP_BUFFER samples
 //		if (mBufferIndex > TEMP_BUFFER_SIZE && totalAbsValue > (2.0/TEMP_BUFFER_SIZE) * temp) {
@@ -177,7 +179,7 @@ public class SpeechAudioStreamer {
 
 
 //		Log.i(TAG, "current D: "+(temp - mMinSoundLevel)+  "  peak D: "+(mPeakSoundLevel-mMinSoundLevel));
-		if ((temp - mMinSoundLevel) <= (mPeakSoundLevel-mMinSoundLevel) * 0.20f) { // became silent
+		if ((movingAverage - mMinSoundLevel) <= (mPeakSoundLevel-mMinSoundLevel) * 0.20f) { // became silent
 			if (mLastStart == -1) {
 				mLastStart = System.currentTimeMillis();
 				return null;
@@ -251,8 +253,8 @@ public class SpeechAudioStreamer {
 
 			try {
 
-				for (int i = 0; i < TEMP_BUFFER_SIZE; i++) {
-					mSilenceAccumulationBuffer[i] = 0.0f;
+				for (int i = 0; i < MOVING_AVERAGE_BUFFER_SIZE; i++) {
+					mMovingAverageBuffer[i] = 0.0f;
 				}
 				for (int i=0; i<mSoundLevelBuffer.length; i++) {
 					mSoundLevelBuffer[i] = 0;
@@ -403,6 +405,7 @@ public class SpeechAudioStreamer {
 			Log.w(TAG, "Already recording");
 			return null;
 		}
+		mBufferIndex = 0;
 		mIsRecording = true;
 //		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
 		Producer p = new Producer();

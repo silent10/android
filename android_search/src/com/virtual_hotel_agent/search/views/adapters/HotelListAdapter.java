@@ -212,14 +212,14 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 						}
 					});
 	
-			if (hotel.tripAdvisorRatingUrl == null) {//hotel.tripAdvisorRating < TRIP_ADVISOR_GOOD_RATING) {
-				holder.tripAdvisorStrip.setVisibility(View.GONE);
-			} else {
-				holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
-	//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
-				holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
-				loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, null, null);
-			}
+//			if (hotel.tripAdvisorRatingUrl == null) {//hotel.tripAdvisorRating < TRIP_ADVISOR_GOOD_RATING) {
+//				holder.tripAdvisorStrip.setVisibility(View.GONE);
+//			} else {
+//				holder.tripAdvisorStrip.setVisibility(View.VISIBLE);
+//	//			holder.tripAdvisorRating.setText(String.valueOf(hotel.tripAdvisorRating) +" out of 5");
+//				holder.reviews.setText("("+hotel.tripAdvisorReviewCount+")");
+//				loader.loadDrawable(hotel.tripAdvisorRatingUrl, holder.tripAdvisorStrip, null, null);
+//			}
 		}
 		
 	}
@@ -235,7 +235,7 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 		public int position;
 		public TextView reviews;
 		public ViewGroup layout;
-		public ImageView tripAdvisorStrip;
+//		public ImageView tripAdvisorStrip;
 //		TextView tripAdvisorRating;
 		CardView cardView;
 		ImageView image;
@@ -250,15 +250,15 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 			super(itemView);
 			this.listener = listener;
 			image = (ImageView) itemView.findViewById(R.id.hotelImage);
-			tripAdvisorStrip = (ImageView) itemView.findViewById(R.id.tripAdvisorStrip);
-//			tripAdvisorRating = (TextView)itemView.findViewById(R.id.tripAdvisorRating);
+//			reviews = (TextView) itemView.findViewById(R.id.tripAdvisorReviews);
+//			tripAdvisorStrip = (ImageView) itemView.findViewById(R.id.tripAdvisorStrip);
+////			tripAdvisorRating = (TextView)itemView.findViewById(R.id.tripAdvisorRating);
 			name = (TextView) itemView.findViewById(R.id.hotelName);
 			rate = (TextView) itemView.findViewById(R.id.pricePerNight);
 			layout = (ViewGroup) itemView.findViewById(R.id.hotel_list_item_layout);
 			distance = (TextView) itemView.findViewById(R.id.hotelDistance);
 			location = (TextView) itemView.findViewById(R.id.hotelLocation);
 			cardView = (CardView) itemView.findViewById(R.id.card_view);
-			reviews = (TextView) itemView.findViewById(R.id.tripAdvisorReviews);
 			rating = (RatingBar) itemView.findViewById(R.id.rating);
 			cardView.setOnClickListener(this);
 		}

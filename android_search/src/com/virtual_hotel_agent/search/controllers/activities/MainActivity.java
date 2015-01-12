@@ -446,7 +446,11 @@ public class MainActivity extends BaseActivity implements
 		//menu.getItem(2).setVisible(eva.isDebug());
 		// If the nav drawer is open, hide action items related to the content view
 	    boolean drawerOpen = mainView.isDrawerOpen();
-	    menu.findItem(R.id.restart_button).setVisible(!drawerOpen);
+	    if (menu != null) {
+			MenuItem restartItem = menu.findItem(R.id.restart_button);
+			if (restartItem != null)
+				restartItem.setVisible(!drawerOpen);
+		}
 	    if (drawerOpen) {
 	    	soundControlMenuItem.setVisible(false);
 	    }
@@ -1271,8 +1275,8 @@ public class MainActivity extends BaseActivity implements
 					if (event != null && event.hotelName != null) {
 						ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this, 
 								Pair.create(event.hotelName, "hotelName"),
-								Pair.create(event.hotelStarRating, "hotelStarRating"),
-								Pair.create(event.hotelTripAdvRating, "hotelTripAdvRating")
+								Pair.create(event.hotelStarRating, "hotelStarRating")//,
+								//Pair.create(event.hotelTripAdvRating, "hotelTripAdvRating")
 								);
 						startActivity(detailIntent, options.toBundle());
 					}

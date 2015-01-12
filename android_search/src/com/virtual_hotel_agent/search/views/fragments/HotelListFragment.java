@@ -223,7 +223,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 		eventBus.post(new HotelItemClicked(position,
 							VHAApplication.FOUND_HOTELS.get(position).hotelId,
 							view.findViewById(R.id.hotelName),
-							view.findViewById(R.id.tripAdvisorStrip),
+							//view.findViewById(R.id.tripAdvisorStrip),
 							view.findViewById(R.id.rating)));
 		Log.d(TAG, "running showHotelDetails()");
 

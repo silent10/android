@@ -392,7 +392,7 @@ public class MainView {
 							//speechAudioStreamer.getPeakLevel(),
 							//speechAudioStreamer.getMinSoundLevel()
 					);
-					view.mSoundView.stopSpringAnimation();
+					//view.mSoundView.stopSpringAnimation();
 					if (view.mSoundView.getVisibility() != View.VISIBLE)
 						view.mSoundView.setVisibility(View.VISIBLE);
 					
@@ -402,7 +402,7 @@ public class MainView {
 						processing = true;
 						view.disableSearchButton();
 						view.showStatus("Processing...");
-						view.mSoundView.startSpringAnimation();
+						//view.mSoundView.startSpringAnimation();
 					}
 				}
 			}
