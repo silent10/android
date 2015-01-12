@@ -3,6 +3,10 @@
 
 <resources>
 
+    <declare-styleable name="ChatBalloonLP">
+	    <attr name="android:layout_gravity" />
+	</declare-styleable>
+    
     <!-- From ShowcaseView -->
     <declare-styleable name="ShowcaseView">
         <attr name="sv_backgroundColor" format="color|reference" />

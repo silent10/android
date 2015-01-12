@@ -1,6 +1,7 @@
 package com.virtual_hotel_agent.search.util;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Outline;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 
 import com.evature.util.Log;
+import com.virtual_hotel_agent.search.R;
 
 // based on http://developer.android.com/reference/android/view/ViewGroup.html
 // https://developer.android.com/training/material/shadows-clipping.html
@@ -29,7 +31,8 @@ public class ChatBalloon extends ViewGroup {
 	private int mPointerHeight;
 	private Paint mBalloonPaint;
 	private Path mPointerPath;
-	private Rect mRect = new Rect();
+	private ChatPointer pointerView;
+	private float mDensity;
 	
 
 	public ChatBalloon(Context context) {
@@ -44,9 +47,9 @@ public class ChatBalloon extends ViewGroup {
 		super(context, attrs, defStyle);
 		
 		try {
-			float density = context.getResources().getDisplayMetrics().density;
-			mPointerWidth = Math.round(density * POINTER_WIDTH);
-			mPointerHeight = Math.round(density * POINTER_HEIGHT);
+			mDensity = context.getResources().getDisplayMetrics().density;
+			mPointerWidth = Math.round(mDensity * POINTER_WIDTH);
+			mPointerHeight = Math.round(mDensity * POINTER_HEIGHT);
 	
 			/*if (attrs != null) {
 				TypedArray a = context.obtainStyledAttributes(attrs, new int[] { R.attr.tint });
@@ -66,6 +69,10 @@ public class ChatBalloon extends ViewGroup {
 //			mBalloonPaint.setShadowLayer(6, 4, 4, 0x80000000);
 	
 			mPointerPath = new Path();
+			
+			pointerView = new ChatPointer(context, attrs, defStyle);
+			this.setElevation(getElevation()); // init the pointer elevation
+			addView(pointerView);
 
 			//setPadding(getPaddingLeft()+mPointerWidth, getPaddingTop(), getPaddingRight(), getPaddingBottom());
 			setOutlineProvider(new ChatBalloneOutlineProvider());
@@ -73,29 +80,54 @@ public class ChatBalloon extends ViewGroup {
 		catch (Exception e) {
 			Log.e(TAG, "Error initializing ");
 			e.printStackTrace();
+			String t = Log.getStackTraceString(e.getCause());
+			Log.e(TAG, "Cause: "+t);
 		}
 	}
 	
 
+    @Override public void setElevation(float elevation) {
+    	super.setElevation(elevation);
+    	if (pointerView != null)
+    		pointerView.setElevation(elevation + 0.1f);
+    };
 		
 	@Override
 	public void draw(Canvas canvas) {
 		Log.i(TAG, "draw");
-		canvas.translate(mPointerWidth, 0);
 		super.draw(canvas);
-		canvas.translate(-mPointerWidth, 0);
-		canvas.drawPath(mPointerPath, mBalloonPaint);
+		//pointerView.draw(canvas);
 	}
 	
+	class ChatPointer extends View {
+
+		public ChatPointer(Context context, AttributeSet attrs, int defStyleAttr) {
+			super(context, attrs, defStyleAttr);
+			
+			setOutlineProvider(new ChatPointerOutlineProvider());
+		}
+		
+		@Override
+		public void onDraw(Canvas canvas) {
+			super.onDraw(canvas);
+			canvas.drawPath(mPointerPath, mBalloonPaint);
+			canvas.drawRect(mTmpChildRect.left, mTmpChildRect.top, mTmpChildRect.left+6*mDensity, mTmpChildRect.top+mPointerHeight, mBalloonPaint);
+		}
+		
+	}
+	
+	class ChatPointerOutlineProvider extends ViewOutlineProvider {
+
+		@Override
+		public void getOutline(View view, Outline outline) {
+			outline.setConvexPath(mPointerPath);
+		}
+	}
 	
 	class ChatBalloneOutlineProvider extends ViewOutlineProvider {
 		@Override
 		public void getOutline(View view, Outline outline) {
-			if (mRect.right - mRect.left > mPointerWidth) {
-				outline.setConvexPath(mPointerPath);
-				outline.setRect(mRect);
-				Log.d(TAG, "Setting outline to "+mRect.left+", "+mRect.top+","+mRect.right+","+mRect.bottom);
-			}
+			outline.setRect(mTmpChildRect);
 		}
 	}
 	
@@ -197,12 +229,12 @@ public class ChatBalloon extends ViewGroup {
 		mPointerPath.lineTo(x0, getPaddingTop()+mPointerHeight);
 		mPointerPath.close();
 		
-		mRect.set(x0, getPaddingTop(), getWidth()-getPaddingRight(), getHeight()-getPaddingBottom());
+		//mRect.set(x0, getPaddingTop(), w-getPaddingRight(), h-getPaddingBottom());
     }
 
     /** These are used for computing child frames based on their gravity. */
-//    private final Rect mTmpContainerRect = new Rect();
-//    private final Rect mTmpChildRect = new Rect();
+    private final Rect mTmpContainerRect = new Rect();
+    private final Rect mTmpChildRect = new Rect();
     
     /**
      * Position all children within this layout.
@@ -216,22 +248,26 @@ public class ChatBalloon extends ViewGroup {
         int rightPos = right - left - getPaddingRight();
 
         // This is the middle region inside of the gutter.
-        final int middleLeft = leftPos;//+ mPointerWidth;
+        final int middleLeft = leftPos+ mPointerWidth;
         final int middleRight = rightPos;
 
         // These are the top and bottom edges in which we are performing layout.
         final int parentTop = getPaddingTop();
         final int parentBottom = bottom - top - getPaddingBottom();
 
+        pointerView.layout(leftPos, parentTop, leftPos+mPointerWidth+Math.round(6f*mDensity), parentTop+mPointerHeight);
+        boolean found = false;
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
+            if (child.getVisibility() != GONE && child != pointerView) {
+            	if (found) {
+            		Log.w(TAG, "ChatBalloon expected only a single non-pointer child!");
+            	}
+            	found = true;
+                final int width = child.getMeasuredWidth();
+                final int height = child.getMeasuredHeight();
 
-//                final int width = child.getMeasuredWidth();
-//                final int height = child.getMeasuredHeight();
-
-//                if (child.getLayoutParams() instanceof MarginLayoutParams) {
-//                	final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+                	final LayoutParams lp = (LayoutParams) child.getLayoutParams();
                 // Compute the frame in which we are placing this child.
                 /*if (lp.position == LayoutParams.POSITION_LEFT) {
                     mTmpContainerRect.left = leftPos + lp.leftMargin;
@@ -242,23 +278,83 @@ public class ChatBalloon extends ViewGroup {
                     mTmpContainerRect.left = rightPos - width - lp.leftMargin;
                     rightPos = mTmpContainerRect.left;
                 } else {*/
-//                    mTmpContainerRect.left = middleLeft + lp.leftMargin;
-//                    mTmpContainerRect.right = middleRight - lp.rightMargin;
+                    mTmpContainerRect.left = middleLeft + lp.leftMargin;
+                    mTmpContainerRect.right = middleRight - lp.rightMargin;
                 //}
-//                mTmpContainerRect.top = parentTop+ lp.topMargin;
-//                mTmpContainerRect.bottom = parentBottom - lp.bottomMargin;
-//                }
+                mTmpContainerRect.top = parentTop+ lp.topMargin;
+                mTmpContainerRect.bottom = parentBottom - lp.bottomMargin;
+            
 
                 // Use the child's gravity and size to determine its final
                 // frame within its container.
-                //Gravity.apply(lp.gravity, width, height, mTmpContainerRect, mTmpChildRect);
+                Gravity.apply(lp.gravity, width, height, mTmpContainerRect, mTmpChildRect);
 
                 // Place the child.
-//                child.layout(mTmpChildRect.left, mTmpChildRect.top,
-//                        mTmpChildRect.right, mTmpChildRect.bottom);
+                child.layout(mTmpChildRect.left, mTmpChildRect.top,
+                        mTmpChildRect.right, mTmpChildRect.bottom);
             	
-            	child.layout(middleLeft, parentTop, middleRight, parentBottom);
             }
+        }
+        if (!found) {
+        	Log.w(TAG, "ChatBalloon expected a visible non-pointer child!");
+        }
+        
+    }
+    
+    
+ // ----------------------------------------------------------------------
+    // The rest of the implementation is for custom per-child layout parameters.
+    // If you do not need these (for example you are writing a layout manager
+    // that does fixed positioning of its children), you can drop all of this.
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new ChatBalloon.LayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    protected LayoutParams generateDefaultLayoutParams() {
+        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+    }
+
+    @Override
+    protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
+        return new LayoutParams(p);
+    }
+
+    @Override
+    protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
+        return p instanceof LayoutParams;
+    }
+
+    /**
+     * Custom per-child layout information.
+     */
+    public static class LayoutParams extends MarginLayoutParams {
+        /**
+         * The gravity to apply with the View to which these layout parameters
+         * are associated.
+         */
+        public int gravity = Gravity.TOP | Gravity.START;
+
+
+        public LayoutParams(Context c, AttributeSet attrs) {
+            super(c, attrs);
+
+            // Pull the layout param values from the layout XML during
+            // inflation.  This is not needed if you don't care about
+            // changing the layout behavior in XML.
+            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.ChatBalloonLP);
+            gravity = a.getInt(R.styleable.ChatBalloonLP_android_layout_gravity, gravity);
+            a.recycle();
+        }
+
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
+
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
         }
     }
 	
