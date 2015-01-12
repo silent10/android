@@ -30,6 +30,7 @@ public class SoundLevelView extends View {
     private float springiness = 0.75f;
     private float damping = 0.92f;
     Path path = new Path();
+    private boolean fishEye = true;
 
 	public SoundLevelView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -65,8 +66,9 @@ public class SoundLevelView extends View {
 		if (soundBuff == null) {
 			return;
 		}
-		int height = this.getHeight() / 2;
+		int height_2 = this.getHeight() / 2;
 		float width = this.getWidth();
+		float width_2 = width/2;
 
 		int startOfBuff = 0;
 		int numOfPoints = soundBuffIndex;
@@ -78,7 +80,7 @@ public class SoundLevelView extends View {
 		float delta = Math.max(50f, peakSound - minSound);
 
 		canvas.save();
-		canvas.translate(0, height);
+		canvas.translate(0, height_2);
 
 		float xStep = getXStep();
 		if (xStep == 0) {
@@ -86,6 +88,7 @@ public class SoundLevelView extends View {
 			setXStep(xStep);
 		}
 		float xStep2 = 2*xStep;
+		float centerStep = (2.5f*xStep);
 		float xStep3 = 3*xStep;
 		float xStep4 = 4*xStep;
 		
@@ -109,15 +112,27 @@ public class SoundLevelView extends View {
 			path.moveTo(curX, 0);
 		}
 		if (numOfPoints > 4) {
-			
+			float Rsqr = height_2 * height_2;
 			for (int i = 0; i < numOfPoints; i++) {
 				float soundLevel = Math.abs(soundBuff[(i + startOfBuff) % soundBuff.length]);
 				if (soundLevel > 0) {
 					soundLevel -= minSound;
 				}
-				float normLevel = soundLevel / delta; // normalize
+				float normLevel = soundLevel / delta; // normalize - from volume to 0..1
+
+				// change sign of level based on odd/even
+				float y = ((i+ startOfBuff) % 2 == 0 ? -1 : 1) * normLevel;
 				
-				float y = ((i+ startOfBuff) % 2 == 0 ? -1 : 1) * height * normLevel;
+				
+				// strech from 0..1 to height
+				if (fishEye) {
+					float centerX = curX+centerStep;
+					float x = Math.abs(centerX - width_2);
+					y *=  Math.sqrt(Rsqr - x*x);
+				}
+				else {
+					y *= height_2;
+				}
 				
 				
 				path.cubicTo(curX+xStep, y, curX+xStep2, y, curX+xStep3, 0);
