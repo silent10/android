@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -11,15 +12,18 @@
           android:animateLayoutChanges="true"
           android:layout_gravity="left"
           android:elevation="6dp"
-          android:layout_marginLeft="2dp"
+          android:layout_marginRight="3dp"
           android:layout_marginBottom="8dp"
+          android:layout_marginTop="20dp"
+          app:pointerSide="Left"
+          
            >
-<!--           android:background="@drawable/me_chat_bubble" -->
 
 		<LinearLayout 
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:orientation="horizontal"
+          android:animateLayoutChanges="true"
           android:background="#fff"
           android:padding="10dp"
 		    >

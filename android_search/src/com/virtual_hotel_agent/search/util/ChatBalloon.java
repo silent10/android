@@ -3,7 +3,6 @@ package com.virtual_hotel_agent.search.util;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -14,6 +13,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
@@ -33,6 +34,17 @@ public class ChatBalloon extends ViewGroup {
 	private Path mPointerPath;
 	private ChatPointer pointerView;
 	private float mDensity;
+	public enum PointerSide {
+		Left,
+		Right
+	}
+	
+	private PointerSide mPointerSide;
+
+	/** These are used for computing child frames based on their gravity. */
+    private final Rect mTmpContainerRect = new Rect();
+    private Rect mTmpChildRect = new Rect();
+    
 	
 
 	public ChatBalloon(Context context) {
@@ -48,33 +60,38 @@ public class ChatBalloon extends ViewGroup {
 		
 		try {
 			mDensity = context.getResources().getDisplayMetrics().density;
-			mPointerWidth = Math.round(mDensity * POINTER_WIDTH);
-			mPointerHeight = Math.round(mDensity * POINTER_HEIGHT);
 	
-			/*if (attrs != null) {
-				TypedArray a = context.obtainStyledAttributes(attrs, new int[] { R.attr.tint });
+			if (attrs != null) {
+				TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ChatBalloon, 0, defStyle);
 				try {
-					mColor = a.getColor(R. , 0xffffffff);
+					mColor = a.getColor(R.styleable.ChatBalloon_pointerColor , 0xffffffff);
+					mPointerWidth = a.getDimensionPixelSize(R.styleable.ChatBalloon_pointerWidth, Math.round(mDensity * POINTER_WIDTH));
+					mPointerHeight = a.getDimensionPixelSize(R.styleable.ChatBalloon_pointerHeight, Math.round(mDensity * POINTER_HEIGHT));
+					String pointerSide = a.getString(R.styleable.ChatBalloon_pointerSide);
+					if (pointerSide != null) {
+						try {
+							mPointerSide = PointerSide.valueOf(pointerSide);
+						} catch(IllegalArgumentException e) {
+							mPointerSide = PointerSide.Left;
+							Log.w(TAG, "PointerSide "+pointerSide+" isn't allowed, valid values are ChatBalloon.PointerSide enum");
+						}
+					}
 				}
 				finally {
 					a.recycle();
 				}
-			}*/
-			mColor = Color.WHITE;
+			}
 //			setWillNotCacheDrawing(false);
 			mBalloonPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			mBalloonPaint.setColor(mColor);
 			mBalloonPaint.setStyle(Style.FILL_AND_STROKE);
 			
-//			mBalloonPaint.setShadowLayer(6, 4, 4, 0x80000000);
-	
 			mPointerPath = new Path();
-			
+			calculatePointerPath();
 			pointerView = new ChatPointer(context, attrs, defStyle);
-			this.setElevation(getElevation()); // init the pointer elevation
+			this.setElevation(getElevation()); // init the pointer elevation and padding/margin offset
 			addView(pointerView);
-
-			//setPadding(getPaddingLeft()+mPointerWidth, getPaddingTop(), getPaddingRight(), getPaddingBottom());
+			
 			setOutlineProvider(new ChatBalloneOutlineProvider());
 		}
 		catch (Exception e) {
@@ -82,6 +99,7 @@ public class ChatBalloon extends ViewGroup {
 			e.printStackTrace();
 			String t = Log.getStackTraceString(e.getCause());
 			Log.e(TAG, "Cause: "+t);
+			throw e;
 		}
 	}
 	
@@ -90,6 +108,14 @@ public class ChatBalloon extends ViewGroup {
     	super.setElevation(elevation);
     	if (pointerView != null)
     		pointerView.setElevation(elevation + 0.1f);
+    	if (mPointerPath != null)
+    		calculatePointerPath();
+//    	setPadding(getPaddingLeft()+Math.round(getElevation()), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+//		ViewGroup.LayoutParams lp = this.getLayoutParams();
+//		if (lp instanceof MarginLayoutParams) {
+//			MarginLayoutParams mlp = (MarginLayoutParams) lp;
+//			mlp.setMarginStart(mlp.getMarginStart() - Math.round(getElevation()));
+//		}
     };
 		
 	@Override
@@ -111,7 +137,12 @@ public class ChatBalloon extends ViewGroup {
 		public void onDraw(Canvas canvas) {
 			super.onDraw(canvas);
 			canvas.drawPath(mPointerPath, mBalloonPaint);
-			canvas.drawRect(mTmpChildRect.left, mTmpChildRect.top, mTmpChildRect.left+6*mDensity, mTmpChildRect.top+mPointerHeight, mBalloonPaint);
+			if (mPointerSide == PointerSide.Left) {
+				canvas.drawRect(mTmpChildRect.left, mTmpChildRect.top, mTmpChildRect.left+6*mDensity, mTmpChildRect.top+mPointerHeight, mBalloonPaint);
+			}
+			else {
+				canvas.drawRect(0, mTmpChildRect.top, getElevation(), mTmpChildRect.top+mPointerHeight, mBalloonPaint);
+			}
 		}
 		
 	}
@@ -124,10 +155,15 @@ public class ChatBalloon extends ViewGroup {
 		}
 	}
 	
-	class ChatBalloneOutlineProvider extends ViewOutlineProvider {
+	static class ChatBalloneOutlineProvider extends ViewOutlineProvider {
 		@Override
 		public void getOutline(View view, Outline outline) {
-			outline.setRect(mTmpChildRect);
+			ChatBalloon cb = (ChatBalloon) view;
+			LinearLayout ll = (LinearLayout)cb.getChildAt(1);
+			TextView tv = (TextView) ll.getChildAt(0);
+			String dbgText = tv.getText().subSequence(0, Math.max(tv.getText().length()-1, 20)).toString().replace("\n", "");
+			Log.d(TAG, "Setting : ["+dbgText+"] outline to "+cb.mTmpChildRect.toShortString());
+			outline.setRect(cb.mTmpChildRect);
 		}
 	}
 	
@@ -163,10 +199,10 @@ public class ChatBalloon extends ViewGroup {
         // from their size.
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() != GONE) {
+            if (child.getVisibility() != GONE && child != pointerView) {
                 // Measure the child.
             	if (child.getLayoutParams() instanceof MarginLayoutParams) {
-            		measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            		measureChildWithMargins(child, widthMeasureSpec, mPointerWidth+Math.round(getElevation()), heightMeasureSpec, 0);
             		// Update our size information based on the layout params.  Children
                     // that asked to be positioned on the left or right go in those gutters.
                     final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
@@ -196,15 +232,19 @@ public class ChatBalloon extends ViewGroup {
 //                //}
 //                maxHeight = Math.max(maxHeight,
 //                        child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-            	maxHeight = Math.max(maxHeight,
-                        child.getMeasuredHeight());
+            	
                 childState = combineMeasuredStates(childState, child.getMeasuredState());
             }
         }
 
         // Total width is the maximum width of all inner children plus the gutters.
         //maxWidth += mLeftWidth + mRightWidth;
-        maxWidth += mPointerWidth;
+//        if (mPointerSide == PointerSide.Left) {
+        	maxWidth += mPointerWidth+ Math.round(getElevation());
+//        }
+//        else {
+//        	maxWidth -= mPointerWidth+ Math.round(getElevation());
+//        }
 
         // Check against our minimum height and width
         maxHeight = Math.max(maxHeight, getSuggestedMinimumHeight());
@@ -222,20 +262,29 @@ public class ChatBalloon extends ViewGroup {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     	super.onSizeChanged(w, h, oldw, oldh);
     	
-		mPointerPath.reset();
-		int x0 = getPaddingLeft()+mPointerWidth;
-		mPointerPath.moveTo(getPaddingLeft(), getPaddingTop());
-		mPointerPath.lineTo(x0, getPaddingTop());
-		mPointerPath.lineTo(x0, getPaddingTop()+mPointerHeight);
-		mPointerPath.close();
+		calculatePointerPath();
 		
 		//mRect.set(x0, getPaddingTop(), w-getPaddingRight(), h-getPaddingBottom());
     }
 
-    /** These are used for computing child frames based on their gravity. */
-    private final Rect mTmpContainerRect = new Rect();
-    private final Rect mTmpChildRect = new Rect();
-    
+	private void calculatePointerPath() {
+		mPointerPath.reset();
+		if (mPointerSide == PointerSide.Left) {
+			int x0 = getPaddingLeft()+Math.round(getElevation());
+			mPointerPath.moveTo(x0, getPaddingTop());
+			mPointerPath.lineTo(x0+mPointerWidth, getPaddingTop());
+			mPointerPath.lineTo(x0+mPointerWidth, getPaddingTop()+mPointerHeight);
+			mPointerPath.close();
+		}
+		else {
+			int x0 = Math.round(getElevation());
+			mPointerPath.moveTo(x0, getPaddingTop());
+			mPointerPath.lineTo(x0+mPointerWidth, getPaddingTop());
+			mPointerPath.lineTo(x0, getPaddingTop()+mPointerHeight);
+			mPointerPath.close();
+		}
+	}
+
     /**
      * Position all children within this layout.
      */
@@ -247,23 +296,40 @@ public class ChatBalloon extends ViewGroup {
         int leftPos = getPaddingLeft();
         int rightPos = right - left - getPaddingRight();
 
-        // This is the middle region inside of the gutter.
-        final int middleLeft = leftPos+ mPointerWidth;
-        final int middleRight = rightPos;
+        // This is the middle region - next to the pointer.
+        final int middleLeft;
+        if (mPointerSide == PointerSide.Left) { 
+        	middleLeft = leftPos+ mPointerWidth+Math.round(getElevation());
+        }
+        else {
+        	middleLeft = leftPos;
+        }
+        final int middleRight; 
+        if (mPointerSide == PointerSide.Left) {
+        	middleRight = rightPos;
+        }
+        else {
+        	middleRight = rightPos - mPointerWidth- Math.round(getElevation());
+        }
 
         // These are the top and bottom edges in which we are performing layout.
         final int parentTop = getPaddingTop();
         final int parentBottom = bottom - top - getPaddingBottom();
 
-        pointerView.layout(leftPos, parentTop, leftPos+mPointerWidth+Math.round(6f*mDensity), parentTop+mPointerHeight);
-        boolean found = false;
+        if (mPointerSide == PointerSide.Left) {
+        	pointerView.layout(leftPos, parentTop, middleLeft+Math.round(getElevation()), parentTop+mPointerHeight+Math.round(getElevation()));
+        }
+        else {
+        	pointerView.layout(middleRight-Math.round(getElevation()), parentTop, rightPos, parentTop+mPointerHeight+Math.round(getElevation()));
+        }
+        boolean foundNonPointer = false;
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE && child != pointerView) {
-            	if (found) {
+            	if (foundNonPointer) {
             		Log.w(TAG, "ChatBalloon expected only a single non-pointer child!");
             	}
-            	found = true;
+            	foundNonPointer = true;
                 final int width = child.getMeasuredWidth();
                 final int height = child.getMeasuredHeight();
 
@@ -283,11 +349,13 @@ public class ChatBalloon extends ViewGroup {
                 //}
                 mTmpContainerRect.top = parentTop+ lp.topMargin;
                 mTmpContainerRect.bottom = parentBottom - lp.bottomMargin;
-            
+
+                Log.d(TAG, "Child w,h:"+width+","+height+"  parent rect: "+mTmpContainerRect.toShortString());
 
                 // Use the child's gravity and size to determine its final
                 // frame within its container.
                 Gravity.apply(lp.gravity, width, height, mTmpContainerRect, mTmpChildRect);
+                Log.d(TAG, "Child rect:"+mTmpChildRect.toShortString());
 
                 // Place the child.
                 child.layout(mTmpChildRect.left, mTmpChildRect.top,
@@ -295,10 +363,10 @@ public class ChatBalloon extends ViewGroup {
             	
             }
         }
-        if (!found) {
+        if (!foundNonPointer) {
         	Log.w(TAG, "ChatBalloon expected a visible non-pointer child!");
         }
-        
+        invalidateOutline();
     }
     
     

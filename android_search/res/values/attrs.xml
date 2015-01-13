@@ -3,6 +3,13 @@
 
 <resources>
 
+    <declare-styleable name="ChatBalloon">
+        <attr name="pointerColor" format="color|reference" />
+        <attr name="pointerSide" format="string" />
+        <attr name="pointerHeight" format="dimension" />
+        <attr name="pointerWidth" format="dimension" />
+    </declare-styleable>
+    
     <declare-styleable name="ChatBalloonLP">
 	    <attr name="android:layout_gravity" />
 	</declare-styleable>
