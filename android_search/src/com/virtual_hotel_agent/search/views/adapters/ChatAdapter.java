@@ -218,7 +218,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			MeRowHolder meHolder = (MeRowHolder) row.getTag(R.id.chat_row_holder); 
 			
 			if (chatItem.getStatus() == Status.InEdit) {
-				meHolder.editText.setText(chatItem.getChat());
+				meHolder.editText.setText(chatItem.getChat().toString());
 				label.setVisibility(View.GONE);
 				meHolder.inEdit.setVisibility(View.VISIBLE);
 			}

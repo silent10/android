@@ -178,14 +178,13 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 			}
 		}
 
-		mAdapter = new HotelListAdapter(this);
-		
-		//mAnimAdapter =  new ScaleInAnimationAdapter(new SwingBottomInAnimationAdapter(mAdapter));
-		//mAnimAdapter.setAbsListView(mHotelListView);
-		//mHotelListView.setAdapter(mAnimAdapter);
-		mHotelListView.setAdapter(mAdapter);
-		
-		//mHotelListView.setOnClickListener(this);
+		if (mAdapter == null) {
+			mAdapter = new HotelListAdapter(this);
+			mHotelListView.setAdapter(mAdapter);
+		}
+		else {
+			mAdapter.notifyDataSetChanged();
+		}
 	}
 
 	public void onEvent( HotelItemClicked event) {

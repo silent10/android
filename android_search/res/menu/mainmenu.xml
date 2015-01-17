@@ -7,6 +7,8 @@
         android:id="@+id/audio"
         android:title="@string/audio_control"
         android:icon="@drawable/speaker_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         app:showAsAction="always"
         android:visible="false">
     </item>
@@ -16,6 +18,8 @@
         android:id="@+id/restart_button"
         android:title="@string/new_session"
         android:icon="@drawable/session_restart"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         app:showAsAction="always">
     </item>
       

@@ -77,6 +77,7 @@ public class MainView {
 		flat,
 		none
 	};
+	boolean pendingIconSwitch = false;
 	
 	MicButtonShow micButtonShow;
 	
@@ -206,9 +207,17 @@ public class MainView {
 			animatedDrawable.start();
 		}
 		else if (what == MicButtonShow.icon) {
-//			if (speechSearch.getSpeechAudioStreamer().getIsRecording()) {
-//				return; // don't change back to icon if recording
-//			}
+			if (mUpdateLevel != null && mUpdateLevel.get() != null) {
+				SearchHandler  handler = (SearchHandler)mUpdateLevel.get();
+				if (handler != null && handler.isRecording()) {
+					return; // don't change back to icon if recording
+				}
+			}
+			if (mProgressBar.getVisibility() == View.VISIBLE) {
+				// wait with icon switch until progressbar is hidden
+				pendingIconSwitch = true;
+				return;
+			}
 			AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.animated_microphone_reverse);
 			mSearchButton.setImageDrawable(animatedDrawable);
 			animatedDrawable.start();
@@ -360,6 +369,10 @@ public class MainView {
 		mStatusText.setText("");
 		mProgressBar.setVisibility(View.GONE);
 		mStatusPanel.setVisibility(View.GONE);
+		if (pendingIconSwitch) {
+			showMicButton(MicButtonShow.icon);
+			pendingIconSwitch = false;
+		}
 	}
 	public void hideSpeechWave() {
 		if (mUpdateLevel != null) {
@@ -378,6 +391,10 @@ public class MainView {
 		public SearchHandler(EvaSpeechComponent speechSearch, MainView view) {
 			this.speechSearch = speechSearch;
 			this.view = view;
+		}
+		
+		public boolean isRecording() {
+			return speechSearch.getSpeechAudioStreamer().getIsRecording();
 		}
 		
 		@Override
@@ -401,7 +418,7 @@ public class MainView {
 					if (!processing) {
 						processing = true;
 						view.disableSearchButton();
-						view.showStatus("Processing...");
+						//view.showStatus("Processing...");
 						//view.mSoundView.startSpringAnimation();
 					}
 				}

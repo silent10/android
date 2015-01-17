@@ -10,13 +10,12 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:animateLayoutChanges="true"
-          android:layout_gravity="left"
-          android:elevation="6dp"
-          android:layout_marginRight="3dp"
+          android:layout_gravity="left|top"
+          android:elevation="3dp"
+          android:layout_marginRight="20dp"
           android:layout_marginBottom="8dp"
-          android:layout_marginTop="20dp"
+          android:layout_marginTop="4dp"
           app:pointerSide="Left"
-          
            >
 
 		<LinearLayout 
@@ -24,7 +23,6 @@
           android:layout_height="wrap_content"
           android:orientation="horizontal"
           android:animateLayoutChanges="true"
-          android:background="#fff"
           android:padding="10dp"
 		    >
 
@@ -54,7 +52,7 @@
 	              android:layout_height="wrap_content"
 	              android:layout_alignParentTop="true"
 	              android:layout_alignParentLeft="true"
-	              android:inputType="text"
+	              android:inputType="textMultiLine"
 	              android:layout_toLeftOf="@+id/buttonDelete"
 	              android:layout_marginLeft="-2dip"
 	              android:gravity="top"
@@ -67,23 +65,30 @@
 	          
 	           <ImageButton
 	              android:id="@+id/buttonMicrophone"
-	              android:layout_width="48dp"
+	              android:layout_width="wrap_content"
 	              android:layout_height="48dp"
 	              android:layout_alignParentTop="true"
 	              android:layout_alignParentRight="true"
-	              android:background="@drawable/microphone_48" 
+	              android:background="@drawable/microphone_48"
+	              android:backgroundTint="#ccc"
+	              android:padding="12dp"
+	              android:adjustViewBounds="true"
+			      android:scaleType="fitCenter" 
 	              android:contentDescription="@string/microphone_button"/>
 	             
 		           
 	          <ImageButton
 	              android:id="@+id/buttonDelete"
-	              android:layout_width="48dp"
+	              android:layout_width="wrap_content"
 	              android:layout_height="48dp"
 	              android:layout_toLeftOf="@+id/buttonMicrophone"
 	              android:layout_alignParentTop="true"
 	              android:background="@drawable/remove_utterance"
+	              android:backgroundTint="#ccc"
+	              android:padding="12dp"
+	              android:adjustViewBounds="true"
+			      android:scaleType="fitCenter" 	              
 	              android:contentDescription="@string/delete_utterance_button"/>
-	          
 	      </RelativeLayout>
 
 	      </LinearLayout>

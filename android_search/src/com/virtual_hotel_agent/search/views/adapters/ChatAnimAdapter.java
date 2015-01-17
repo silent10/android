@@ -1,6 +1,7 @@
 package com.virtual_hotel_agent.search.views.adapters;
 
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,14 +15,16 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.evature.util.Log;
+import com.nhaarman.listviewanimations.appearance.AnimationAdapter;
 import com.nhaarman.listviewanimations.appearance.OnAnimEndCallback;
-import com.nhaarman.listviewanimations.appearance.SingleAnimationAdapter;
+import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.nhaarman.listviewanimations.util.AdapterViewUtil;
 import com.nhaarman.listviewanimations.util.ListViewWrapper;
-import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 
@@ -33,9 +36,12 @@ import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
  * 
  * Based on AnimateDismissAdapter and SingleAnimationAdapter
  */
-public class ChatAnimAdapter extends SingleAnimationAdapter {
+public class ChatAnimAdapter extends AnimationAdapter {
 
+	private static final String TAG = "ChatAnimAdapter";
     private static final String TRANSLATION_X = "translationX";
+    private static final String TRANSLATION_Y = "translationY";
+    private static final String TRANSLATION_Z = "translationZ";
     private final long mAnimationDelayMillis;
     private final long mAnimationDurationMillis;
     private final OnDismissCallback mCallback;
@@ -46,17 +52,26 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
      *            indicated that she would like to dismiss one or more list
      *            items.
      */
-    public ChatAnimAdapter(final BaseAdapter baseAdapter, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
-        this(baseAdapter, 100, 300, callback, animEndCallback);
-        
-    }
-
-    public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
-        this(baseAdapter, animationDelayMillis, 300, callback, animEndCallback);
-    }
+//    public ChatAnimAdapter(final BaseAdapter baseAdapter, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
+//        this(baseAdapter, 100, 300, callback, animEndCallback);
+//        
+//    }
+//
+//    public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
+//        this(baseAdapter, animationDelayMillis, 300, callback, animEndCallback);
+//    }
 
     public ChatAnimAdapter(final BaseAdapter baseAdapter, final long animationDelayMillis, final long animationDurationMillis, final OnDismissCallback callback, final OnAnimEndCallback animEndCallback) {
-        super(baseAdapter, animEndCallback);
+        super(baseAdapter, new OnAnimEndCallback() {
+			
+			@Override
+			public void onAnimEnd(View view) {
+				view.setScaleY(1.0f);
+				if (animEndCallback != null) {
+					animEndCallback.onAnimEnd(view);
+				}
+			}
+		});
         mAnimationDelayMillis = animationDelayMillis;
         mAnimationDurationMillis = animationDurationMillis;
         mCallback = callback;
@@ -73,19 +88,34 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
 //    	}
     	super.animateViewIfNecessary(position, view, parent);
     };
-    
+       
     @Override
-    protected Animator getAnimator(final ViewGroup parent, final View view) {
+    public Animator[] getAnimators(final ViewGroup parent, final View view, final int position) {
     	ChatItem chatItem = (ChatItem) view.getTag();
+    	
+    	final View chatBalloon = ((ViewGroup)view).getChildAt(0); // get the cHat 
+//    		Animator heightAnim = createHeightAnimatorForView(view, 0.1f, 1.0f);
+//		Animator heightAnim = ObjectAnimator.ofFloat(view, "scaleY", 0.1f, 1.0f);
+    	Animator heightAnim = ObjectAnimator.ofFloat(chatBalloon, TRANSLATION_Z, 12f, 0f);
+    	Animator yAnim = ObjectAnimator.ofFloat(chatBalloon, TRANSLATION_Y, -12f, 0f);
+		//view.setScaleY(0.1f);
+    	chatBalloon.setTranslationZ(12f);
+    	chatBalloon.setTranslationY(-12f);
+		heightAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
+		heightAnim.setDuration(mAnimationDurationMillis);
+		yAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
+		yAnim.setDuration(mAnimationDurationMillis);
+
     	if (chatItem != null && chatItem.getType() == ChatType.Me) {
-    		Animator result = ObjectAnimator.ofFloat(view, TRANSLATION_X, 0 - parent.getWidth(), 0);
-    		result.setStartDelay(0);
-    		return result;
+    		
+    		Animator translateX = ObjectAnimator.ofFloat(view, TRANSLATION_X, 0 - parent.getWidth(), 0);
+    		translateX.setStartDelay(0);
+    		return new Animator[] {translateX, heightAnim};
     	}
     	else {
-    		Animator result = ObjectAnimator.ofFloat(view, TRANSLATION_X, parent.getWidth(), 0);
-    		result.setStartDelay(250);
-    		return result;
+    		Animator translateX = ObjectAnimator.ofFloat(view, TRANSLATION_X, parent.getWidth(), 0);
+    		translateX.setStartDelay(250);
+    		return new Animator[]  {translateX, yAnim, heightAnim};
     	}
     }
     
@@ -105,10 +135,10 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
      * Animate dismissal of the items at given positions.
      */
     public void animateDismiss(final Collection<Integer> positions) {
-        final List<Integer> positionsCopy = new ArrayList<Integer>(positions);
         if (getListViewWrapper() == null) {
             throw new IllegalStateException("Call getListViewWrapper() on this AnimateDismissAdapter before calling setAdapter()!");
         }
+        final List<Integer> positionsCopy = new ArrayList<Integer>(positions);
 
         List<View> views = getVisibleViewsForPositions(positionsCopy);
 
@@ -116,7 +146,7 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
             Animator[] animatorsArray = new Animator[views.size()];
             int i=0;
             for (final View view : views) {
-            	animatorsArray[i++] = createAnimatorForView(view);
+            	animatorsArray[i++] = createHeightAnimatorForView(view, 1.0f, 0f);
             }
 
             AnimatorSet animatorSet = new AnimatorSet();
@@ -159,16 +189,29 @@ public class ChatAnimAdapter extends SingleAnimationAdapter {
         return views;
     }
 
-    private Animator createAnimatorForView(final View view) {
-        final ViewGroup.LayoutParams lp = view.getLayoutParams();
-        final int originalHeight = view.getHeight();
-
-        ValueAnimator animator = ValueAnimator.ofInt(originalHeight, 0);
+    private Animator createHeightAnimatorForView(final View view, final float start, final float end) {
+//        try {
+//            Method m = view.getClass().getDeclaredMethod("onMeasure", int.class, int.class);
+//            m.setAccessible(true);
+//            m.invoke(
+//                view,
+//                MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+//                MeasureSpec.makeMeasureSpec(((View)view.getParent()).getMeasuredHeight(), MeasureSpec.AT_MOST)
+//            );
+//        } catch (Exception e){
+//            Log.e("test", "", e);
+//        }
+//        final int originalHeight = view.getMeasuredHeight();
+//        Log.d(TAG, "initialHeight="+originalHeight);
+    	final ViewGroup.LayoutParams lp = view.getLayoutParams();
+    	final int originalHeight = view.getHeight();
+    	Log.d(TAG, "initialHeight="+originalHeight);
+        ValueAnimator animator = ValueAnimator.ofInt(Math.round(originalHeight*start), Math.round(originalHeight*end));
         animator.addListener(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(final Animator animator) {
-                lp.height = 0;
+                lp.height = Math.round(originalHeight*end);
                 view.setLayoutParams(lp);
             }
         });

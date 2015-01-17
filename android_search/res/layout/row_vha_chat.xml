@@ -4,17 +4,18 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="right"
+    android:gravity="right|top"
      >
 
     <com.virtual_hotel_agent.search.util.ChatBalloon 
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:animateLayoutChanges="true"
-          android:elevation="6dp"
-          android:layout_marginLeft="3dp"
+          android:elevation="3dp"
+          android:layout_gravity="right|top"
+          android:layout_marginLeft="20dp"
           android:layout_marginBottom="8dp"
-          android:layout_marginTop="2dp"
+          android:layout_marginTop="4dp"
           app:pointerSide="Right"
           app:pointerColor="#03A9F4"
            >
@@ -22,7 +23,6 @@
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 		android:layout_gravity="right"        
-        android:background="#03A9F4"
         android:orientation="horizontal"
         android:padding="10dp"    
         >

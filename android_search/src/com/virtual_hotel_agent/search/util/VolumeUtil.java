@@ -86,32 +86,36 @@ public class VolumeUtil {
 	}
 
 	public static int getVolumeIcon() {
-		if (routedToDevice == AudioDevice.Bluetooth) {
-			Log.i(TAG, "Bluetooth");
-			if (VolumeUtil.isLowVolume()) {  
-				return R.drawable.bluetooth_warning_icon;
-			}
-			else {
-				return R.drawable.bluetooth_icon;
-			}
-		} else if (routedToDevice == AudioDevice.Headphone) {
-			Log.i(TAG, "Headphones");
-			if (VolumeUtil.isLowVolume()) {
-				return R.drawable.headphones_warning_icon;
-			}
-			else {
-				return R.drawable.headphones_icon;
-			}
+		if (VolumeUtil.isLowVolume()) {
+			return R.drawable.volume_warning;
 		}
-		else { 
-			Log.i(TAG, "Speaker");
-			if (VolumeUtil.isLowVolume()) {
-				return R.drawable.speaker_warning_icon;
-			}
-			else {
-				return R.drawable.speaker_icon;
-			}
-		}
+		return R.drawable.speaker_icon;
+//		if (routedToDevice == AudioDevice.Bluetooth) {
+//			Log.i(TAG, "Bluetooth");
+//			if (VolumeUtil.isLowVolume()) {  
+//				return R.drawable.bluetooth_warning_icon;
+//			}
+//			else {
+//				return R.drawable.bluetooth_icon;
+//			}
+//		} else if (routedToDevice == AudioDevice.Headphone) {
+//			Log.i(TAG, "Headphones");
+//			if (VolumeUtil.isLowVolume()) {
+//				return R.drawable.headphones_warning_icon;
+//			}
+//			else {
+//				return R.drawable.headphones_icon;
+//			}
+//		}
+//		else { 
+//			Log.i(TAG, "Speaker");
+//			if (VolumeUtil.isLowVolume()) {
+//				return R.drawable.speaker_warning_icon;
+//			}
+//			else {
+//				return R.drawable.speaker_icon;
+//			}
+//		}
 	}
 	
 	public static int getVolumeIconNoWarning() {

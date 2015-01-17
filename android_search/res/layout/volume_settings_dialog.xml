@@ -25,6 +25,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:layout_above="@+id/header_divider"
+                android:tint="#444"
                 android:src="@drawable/speaker_warning_icon" />
 
             <TextView

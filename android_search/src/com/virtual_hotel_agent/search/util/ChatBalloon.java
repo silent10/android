@@ -8,13 +8,14 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.evature.util.Log;
 import com.virtual_hotel_agent.search.R;
@@ -26,6 +27,7 @@ public class ChatBalloon extends ViewGroup {
 
 	private static final String TAG = "ChatBalloon";
 	private int mColor;
+	private static float BORDER_RAD = 5;
 	private static int POINTER_WIDTH = 20; // in Device independant pixels
 	private static int POINTER_HEIGHT = 15; // in Device independant pixels
 	private int mPointerWidth;
@@ -44,7 +46,8 @@ public class ChatBalloon extends ViewGroup {
 	/** These are used for computing child frames based on their gravity. */
     private final Rect mTmpContainerRect = new Rect();
     private Rect mTmpChildRect = new Rect();
-    
+    // replace child drawable for border radius
+    private GradientDrawable mTmpChildDrawable = new GradientDrawable();    
 	
 
 	public ChatBalloon(Context context) {
@@ -92,7 +95,7 @@ public class ChatBalloon extends ViewGroup {
 			this.setElevation(getElevation()); // init the pointer elevation and padding/margin offset
 			addView(pointerView);
 			
-			setOutlineProvider(new ChatBalloneOutlineProvider());
+			setOutlineProvider(new ChatBalloonOutlineProvider());
 		}
 		catch (Exception e) {
 			Log.e(TAG, "Error initializing ");
@@ -155,15 +158,15 @@ public class ChatBalloon extends ViewGroup {
 		}
 	}
 	
-	static class ChatBalloneOutlineProvider extends ViewOutlineProvider {
+	class ChatBalloonOutlineProvider extends ViewOutlineProvider {
 		@Override
 		public void getOutline(View view, Outline outline) {
 			ChatBalloon cb = (ChatBalloon) view;
-			LinearLayout ll = (LinearLayout)cb.getChildAt(1);
-			TextView tv = (TextView) ll.getChildAt(0);
-			String dbgText = tv.getText().subSequence(0, Math.max(tv.getText().length()-1, 20)).toString().replace("\n", "");
-			Log.d(TAG, "Setting : ["+dbgText+"] outline to "+cb.mTmpChildRect.toShortString());
-			outline.setRect(cb.mTmpChildRect);
+//			LinearLayout ll = (LinearLayout)cb.getChildAt(1);
+//			TextView tv = (TextView) ll.getChildAt(0);
+//			String dbgText = tv.getText().subSequence(0, Math.max(tv.getText().length()-1, 20)).toString().replace("\n", "");
+//			Log.d(TAG, "Setting : ["+dbgText+"] outline to "+cb.mTmpChildRect.toShortString());
+			outline.setRoundRect(cb.mTmpChildRect, BORDER_RAD*mDensity);
 		}
 	}
 	
@@ -269,21 +272,29 @@ public class ChatBalloon extends ViewGroup {
 
 	private void calculatePointerPath() {
 		mPointerPath.reset();
+		int y0 = 0;// getPaddingTop();
 		if (mPointerSide == PointerSide.Left) {
 			int x0 = getPaddingLeft()+Math.round(getElevation());
-			mPointerPath.moveTo(x0, getPaddingTop());
-			mPointerPath.lineTo(x0+mPointerWidth, getPaddingTop());
-			mPointerPath.lineTo(x0+mPointerWidth, getPaddingTop()+mPointerHeight);
+			mPointerPath.moveTo(x0, y0);
+			mPointerPath.lineTo(x0+mPointerWidth, y0);
+			mPointerPath.lineTo(x0+mPointerWidth, y0+mPointerHeight);
 			mPointerPath.close();
 		}
 		else {
 			int x0 = Math.round(getElevation());
-			mPointerPath.moveTo(x0, getPaddingTop());
-			mPointerPath.lineTo(x0+mPointerWidth, getPaddingTop());
-			mPointerPath.lineTo(x0, getPaddingTop()+mPointerHeight);
+			mPointerPath.moveTo(x0, y0);
+			mPointerPath.lineTo(x0+mPointerWidth, y0);
+			mPointerPath.lineTo(x0, y0+mPointerHeight);
 			mPointerPath.close();
 		}
 	}
+	
+	@Override public void setTranslationZ(float translationZ) {
+		super.setTranslationZ(translationZ);
+		if (translationZ != getTranslationZ()) {
+			invalidateOutline();
+		}
+	};
 
     /**
      * Position all children within this layout.
@@ -360,7 +371,18 @@ public class ChatBalloon extends ViewGroup {
                 // Place the child.
                 child.layout(mTmpChildRect.left, mTmpChildRect.top,
                         mTmpChildRect.right, mTmpChildRect.bottom);
-            	
+                if (child.getBackground() != mTmpChildDrawable) {
+	                mTmpChildDrawable.setColor(mColor);
+	                float borderRad = BORDER_RAD * mDensity;
+	                if (mPointerSide == PointerSide.Left) {
+	                	mTmpChildDrawable.setCornerRadii(new float[] {0,0, borderRad,borderRad,  borderRad,borderRad,  borderRad,borderRad});
+	                }
+	                else {
+	                	mTmpChildDrawable.setCornerRadii(new float[] {borderRad,borderRad,  0,0, borderRad,borderRad,  borderRad,borderRad});
+	                }
+	                child.setBackground(mTmpChildDrawable);
+                }
+                            	
             }
         }
         if (!foundNonPointer) {
