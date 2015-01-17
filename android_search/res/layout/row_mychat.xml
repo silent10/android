@@ -4,6 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:paddingTop="4dp"
      >
 
       <com.virtual_hotel_agent.search.util.ChatBalloon 
@@ -13,7 +14,7 @@
           android:layout_gravity="left|top"
           android:elevation="3dp"
           android:layout_marginRight="20dp"
-          android:layout_marginBottom="8dp"
+          android:layout_marginBottom="6dp"
           android:layout_marginTop="4dp"
           app:pointerSide="Left"
            >

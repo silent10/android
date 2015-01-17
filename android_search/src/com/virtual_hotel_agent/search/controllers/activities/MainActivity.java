@@ -684,6 +684,10 @@ public class MainActivity extends BaseActivity implements
 	private void voiceRecognitionSearch(ChatItem chatItem, boolean editLastUtterance) {
 		// simplest method:  default 
 		// MainActivity.this.eva.searchWithVoice("voice");
+
+		//		TutorialController.onMicrophonePressed(this);
+		ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
+		VHAApplication.EVA.speak("");
 		
 		if ("google_local".equals(VHAApplication.EVA.getVrService())) {
 			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, ADDED_TEXT_COOKIE, editLastUtterance);
@@ -702,11 +706,6 @@ public class MainActivity extends BaseActivity implements
 			return;
 		}
 		
-//		TutorialController.onMicrophonePressed(this);
-		
-		ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
-		
-		VHAApplication.EVA.speak("");
 		Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
 		if (defaultTracker != null) 
 			defaultTracker.send(MapBuilder
@@ -873,6 +872,7 @@ public class MainActivity extends BaseActivity implements
 				if (ADDED_TEXT_COOKIE.storeResultInItem != null) {
 					// this voice recognition replaces the last utterance
 					mainView.getChatFragment().storeResponseInChatItem(ADDED_TEXT_COOKIE.storeResultInItem, chat);
+					ADDED_TEXT_COOKIE.storeResultInItem = null;
 				}
 				else {
 					addChatItem(new ChatItem(chat));
