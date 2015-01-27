@@ -15,7 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.flow.Flow;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaApiReply implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -48,7 +48,6 @@ public class EvaApiReply implements Serializable {
 	
 	public transient JSONObject JSONReply;
 
-
 	public EvaApiReply(String fullReply) {
 		initFromJson(fullReply);
 	}
@@ -59,7 +58,7 @@ public class EvaApiReply implements Serializable {
 		try {
 			this.JSONReply = new JSONObject(fullReply);
 			JSONObject jFullReply = JSONReply;
-			Log.d(TAG, "eva_reply: " + jFullReply.toString(2));
+			DLog.d(TAG, "eva_reply: " + jFullReply.toString(2));
 			boolean status = jFullReply.optBoolean("status", false);
 			if (!status) {
 				errorMessage = jFullReply.optString("message", "Unknown Error");
@@ -169,11 +168,11 @@ public class EvaApiReply implements Serializable {
 				}
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, "Bad EVA reply!", e);
+			DLog.e(TAG, "Bad EVA reply!", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());
 		}
 		if (parseErrors.size() > 0) {
-			Log.w(TAG, "reply is "+fullReply);
+			DLog.w(TAG, "reply is "+fullReply);
 		}
 	}
 	

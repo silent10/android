@@ -8,7 +8,7 @@ APP_PLATFORM = android-19  # mkfifo isn't backwards compatible in 21+
 AUDIO_NATIVE_FLAGS = \
 	-Ijni/config \
 	-Ijni/ogg/include \
-	-DVERSION=\"1.2\" \
+	-DVERSION=\"1.3\" \
 	-Ijni/flac/include \
 	-Ijni/flac/src/libFLAC/include
 

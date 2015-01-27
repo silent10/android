@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class ServiceAttributes  implements Serializable {
 	private static final String TAG = "ServiceAttributes";
@@ -23,7 +23,7 @@ public class ServiceAttributes  implements Serializable {
 			}
 		}
 		catch (JSONException e) {
-			Log.e(TAG, "Parsing JSON", e);
+			DLog.e(TAG, "Parsing JSON", e);
 			parseErrors.add("Exception during parsing service attributes: "+e.getMessage());
 		}
 	}

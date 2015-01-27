@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.R;
 
 public class ReviewsFragment extends Fragment {
@@ -21,7 +21,7 @@ public class ReviewsFragment extends Fragment {
 
 		if (mView != null) {
 			((ViewGroup) mView.getParent()).removeView(mView);
-			Log.w(TAG, "Fragment create view twice");
+			DLog.w(TAG, "Fragment create view twice");
 			return mView;
 		}
 

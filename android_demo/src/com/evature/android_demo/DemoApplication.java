@@ -5,7 +5,7 @@ import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 @ReportsCrashes(formKey = "dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ")
 public class DemoApplication extends Application {
@@ -17,7 +17,7 @@ public class DemoApplication extends Application {
 			// The following line triggers the initialization of ACRA
 			ACRA.init(this);
 		//}
-		Log.DEBUG = true;
+		DLog.DebugMode = true;
 
 		super.onCreate();
 	}

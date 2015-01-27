@@ -37,7 +37,8 @@ import com.ean.mobile.hotel.RoomOccupancy;
 import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvatureLocationUpdater;
-import com.evature.util.Log;
+import com.evature.util.DLog;
+import com.evature.util.DLog.LogLevel;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.google.analytics.tracking.android.Tracker;
@@ -60,8 +61,70 @@ public class VHAApplication extends Application {
 			ACRA.init(this); 
 			AcraInitialized = true;
 		}
-		Log.DEBUG = BuildConfig.DEBUG;
-		Log.i(TAG, "Application onCreate,  photo cache: "+PHOTO_CACHE_SIZE+ "kb");
+		
+		DLog.DebugMode = BuildConfig.DEBUG;
+		DLog.LogListener listener = new DLog.LogListener() {
+			
+			@Override
+			public void logActivated(DLog.LogLevel level, boolean debugMode, String tag,
+					String text, String callingInfo, Throwable exception) {
+				
+				if (level != LogLevel.ERROR && level != LogLevel.WTF) {
+					// special handling only for errors
+					return;
+				}
+
+				if (BuildConfig.DEBUG) {
+					try {
+						if (mCurrentActivity != null) {
+								Toast.makeText(mCurrentActivity, "Error: "+text, Toast.LENGTH_LONG).show();
+						}
+						if (exception != null) {
+							new AlertDialog.Builder(context)
+						    	.setTitle("Exception")
+						    	.setMessage(DLog.getStackTraceString(exception))
+						    .setIcon(android.R.drawable.ic_dialog_alert)
+						     .show();
+						}
+					}
+					catch (RuntimeException e) {
+						DLog.w(TAG, "Failed to show Debug toast");
+					}
+				}
+		 		else { 
+					try {
+						Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
+						if (defaultTracker != null) {
+							if (exception != null) {
+								defaultTracker.send(MapBuilder
+									    .createException(text+ '\n' + DLog.getStackTraceString(exception), false)
+									    .build()
+									   );	
+							}
+							else {
+								defaultTracker.send(MapBuilder
+									    .createEvent("Error_log", tag, text, 0l)
+									    .build()
+									   );
+							}
+						}
+					}
+					catch (Exception e) {
+						DLog.e(tag, "Exception sending error event", e);
+					}
+				}
+			}
+			
+			@Override
+			public void logActivated(LogLevel level, boolean debugMode, String tag,
+					String text, String callingInfo) {
+				this.logActivated(level, debugMode, tag, text, callingInfo, null);
+			}
+		};
+		
+		DLog.registerLogListener(listener);
+		
+		DLog.i(TAG, "Application onCreate,  photo cache: "+PHOTO_CACHE_SIZE+ "kb");
 		
 		setupHttpConnectionStuff();
 		
@@ -82,7 +145,7 @@ public class VHAApplication extends Application {
 
 	@Override
 	public void onLowMemory() {
-		logError(TAG, "onLowMemory");
+		DLog.e(TAG, "onLowMemory");
 		HOTEL_ROOMS.trimToSize(1);
 		EXTENDED_INFOS.trimToSize(1);
 		HOTEL_PHOTOS.trimToSize((int)(PHOTO_CACHE_SIZE*0.5));
@@ -100,65 +163,9 @@ public class VHAApplication extends Application {
     }
 
 
-	
-	public static void logError(String tag, String desc) {
-		logError(tag, desc, null);
-	}
-	
-	public static void logError(String tag, String desc, Throwable exception) {
-		if (exception != null)
-			Log.e(tag, desc, exception);
-		else {
-			Log.e(tag, desc);
-		}
-		
-
-		if (BuildConfig.DEBUG) {
-			try {
-				if (mCurrentActivity != null) {
-						Toast.makeText(mCurrentActivity, "Error: "+desc, Toast.LENGTH_LONG).show();
-				}
-				if (exception != null) {
-					new AlertDialog.Builder(context)
-				    	.setTitle("Exception")
-				    	.setMessage(Log.getStackTraceString(exception))
-				    .setIcon(android.R.drawable.ic_dialog_alert)
-				     .show();
-				}
-			}
-			catch (RuntimeException e) {
-				Log.w(TAG, "Failed to show Debug toast");
-			}
-		}
- 		else { 
-			try {
-				Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();
-				if (defaultTracker != null) {
-					if (exception != null) {
-						defaultTracker.send(MapBuilder
-							    .createException(desc+ '\n' + Log.getStackTraceString(exception), false)
-							    .build()
-							   );	
-					}
-					else {
-						defaultTracker.send(MapBuilder
-							    .createEvent("Error_log", tag, desc, 0l)
-							    .build()
-							   );
-					}
-				}
-			}
-			catch (Exception e) {
-				Log.e(tag, "Exception sending error event", e);
-			}
-		}
-			
-	}
-
-
 	@Override
 	public void onTerminate() {
-		Log.d(TAG, "OnTerminate");
+		DLog.d(TAG, "OnTerminate");
 		super.onTerminate();
 	}
 
@@ -378,7 +385,7 @@ public class VHAApplication extends Application {
             }
             cacheKey = hotelList.cacheKey;
             cacheLocation = hotelList.cacheLocation;
-            Log.d(TAG, "Added "+hotelList.hotels.size()+" hotels, list now at "+FOUND_HOTELS.size()+" / "
+            DLog.d(TAG, "Added "+hotelList.hotels.size()+" hotels, list now at "+FOUND_HOTELS.size()+" / "
             			+hotelList.totalNumberOfResults+"  cacheKey="+cacheKey+"  cacheLoc="+cacheLocation);
             moreResultsAvailable = hotelList.moreResults;
         }
@@ -412,7 +419,7 @@ public class VHAApplication extends Application {
                 final File httpCacheDir = new File(getCacheDir(), "http");
                 HttpResponseCache.install(httpCacheDir, TEN_MEGABYTES);
             } catch (IOException ioe) {
-                logError(TAG, "Could not install http cache on this device.", ioe);
+                DLog.e(TAG, "Could not install http cache on this device.", ioe);
             }
         }
     }

@@ -74,7 +74,7 @@ import com.evaapis.crossplatform.ParsedText.TimesMarkup;
 import com.evaapis.crossplatform.flow.FlowElement;
 import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evaapis.crossplatform.flow.QuestionElement;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -255,7 +255,7 @@ public class MainActivity extends BaseActivity implements
 		    EasyTracker.getInstance(this).activityStart(this);
 		}
 	    catch(Exception e) {
-			VHAApplication.logError(TAG, "Exception setting google analytics", e);
+			DLog.e(TAG, "Exception setting google analytics", e);
 		}
 	}
 	
@@ -276,7 +276,7 @@ public class MainActivity extends BaseActivity implements
 	
 	@Override 
 	public void onResume() {
-		Log.d(TAG, "onResume()");
+		DLog.d(TAG, "onResume()");
 		super.onResume();
 		
 		Intent myIntent = getIntent();
@@ -300,7 +300,7 @@ public class MainActivity extends BaseActivity implements
 	
 	@Override
 	public void onPause() {
-		Log.d(TAG, "onPause()");
+		DLog.d(TAG, "onPause()");
 		VHAApplication.EVA.onPause();
 		
 		VolumeUtil.unregister(this);
@@ -309,7 +309,7 @@ public class MainActivity extends BaseActivity implements
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) { // Called when the activity is first created.
-		Log.d(TAG, "onCreate()");
+		DLog.d(TAG, "onCreate()");
 		super.onCreate(savedInstanceState);
 		
 		mChatListModel = ChatItemList.getInstance();
@@ -331,7 +331,7 @@ public class MainActivity extends BaseActivity implements
 			pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
 			eva.setAppVersion("vha_"+pInfo.versionCode);
 		} catch (NameNotFoundException e) {
-			Log.w(TAG, "Failed to get app version");
+			DLog.w(TAG, "Failed to get app version");
 			eva.setAppVersion("vha_unknown");
 		}
 		
@@ -342,7 +342,7 @@ public class MainActivity extends BaseActivity implements
 		ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
 		if (networkInfo != null && networkInfo.isConnected()) {
-			Log.d(TAG, "Progress: We are connected to the network");
+			DLog.d(TAG, "Progress: We are connected to the network");
 			mIsNetworkingOk = true;
 			// fetch data
 			// new GetExternalIpAddress().execute();
@@ -404,11 +404,11 @@ public class MainActivity extends BaseActivity implements
 	
 	@Override
 	public void onBackPressed() {
-	   Log.d(TAG, "onBackPressed Called");
+	   DLog.d(TAG, "onBackPressed Called");
 
 	   // cancel recording if during recording
 	   if (speechSearch.isInSpeechRecognition()) {
-		   Log.i(TAG, "Canceling recording");
+		   DLog.i(TAG, "Canceling recording");
 		   speechSearch.cancel();
 		   mainView.deactivateSearchButton();
 		   mainView.hideStatus();
@@ -427,7 +427,7 @@ public class MainActivity extends BaseActivity implements
 		   boolean handled = mainView.getChatFragment().handleBackPressed();
 		   if (!handled) {
 			   // nothing handled - close application
-			   Log.i(TAG, "Back pressed, nothing to close - closing activity");
+			   DLog.i(TAG, "Back pressed, nothing to close - closing activity");
 			   super.onBackPressed();
 		   }
 	   }
@@ -567,7 +567,7 @@ public class MainActivity extends BaseActivity implements
 			Uri uri = Uri.parse(Html.fromHtml(faqUrl).toString());
 			Intent i = new Intent(Intent.ACTION_VIEW);
 			i.setData(uri);
-			Log.i(TAG, "Setting Browser to url:  "+uri);
+			DLog.i(TAG, "Setting Browser to url:  "+uri);
 			startActivity(i);
 		}
 		
@@ -586,13 +586,13 @@ public class MainActivity extends BaseActivity implements
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		// Save UI state changes to the savedInstanceState.
 		// This bundle will be passed to onCreate if the process is killed and restarted.
-		Log.d(TAG, "onSaveInstanceState");
+		DLog.d(TAG, "onSaveInstanceState");
 		try {
 			super.onSaveInstanceState(savedInstanceState);
 		}
 		catch (IllegalStateException e) {
 			// this sometimes happens when "fragment not in fragment manager" - not sure why
-			VHAApplication.logError(TAG, "Illegal state while saving instance state in main activity", e);
+			DLog.e(TAG, "Illegal state while saving instance state in main activity", e);
 		}
 
 		savedInstanceState.putString("sessionId", VHAApplication.EVA.getSessionId());
@@ -631,7 +631,7 @@ public class MainActivity extends BaseActivity implements
 
 	
 	private void addChatItem(ChatItem item) {
-		Log.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
+		DLog.d(TAG, "Adding chat item  type = "+item.getType()+ "  '"+item.getChat()+"'");
 		ChatFragment chatFragment = mainView.getChatFragment();
 		if (chatFragment != null && chatFragment.isReady()) {
 			chatFragment.addChatItem(item);
@@ -748,7 +748,7 @@ public class MainActivity extends BaseActivity implements
 			if (currencyIndex < entries.length)
 				currencyCode = entries[currencyIndex];
 			else {
-				VHAApplication.logError(TAG, "currencyIndex = "+currencyIndex+"  but entries.size = "+entries.length);
+				DLog.e(TAG, "currencyIndex = "+currencyIndex+"  but entries.size = "+entries.length);
 				currencyCode = entries[0];
 			}
 			CommonParameters.currencyCode = currencyCode;
@@ -864,7 +864,7 @@ public class MainActivity extends BaseActivity implements
 						}
 					}
 					catch (IndexOutOfBoundsException e) {
-						VHAApplication.logError(TAG, "Index out of bounds setting spans of chat ["+chat+"]", e);
+						DLog.e(TAG, "Index out of bounds setting spans of chat ["+chat+"]", e);
 					}
 				}
 			}
@@ -1004,7 +1004,7 @@ public class MainActivity extends BaseActivity implements
 		
 		@Override
 		public void endProgressDialog(int id, Object result) {
-			Log.i(TAG, "End search for "+currentItem.getChat());
+			DLog.i(TAG, "End search for "+currentItem.getChat());
 			mainView.hideStatus();
 			//currentItem.setSearchResults(result);
 			currentItem.setStatus(Status.HasResults);
@@ -1048,7 +1048,7 @@ public class MainActivity extends BaseActivity implements
 						fragment.newHotelsList();
 					}
 					else {
-						VHAApplication.logError(TAG, "Unexpected hotel list fragment is null");
+						DLog.e(TAG, "Unexpected hotel list fragment is null");
 					}
 				}
 				
@@ -1078,20 +1078,20 @@ public class MainActivity extends BaseActivity implements
 
 		@Override
 		public void startProgressDialog(int id) {
-			Log.i(TAG, "Start search for "+currentItem.getChat());
+			DLog.i(TAG, "Start search for "+currentItem.getChat());
 			currentItem.setStatus(Status.InSearch);
 			//invalidateChatFragment();
 		}
 
 		@Override
 		public void endProgressDialogWithError(int id, Object result) {
-			Log.w(TAG, "End search with ERROR for "+currentItem.getChat());
+			DLog.w(TAG, "End search with ERROR for "+currentItem.getChat());
 			mainView.hideStatus();
 			currentItem.setStatus(Status.ToSearch);
 			if (currentItem.getFlowElement().Type == TypeEnum.Hotel) {
 				if (retries < 3) {
 					retries++;
-					Log.w(TAG, "retrying... "+retries); 
+					DLog.w(TAG, "retrying... "+retries); 
 					executeFlowElement(currentItem.getEvaReply(), currentItem.getFlowElement(), currentItem, false);
 				}
 			}
@@ -1169,7 +1169,7 @@ public class MainActivity extends BaseActivity implements
 			if (reply.travelers != null && reply.travelers.allChildren() > 0
 				&& (reply.ean.containsKey("room1") == false || reply.ean.get("room1").matches("\\d"))
 					) {
-				Log.d(TAG,"Guests dialog");
+				DLog.d(TAG,"Guests dialog");
 				chatItem.sayitActivated = false;
 				final ChatItem _chatItem = chatItem; 
 				final FlowElement _flow = flow;
@@ -1199,7 +1199,7 @@ public class MainActivity extends BaseActivity implements
 				
 			}
 			else {
-				 Log.d(TAG, "Running Hotel Search!");
+				 DLog.d(TAG, "Running Hotel Search!");
 				 if (reply.travelers != null) {
 					 // no children
 					 VHAApplication.numberOfAdults = reply.travelers.allAdults();
@@ -1230,7 +1230,7 @@ public class MainActivity extends BaseActivity implements
 //			break;
 		case Question:
 			// flash the microphone button
-			Log.d(TAG, "Question asked");
+			DLog.d(TAG, "Question asked");
 			// give some delay to the flashing - to happen while question is asked
 			if (mFlashButton == null) {
 				 mFlashButton = new FlashHandler(mainView);
@@ -1255,7 +1255,7 @@ public class MainActivity extends BaseActivity implements
 			HotelItemClicked event = mHotelDownloader.getHotelEvent();
 			long hotelId = event.hotelId;
 			VHAApplication.selectedHotel = VHAApplication.HOTEL_ID_MAP.get(hotelId);
-			Log.d(TAG, "endProgressDialog() Hotel # " + hotelId+ " - "+VHAApplication.selectedHotel.name);
+			DLog.d(TAG, "endProgressDialog() Hotel # " + hotelId+ " - "+VHAApplication.selectedHotel.name);
 
 			onEvent(new HotelsListUpdated());
 
@@ -1470,15 +1470,15 @@ public class MainActivity extends BaseActivity implements
 	}
 	
 	public void onEvent( HotelItemClicked event) {
-		Log.d(TAG, "onHotelItemClicked("+event.hotelIndex+")");
+		DLog.d(TAG, "onHotelItemClicked("+event.hotelIndex+")");
 		if (VHAApplication.FOUND_HOTELS.size() <= event.hotelIndex) {
-			VHAApplication.logError(TAG, "clicked index "+event.hotelIndex+ " but size is "+VHAApplication.FOUND_HOTELS.size());
+			DLog.e(TAG, "clicked index "+event.hotelIndex+ " but size is "+VHAApplication.FOUND_HOTELS.size());
 			return;
 		}
 
 		if (mHotelDownloader != null) {
 			if (false == mHotelDownloader.cancel(true)) {
-				Log.d(TAG, "false == mHotelDownloader.cancel(true)");
+				DLog.d(TAG, "false == mHotelDownloader.cancel(true)");
 				mHotelDownloader = null;
 			}
 		}
@@ -1487,13 +1487,13 @@ public class MainActivity extends BaseActivity implements
 		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(hotel.hotelId);
 		mHotelDownloader = new HotelDownloaderTask(mHotelDownloadListener, event);
 		if (info != null) {
-			Log.d(TAG, "Loaded info for hotel "+hotel.name+" from cache");
+			DLog.d(TAG, "Loaded info for hotel "+hotel.name+" from cache");
 			// restored from cache - fake downloader progress
 			mHotelDownloadListener.endProgressDialog(R.string.HOTEL, null);
 		}
 		else {
 			mainView.showStatus("Getting Hotel info...");
-			Log.d(TAG, "Getting info for hotel "+hotel.name);
+			DLog.d(TAG, "Getting info for hotel "+hotel.name);
 			//this.endProgressDialog(R.string.HOTEL, "fake response");
 			mHotelDownloader.execute();
 		}
@@ -1502,7 +1502,7 @@ public class MainActivity extends BaseActivity implements
 	public void onEvent( ChatItemModified event) {
 		if (event.startRecord) {
 			if (event.chatItem == null) {
-				VHAApplication.logError(TAG, "Unexpected chatItem=null startRecord");
+				DLog.e(TAG, "Unexpected chatItem=null startRecord");
 				return;
 			}
 			voiceRecognitionSearch(event.chatItem, event.editLastUtterance);
@@ -1525,7 +1525,7 @@ public class MainActivity extends BaseActivity implements
 	}
 	
 	public void onEvent( HotelSelected event) {
-		Log.d(TAG, "onHotelSelected("+event.hotelId+")");
+		DLog.d(TAG, "onHotelSelected("+event.hotelId+")");
 
 		// asdf int index = mainView.getRoomsTabIndex();
 		// asdf if (index == -1) {

@@ -116,6 +116,7 @@ android:layout_height="match_parent">
         android:elevation="8dp"
         android:hapticFeedbackEnabled="true"
         android:background="@drawable/transition_button_activate"
+        android:stateListAnimator="@anim/button_elevation"
          />
      
     <com.evaapis.android.SoundLevelView

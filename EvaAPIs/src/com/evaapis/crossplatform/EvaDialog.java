@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaDialog  implements Serializable {
 
@@ -43,7 +43,7 @@ public class EvaDialog  implements Serializable {
 				}
 			}
 			catch(JSONException e) {
-				Log.e(TAG, "Parse JSON", e);
+				DLog.e(TAG, "Parse JSON", e);
 				parseErrors.add("Error during parsing eva chat: "+e.getMessage());
 			}
 		}
@@ -68,7 +68,7 @@ public class EvaDialog  implements Serializable {
 			}
 			
 		} catch (JSONException e) {
-			Log.e(TAG, "Parse JSON", e);
+			DLog.e(TAG, "Parse JSON", e);
 			parseErrors.add("Error during parsing eva chat: "+e.getMessage());
 		}
 	}

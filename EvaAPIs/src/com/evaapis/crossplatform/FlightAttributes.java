@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class FlightAttributes  implements Serializable {
 
@@ -58,7 +58,7 @@ public class FlightAttributes  implements Serializable {
 				}
 				catch(IllegalArgumentException e) {
 					parseErrors.add( "Unexpected SeatType "+jFlightAttributes.optString("Seat"));
-					Log.w(TAG, "Unexpected SeatType", e);
+					DLog.w(TAG, "Unexpected SeatType", e);
 					seatType = SeatType.Unknown;
 				}
 			}
@@ -71,14 +71,14 @@ public class FlightAttributes  implements Serializable {
 					}
 					catch(IllegalArgumentException e) {
 						parseErrors.add( "Unexpected SeatClass"+jSeatClass.optString(i));
-						Log.w(TAG, "Unexpected SeatClass", e);
+						DLog.w(TAG, "Unexpected SeatClass", e);
 						seatClass[i] = SeatClass.Unknown;
 					}
 				}
 			}
 			
 		} catch (JSONException e) {
-			Log.e(TAG, "Parsing JSON", e);
+			DLog.e(TAG, "Parsing JSON", e);
 			parseErrors.add("Exception during parsing flight attributes: "+e.getMessage());
 		}
 	}

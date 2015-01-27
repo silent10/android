@@ -47,7 +47,7 @@ public class ExternalIpAddressGetter {
 
 	public void executeGetIpAddr() {
 		if (System.currentTimeMillis() - lastTimeChecked < CHECK_IP_EVERY_MS-100) {
-			Log.d(TAG, "Not spamming IP check - too soon");
+			DLog.d(TAG, "Not spamming IP check - too soon");
 			return;
 		}
 		lastTimeChecked = System.currentTimeMillis();
@@ -78,7 +78,7 @@ public class ExternalIpAddressGetter {
 		@Override
 		protected String doInBackground(String... ignore) {
 			try {
-				Log.d(TAG, "Requesting external IP address");
+				DLog.d(TAG, "Requesting external IP address");
 				String result = DownloadUrl.sget(host + "/whatismyip");
 				if (result == null) {
 					return null;
@@ -91,7 +91,7 @@ public class ExternalIpAddressGetter {
 				// This can sometimes fail - no need to log...
 				return null;
 			} catch (JSONException e) {
-				Log.e(TAG, "attempt to get ip_address failed on JSON parse", e);
+				DLog.e(TAG, "attempt to get ip_address failed on JSON parse", e);
 				return null;
 			}
 		}
@@ -99,10 +99,10 @@ public class ExternalIpAddressGetter {
 		@Override
 		protected void onPostExecute(String result) { // onPostExecute displays the results of the AsyncTask.
 			if (result != null) {
-				Log.d(TAG, "External IP address = " + result);
+				DLog.d(TAG, "External IP address = " + result);
 				setExternalIpAddr(result);
 			} else {
-				Log.d(TAG, "My external IP resolver returned null!");
+				DLog.d(TAG, "My external IP resolver returned null!");
 			}
 		}
 	}

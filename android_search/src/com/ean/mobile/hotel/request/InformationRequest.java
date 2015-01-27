@@ -46,7 +46,7 @@ import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.request.CommonParameters;
 import com.ean.mobile.request.Request;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
@@ -159,14 +159,14 @@ public final class InformationRequest extends Request<HotelInformation> {
                         image.optString("url"), 
                         image.optString("caption"), image.optInt("category", 0)));
             } catch (MalformedURLException me) {
-                VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON: "+
+                DLog.e(Constants.LOG_TAG, "Unable to process JSON: "+
                 				image.optString("url","<null>")+" "+image.optString("thumbnailUrl","<null>"), me);
             }
         }
 
         CommonParameters.customerSessionId = infoResp.optString("customerSessionId");
 
-        Log.d(Constants.LOG_TAG, "Found " + imageTuples.size() + " images");
+        DLog.d(Constants.LOG_TAG, "Found " + imageTuples.size() + " images");
         return new HotelInformation(infoResp.optLong("@hotelId"), longDescription, imageTuples);
     }
 

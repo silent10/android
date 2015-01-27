@@ -6,7 +6,7 @@ import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.request.ListRequest;
 import com.ean.mobile.request.RequestProcessor;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
@@ -19,7 +19,7 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 
 	public ListContinuationDownloaderTask(HotelListFragment listener, String currencyCode) {
 		super(R.string.HOTELS);
-		Log.i(TAG, "CTOR");
+		DLog.i(TAG, "CTOR");
 		attach(listener);
 		hotelFragment = listener;
 		mCurrencyCode = currencyCode;
@@ -37,11 +37,11 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
 
 	@Override
 	protected Object doInBackground(Void... params) {
-		Log.i(TAG, "Do in background");
+		DLog.i(TAG, "Do in background");
 //
 //		JSONObject hotelListResponse = XpediaProtocolStatic.getExpediaNext(hotelFragment.getActivity(), mNextQuery, mCurrencyCode);
 //		if (hotelListResponse == null)
-//			VHAApplication.logError(TAG, "Response for next null");
+//			DLog.e(TAG, "Response for next null");
 //		mProgress = DownloaderStatus.MadeSomeProgress;
 //		onProgressUpdate();
 //		
@@ -59,7 +59,7 @@ public class ListContinuationDownloaderTask extends DownloaderTask {
             VHAApplication.updateFoundHotels(RequestProcessor.run(request));
             mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
-            Log.d(TAG, "An APILevel Exception occurred.", ewe);
+            DLog.d(TAG, "An APILevel Exception occurred.", ewe);
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
         	VHAApplication.sendRedirectionToast();

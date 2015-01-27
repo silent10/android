@@ -52,7 +52,7 @@ import com.ean.mobile.hotel.RoomOccupancy;
 import com.ean.mobile.hotel.SupplierType;
 import com.ean.mobile.hotel.request.BookingRequest;
 import com.ean.mobile.request.RequestProcessor;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -85,7 +85,7 @@ public class BookingFragement extends Fragment {
 			Bundle savedInstanceState) {
 
 		if (mView != null) {
-			Log.w(TAG, "Fragment initialized twice");
+			DLog.w(TAG, "Fragment initialized twice");
 			((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
 		}
@@ -122,7 +122,7 @@ public class BookingFragement extends Fragment {
 		toggleGuests.setOnClickListener(mToggleGuests);
 		
         if (VHAApplication.selectedHotel == null || VHAApplication.selectedRoom == null) {
-        	VHAApplication.logError(TAG, "Null hotel/room");
+        	DLog.e(TAG, "Null hotel/room");
         	return mView;
         }
 
@@ -264,7 +264,7 @@ public class BookingFragement extends Fragment {
 	
     
 	public void changeHotelRoom(Hotel hotel, HotelRoom room) {
-		Log.i(TAG, "Setting hotelId to "+hotel.hotelId+ "   room: "+room.description);
+		DLog.i(TAG, "Setting hotelId to "+hotel.hotelId+ "   room: "+room.description);
 		if (this.hotel == hotel && this.hotelRoom == room) {
 			return;
 		}
@@ -514,7 +514,7 @@ public class BookingFragement extends Fragment {
         					    .build()
         					   );
                 } catch (EanWsError ewe) {
-                    VHAApplication.logError(TAG, "An APILevel Exception occurred.", ewe);
+                    DLog.e(TAG, "An APILevel Exception occurred.", ewe);
                     return Boolean.FALSE;
                 } catch (UrlRedirectionException  ure) {
                     VHAApplication.sendRedirectionToast();

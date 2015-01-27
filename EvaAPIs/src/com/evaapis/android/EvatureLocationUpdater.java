@@ -6,7 +6,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 
 public class EvatureLocationUpdater implements LocationListener {
@@ -48,12 +48,12 @@ public class EvatureLocationUpdater implements LocationListener {
 		try {
 			gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 		} catch (Exception ex) {
-			Log.w(TAG, "No GPS_PROVIDER?");
+			DLog.w(TAG, "No GPS_PROVIDER?");
 		}
 		try {
 			network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 		} catch (Exception ex) {
-			Log.w(TAG, "No NETWORK_PROVIDER?");
+			DLog.w(TAG, "No NETWORK_PROVIDER?");
 		}
 
 		// if enabled, set updates from GPS location provider
@@ -88,7 +88,7 @@ public class EvatureLocationUpdater implements LocationListener {
 		if (isBetterLocation(location, currentLocation)) {
 			currentLocation = new Location(location);
 			String my_text = String.valueOf(location.getLatitude()) + " / " + String.valueOf(location.getLongitude());
-			Log.d(TAG, "Got location: " + my_text);
+			DLog.d(TAG, "Got location: " + my_text);
 		}
 	}
 

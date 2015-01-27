@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaTime  implements Serializable {
 
@@ -46,7 +46,7 @@ public class EvaTime  implements Serializable {
 			}
 
 		} catch (JSONException e) {
-			Log.e("EvaTime", "Error parsing JSON",e);
+			DLog.e("EvaTime", "Error parsing JSON",e);
 			parseErrors.add("Error during parsing time: "+e.getMessage());
 		}
 	}

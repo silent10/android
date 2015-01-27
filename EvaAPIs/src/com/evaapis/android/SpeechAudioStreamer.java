@@ -1,7 +1,6 @@
 package com.evaapis.android;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,10 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.WritableByteChannel;
 
 import org.apache.commons.io.FileUtils;
 
@@ -25,7 +22,8 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import com.evaapis.EvaException;
-import com.evature.util.Log;
+import com.evaapis.android.FLACStreamEncoder.WriteCallback;
+import com.evature.util.DLog;
 
 public class SpeechAudioStreamer {
 	public static final String TAG = "SpeechAudioStreamer";
@@ -63,6 +61,8 @@ public class SpeechAudioStreamer {
 	public boolean wasNoise;
 
 	private String fifoPath;
+	
+	OutputStream mOutputStream;
 
 	public SpeechAudioStreamer(Context context, int sampleRate) {
 		fifoPath = context.getApplicationInfo().dataDir + "/flac_stream_fifo";
@@ -75,11 +75,11 @@ public class SpeechAudioStreamer {
 		mDebugSavePCM = prefs.getBoolean("eva_save_pcm", false);
 //		mDebugSavePCM = false;
 		
-		Log.i(TAG, "Encoder=" + mEncoder.toString());
+		DLog.i(TAG, "Encoder=" + mEncoder.toString());
 	}
 
 	void initRecorder() throws EvaException {
-		Log.i(TAG, "<<< Starting to record");
+		DLog.i(TAG, "<<< Starting to record");
 		
 		wasNoise = false;
 		mPeakSoundLevel = 0f;
@@ -93,12 +93,12 @@ public class SpeechAudioStreamer {
 			bufferSize *= 1.25;
 			mBuffer = new byte[bufferSize];
 //			mBufferShorts = new int[bufferSize/2+1];
-			Log.i(TAG, "Initialized buffer to "+bufferSize);
+			DLog.i(TAG, "Initialized buffer to "+bufferSize);
 			mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 					AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
 					bufferSize);
 			if (mRecorder.getState() == AudioRecord.STATE_UNINITIALIZED) {
-				Log.e(TAG, "Failed to initalize recorder");
+				DLog.e(TAG, "Failed to initalize recorder");
 			}
 		}
 	}
@@ -129,7 +129,7 @@ public class SpeechAudioStreamer {
 		//Log.d(TAG, "Read "+numberOfReadBytes);
 		
 		if (mBuffer.length != numberOfReadBytes) {
-			Log.w(TAG, "unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
+			DLog.w(TAG, "unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
 			if (mBuffer.length < numberOfReadBytes) {
 				numberOfReadBytes = mBuffer.length;
 			}
@@ -219,11 +219,11 @@ public class SpeechAudioStreamer {
 		}
 		
 		private void encode(byte[] chunk, int readSize) throws IOException {
-			//Log.i(TAG, "<<< encoding " + chunk.length + " bytes");
+//			DLog.i(TAG, "<<< encoding " + chunk.length + " bytes");
 
 			// encoded = mEncoder.encode(chunk);
 
-//			long startTime = System.nanoTime();
+			long startTime = System.nanoTime();
 			
 			ByteBuffer bf = ByteBuffer.allocateDirect(readSize);
 			bf.put(chunk, 0, readSize);
@@ -231,8 +231,9 @@ public class SpeechAudioStreamer {
 			//ByteBuffer bf = ByteBuffer.wrap(chunk);
 			
 			mEncoder.write(bf, readSize);
+			mEncoder.flush();
 //			long duration = (System.nanoTime() - startTime)/1000000;
-//			Log.i(TAG, "<<< Writing "+chunk.length+" bytes to encoder took "+duration + " ms");
+//			DLog.i(TAG, "<<< Writing "+chunk.length+" bytes to encoder took "+duration + " ms");
 		}
 
 		public void run() {
@@ -247,7 +248,7 @@ public class SpeechAudioStreamer {
 					fos = new FileOutputStream(f);
 					dos = new DataOutputStream(new BufferedOutputStream(fos));
 				} catch (FileNotFoundException e) {
-					Log.w(TAG, "Failed to open file to save PCM");
+					DLog.w(TAG, "Failed to open file to save PCM");
 				}
 			}
 			
@@ -266,7 +267,7 @@ public class SpeechAudioStreamer {
 					android.os.Process
 							.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				} catch (Exception e) {
-					Log.e(TAG,
+					DLog.e(TAG,
 							"Set rec thread priority failed: " + e.getMessage());
 				}
 
@@ -282,29 +283,29 @@ public class SpeechAudioStreamer {
 
 					iterations++;
 					if (readSize < 0) {
-						Log.w(TAG, "Error reading from recorder "+readSize);
+						DLog.w(TAG, "Error reading from recorder "+readSize);
 						Thread.sleep(10);
 						errorIterations++;
 						if (errorIterations > MAX_ERROR_ITERATIONS) {
-							Log.e(TAG, "Errors - quiting");
+							DLog.e(TAG, "Errors - quiting");
 							break;
 						}
 					}
 					else if (readSize == 0) {
 						try {
-							Log.i(TAG, "Waiting for microphone to produce data");
+							DLog.i(TAG, "Waiting for microphone to produce data");
 							Thread.sleep(10);
 							if (iterations > MAX_TIME_WAIT_ITERATIONS) {
-								Log.e(TAG, "Waited too long for microphone to produce data - quiting");
+								DLog.e(TAG, "Waited too long for microphone to produce data - quiting");
 								break;
 							}
 						} catch (InterruptedException e) {
-							Log.e(TAG, "Interruprted Producer stream", e);
+							DLog.e(TAG, "Interruprted Producer stream", e);
 						}
 					} else {
 						Boolean hadSilence = checkForSilence(readSize);
 						if (!wasNoise && Boolean.FALSE == hadSilence) {
-							Log.i(TAG, "<<< Found initial noise");
+							DLog.i(TAG, "<<< Found initial noise");
 							wasNoise = true;
 						}
 						if (wasNoise && Boolean.TRUE == hadSilence) {
@@ -313,7 +314,7 @@ public class SpeechAudioStreamer {
 							try {
 								encode(mBuffer, readSize);
 							} catch (IOException e) {
-								Log.e(TAG, "IO error while sending to encoder");
+								DLog.e(TAG, "IO error while sending to encoder");
 							}
 							
 							if (mDebugSavePCM) {
@@ -341,10 +342,10 @@ public class SpeechAudioStreamer {
 				
 //				queue.put(new byte[0]);
 
-				Log.i(TAG, "<<< Finished producer thread - iterations="+iterations+ "  time="+((System.nanoTime() - t0) / 1000000)+"ms");
+				DLog.i(TAG, "<<< Finished producer thread - iterations="+iterations+ "  time="+((System.nanoTime() - t0) / 1000000)+"ms");
 
 			} catch (Exception ex) {
-				Log.e(TAG, "Exception in microphone producer", ex);
+				DLog.e(TAG, "Exception in microphone producer", ex);
 			} finally {
 				if (mRecorder.getState() == AudioRecord.STATE_INITIALIZED) {
 					mRecorder.stop();
@@ -386,76 +387,101 @@ public class SpeechAudioStreamer {
 //
 //	
 			encodedStream = null;
-			Log.i(TAG, "initing Fifo");
+			DLog.i(TAG, "initing Fifo");
 			mEncoder.initFifo(fifoPath);
 			try {
 				startedReading = true; // must be set before encodedStream, since the FileInputStream will be stuck until someone reads from it
 				encodedStream = new FileInputStream(fifoPath);
 			} catch (FileNotFoundException e) {
-				Log.e(TAG, "Failed to open FIFO from encoder");
+				DLog.e(TAG, "Failed to open FIFO from encoder");
 				throw new RuntimeException("Failed to open FIFO from encoder");
 			}
-			Log.i(TAG, "Encoded stream ready");
+			DLog.i(TAG, "Encoded stream ready");
 			
 		}
 
 	}
 
-	public InputStream start() {
+	public boolean start(final OutputStream outstream) {
 		if (mIsRecording) {
-			Log.w(TAG, "Already recording");
-			return null;
+			DLog.w(TAG, "Already recording");
+			return false;
 		}
 		mBufferIndex = 0;
 		mIsRecording = true;
 //		BlockingQueue q = new ArrayBlockingQueue<byte[]>(1000);
 		Producer p = new Producer();
 		//	Consumer c = new Consumer(q);
-		Uploader u = new Uploader();
-		Thread uploaderThread = new Thread(u);
-		uploaderThread.start(); // start uploader first -
+		//Uploader u = new Uploader();
+		//Thread uploaderThread = new Thread(u);
+		//uploaderThread.start(); // start uploader first -
 								// must read from encoded FIFO before any write takes place
-		int iterations = 0;
-		while (u.startedReading == false) {
-			iterations++;
-			try {
-				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing");
-				Thread.sleep(10);
-				if (iterations > MAX_UPLOADER_WAIT_ITERATIONS) {
-					Log.e(TAG, "Waited too long for uploader to start reading");
-					uploaderThread.interrupt();
-					return null;
-				}
-			} catch (InterruptedException e) {
-				Log.e(TAG, "interrupted waiting for uploader", e);
-				return null;
-			}
-		}
+//		int iterations = 0;
+//		while (u.startedReading == false) {
+//			iterations++;
+//			try {
+//				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing");
+//				Thread.sleep(10);
+//				if (iterations > MAX_UPLOADER_WAIT_ITERATIONS) {
+//					Log.e(TAG, "Waited too long for uploader to start reading");
+//					uploaderThread.interrupt();
+//					return null;
+//				}
+//			} catch (InterruptedException e) {
+//				Log.e(TAG, "interrupted waiting for uploader", e);
+//				return null;
+//			}
+//		}
 
-		Log.i(TAG, "Encoder init");
-		mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16); // write header
+
+		mEncoder.setWriteCallback(new WriteCallback() {
+			
+			@Override
+			public void onWrite(byte[] buffer, int length, int samples, int frame) {
+//				DLog.d(TAG, "Writing to HTTP: "+length+" bytes");
+//				if (frame == 0) {
+//					String txt = "";
+//					for (int i=0; i<length; i++) {
+//						if (buffer[i] > 30 && buffer[i] < 128) {
+//							txt += Character.toString((char)buffer[i]);
+//						}
+//					}
+//					Log.i(TAG, "in buffer: > "+txt);
+//				}
+				try {
+					outstream.write(buffer, 0, length);
+					outstream.flush();
+				} catch (IOException e) {
+					DLog.e(TAG, "Error writing to output stream");
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		DLog.i(TAG, "Encoder init");
+		//mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16, false, 256);
+		mEncoder.initWithCallback( mSampleRate, CHANNELS, 16, false, 256);
 
 		new Thread(p).start();
 		//new Thread(c).start();
-		Log.i(TAG, "Audio Streamer started!");
-		
-		while (u.encodedStream == null) {
-			iterations++;
-			try {
-				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing 2");
-				Thread.sleep(10);
-				if (iterations > MAX_UPLOADER_WAIT_ITERATIONS) {
-					Log.e(TAG, "Waited too long for uploader to start reading 2");
-					uploaderThread.interrupt();
-					return null;
-				}
-			} catch (InterruptedException e) {
-				Log.e(TAG, "interrupted waiting for uploader", e);
-				return null;
-			}
-		}
-		
-		return u.encodedStream;
+		DLog.i(TAG, "Audio Streamer started!");
+//		
+//		while (u.encodedStream == null) {
+//			iterations++;
+//			try {
+//				Log.i(TAG, "Waiting for uploader to start reading from FIFO before writing 2");
+//				Thread.sleep(10);
+//				if (iterations > MAX_UPLOADER_WAIT_ITERATIONS) {
+//					Log.e(TAG, "Waited too long for uploader to start reading 2");
+//					uploaderThread.interrupt();
+//					return null;
+//				}
+//			} catch (InterruptedException e) {
+//				Log.e(TAG, "interrupted waiting for uploader", e);
+//				return null;
+//			}
+//		}
+		return true;
 	}
 
 	/*
@@ -482,7 +508,7 @@ public class SpeechAudioStreamer {
 	 * (input != null) { input.close(); } } finally { if (output != null) {
 	 * output.close(); } } } }
 	 */
-
+/*
 	public byte[] loadBytesFromFile(File file) {
 		WritableByteChannel outputChannel = null;
 		FileChannel in = null;
@@ -514,7 +540,7 @@ public class SpeechAudioStreamer {
 		}
 		return new byte[0];
 	}
-
+*/
 //	public InputStream getInputStream() throws IOException {
 ////		pipedOut = new PipedOutputStream();
 ////		pipedIn = new PipedInputStream(pipedOut);
@@ -534,7 +560,7 @@ public class SpeechAudioStreamer {
 		try {
 			out = new FileOutputStream(outputFile);
 		} catch (FileNotFoundException e) {
-			Log.e(TAG, "Exception opening file", e);
+			DLog.e(TAG, "Exception opening file", e);
 		}
 
 		byte[] header = new byte[44];
@@ -588,7 +614,7 @@ public class SpeechAudioStreamer {
 			out.flush();
 			out.close();
 		} catch (IOException e) {
-			Log.e(TAG, "IO exception saving wav file", e);
+			DLog.e(TAG, "IO exception saving wav file", e);
 		}
 	}
 

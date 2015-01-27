@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ean.mobile.hotel.Hotel;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -77,7 +77,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
 		if (mView != null) {
-			Log.w(TAG, "Fragment initialized twice");
+			DLog.w(TAG, "Fragment initialized twice");
 			((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
 		}
@@ -121,7 +121,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 				mMap = mapFragment.getMap();
 			}
 			catch (Exception e) {
-				VHAApplication.logError(TAG, "Exception setting map fragment", e);
+				DLog.e(TAG, "Exception setting map fragment", e);
 				mMap = null;
 			}
         }
@@ -157,14 +157,14 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
         super.onResume();
         Activity activity = this.getActivity();
 		mCurrency = SettingsAPI.getCurrencySymbol(activity);
-		Log.i(TAG, "Map resumed - checking google play");
+		DLog.i(TAG, "Map resumed - checking google play");
         int errCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
 		if (errCode != ConnectionResult.SUCCESS) {
 			Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(errCode, activity, 0);
 			errorDialog.show();
 		}
 		else {
-			Log.i(TAG, "Map resumed - setting map");
+			DLog.i(TAG, "Map resumed - setting map");
 			setUpMapIfNeeded();
 		}
     }
@@ -172,7 +172,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 
 	
 	public void onHotelsListUpdated() {
-		Log.d(TAG, "Updating map because hotels list was updated");
+		DLog.d(TAG, "Updating map because hotels list was updated");
 		mLastPresentLength = -1; // force refresh of map
 		setUpMapIfNeeded();
 	}
@@ -190,7 +190,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 	
 	private void addHotelsToMap()
 	{	   
-		Log.d(TAG, "Adding hotels to map");
+		DLog.d(TAG, "Adding hotels to map");
 		mMap.clear();
 		
 		int startFrom = getFirstIndexToDisplay();
@@ -217,11 +217,11 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 	        try{
 	        	//This line will cause the exception first times when map is still not "inflated"
 	        	mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-	        	Log.d(TAG, "Camera moved successfully");
+	        	DLog.d(TAG, "Camera moved successfully");
 	        } catch(IllegalStateException e) {
-	        	Log.w(TAG, "Camera move exception", e);
+	        	DLog.w(TAG, "Camera move exception", e);
 	            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,400,400,10));
-	            Log.d(TAG, "Camera moved to hardcoded width height");
+	            DLog.d(TAG, "Camera moved to hardcoded width height");
 	        }
         }
         else {
@@ -282,7 +282,7 @@ public class HotelsMapFragment extends Fragment implements OnInfoWindowClickList
 	        	if (Math.abs(position.latitude - hotel.address.latitude.doubleValue()) < 0.001
 	        		&& Math.abs(position.longitude - hotel.address.longitude.doubleValue()) < 0.001) {
 	        		
-	        		Log.d(TAG, "Hotel "+i+" clicked in map");
+	        		DLog.d(TAG, "Hotel "+i+" clicked in map");
 	        		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();
 	        		if (defaultTracker != null) 
 	        			defaultTracker.send(MapBuilder

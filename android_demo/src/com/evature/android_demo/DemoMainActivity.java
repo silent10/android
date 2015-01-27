@@ -28,7 +28,7 @@ import com.evaapis.android.EvaBaseActivity;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class DemoMainActivity extends EvaBaseActivity implements OnSharedPreferenceChangeListener {
 	
@@ -47,7 +47,7 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.DEBUG = BuildConfig.DEBUG;
+		DLog.DebugMode = BuildConfig.DEBUG;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if (sharedPreferences.getString(EvaComponent.VRSERV_PREF_KEY, "-").equals("-")) {
 			Editor edit = sharedPreferences.edit();

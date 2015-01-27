@@ -21,7 +21,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.ean.mobile.hotel.Hotel;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader.LoadedCallback;
 import com.virtual_hotel_agent.search.R;
@@ -95,7 +95,7 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 		
 		final Hotel hotel = hotels.get(position);
 		if (hotel == null) {
-			Log.w(TAG, "No hotel info for adapter position "+position);
+			DLog.w(TAG, "No hotel info for adapter position "+position);
 			return;
 		}
 		final HotelViewHolder holder = (HotelViewHolder)itemHolder;
@@ -103,7 +103,7 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
 		Spanned spannedName = Html.fromHtml(hotel.name);
 		String name = spannedName.toString();
-		Log.d(TAG, "binding View to hotel "+name+",   holder had "+holder.name.getText());
+		DLog.d(TAG, "binding View to hotel "+name+",   holder had "+holder.name.getText());
 
 //		((WindowManager) mParent.getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -165,7 +165,7 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 						@Override
 						public void drawableLoaded(boolean success, BitmapDrawable drawable) {
 							if (!success) {
-								Log.w(TAG, "Failed download img for hotel "+holder.name.getText());
+								DLog.w(TAG, "Failed download img for hotel "+holder.name.getText());
 								return;
 							}
 							Bitmap bmp = ((BitmapDrawable) drawable).getBitmap();
@@ -189,7 +189,7 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 								holder.name.setTextColor(swatch.getTitleTextColor());
 							}
 							else {
-								Log.w(TAG, "No swatch made for photo?  hotel: "+holder.name.getText() );
+								DLog.w(TAG, "No swatch made for photo?  hotel: "+holder.name.getText() );
 							}
 
 							// load a high resolution bitmap

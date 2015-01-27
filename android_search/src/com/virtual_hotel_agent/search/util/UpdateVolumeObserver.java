@@ -1,6 +1,6 @@
 package com.virtual_hotel_agent.search.util;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 import android.content.Context;
 import android.database.ContentObserver;
@@ -37,12 +37,12 @@ public class UpdateVolumeObserver  extends ContentObserver {
 
         if(delta>0)
         {
-            Log.d(TAG, "Decreased");
+            DLog.d(TAG, "Decreased");
             previousVolume=currentVolume;
         }
         else if(delta<0)
         {
-            Log.d(TAG, "Increased");
+            DLog.d(TAG, "Increased");
             previousVolume=currentVolume;
         }
     }

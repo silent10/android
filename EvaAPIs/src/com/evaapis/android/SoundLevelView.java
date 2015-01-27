@@ -10,7 +10,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class SoundLevelView extends View {
 
@@ -182,7 +182,7 @@ public class SoundLevelView extends View {
 			}
 		}
 		soundBuffIndex = index;
-		Log.i(TAG, "@@@ added "+numOfPoints+"  to buffer, peak="+peakSound+"  minSound="+minSound);
+		DLog.i(TAG, "@@@ added "+numOfPoints+"  to buffer, peak="+peakSound+"  minSound="+minSound);
 		
 //		if (springiness != 0) {
 //			postDelayed(animator, 15);

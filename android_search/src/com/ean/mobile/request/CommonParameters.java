@@ -37,7 +37,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.CommonParameterValidationException;
-import com.virtual_hotel_agent.search.VHAApplication;
+import com.evature.util.DLog;
 
 /**
  * Contains elements that (1) are common to all requests and (2) typically remain the same across multiple requests.
@@ -163,7 +163,7 @@ public final class CommonParameters {
                 messageDigest.update(signatureInput.getBytes());
                 return String.format("%032x", new BigInteger(1, messageDigest.digest()));
             } catch (NoSuchAlgorithmException e) {
-            	VHAApplication.logError(Constants.LOG_TAG, "Couldn't get MD5 hashing working.", e);
+            	DLog.e(Constants.LOG_TAG, "Couldn't get MD5 hashing working.", e);
             }
         }
         return null;

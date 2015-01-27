@@ -29,7 +29,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
 import com.virtual_hotel_agent.search.BuildConfig;
 import com.virtual_hotel_agent.search.R;
@@ -72,10 +72,10 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		Log.d(TAG, "onCreateView");
+		DLog.d(TAG, "onCreateView");
 		
 		if (root != null) {
-			Log.w(TAG, "Fragment initialized twice");
+			DLog.w(TAG, "Fragment initialized twice");
 			((ViewGroup) root.getParent()).removeView(root);
 			return root;
 		}
@@ -103,7 +103,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 	
 	@Override 
 	public void onActivityCreated(Bundle savedInstanceState) {
-		Log.d(TAG, "ChatFragment onActivityCreated");
+		DLog.d(TAG, "ChatFragment onActivityCreated");
 		super.onActivityCreated(savedInstanceState);
 		mChatListModel.loadInstanceState(savedInstanceState);
 		if (mChatListModel.size() == 0) {
@@ -138,7 +138,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 
 	@Override
 	public void onSaveInstanceState(Bundle instanceState) {
-		Log.d(TAG, "onSaveInstanceState");
+		DLog.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(instanceState);
 		mChatListModel.saveInstanceState(instanceState);
 	}
@@ -370,7 +370,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 	}
 
 	public void clearChat() {
-		Log.d(TAG, "Clearing chat Fragment");
+		DLog.d(TAG, "Clearing chat Fragment");
 		shownExamples = false;
 		editedChatItemIndex = -1;
 		getActivity().runOnUiThread(new Runnable() {
@@ -410,17 +410,17 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 	 */
 	private void closeEditChatItem(boolean isSubmitted) {
 		if (editedChatItemIndex == -1) {
-			VHAApplication.logError(TAG, "Unexpected closed edit chat item");
+			DLog.e(TAG, "Unexpected closed edit chat item");
 			return;
 		}
 		if (getActivity() == null) {
-			VHAApplication.logError(TAG, "no activity connected to chat Fragment");
+			DLog.e(TAG, "no activity connected to chat Fragment");
 		} 
 		else {
 			InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(
 				      Context.INPUT_METHOD_SERVICE);
 			if (imm == null) {
-				VHAApplication.logError(TAG, "no input method manager");
+				DLog.e(TAG, "no input method manager");
 			}
 			else {
 				imm.hideSoftInputFromWindow(mChatListView.getWindowToken(), 0);
@@ -434,12 +434,12 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 		if (isSubmitted) {
 			View rowView = getViewForChatItem(editedChatItem);
 			if (rowView == null) {
-				VHAApplication.logError(TAG, "Unexpected edited row not found");
+				DLog.e(TAG, "Unexpected edited row not found");
 				return;
 			}
 			EditText editText = (EditText)rowView.findViewById(R.id.editText);
 			if (editText == null) {
-				VHAApplication.logError(TAG, "Unexpected editText not found");
+				DLog.e(TAG, "Unexpected editText not found");
 				return;
 			}
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
@@ -474,9 +474,9 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 	public final OnClickListener deleteHandler = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			Log.d(TAG, "Clicked delete");
+			DLog.d(TAG, "Clicked delete");
 			if (editedChatItemIndex == -1) {
-				VHAApplication.logError(TAG, "Unexpected delete no edit chat item");
+				DLog.e(TAG, "Unexpected delete no edit chat item");
 				return;
 			}
 			ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);
@@ -497,9 +497,9 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 		
 		@Override
 		public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-			Log.d(TAG, "editor Action "+actionId);
+			DLog.d(TAG, "editor Action "+actionId);
 			if (editedChatItemIndex == -1) {
-				VHAApplication.logError(TAG, "Unexpected execute no edit chat item");
+				DLog.e(TAG, "Unexpected execute no edit chat item");
 				return false;
 			}
 			closeEditChatItem(true);
@@ -512,7 +512,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 		@Override
 		public void onClick(View v) {
 			if (editedChatItemIndex == -1) {
-				VHAApplication.logError(TAG, "Unexpected microphone no edit chat item");
+				DLog.e(TAG, "Unexpected microphone no edit chat item");
 				return;
 			}
 			ChatItem editedChatItem = mChatListModel.get(editedChatItemIndex);

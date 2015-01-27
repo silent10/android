@@ -19,7 +19,7 @@ import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.nhaarman.listviewanimations.appearance.AnimationAdapter;
 import com.nhaarman.listviewanimations.appearance.OnAnimEndCallback;
 import com.nhaarman.listviewanimations.itemmanipulation.swipedismiss.OnDismissCallback;
@@ -205,7 +205,7 @@ public class ChatAnimAdapter extends AnimationAdapter {
 //        Log.d(TAG, "initialHeight="+originalHeight);
     	final ViewGroup.LayoutParams lp = view.getLayoutParams();
     	final int originalHeight = view.getHeight();
-    	Log.d(TAG, "initialHeight="+originalHeight);
+    	DLog.d(TAG, "initialHeight="+originalHeight);
         ValueAnimator animator = ValueAnimator.ofInt(Math.round(originalHeight*start), Math.round(originalHeight*end));
         animator.addListener(new AnimatorListenerAdapter() {
 

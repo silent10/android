@@ -17,7 +17,7 @@ import android.text.style.StyleSpan;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.flow.FlowElement;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.util.ErrorSpan;
 
@@ -137,7 +137,7 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 				} catch (InstantiationException | IllegalAccessException
 						| IllegalArgumentException | InvocationTargetException
 						| NoSuchMethodException e) {
-					VHAApplication.logError(TAG, "Failed to create span "+className+"  ["+start+"-"+end+"]");
+					DLog.e(TAG, "Failed to create span "+className+"  ["+start+"-"+end+"]");
 				}
 	        }
 	        	

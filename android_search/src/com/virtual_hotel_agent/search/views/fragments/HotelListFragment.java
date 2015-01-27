@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -50,7 +50,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 
 	@Override
 	public void onDestroyView() {
-		Log.d(TAG, "onDestroyView");
+		DLog.d(TAG, "onDestroyView");
 		super.onDestroyView();
 	}
 	
@@ -62,21 +62,21 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 	    if (this.isVisible()) {
 	        // If we are becoming invisible, then...
 	        if (!isVisibleToUser) {
-	            Log.i(TAG, "Not visible anymore.");
+	            DLog.i(TAG, "Not visible anymore.");
 	        }
 	        else {
-	        	Log.i(TAG, "Becoming visible. Starting audio.");
+	        	DLog.i(TAG, "Becoming visible. Starting audio.");
 	        	((MainActivity)getActivity()).hotelsFragmentVisible();
 	        }
 	    }
 	    else {
-	    	Log.w(TAG, "hint called while not visible?");
+	    	DLog.w(TAG, "hint called while not visible?");
 	    }
 	}
 
 	@Override
 	public void onPause() {
-		Log.d(TAG, "onPause");
+		DLog.d(TAG, "onPause");
 
 		if (mContinuationLoader != null) {
 			mContinuationLoader.detach();
@@ -89,25 +89,25 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 
 	@Override
 	public void onResume() {
-		Log.d(TAG, "onResume");
+		DLog.d(TAG, "onResume");
 		super.onResume();
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		Log.d(TAG, "onSaveInstanceState");
+		DLog.d(TAG, "onSaveInstanceState");
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onStart() {
-		Log.d(TAG, "onStart");
+		DLog.d(TAG, "onStart");
 		super.onStart();
 	}
 
 	@Override
 	public void onStop() {
-		Log.i(TAG, "onStop");
+		DLog.i(TAG, "onStop");
 		super.onStop();
 	}
 
@@ -129,7 +129,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		if (mView != null) {
-			Log.w(TAG, "Fragment initialized twice");
+			DLog.w(TAG, "Fragment initialized twice");
 			if (mView.getParent() != null)
 				((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
@@ -202,7 +202,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 
 	@Override
 	public void onHotelClick(int position, View view) {
-		Log.d(TAG, "onHotelClick "+position);
+		DLog.d(TAG, "onHotelClick "+position);
 
 
 		Tracker defaultTracker = GoogleAnalytics.getInstance(getActivity()).getDefaultTracker();
@@ -216,7 +216,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 		//mHotelListView.setSelection(VHAApplication.FOUND_HOTELS.indexOf(VHAApplication.selectedHotel));
 		//mHotelListView.requestFocus();
 		if (position >= VHAApplication.FOUND_HOTELS.size()) {
-			Log.e(TAG, "position "+position+" is greater than "+VHAApplication.FOUND_HOTELS.size()+ " found hotels");
+			DLog.e(TAG, "position "+position+" is greater than "+VHAApplication.FOUND_HOTELS.size()+ " found hotels");
 			return;
 		}
 		eventBus.post(new HotelItemClicked(position,
@@ -224,7 +224,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 							view.findViewById(R.id.hotelName),
 							//view.findViewById(R.id.tripAdvisorStrip),
 							view.findViewById(R.id.rating)));
-		Log.d(TAG, "running showHotelDetails()");
+		DLog.d(TAG, "running showHotelDetails()");
 
 	}
 
@@ -245,7 +245,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 			if ((maxPosition > 0) && (maxPosition >= totalItemCount - distanceFromLastPositionToLoad) 
 					&& mContinuationLoader == null
 					&& mEnabledPaging) {
-				Log.d(TAG, "-Last Scroll-");
+				DLog.d(TAG, "-Last Scroll-");
 				mFooterView.setVisibility(View.VISIBLE);
 				//String nextQuery = MyApplication.getDb().getNextQuery();
 				mContinuationLoader = new ListContinuationDownloaderTask(HotelListFragment.this, 
@@ -321,7 +321,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 	@Override
 	public void updateProgress(int id, DownloaderStatus progress) {
 
-		Log.i(TAG, "Update progress "+progress);
+		DLog.i(TAG, "Update progress "+progress);
 		if (mContinuationLoader != null && id == mContinuationLoader.getId()) {
 			switch (progress) {
 			case MadeSomeProgress:
@@ -337,10 +337,10 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 
 	public void newHotelsList() {
 		if (mAdapter == null) {
-			VHAApplication.logError(TAG, "Unexpected adapter is null");
+			DLog.e(TAG, "Unexpected adapter is null");
 			return;
 		}
-		Log.d(TAG, "New Hotel list updated to size "+(mAdapter.getItemCount()-1));
+		DLog.d(TAG, "New Hotel list updated to size "+(mAdapter.getItemCount()-1));
 		//mAnimAdapter.reset();
 		//mHotelListView.clearChoices();
 		setAdapter();

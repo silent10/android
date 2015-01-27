@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class Sabre  implements Serializable {
 	private static final String TAG = "Sabre";
@@ -27,7 +27,7 @@ public class Sabre  implements Serializable {
 				warnings[index] = jWarnings.getString(index);
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, "Problem parsing JSON", e);
+			DLog.e(TAG, "Problem parsing JSON", e);
 			parseErrors.add("Error parsing Sabre: "+e.getMessage());
 		}
 	}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import android.os.AsyncTask;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
 
 abstract public class DownloaderTask extends AsyncTask<Void, Integer, Object> {
@@ -48,7 +48,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, Object> {
 	@Override
 	protected void onPostExecute(Object result) {
 
-		Log.d(TAG, "onPostExecute");
+		DLog.d(TAG, "onPostExecute");
 
 
 		for (DownloaderTaskListenerInterface listener : mListeners) {
@@ -63,7 +63,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, Object> {
 
 	@Override
 	protected void onPreExecute() {
-		Log.d(TAG, "onPreExecute");
+		DLog.d(TAG, "onPreExecute");
 
 		mProgress = DownloaderStatus.Started;
 		for (DownloaderTaskListenerInterface listener : mListeners) {
@@ -76,7 +76,7 @@ abstract public class DownloaderTask extends AsyncTask<Void, Integer, Object> {
 	@Override
 	protected void onProgressUpdate(Integer... values) {
 
-		Log.d(TAG, "onProgressUpdate:" + mProgress);
+		DLog.d(TAG, "onProgressUpdate:" + mProgress);
 
 		for (DownloaderTaskListenerInterface listener : mListeners) {
 			listener.updateProgress(getId(), mProgress);

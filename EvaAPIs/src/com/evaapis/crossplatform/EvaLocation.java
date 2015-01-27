@@ -9,7 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaLocation implements Serializable {
 	private final String TAG = "EvaLocation";
@@ -107,7 +107,7 @@ public class EvaLocation implements Serializable {
 				}
 				catch(IllegalArgumentException e) {
 					parseErrors.add( "Unexpected Location Type"+location.optString("Type"));
-					Log.w(TAG, "Unexpected Location Type", e);
+					DLog.w(TAG, "Unexpected Location Type", e);
 					Type = TypeEnum.Unknown;
 				}
 			}
@@ -141,7 +141,7 @@ public class EvaLocation implements Serializable {
 			}
 
 		} catch (JSONException e) {
-			Log.e(TAG, "Error parsing JSON",e);
+			DLog.e(TAG, "Error parsing JSON",e);
 			parseErrors.add("Error during parsing location attributes: "+e.getMessage());
 		}
 

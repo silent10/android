@@ -7,8 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.EvaLocation;
-import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class QuestionElement extends FlowElement {
 
@@ -45,7 +44,7 @@ public class QuestionElement extends FlowElement {
 					questionType = QuestionType.valueOf(jFlowElement.getString("QuestionType").replace(' ','_'));
 				}
 				catch(IllegalArgumentException e) {
-					Log.w(TAG, "Unexpected QuestionType in Flow element", e);
+					DLog.w(TAG, "Unexpected QuestionType in Flow element", e);
 					questionType = QuestionType.Unknown;
 				}
 			}
@@ -55,7 +54,7 @@ public class QuestionElement extends FlowElement {
 					questionCategory = QuestionCategory.valueOf(jFlowElement.getString("QuestionCategory").replace(' ', '_'));
 				}
 				catch(IllegalArgumentException e) {
-					Log.w(TAG, "Unexpected Question Category in Flow element", e);
+					DLog.w(TAG, "Unexpected Question Category in Flow element", e);
 					questionCategory = QuestionCategory.Unknown;
 				}
 			}
@@ -73,16 +72,16 @@ public class QuestionElement extends FlowElement {
 			}
 		}
 		catch(JSONException e) {
-			Log.e(TAG, "Bad EVA reply!", e);
+			DLog.e(TAG, "Bad EVA reply!", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());	
 		}
 		catch(Exception e) {
-			Log.e(TAG, "Error parsing EVA reply", e);
+			DLog.e(TAG, "Error parsing EVA reply", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());
 			try {
-				Log.i(TAG, jFlowElement.toString(4));
+				DLog.i(TAG, jFlowElement.toString(4));
 			} catch (JSONException e1) {
-				Log.e(TAG, "JSON exception parsing question element", e);
+				DLog.e(TAG, "JSON exception parsing question element", e);
 			}
 		}
 

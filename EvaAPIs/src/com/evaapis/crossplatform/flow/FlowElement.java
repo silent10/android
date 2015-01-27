@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.EvaLocation;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class FlowElement implements Serializable {
 
@@ -47,7 +47,7 @@ public class FlowElement implements Serializable {
 			}
 		}
 		catch(JSONException e) {
-			Log.e(TAG, "Bad EVA reply!  exception processing RelatedLocations in flow Element", e);
+			DLog.e(TAG, "Bad EVA reply!  exception processing RelatedLocations in flow Element", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());	
 		}
 		
@@ -55,11 +55,11 @@ public class FlowElement implements Serializable {
 			Type = TypeEnum.valueOf(jFlowElement.getString("Type"));
 		}
 		catch(IllegalArgumentException e) {
-			Log.w(TAG, "Unexpected Flow Type in Flow element", e);
+			DLog.w(TAG, "Unexpected Flow Type in Flow element", e);
 			Type = TypeEnum.Other;
 		}
 		catch(JSONException e) {
-			Log.e(TAG, "Bad EVA reply! no Type in Flow element", e);
+			DLog.e(TAG, "Bad EVA reply! no Type in Flow element", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());	
 		}
 		
@@ -67,7 +67,7 @@ public class FlowElement implements Serializable {
 			SayIt = jFlowElement.getString("SayIt");
 		}
 		catch(JSONException e) {
-			Log.e(TAG, "Bad EVA reply! no SayIt in Flow element", e);
+			DLog.e(TAG, "Bad EVA reply! no SayIt in Flow element", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());	
 		}
 	}

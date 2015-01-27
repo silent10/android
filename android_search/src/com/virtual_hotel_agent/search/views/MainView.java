@@ -36,7 +36,7 @@ import com.evaapis.android.EvaSpeechComponent;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.android.SoundLevelView;
 import com.evaapis.android.SpeechAudioStreamer;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
@@ -229,7 +229,7 @@ public class MainView {
 	}
 	
 	public void activateSearchButton() {
-		Log.d(TAG, "activate search button");
+		DLog.d(TAG, "activate search button");
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
@@ -247,7 +247,7 @@ public class MainView {
 			return;
 		}
 		if (times == 1) {
-			Log.d(TAG, "flash search button");
+			DLog.d(TAG, "flash search button");
 		}
 		mSearchButton.post(new Runnable() {
 		    @Override
@@ -279,7 +279,7 @@ public class MainView {
 	}
 	
 	public void disableSearchButton() {
-		Log.d(TAG, "disable search button");
+		DLog.d(TAG, "disable search button");
 		mSearchButton.post(new Runnable() {
 			@Override
 			public void run() {
@@ -303,7 +303,7 @@ public class MainView {
 	}
 	
 	public void deactivateSearchButton() {
-		Log.d(TAG, "deactivate search button");
+		DLog.d(TAG, "deactivate search button");
 		mSearchButton.post(new Runnable() {
 		    @Override
 		    public void run() {
@@ -331,7 +331,7 @@ public class MainView {
 			return;
 		}
 		if (times == 1) {
-			Log.d(TAG, "flash bad search button");
+			DLog.d(TAG, "flash bad search button");
 		}
 				
 		mSearchButton.post(new Runnable() {
@@ -418,7 +418,7 @@ public class MainView {
 					if (!processing) {
 						processing = true;
 						view.disableSearchButton();
-						//view.showStatus("Processing...");
+						view.showStatus("Processing...");
 						//view.mSoundView.startSpringAnimation();
 					}
 				}
@@ -469,7 +469,7 @@ public class MainView {
 		}
 		catch (EvaException e) {
 			Toast.makeText(VHAApplication.getAppContext(), "Failed to start recorder, please try again later and contact the developers if the problem persists", Toast.LENGTH_LONG).show();
-			VHAApplication.logError(TAG, "Exception starting recorder", e);
+			DLog.e(TAG, "Exception starting recorder", e);
 		}
 	}
 
@@ -509,25 +509,25 @@ public class MainView {
 		
 		public MyPagerAdapter(FragmentManager fm) {
 			super(fm);
-			Log.i(TAG, "CTOR");
+			DLog.i(TAG, "CTOR");
 		}
 //		
 		@Override 
 		public void destroyItem(android.view.ViewGroup container, int position, Object object) {
 			if (position >= getCount()) {
-				Log.d(TAG, "Destryoing tab at position "+position);
+				DLog.d(TAG, "Destryoing tab at position "+position);
 		        FragmentManager manager = ((Fragment) object).getFragmentManager();
 		        FragmentTransaction trans = manager.beginTransaction();
 		        trans.remove((Fragment) object);
 		        trans.commit();
 		    }
 			else {
-				Log.d(TAG, "Ignoring destroyItem at position "+position);
+				DLog.d(TAG, "Ignoring destroyItem at position "+position);
 			}
 		};
 		
 		@Override public Object instantiateItem (ViewGroup container, int position) {
-			Log.d(TAG, "instantiateItem "+position);
+			DLog.d(TAG, "instantiateItem "+position);
 			Object result = super.instantiateItem(container, position);
 			
 			// hack to restore pointer to fragments:
@@ -550,29 +550,29 @@ public class MainView {
 
 	    @Override
 		public Fragment getItem(int position) {// Asks for the main fragment
-			Log.d(TAG, "getItem " + String.valueOf(position));
+			DLog.d(TAG, "getItem " + String.valueOf(position));
 			int size = mTabTitles.size();
 			if (position >= size) {
-				VHAApplication.logError(TAG, "No fragment made for Position "+position);
+				DLog.e(TAG, "No fragment made for Position "+position);
 				return null;
 			}
 			String tabTitle = mTabTitles.get(position);
 			if (tabTitle.equals(mChatTabName)) { // Main Chat window
-				Log.d(TAG, "Chat Fragment");
+				DLog.d(TAG, "Chat Fragment");
 				if (mChatFragment == null) {
 					mChatFragment = new ChatFragment();
 				}
 				return mChatFragment;
 			}
 			else if (tabTitle.equals(mHotelsTabName)) { // Hotel list window
-				Log.i(TAG, "Hotels Fragment");
+				DLog.i(TAG, "Hotels Fragment");
 				if (mHotelsListFragment == null) {
 					mHotelsListFragment = new HotelListFragment();
 				}
 				return mHotelsListFragment;
 			}
 
-			VHAApplication.logError(TAG, "No fragment made for Position "+position+(position< size ? " titled "+tabTitle : ""));
+			DLog.e(TAG, "No fragment made for Position "+position+(position< size ? " titled "+tabTitle : ""));
 			return null;
 		}
 
@@ -606,7 +606,7 @@ public class MainView {
 	}
 
 	public void showTab(int position) {
-		Log.d(TAG, "showTab "+position);
+		DLog.d(TAG, "showTab "+position);
 //		lastShown = position;
 		mViewPager.setCurrentItem(position, true);
 	}
@@ -622,13 +622,13 @@ public class MainView {
 	}
 
 	public void addTab(String name) { // Dynamic tabs add to end
-		Log.d(TAG, "addTab "+name);
+		DLog.d(TAG, "addTab "+name);
 		mTabTitles.add(name);
 		mPagerAdapter.notifyDataSetChanged();
 	}
 	
 	public void addTab(String name, int position) { // Dynamic tabs add to certain position
-		Log.d(TAG, "addTab "+name);
+		DLog.d(TAG, "addTab "+name);
 		mTabTitles.add(position, name);
 		mPagerAdapter.notifyDataSetChanged();
 	}
@@ -643,7 +643,7 @@ public class MainView {
 	
 	public void removeTab(int tabIndex)
 	{
-		Log.d(TAG, "removeTab "+tabIndex);
+		DLog.d(TAG, "removeTab "+tabIndex);
 		mTabTitles.remove(tabIndex);
 		mPagerAdapter.notifyDataSetChanged();
 	}

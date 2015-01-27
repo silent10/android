@@ -26,7 +26,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.R;
 
 public class BugReportDialog extends BaseActivity implements
@@ -131,11 +131,11 @@ public class BugReportDialog extends BaseActivity implements
 			@Override
 			public void send(CrashReportData report)
 					throws ReportSenderException {
-				Log.i(TAG, "Sending bug report");
+				DLog.i(TAG, "Sending bug report");
 				report.put(ReportField.USER_COMMENT, userComment.getText().toString());
 				GoogleFormSender gfs = new GoogleFormSender("dC1fQTdXMlg0RmplcVpvVzNmZ2Q2amc6MA");
 				gfs.send(report);
-				Log.i(TAG, "Reseting to crash report config");
+				DLog.i(TAG, "Reseting to crash report config");
 				// reset to crash reports
 				bugReporter.setReportSender(new GoogleFormSender("dDk0dGxhc1B6Z05vaXh3Q0xxWnhnZlE6MQ"));
 				bugReporter.putCustomData("bug_report", "false");

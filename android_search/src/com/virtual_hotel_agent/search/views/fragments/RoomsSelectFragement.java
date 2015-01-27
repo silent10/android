@@ -20,7 +20,7 @@ import android.widget.Toast;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.hotel.SupplierType;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -76,7 +76,7 @@ public class RoomsSelectFragement extends Fragment {//implements OnItemClickList
 			Bundle savedInstanceState) {
 
 		if (mView != null) {
-			Log.w(TAG, "Fragment initialized twice");
+			DLog.w(TAG, "Fragment initialized twice");
 			((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
 		}
@@ -105,7 +105,7 @@ public class RoomsSelectFragement extends Fragment {//implements OnItemClickList
 		mStarRatingBar = (RatingBar)mView.findViewById(R.id.starRating);
 		
 		if (VHAApplication.selectedHotel == null) {
-			VHAApplication.logError(TAG, "onCreateView - no selectedHotel");
+			DLog.e(TAG, "onCreateView - no selectedHotel");
 		}
 		else {
 			changeHotelId(VHAApplication.selectedHotel.hotelId);
@@ -117,7 +117,7 @@ public class RoomsSelectFragement extends Fragment {//implements OnItemClickList
 	private void fillData() {
 		Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 		if (hotel == null) {
-			VHAApplication.logError(TAG, "showing hotel id "+mHotelId +" but not found");
+			DLog.e(TAG, "showing hotel id "+mHotelId +" but not found");
 			return;
 		}
 		
@@ -251,7 +251,7 @@ public class RoomsSelectFragement extends Fragment {//implements OnItemClickList
 		if (hotelId == -1)
 			return;
 		
-		Log.i(TAG, "Setting hotelId to "+hotelId+", was "+mHotelId);
+		DLog.i(TAG, "Setting hotelId to "+hotelId+", was "+mHotelId);
 		if (mHotelId == hotelId) {
 			return;
 		}

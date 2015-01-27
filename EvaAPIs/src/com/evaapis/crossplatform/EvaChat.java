@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaChat  implements Serializable {
 
@@ -20,7 +20,7 @@ public class EvaChat  implements Serializable {
 	public String name = null;
 
 	public EvaChat(JSONObject jChat, List<String> parseErrors) {
-		Log.d(TAG, "CTOR");
+		DLog.d(TAG, "CTOR");
 		try {
 			if (jChat.has("Hello"))
 				hello = jChat.getBoolean("Hello");
@@ -35,7 +35,7 @@ public class EvaChat  implements Serializable {
 			if (jChat.has("Name"))
 				name = jChat.getString("Name");
 		} catch (JSONException e) {
-			Log.e(TAG, "Parse JSON", e);
+			DLog.e(TAG, "Parse JSON", e);
 			parseErrors.add("Error during parsing eva chat: "+e.getMessage());
 		}
 	}

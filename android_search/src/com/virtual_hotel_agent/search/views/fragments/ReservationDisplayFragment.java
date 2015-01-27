@@ -39,7 +39,7 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import com.ean.mobile.hotel.Reservation;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -63,7 +63,7 @@ public class ReservationDisplayFragment extends Fragment {
 			Bundle savedInstanceState) {
 
 		if (mView != null) {
-			Log.w(TAG, "Fragment initialized twice");
+			DLog.w(TAG, "Fragment initialized twice");
 			((ViewGroup) mView.getParent()).removeView(mView);
 			return mView;
 		}
@@ -119,7 +119,7 @@ public class ReservationDisplayFragment extends Fragment {
         final Reservation reservationToDisplay = VHAApplication.getLatestReservation();
 
         if (reservationToDisplay == null) {
-        	VHAApplication.logError(TAG, "No reservation to display");
+        	DLog.e(TAG, "No reservation to display");
         	return;
         }
 

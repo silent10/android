@@ -6,7 +6,7 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.request.InformationRequest;
 import com.ean.mobile.request.RequestProcessor;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.events.HotelItemClicked;
@@ -19,17 +19,17 @@ public class HotelDownloaderTask extends DownloaderTask {
 
 	public HotelDownloaderTask(DownloaderTaskListenerInterface listener, HotelItemClicked event) {
 		super( R.string.HOTEL);
-		Log.d(TAG, "CTOR");
+		DLog.d(TAG, "CTOR");
 		attach(listener);
 		hotelItemSelectedEvent = event;
 	}
 
 	@Override
 	protected Object doInBackground(Void... params) {
-		Log.d(TAG, "doInBackground()");
+		DLog.d(TAG, "doInBackground()");
 
 		if (isCancelled()) {
-			Log.w(TAG, "thread was canceled!");
+			DLog.w(TAG, "thread was canceled!");
 			mProgress = DownloaderStatus.FinishedWithError;
 			return null;
 		}
@@ -44,7 +44,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 			VHAApplication.EXTENDED_INFOS.put(hotelItemSelectedEvent.hotelId, hotelInformation);
 			mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
-            Log.d(TAG, "Unexpected error occurred within the api", ewe);
+            DLog.d(TAG, "Unexpected error occurred within the api", ewe);
             eanWsError = ewe;
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
@@ -75,7 +75,7 @@ public class HotelDownloaderTask extends DownloaderTask {
 //			return jHotel;
 //
 //		} catch (JSONException e) {
-//			VHAApplication.logError(TAG, "JSON exception getting hotel details", e);
+//			DLog.e(TAG, "JSON exception getting hotel details", e);
 //			return jHotel;
 //		}
 //	}

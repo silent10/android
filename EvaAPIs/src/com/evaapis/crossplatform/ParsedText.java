@@ -7,7 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class ParsedText {
 
@@ -40,7 +40,7 @@ public class ParsedText {
 					times.add(time);
 				}
 			} catch (JSONException e) {
-				Log.e("ParsedText", "Error parsing JSON",e);
+				DLog.e("ParsedText", "Error parsing JSON",e);
 				parseErrors.add("Failed to parse Times in ParsedText");
 			}
 		}
@@ -57,7 +57,7 @@ public class ParsedText {
 					locations.add(location);
 				}
 			} catch (JSONException e) {
-				Log.e("ParsedText", "Error parsing JSON",e);
+				DLog.e("ParsedText", "Error parsing JSON",e);
 				parseErrors.add("Failed to parse Locations in ParsedText");
 			}
 

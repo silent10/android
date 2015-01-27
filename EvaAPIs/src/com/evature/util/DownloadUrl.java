@@ -58,13 +58,13 @@ public class DownloadUrl {
 			try {
 				sf = new EvatureSSLSocketFactory(null);
 			} catch (UnrecoverableKeyException e) {
-				Log.e(TAG, "UnrecoverableKeyException", e);
+				DLog.e(TAG, "UnrecoverableKeyException", e);
 			} catch (KeyStoreException e) {
-				Log.e(TAG, "KeyStoreException", e);
+				DLog.e(TAG, "KeyStoreException", e);
 			} catch (KeyManagementException e) {
-				Log.e(TAG, "KeyManagementException", e);
+				DLog.e(TAG, "KeyManagementException", e);
 			} catch (NoSuchAlgorithmException e) {
-				Log.e(TAG, "NoSuchAlgorithmException", e);
+				DLog.e(TAG, "NoSuchAlgorithmException", e);
 			}
 			sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 			Scheme sch = new Scheme("https", sf, 443);

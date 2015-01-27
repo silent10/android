@@ -9,6 +9,7 @@ import com.ean.mobile.exception.UrlRedirectionException;
 import com.ean.mobile.hotel.HotelRoom;
 import com.ean.mobile.hotel.request.RoomAvailabilityRequest;
 import com.ean.mobile.request.RequestProcessor;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.controllers.activities.MainActivity;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
@@ -54,7 +55,7 @@ public class RoomsUpdaterTask extends DownloaderTask {
              mProgress = DownloaderStatus.Finished;
              return hotelRooms;
          } catch (EanWsError ewe) {
-             VHAApplication.logError(TAG, "An error occurred in the api", ewe);
+             DLog.e(TAG, "An error occurred in the api", ewe);
              eanWsError = ewe;
              mProgress = DownloaderStatus.FinishedWithError;
          } catch (UrlRedirectionException ure) {

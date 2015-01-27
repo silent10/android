@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaTravelers  implements Serializable{
 	private final static String TAG = "EvaTravellers";
@@ -31,7 +31,7 @@ public class EvaTravelers  implements Serializable{
 			}
 		} catch (JSONException e) {
 			parseErrors.add("Error during parsing Travelers: "+e.getMessage());
-			Log.e(TAG, "Travelers Parse error ", e);
+			DLog.e(TAG, "Travelers Parse error ", e);
 		}
 	}
 	

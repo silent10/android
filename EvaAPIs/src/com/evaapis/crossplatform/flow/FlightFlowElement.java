@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.EvaLocation;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class FlightFlowElement extends FlowElement {
 
@@ -25,7 +25,7 @@ public class FlightFlowElement extends FlowElement {
 				RoundTripSayit = jElement.getString("SayIt");
 				ActionIndex = jElement.getInt("ActionIndex");
 			} catch (JSONException e) {
-				Log.e(TAG, "Bad EVA reply!  exception processing flight flow Element", e);
+				DLog.e(TAG, "Bad EVA reply!  exception processing flight flow Element", e);
 				parseErrors.add("Exception during parsing: "+e.getMessage());
 			}
 		}

@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class EvaMoney  implements Serializable {
 	private final static String TAG = "EvaMoney";
@@ -39,7 +39,7 @@ public class EvaMoney  implements Serializable {
 				}
 				catch(IllegalArgumentException e) {
 					parseErrors.add( "Unexpected Restriction"+jMoney.optString("Restriction"));
-					Log.w(TAG, "Unexpected Restriction", e);
+					DLog.w(TAG, "Unexpected Restriction", e);
 					Restriction = RestrictionType.Unknown;
 				}
 			}
@@ -51,7 +51,7 @@ public class EvaMoney  implements Serializable {
 			}
 		} catch (JSONException e) {
 			parseErrors.add("Error during parsing Money: "+e.getMessage());
-			Log.e(TAG, "Money Parse error ", e);
+			DLog.e(TAG, "Money Parse error ", e);
 		}
 	}
 }

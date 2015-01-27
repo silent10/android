@@ -6,7 +6,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class PNRAttributes  implements Serializable {
 	public boolean requested = false;
@@ -17,7 +17,7 @@ public class PNRAttributes  implements Serializable {
 				requested = pnrAttributes.getBoolean("Requested");
 			}
 		} catch (JSONException e) {
-			Log.e("PNR Attributes", "Error parsing JSON",e);
+			DLog.e("PNR Attributes", "Error parsing JSON",e);
 			parseErrors.add("Error during parsing PNR: "+e.getMessage());
 		}
 	}

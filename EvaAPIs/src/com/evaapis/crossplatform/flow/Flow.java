@@ -10,7 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.EvaLocation;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class Flow  implements Serializable {
 
@@ -44,7 +44,7 @@ public class Flow  implements Serializable {
 				}
 			}
 		} catch(JSONException e) {
-			Log.e(TAG, "Bad EVA reply! ", e);
+			DLog.e(TAG, "Bad EVA reply! ", e);
 			parseErrors.add("Exception during parsing: "+e.getMessage());	
 		}
 		

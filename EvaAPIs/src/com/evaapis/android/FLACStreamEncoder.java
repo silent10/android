@@ -4,6 +4,8 @@ package com.evaapis.android;
 
 import java.nio.ByteBuffer;
 
+import com.evature.util.DLog;
+
 /***
  * When moving this file - remember to fix FLACStreamEncoder.cpp
  * 1) Function names: eg. Java_com_evaapis_android_FLACStreamEncoder_init
@@ -14,7 +16,15 @@ import java.nio.ByteBuffer;
 
 public class FLACStreamEncoder
 {
-  /***************************************************************************
+  private static final String TAG = "FLACStreamEncoder";
+  
+  interface WriteCallback {
+	  void onWrite(byte[] buffer, int length, int samples, int frame);
+  }
+  
+  WriteCallback callback;
+
+/***************************************************************************
    * Interface
    **/
 
@@ -31,10 +41,10 @@ public class FLACStreamEncoder
 
 
   public void reset(String outfile, int sample_rate, int channels,
-      int bits_per_sample)
+      int bits_per_sample, boolean verify, int frame_size)
   {
     deinit();
-    init(outfile, sample_rate, channels, bits_per_sample);
+    init(outfile, sample_rate, channels, bits_per_sample, verify, frame_size);
   }
 
 
@@ -48,7 +58,18 @@ public class FLACStreamEncoder
     }
   }
 
+  
+  private void writeCallback(byte[] buffer, int length, int samples, int frame) {
+//	  DLog.i(TAG, ">>>>>> write callback!!  buffer len "+length+",  frame: "+frame+",  samples: "+samples);
+	  if (this.callback != null) {
+		  callback.onWrite(buffer, length, samples, frame);
+	  }
+  }
 
+  
+  public void setWriteCallback(WriteCallback callback) {
+	  this.callback = callback;
+  }
 
   /***************************************************************************
    * JNI Implementation
@@ -64,7 +85,11 @@ public class FLACStreamEncoder
    * bits_per_sample must be either 8 or 16
    **/
   native public void init(String outfile, int sample_rate, int channels,
-      int bits_per_sample);
+      int bits_per_sample, boolean verify, int frame_size);
+  
+  
+  native public void initWithCallback(int sample_rate, int channels,
+	      int bits_per_sample, boolean verify, int frame_size);
 
   /**
    * Destructor equivalent, but can be called multiple times.

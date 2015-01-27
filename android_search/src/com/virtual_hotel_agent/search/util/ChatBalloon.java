@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.R;
 
 // based on http://developer.android.com/reference/android/view/ViewGroup.html
@@ -76,7 +76,7 @@ public class ChatBalloon extends ViewGroup {
 							mPointerSide = PointerSide.valueOf(pointerSide);
 						} catch(IllegalArgumentException e) {
 							mPointerSide = PointerSide.Left;
-							Log.w(TAG, "PointerSide "+pointerSide+" isn't allowed, valid values are ChatBalloon.PointerSide enum");
+							DLog.w(TAG, "PointerSide "+pointerSide+" isn't allowed, valid values are ChatBalloon.PointerSide enum");
 						}
 					}
 				}
@@ -98,10 +98,10 @@ public class ChatBalloon extends ViewGroup {
 			setOutlineProvider(new ChatBalloonOutlineProvider());
 		}
 		catch (Exception e) {
-			Log.e(TAG, "Error initializing ");
+			DLog.e(TAG, "Error initializing ");
 			e.printStackTrace();
-			String t = Log.getStackTraceString(e.getCause());
-			Log.e(TAG, "Cause: "+t);
+			String t = DLog.getStackTraceString(e.getCause());
+			DLog.e(TAG, "Cause: "+t);
 			throw e;
 		}
 	}
@@ -123,7 +123,7 @@ public class ChatBalloon extends ViewGroup {
 		
 	@Override
 	public void draw(Canvas canvas) {
-		Log.i(TAG, "draw");
+		DLog.i(TAG, "draw");
 		super.draw(canvas);
 		//pointerView.draw(canvas);
 	}
@@ -258,7 +258,7 @@ public class ChatBalloon extends ViewGroup {
                 resolveSizeAndState(maxHeight, heightMeasureSpec,
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
         
-        Log.i(TAG, "onMeasure, max:"+maxWidth+", "+maxHeight);
+        DLog.i(TAG, "onMeasure, max:"+maxWidth+", "+maxHeight);
     }
     
     @Override
@@ -338,7 +338,7 @@ public class ChatBalloon extends ViewGroup {
             final View child = getChildAt(i);
             if (child.getVisibility() != GONE && child != pointerView) {
             	if (foundNonPointer) {
-            		Log.w(TAG, "ChatBalloon expected only a single non-pointer child!");
+            		DLog.w(TAG, "ChatBalloon expected only a single non-pointer child!");
             	}
             	foundNonPointer = true;
                 final int width = child.getMeasuredWidth();
@@ -361,12 +361,12 @@ public class ChatBalloon extends ViewGroup {
                 mTmpContainerRect.top = parentTop+ lp.topMargin;
                 mTmpContainerRect.bottom = parentBottom - lp.bottomMargin;
 
-                Log.d(TAG, "Child w,h:"+width+","+height+"  parent rect: "+mTmpContainerRect.toShortString());
+                DLog.d(TAG, "Child w,h:"+width+","+height+"  parent rect: "+mTmpContainerRect.toShortString());
 
                 // Use the child's gravity and size to determine its final
                 // frame within its container.
                 Gravity.apply(lp.gravity, width, height, mTmpContainerRect, mTmpChildRect);
-                Log.d(TAG, "Child rect:"+mTmpChildRect.toShortString());
+                DLog.d(TAG, "Child rect:"+mTmpChildRect.toShortString());
 
                 // Place the child.
                 child.layout(mTmpChildRect.left, mTmpChildRect.top,
@@ -386,7 +386,7 @@ public class ChatBalloon extends ViewGroup {
             }
         }
         if (!foundNonPointer) {
-        	Log.w(TAG, "ChatBalloon expected a visible non-pointer child!");
+        	DLog.w(TAG, "ChatBalloon expected a visible non-pointer child!");
         }
         invalidateOutline();
     }

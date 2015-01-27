@@ -19,7 +19,7 @@ import android.util.LruCache;
 import android.widget.ImageView;
 
 import com.ean.mobile.hotel.HotelImageTuple;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 
 /***
@@ -105,7 +105,7 @@ public class S3DrawableBackgroundLoader {
 				else if (mUrl.equals("")) {
 					mUrl = "<empty>";
 				}
-				VHAApplication.logError(TAG, "Maformed URL in S3Drawable: "+mUrl, e);
+				DLog.e(TAG, "Maformed URL in S3Drawable: "+mUrl, e);
 				return null;
 			}
 
@@ -258,10 +258,10 @@ public class S3DrawableBackgroundLoader {
 					bmp = downloadDrawable(sourceContainer, lookup);
 				}
 				catch (FileNotFoundException e) {
-					Log.w(TAG, "Image not found");
+					DLog.w(TAG, "Image not found");
 					error = 2;
 				} catch (IOException e) {
-					VHAApplication.logError(TAG, "Error loading image", e);
+					DLog.e(TAG, "Error loading image", e);
 					error = 1;
 				}
 				

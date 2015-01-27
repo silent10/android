@@ -50,6 +50,8 @@ struct type_traits<int16_t>
 namespace {
 
 
+
+
 /**
  * Convert a jstring to a UTF-8 char pointer. Ownership of the pointer goes
  * to the caller.
@@ -95,6 +97,7 @@ void throwByName(JNIEnv * env, const char * name, const char * msg)
 static char const * const FLACStreamEncoder_classname =
 		"com/evaapis/android/FLACStreamEncoder";
 static char const * const FLACStreamEncoder_mObject = "mObject";
+static char const * const FLACStreamEncoder_writeCallback = "writeCallback";
 
 static char const * const IllegalArgumentException_classname =
 		"java.lang.IllegalArgumentException";
@@ -102,6 +105,29 @@ static char const * const IllegalArgumentException_classname =
 static char const * const LTAG = "FLACStreamEncoder/native";
 
 static int COMPRESSION_LEVEL = 5;
+
+
+
+// Iftah:
+static JavaVM *java_vm;
+static jclass streamer_jcls;
+static jfieldID streamer_mObj;
+static jmethodID streamer_writeMethod;
+
+// Iftah:
+/***********
+ * encoder	The encoder instance calling the callback.
+ * buffer	An array of encoded data of length bytes.
+ * bytes	The byte length of buffer.
+ * samples	The number of samples encoded by buffer. 0 has a special meaning; see above.
+ * current_frame	The number of the current frame being encoded.
+ * client_data	The callee's client data set through FLAC__stream_encoder_init_*().
+ */
+extern "C" {
+	FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder *encoder,
+		const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data);
+}
+
 
 /*****************************************************************************
  * Native FLACStreamEncoder representation
@@ -169,14 +195,16 @@ public:
 
 	/**
 	 * Takes ownership of the outfile.
+	 * Iftah: pass NULL outfile in order to use the write_callback instead
 	 **/
 	FLACStreamEncoder(char * outfile, int sample_rate, int channels,
-			int bits_per_sample) :
-			m_outfile(outfile), m_sample_rate(sample_rate), m_channels(
-					channels), m_bits_per_sample(bits_per_sample), m_encoder(
-					NULL), m_max_amplitude(0), m_average_sum(0), m_average_count(
-					0), m_write_buffer(NULL), m_write_buffer_size(0), m_write_buffer_offset(
-					0), m_fifo(NULL), m_kill_writer(false) {
+			int bits_per_sample, bool verify, int frame_size, jobject obj) :
+			m_outfile(outfile), m_sample_rate(sample_rate),
+			m_channels(channels), m_bits_per_sample(bits_per_sample),
+			m_encoder(NULL), m_max_amplitude(0), m_average_sum(0),
+			m_average_count(0), m_write_buffer(NULL), m_write_buffer_size(0),
+			m_write_buffer_offset(0), m_fifo(NULL), m_kill_writer(false)
+			, m_verify(verify), m_frame_size(frame_size), m_obj(obj) {
 	}
 
 	/**
@@ -184,9 +212,6 @@ public:
 	 * Returns NULL on success, else an error message
 	 **/
 	char const * const init() {
-		if (!m_outfile) {
-			return "No file name given!";
-		}
 
 		// Try to create the encoder instance
 		m_encoder = FLAC__stream_encoder_new();
@@ -201,28 +226,49 @@ public:
 		ok &= FLAC__stream_encoder_set_channels(m_encoder, m_channels);
 		ok &= FLAC__stream_encoder_set_bits_per_sample(m_encoder,
 				m_bits_per_sample);
-		ok &= FLAC__stream_encoder_set_verify(m_encoder, true);
+		ok &= FLAC__stream_encoder_set_verify(m_encoder, m_verify);
 		ok &= FLAC__stream_encoder_set_compression_level(m_encoder,
 				COMPRESSION_LEVEL);
-		ok &= FLAC__stream_encoder_set_blocksize(m_encoder, 256); // Iftah: attempt to write smaller chunks in higher frequency
+		ok &= FLAC__stream_encoder_set_blocksize(m_encoder, m_frame_size); // Iftah: attempt to write smaller chunks in higher frequency
 		if (!ok) {
 			return "Could not set up FLAC__StreamEncoder with the given parameters!";
 		}
 
+
 		// Try initializing the file stream.
-		FLAC__StreamEncoderInitStatus init_status =
-				FLAC__stream_encoder_init_file(m_encoder, m_outfile, NULL,
-						NULL);
+		FLAC__StreamEncoderInitStatus init_status;
+
+		__android_log_print(ANDROID_LOG_DEBUG, LTAG, "initializing encoder, m_obj=%p", m_obj);
+
+		if (m_outfile != NULL) {
+			init_status =
+					FLAC__stream_encoder_init_file(m_encoder, m_outfile, NULL, NULL);
+		}
+		else {
+			init_status = FLAC__stream_encoder_init_stream(
+					m_encoder,
+					encoder_WriteCallback,
+					NULL,
+					NULL,
+					NULL,
+					this
+
+			);
+		}
 
 		if (FLAC__STREAM_ENCODER_INIT_STATUS_OK != init_status) {
-			return "Could not initialize FLAC__StreamEncoder for the given file!";
+			__android_log_print(ANDROID_LOG_ERROR, LTAG, "Could not initialize FLAC__StreamEncoder!");
 		}
+		else {
+			__android_log_print(ANDROID_LOG_DEBUG, LTAG, "initialized encoder");
+		}
+
 
 		// Allocate write buffer. Based on observations noted down in issue #106, we'll
 		// choose this to be 32k in size. Actual allocation happens lazily.
 		//m_write_buffer_size = 32768;
 		// Iftah: attempt to write smaller chunks in higher frequency
-		m_write_buffer_size = 512;
+		m_write_buffer_size = m_frame_size*2;
 
 		// The write FIFO gets created lazily. But we'll initialize the mutex for it
 		// here.
@@ -244,6 +290,8 @@ public:
 		if (err) {
 			return "Could not start writer thread!";
 		}
+
+
 
 		return NULL;
 	}
@@ -277,6 +325,16 @@ public:
 		if (m_outfile) {
 			free(m_outfile);
 			m_outfile = NULL;
+		}
+
+		if (m_obj) {
+			JNIEnv* env;
+			if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+				__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
+			}
+			else {
+				env->DeleteGlobalRef(m_obj);
+			}
 		}
 	}
 
@@ -351,6 +409,11 @@ public:
 	 * Writer thread function.
 	 **/
 	void * writer_thread(void * args) {
+
+//		__android_log_print(ANDROID_LOG_INFO, LTAG, "<<< Attaching thread");
+		JNIEnv* env;
+		java_vm->AttachCurrentThread(&env, NULL);
+
 		// Loop while m_kill_writer is false.
 		pthread_mutex_lock(&m_fifo_mutex);
 		do {
@@ -371,9 +434,9 @@ public:
 
 				write_fifo_t * current = fifo;
 				while (current) {
-					__android_log_print(ANDROID_LOG_VERBOSE, LTAG,
-							"<<< Writer encoding size %d",
-							current->m_buffer_fill_size);
+//					__android_log_print(ANDROID_LOG_VERBOSE, LTAG,
+//							"<<< Writer encoding size %d",
+//							current->m_buffer_fill_size);
 					//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Encoding current entry %p, buffer %p, size %d",
 					//    current, current->m_buffer, current->m_buffer_fill_size);
 
@@ -393,7 +456,7 @@ public:
 						} else {
 							// Sleep a little before retrying.
 							__android_log_print(ANDROID_LOG_ERROR, LTAG,
-									"Writing FIFO entry %p failed; retrying...");
+									"Writing FIFO entry %p failed; retrying...", current->m_buffer);
 							usleep(5000); // 5msec
 						}
 						continue;
@@ -413,13 +476,16 @@ public:
 
 		pthread_mutex_unlock(&m_fifo_mutex);
 
-		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer sleeping");
+//		__android_log_print(ANDROID_LOG_INFO, LTAG, "<<< Detaching thread");
+		java_vm->DetachCurrentThread();
+
+//		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer sleeping");
 
 		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writer thread dies.");
 		for (long i = 0; i < 50; i++) {
 			usleep(5000);
 		}
-		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer slept");
+//		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer slept");
 //    __android_log_print(ANDROID_LOG_DEBUG, LTAG, "slept.");
 		return NULL;
 	}
@@ -554,6 +620,10 @@ private:
 	int m_write_buffer_size;
 	int m_write_buffer_offset;
 
+	bool m_verify;
+	int m_frame_size;
+
+
 	// Write FIFO
 	volatile write_fifo_t * m_fifo;
 	pthread_mutex_t m_fifo_mutex;
@@ -562,6 +632,9 @@ private:
 	pthread_t m_writer;
 	pthread_cond_t m_writer_condition;
 	volatile bool m_kill_writer;
+
+	public:
+	jobject m_obj; // pointer to the java object
 };
 
 /*****************************************************************************
@@ -572,15 +645,8 @@ private:
  * Retrieve FLACStreamEncoder instance from the passed jobject.
  **/
 static FLACStreamEncoder * get_encoder(JNIEnv * env, jobject obj) {
-	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
 
-	// Do the JNI dance for getting the mObject field
-	jclass cls = env->FindClass(FLACStreamEncoder_classname);
-	jfieldID object_field = env->GetFieldID(cls, FLACStreamEncoder_mObject,
-			"J");
-	jlong encoder_value = env->GetLongField(obj, object_field);
-
-	env->DeleteLocalRef(cls);
+	jlong encoder_value = env->GetLongField(obj, streamer_mObj);
 
 	return reinterpret_cast<FLACStreamEncoder *>(encoder_value);
 }
@@ -590,16 +656,13 @@ static FLACStreamEncoder * get_encoder(JNIEnv * env, jobject obj) {
  **/
 static void set_encoder(JNIEnv * env, jobject obj,
 		FLACStreamEncoder * encoder) {
-	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
 
-	// Do the JNI dance for setting the mObject field
 	jlong encoder_value = reinterpret_cast<jlong>(encoder);
-	jclass cls = env->FindClass(FLACStreamEncoder_classname);
-	jfieldID object_field = env->GetFieldID(cls, FLACStreamEncoder_mObject,
-			"J");
-	env->SetLongField(obj, object_field, encoder_value);
-	env->DeleteLocalRef(cls);
+
+	env->SetLongField(obj, streamer_mObj, encoder_value);
 }
+
+
 
 } // anonymous namespace
 
@@ -607,9 +670,49 @@ static void set_encoder(JNIEnv * env, jobject obj,
  * JNI Wrappers
  **/
 
+
 char * fifo_filename = 0;
 
 extern "C" {
+
+
+// Iftah:
+/***********
+ * encoder	The encoder instance calling the callback.
+ * buffer	An array of encoded data of length bytes.
+ * bytes	The byte length of buffer.
+ * samples	The number of samples encoded by buffer. 0 has a special meaning; see above.
+ * current_frame	The number of the current frame being encoded.
+ * client_data	The callee's client data set through FLAC__stream_encoder_init_*().
+ */
+FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder *encoder,
+		const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data) {
+
+	FLACStreamEncoder* encoderCPP = (FLACStreamEncoder*)client_data;
+	//__android_log_print(ANDROID_LOG_INFO, LTAG, ">>>> Write Callback: %d bytes, %d samples, frame %d",  bytes, samples, current_frame);
+
+	// Get JNI Env
+	JNIEnv* env;
+	if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
+		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+	}
+
+//	__android_log_print(ANDROID_LOG_INFO, LTAG, ">>>> Write Callback: got the Java method, activating in %p", encoderCPP->m_obj);
+
+	jbyteArray arr = env->NewByteArray(bytes);
+	env->SetByteArrayRegion(arr, 0, bytes, (jbyte*) buffer);
+
+	env->CallVoidMethod(encoderCPP->m_obj, streamer_writeMethod, arr, bytes, samples, current_frame);
+	if (env->ExceptionCheck()) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>>> Write Callback: exception after calling method");
+		env->ExceptionDescribe();
+		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+	}
+
+	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
+}
+
 
 JNIEXPORT
 void Java_com_evaapis_android_FLACStreamEncoder_initFifo(JNIEnv * env,
@@ -634,12 +737,12 @@ void Java_com_evaapis_android_FLACStreamEncoder_deinitFifo(JNIEnv * env,
 JNIEXPORT
 void Java_com_evaapis_android_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 		jstring outfile, jint sample_rate, jint channels,
-		jint bits_per_sample) {
+		jint bits_per_sample, jboolean verify, jint frame_size) {
 	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
 
 	FLACStreamEncoder * encoder = new FLACStreamEncoder(
 			convert_jstring_path(env, outfile), sample_rate, channels,
-			bits_per_sample);
+			bits_per_sample, verify, frame_size, env->NewGlobalRef(obj));
 
 	char const * const error = encoder->init();
 	if (NULL != error) {
@@ -649,8 +752,43 @@ void Java_com_evaapis_android_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 		return;
 	}
 
+	__android_log_print(ANDROID_LOG_INFO, LTAG, "init with outfile");
 	set_encoder(env, obj, encoder);
 }
+
+/*
+JNIEXPORT void JNICALL
+Java_Callbacks_nativeMethod(JNIEnv *env, jobject obj, jint depth)
+{
+    printf("In C, depth = %d, about to enter Java\n", depth);
+    (*env)->CallVoidMethod(env, obj, mid, depth);
+    printf("In C, depth = %d, back from Java\n", depth);
+}
+*/
+
+JNIEXPORT
+void Java_com_evaapis_android_FLACStreamEncoder_initWithCallback(JNIEnv * env, jobject obj,
+		jint sample_rate, jint channels,
+		jint bits_per_sample, jboolean verify, jint frame_size) {
+	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
+
+	FLACStreamEncoder * encoder = new FLACStreamEncoder(
+			NULL, sample_rate, channels,
+			bits_per_sample, verify, frame_size, env->NewGlobalRef(obj));
+
+	__android_log_print(ANDROID_LOG_INFO, LTAG, "init with write_callback");
+	char const * const error = encoder->init();
+	if (NULL != error) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, "error init %s", error);
+		delete encoder;
+
+		throwByName(env, IllegalArgumentException_classname, error);
+		return;
+	}
+
+	set_encoder(env, obj, encoder);
+}
+
 
 JNIEXPORT
 void Java_com_evaapis_android_FLACStreamEncoder_deinit(JNIEnv * env,
@@ -665,8 +803,7 @@ void Java_com_evaapis_android_FLACStreamEncoder_deinit(JNIEnv * env,
 	}
 }
 
-JNIEXPORT jint
-Java_com_evaapis_android_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
+JNIEXPORT jint Java_com_evaapis_android_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
 		jobject buffer, jint bufsize)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
@@ -700,8 +837,7 @@ void Java_com_evaapis_android_FLACStreamEncoder_flush(JNIEnv * env,
 	encoder->flush();
 }
 
-JNIEXPORT jfloat
-Java_com_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
+JNIEXPORT jfloat Java_com_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
@@ -714,8 +850,7 @@ Java_com_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject
 	return encoder->getMaxAmplitude();
 }
 
-JNIEXPORT jfloat
-Java_com_evaapis_android_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
+JNIEXPORT jfloat Java_com_evaapis_android_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
@@ -726,6 +861,46 @@ Java_com_evaapis_android_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, job
 	}
 
 	return encoder->getAverageAmplitude();
+}
+
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+//	__android_log_print(ANDROID_LOG_INFO, LTAG, ">>> JNI_OnLoad");
+    java_vm = vm;
+
+
+	// Do the JNI dance for getting the mObject field, and write callback method
+    JNIEnv* env;
+	if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
+		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+	}
+
+	jclass cls = env->FindClass(FLACStreamEncoder_classname);
+	if (env->ExceptionCheck()) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>>  failed to get class");
+		env->ExceptionDescribe();
+	    return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+	}
+
+	streamer_jcls = cls;
+
+	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
+	jfieldID object_field = env->GetFieldID(streamer_jcls, FLACStreamEncoder_mObject, "J");
+	streamer_mObj = object_field;
+
+    jmethodID mid = env->GetMethodID(cls, FLACStreamEncoder_writeCallback, "([BIII)V");  // buffer, length, samples, frame
+    if (env->ExceptionCheck()) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>>> Write Callback: failed to get method");
+		env->ExceptionDescribe();
+		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
+	}
+	assert(mid != 0);
+	streamer_writeMethod = mid;
+
+
+    return JNI_VERSION_1_6;
 }
 
 } // extern "C"

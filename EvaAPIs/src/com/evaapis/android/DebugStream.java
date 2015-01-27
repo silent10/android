@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class DebugStream extends InputStream {
 	long timeOfLastBuffer = -1;
@@ -19,7 +19,7 @@ public class DebugStream extends InputStream {
 	private DataOutputStream dos;
 	
     public DebugStream(InputStream wrapped, boolean save, String savePath) {
-    	Log.i(TAG, "<<< Started");
+    	DLog.i(TAG, "<<< Started");
         this.wrapped = wrapped;
         mDebugSave = save;
 
@@ -30,7 +30,7 @@ public class DebugStream extends InputStream {
 				FileOutputStream fos = new FileOutputStream(f);
 				dos = new DataOutputStream(new BufferedOutputStream(fos));
 			} catch (FileNotFoundException e) {
-				Log.e(TAG, "Failed to open debug file",e);
+				DLog.e(TAG, "Failed to open debug file",e);
 			}
 		}
     }
@@ -39,7 +39,7 @@ public class DebugStream extends InputStream {
         return wrapped.available();
     }
     public void close() throws IOException {
-    	Log.i(TAG, "<<< Closed");
+    	DLog.i(TAG, "<<< Closed");
     	wrapped.close();
     }
 
@@ -51,30 +51,30 @@ public class DebugStream extends InputStream {
     	return wrapped.markSupported();
     }
     public int read() throws IOException {
-    	Log.i(TAG, "<<< Read");
+    	DLog.i(TAG, "<<< Read");
     	int result= wrapped.read();
     	if (result == -1) {
     		timeOfLastBuffer = System.nanoTime();
-    		Log.i(TAG, "<<< Input Stream ended");
+    		DLog.i(TAG, "<<< Input Stream ended");
     		if (mDebugSave) {
 				try {
 				dos.flush();
 				dos.close(); 
 				} catch (IOException e) {
-					Log.e(TAG, "Exception flusing debug file", e);
+					DLog.e(TAG, "Exception flusing debug file", e);
 				}
 			}
     	}
     	else {
-    		//Log.i(TAG, "<<< Read "+result+" bytes");
     		if (mDebugSave) {
 				try {
 					dos.write(result);
 				} catch (IOException e) {
-					Log.w(TAG, "Exception writing debug file",e ); 
+					DLog.w(TAG, "Exception writing debug file",e ); 
 				}
 			}
     	}
+    	DLog.i(TAG, "<<< Read "+result+" bytes");
     	return result;
     }
 
@@ -82,26 +82,26 @@ public class DebugStream extends InputStream {
         int result = wrapped.read(buffer);
         if (result == -1) {
         	timeOfLastBuffer = System.nanoTime();
-        	Log.i(TAG, "<<< Input Stream ended");
+        	DLog.i(TAG, "<<< Input Stream ended");
         	if (mDebugSave) {
 				try {
 				dos.flush();
 				dos.close(); 
 				} catch (IOException e) {
-					Log.e(TAG, "Exception flusing debug file", e);
+					DLog.e(TAG, "Exception flusing debug file", e);
 				}
 			}
         }
         else {
-        	//Log.i(TAG, "<<< Read "+result+" bytes");
 			if (mDebugSave) {
 				try {
 					dos.write(buffer);
 				} catch (IOException e) {
-					Log.w(TAG, "Exception writing debug file", e);
+					DLog.w(TAG, "Exception writing debug file", e);
 				}
 			}
 		}
+        DLog.i(TAG, "<<< Read "+result+" bytes");
         return result;
     }
 
@@ -109,23 +109,23 @@ public class DebugStream extends InputStream {
     	int result = wrapped.read(buffer, offset, length);
     	if (result == -1) {
     		timeOfLastBuffer = System.nanoTime();
-    		Log.i(TAG, "<<< Input Stream ended");
+    		DLog.i(TAG, "<<< Input Stream ended");
     	}
     	else {
-    		//Log.i(TAG, "<<< Read "+result+" bytes");
 			if (mDebugSave) {
 				try {
 					dos.write(buffer, offset, length);
 				} catch (IOException e) {
-					Log.w(TAG, "Exception writing debug file",e ); 
+					DLog.w(TAG, "Exception writing debug file",e ); 
 				}
 			}
     	}
+    	DLog.i(TAG, "<<< Read "+result+" bytes");
     	return result;
     }
 
     public synchronized void reset() throws IOException {
-    	Log.i(TAG, "reset");
+    	DLog.i(TAG, "reset");
         wrapped.reset();
     }
 

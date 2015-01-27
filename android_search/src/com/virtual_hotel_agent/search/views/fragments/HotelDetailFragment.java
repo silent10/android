@@ -41,7 +41,7 @@ import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.hotel.HotelRoom;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader.LoadedCallback;
 import com.virtual_hotel_agent.search.R;
@@ -166,7 +166,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 
 		if (mView != null) {
 			((ViewGroup) mView.getParent()).removeView(mView);
-			Log.w(TAG, "Fragment create view twice");
+			DLog.w(TAG, "Fragment create view twice");
 			return mView;
 		}
 		
@@ -206,7 +206,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 
 
 		if (VHAApplication.selectedHotel == null) {
-			VHAApplication.logError(TAG, "onCreateView - null selectedHotel");
+			DLog.e(TAG, "onCreateView - null selectedHotel");
 		}
 		else {
 			changeHotelId(VHAApplication.selectedHotel.hotelId);
@@ -227,7 +227,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		if (hotelId == -1)
 			return;
 		
-		Log.i(TAG, "Setting hotelId to "+hotelId+", was "+mHotelId);
+		DLog.i(TAG, "Setting hotelId to "+hotelId+", was "+mHotelId);
 		if (mHotelId == hotelId) {
 			return;
 		}
@@ -258,7 +258,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 //			
 			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 			if (hotel == null) {
-				VHAApplication.logError(TAG, "selecting hotel id "+mHotelId +" but not found");
+				DLog.e(TAG, "selecting hotel id "+mHotelId +" but not found");
 				return;
 			}
 			
@@ -281,7 +281,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 	private void startRoomSearch() {
 		if (mRoomUpdater != null) {
 			if (false == mRoomUpdater.cancel(true)) {
-				Log.d(TAG, "false == mRoomUpdater.cancel(true)");
+				DLog.d(TAG, "false == mRoomUpdater.cancel(true)");
 				mRoomUpdater = null;
 				// return;
 			}
@@ -311,7 +311,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 
 		@Override
 		public void endProgressDialog(int id, Object result) { // we got the hotel rooms reply successfully
-			Log.d(TAG, "endProgressDialog() for hotel rooms for hotel "+mRoomUpdater.hotelId);
+			DLog.d(TAG, "endProgressDialog() for hotel rooms for hotel "+mRoomUpdater.hotelId);
 			//mainView.hideStatus();
 			
 			
@@ -367,7 +367,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		public void onClick(View v) {
 			final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 			if (hotel == null) {
-				VHAApplication.logError(TAG, "showing map for hotel id "+mHotelId +" but not found");
+				DLog.e(TAG, "showing map for hotel id "+mHotelId +" but not found");
 				return;
 			}
 
@@ -400,7 +400,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 
 	
 	void fillData() {
-		Log.i(TAG, "Filling data for hotel "+mHotelId);
+		DLog.i(TAG, "Filling data for hotel "+mHotelId);
 		if (mPropertyDescription == null) {
 			return;
 		}
@@ -409,12 +409,12 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		
 		final Hotel hotel = VHAApplication.HOTEL_ID_MAP.get(mHotelId);
 		if (hotel == null) {
-			VHAApplication.logError(TAG, "showing hotel id "+mHotelId +" but not found");
+			DLog.e(TAG, "showing hotel id "+mHotelId +" but not found");
 			return;
 		}
 		String name = hotel.name;
 
-		Log.d(TAG, "Filling hotel data: "+mHotelName.getText()+ "  --> "+name);
+		DLog.d(TAG, "Filling hotel data: "+mHotelName.getText()+ "  --> "+name);
 
 //		Display display = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 
@@ -431,10 +431,10 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		// }
 
 		mHotelName.setText(name);
-		Log.i(TAG, "hotel name = " + name);
+		DLog.i(TAG, "hotel name = " + name);
 		HotelInformation info = VHAApplication.EXTENDED_INFOS.get(VHAApplication.selectedHotel.hotelId);
 		if (info == null) {
-			VHAApplication.logError(TAG, "No extended info for hotel "+VHAApplication.selectedHotel.name);
+			DLog.e(TAG, "No extended info for hotel "+VHAApplication.selectedHotel.name);
 			return;
 		}
 
@@ -484,7 +484,7 @@ public class HotelDetailFragment extends Fragment implements  OnItemClickListene
 		mPhotoLoader = new S3DrawableBackgroundLoader(3, VHAApplication.HOTEL_PHOTOS);
 		
 		if (info.images.size() > 0 ) {
-			Log.i(TAG, "gallery showing "+info.images.size()+" imgs for hotel "+mHotelId);
+			DLog.i(TAG, "gallery showing "+info.images.size()+" imgs for hotel "+mHotelId);
 			for (HotelImageTuple image : info.images) {
 				mPhotoLoader.loadDrawable(image, false, null, null, new LoadedCallback() {
 					

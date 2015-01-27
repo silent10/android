@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.evature.util.DLog;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.VHAApplication;
@@ -69,7 +70,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	public ChatItem getItem(int position) {
 		// todo: if some items are collapsed then count from start and skip them
 		if (position >= mChatList.size()) {
-			VHAApplication.logError(TAG, "Accessing chat item "+position+" but size is "+mChatList.size());
+			DLog.e(TAG, "Accessing chat item "+position+" but size is "+mChatList.size());
 			return null;
 		}
 		ChatItem chatItem = mChatList.get(position);
@@ -79,7 +80,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	@Override public int getCount() {
 		// todo: if some items are collapsed then count from start and skip them
 		if (mChatList == null) {
-			VHAApplication.logError(TAG, "null chatList");
+			DLog.e(TAG, "null chatList");
 			return 0;
 		}
 		return mChatList.size()+1;
@@ -165,7 +166,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			holder.label = (TextView) row.findViewById(R.id.label);
 			if (holder.label == null) {
 				// rare bug that is hard to reproduce - the row is a recycled filler view but isn't at the last position
-				VHAApplication.logError(TAG, "No label in Row #1 ?");
+				DLog.e(TAG, "No label in Row #1 ?");
 				if (convertView != null) {
 					// try again without view recycling
 					return getView(position, null, parent);
@@ -175,7 +176,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		}
 		TextView label = holder.label;
 		if (label == null) {
-			VHAApplication.logError(TAG, "No label in Row?");
+			DLog.e(TAG, "No label in Row?");
 			row.setTag(chatItem);
 			return row;
 		}

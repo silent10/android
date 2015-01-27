@@ -8,7 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class RequestAttributes  implements Serializable {
 	private static final String TAG = "RequestAttributes";
@@ -42,7 +42,7 @@ public class RequestAttributes  implements Serializable {
 					transportType.add(jTransportType.getString(i));
 				}
 			} catch (JSONException e) {
-				Log.e(TAG, "Problem parsing JSON", e);
+				DLog.e(TAG, "Problem parsing JSON", e);
 				parseErrors
 						.add("Error parsing Request Attr: " + e.getMessage());
 			}
@@ -56,7 +56,7 @@ public class RequestAttributes  implements Serializable {
 								' ', '_'));
 					}
 					catch(IllegalArgumentException e) {
-						Log.w(TAG, "Unexpected SortBy", e);
+						DLog.w(TAG, "Unexpected SortBy", e);
 						sortBy = SortEnum.unknown;
 					}
 				}
@@ -66,12 +66,12 @@ public class RequestAttributes  implements Serializable {
 								' ', '_'));
 					}
 					catch(IllegalArgumentException e) {
-						Log.w(TAG, "Unexpected SortOrder", e);
+						DLog.w(TAG, "Unexpected SortOrder", e);
 						sortOrder = SortOrderEnum.unknown;
 					}
 				}
 			} catch (JSONException e) {
-				Log.e(TAG, "Problem parsing JSON", e);
+				DLog.e(TAG, "Problem parsing JSON", e);
 				parseErrors
 						.add("Error parsing Request Attr: " + e.getMessage());
 			}

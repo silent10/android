@@ -11,7 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 public class HotelAttributes  implements Serializable {
 	private static final String TAG = "HotelAttributes";
@@ -140,7 +140,7 @@ public class HotelAttributes  implements Serializable {
 				}
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, "Parsing JSON", e);
+			DLog.e(TAG, "Parsing JSON", e);
 			parseErrors.add("Exception during parsing hotel attributes: "+e.getMessage());
 		}
 		
@@ -176,7 +176,7 @@ public class HotelAttributes  implements Serializable {
 					pool = PoolType.valueOf(poolType);
 				}
 				catch(IllegalArgumentException e) {
-					Log.w(TAG, "Unexpected PoolType", e);
+					DLog.w(TAG, "Unexpected PoolType", e);
 					pool = PoolType.Unknown;
 				}
 			}
@@ -187,7 +187,7 @@ public class HotelAttributes  implements Serializable {
 					accomodation = AccommodationType.valueOf(accomodationType.replaceAll(" ", ""));
 				}
 				catch(IllegalArgumentException e) {
-					Log.w(TAG, "Unexpected AccommodationType in Flow element", e);
+					DLog.w(TAG, "Unexpected AccommodationType in Flow element", e);
 					accomodation = AccommodationType.Unknown;
 				}
 			}
@@ -214,7 +214,7 @@ public class HotelAttributes  implements Serializable {
 				}
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, "Parsing JSON", e);
+			DLog.e(TAG, "Parsing JSON", e);
 			parseErrors.add("Exception during parsing hotel attributes: "+e.getMessage());
 		}
 	}

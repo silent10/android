@@ -16,7 +16,7 @@ import android.os.AsyncTask;
 
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DownloadUrl;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 
     //Uses AsyncTask to create a task away from the main UI thread. This task takes a
@@ -136,7 +136,7 @@ import com.evature.util.Log;
 						evatureUrl += "&"+key+"="+URLEncoder.encode(val, "UTF-8");
 				}
 			} catch (UnsupportedEncodingException e) {
-				Log.e(TAG, "UnsupportedEncodingException", e);
+				DLog.e(TAG, "UnsupportedEncodingException", e);
 			}
 			
 			if (mNBest != null) {
@@ -144,7 +144,7 @@ import com.evature.util.Log;
 					try {
 						evatureUrl += ("&input_text=" + URLEncoder.encode(input, "UTF-8"));
 					} catch (UnsupportedEncodingException e) {
-						Log.e(TAG, "UnsupportedEncodingException", e);
+						DLog.e(TAG, "UnsupportedEncodingException", e);
 					}
 				}
 			}
@@ -152,7 +152,7 @@ import com.evature.util.Log;
 				try {
 					evatureUrl += ("&input_text=" + URLEncoder.encode(mInputText, "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
-					Log.e(TAG, "UnsupportedEncodingException", e); 
+					DLog.e(TAG, "UnsupportedEncodingException", e); 
 				}
 			}
 //			String externalIpAddress = ExternalIpAddressGetter.getExternalIpAddr();
@@ -173,13 +173,13 @@ import com.evature.util.Log;
 			
 			int retries = 0;
 			while (retries < 3) {
-				Log.i(TAG, "<< Sending Eva URL = " + evatureUrl);
+				DLog.i(TAG, "<< Sending Eva URL = " + evatureUrl);
 				try {
 					String result = DownloadUrl.sget(evatureUrl);
 					EvaApiReply apiReply = new EvaApiReply(result);
 					return apiReply;
 				} catch (IOException e) {
-					Log.w(TAG, "IOException in request to Evature: "+e.getMessage());
+					DLog.w(TAG, "IOException in request to Evature: "+e.getMessage());
 					retries++;
 					try {
 						Thread.sleep(10);
@@ -208,7 +208,7 @@ import com.evature.util.Log;
 						apiReply.JSONReply.put("debug", debugData);
 					}
 				} catch (JSONException e) {
-					Log.e(TAG, "Failed setting debug data", e);
+					DLog.e(TAG, "Failed setting debug data", e);
 				}
 			}
 						

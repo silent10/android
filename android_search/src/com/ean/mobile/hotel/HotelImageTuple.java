@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Pattern;
 
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.search.VHAApplication;
 
@@ -155,7 +156,7 @@ public final class HotelImageTuple {
     		}
 			return new URL(IMAGE_PROTOCOL, IMAGE_HOST, partial);
     	} catch (MalformedURLException e) {
-			VHAApplication.logError(TAG, "Malformed URL "+partial, e);
+			DLog.e(TAG, "Malformed URL "+partial, e);
 			return null;
 		}
     }
@@ -175,7 +176,7 @@ public final class HotelImageTuple {
 				try {
 					thumbnailUrl = new URL(replaceResolution(thumbnailUrl.toString(), resolutions[i-1]));
 				} catch (MalformedURLException e) {
-					VHAApplication.logError(TAG, "Failed to downgrade resolution of thumbnail url "+thumbnailUrl);
+					DLog.e(TAG, "Failed to downgrade resolution of thumbnail url "+thumbnailUrl);
 					return false;
 				}
 				return true;
@@ -195,7 +196,7 @@ public final class HotelImageTuple {
 				try {
 					mainUrl = new URL(replaceResolution(mainUrl.toString(), resolutions[i-1]));
 				} catch (MalformedURLException e) {
-					VHAApplication.logError(TAG, "Failed to downgrade resolution of main url "+mainUrl);
+					DLog.e(TAG, "Failed to downgrade resolution of main url "+mainUrl);
 					return false;
 				}
 				return true;

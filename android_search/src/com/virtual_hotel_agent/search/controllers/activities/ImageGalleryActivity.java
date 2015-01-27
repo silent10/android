@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.ean.mobile.hotel.Hotel;
 import com.ean.mobile.hotel.HotelImageTuple;
 import com.ean.mobile.hotel.HotelInformation;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader;
 import com.virtual_hotel_agent.components.S3DrawableBackgroundLoader.LoadedCallback;
@@ -90,7 +90,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		
 		long hotelId = intent.getLongExtra(HOTEL_ID, -1l);
 		if (hotelId == -1 && urlsArray == null) {
-			VHAApplication.logError(TAG, "No hotel ID and no urls");
+			DLog.e(TAG, "No hotel ID and no urls");
 			this.finish();
 			return;
 		}
@@ -99,7 +99,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		if (hotelId != -1) {
 			hotelData = VHAApplication.HOTEL_ID_MAP.get(hotelId);
 			if (hotelData == null) {
-				VHAApplication.logError(TAG, "No DB - hotelId = "+hotelId);
+				DLog.e(TAG, "No DB - hotelId = "+hotelId);
 				this.finish();
 				return;
 			}
@@ -148,7 +148,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 							}
 							else {
 								if (hotelImage.getCategoryTitle().equals("") == false) {
-									Log.i(TAG, "Category: "+hotelImage.getCategoryTitle());
+									DLog.i(TAG, "Category: "+hotelImage.getCategoryTitle());
 								}
 								captions.add(hotelImage.getCategoryTitle());
 							}
@@ -170,7 +170,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		}
 
 		if (captions.size() == 0) {
-			VHAApplication.logError(TAG, "No images");
+			DLog.e(TAG, "No images");
 			this.finish();
 			return;
 		}
@@ -196,7 +196,7 @@ public class ImageGalleryActivity extends BaseActivity implements OnPageChangeLi
 		//imageDownloader.startDownload(urls);
 		mIndicator.setOnPageChangeListener(this);
 		
-		Log.i(TAG, "Showing "+captions.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
+		DLog.i(TAG, "Showing "+captions.size()+" imgs for hotel "+hotelId+"  jumping to img: "+initialPage);
 		
 		if (captions.size() > 1) {
 			Toast.makeText(this, "Swipe left and right to view other photos\nPress 'back' to close", Toast.LENGTH_LONG).show();

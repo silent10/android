@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.evaapis.EvaException;
 import com.evaapis.R;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 
 
@@ -88,7 +88,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 		EvaComponent.EvaConfig config = (EvaComponent.EvaConfig)intent.getSerializableExtra("evaConfig");
 		speechRecognition = new EvaSpeechComponent(this, config);
 		
-		Log.i(TAG,"Creating speech recognition activity");
+		DLog.i(TAG,"Creating speech recognition activity");
 
 		setContentView(R.layout.listening);
 		mStopButton = (Button)findViewById(R.id.btn_listeningStop);
@@ -124,7 +124,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 	
 	@Override
 	protected void onStop() {
-		Log.i(TAG,"Stopping speech recognition activity");
+		DLog.i(TAG,"Stopping speech recognition activity");
 		speechRecognition.stop();
 		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
@@ -141,7 +141,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 		intent.putExtra(EvaSpeechComponent.RESULT_TIME_ACTIVITY_CREATE, mTimeActivityCreation);
 		
 		setResult(RESULT_OK, intent);		
-		Log.i(TAG,"<<< Finish speech recognition activity: OK");
+		DLog.i(TAG,"<<< Finish speech recognition activity: OK");
 		finish();
 	}
 
@@ -150,7 +150,7 @@ public class EvaSpeechRecognitionActivity extends Activity implements EvaSpeechC
 		Intent intent = new Intent();
 		intent.putExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE, message);
 		setResult(RESULT_CANCELED, intent);
-		Log.i(TAG,"<<< Finish speech recognition activity - on error:  "+message);
+		DLog.i(TAG,"<<< Finish speech recognition activity - on error:  "+message);
 		finish();
 	}
 

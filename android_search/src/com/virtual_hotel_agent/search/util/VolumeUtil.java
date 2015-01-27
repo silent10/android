@@ -9,7 +9,7 @@ import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.os.Handler;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.R;
 
 public class VolumeUtil {
@@ -43,7 +43,7 @@ public class VolumeUtil {
 		AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		volume = audioManager.getStreamVolume(currentStream);
 		maxVolume = audioManager.getStreamMaxVolume(currentStream);
-		Log.i(TAG, "Current volume :"+volume+" out of "+maxVolume+ "  mode = "+audioManager.getMode()+ " stream = "+currentStream);
+		DLog.i(TAG, "Current volume :"+volume+" out of "+maxVolume+ "  mode = "+audioManager.getMode()+ " stream = "+currentStream);
 	 	
 		_isBluetoothEnabled = audioManager.isBluetoothA2dpOn();
 
@@ -140,7 +140,7 @@ public class VolumeUtil {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			int state = intent.getIntExtra("state", -1);
-			Log.d(TAG, "Headset status changed hasHeadphone: "+state);
+			DLog.d(TAG, "Headset status changed hasHeadphone: "+state);
 			VolumeUtil._isHeadphoneEnabled = state == 1;
 			if (listener != null)
 				listener.onVolumeChange();
@@ -150,7 +150,7 @@ public class VolumeUtil {
 	private static ContentObserver updateVolumeContent = new ContentObserver(new Handler()) {
 		@Override
 	    public void onChange(boolean selfChange) {
-			Log.d(TAG, "volume changed selfChange: "+selfChange);
+			DLog.d(TAG, "volume changed selfChange: "+selfChange);
 			if (listener != null)
 				listener.onVolumeChange();
 		}
@@ -159,7 +159,7 @@ public class VolumeUtil {
 	private static BroadcastReceiver updateBluetoothReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d(TAG, "Bluetooth status changed");
+			DLog.d(TAG, "Bluetooth status changed");
 			if (listener != null)
 				listener.onVolumeChange();
 		}

@@ -36,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 
 /**
@@ -154,7 +155,7 @@ public final class HotelRoom {
 												jImg.optString("caption"), jImg.optInt("category", 0));
 						}
 						catch (MalformedURLException e) {
-							VHAApplication.logError(TAG, "Malformed URL for room image", e);
+							DLog.e(TAG, "Malformed URL for room image", e);
 						}
 					}
 					else {
@@ -167,14 +168,14 @@ public final class HotelRoom {
 													jImg.optString("caption"), jImg.optInt("category", 0));
 							}
 							catch (MalformedURLException e) {
-								VHAApplication.logError(TAG, "Malformed URL for room image", e);
+								DLog.e(TAG, "Malformed URL for room image", e);
 							}
 
 						}
 					}
 				}
         	} catch (JSONException e) {
-        		VHAApplication.logError(TAG, "Error parsing hotel room", e);
+        		DLog.e(TAG, "Error parsing hotel room", e);
         	}
 		}
         
@@ -201,7 +202,7 @@ public final class HotelRoom {
 					}
 				}
 	        } catch (JSONException e) {
-	    		VHAApplication.logError(TAG, "Error parsing hotel room", e);
+	    		DLog.e(TAG, "Error parsing hotel room", e);
 	    		images = null;
 	    	}
 		}

@@ -17,7 +17,7 @@ import com.ean.mobile.request.CommonParameters;
 import com.ean.mobile.request.Request;
 import com.ean.mobile.request.RequestProcessor;
 import com.evaapis.crossplatform.EvaApiReply;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.controllers.web_services.DownloaderTaskListenerInterface.DownloaderStatus;
@@ -39,7 +39,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
 	}
 
 	public void initialize(DownloaderTaskListenerInterface listener, EvaApiReply apiReply/*, String currencyCode*/) {
-		Log.i(TAG, "CTOR");
+		DLog.i(TAG, "CTOR");
 		// mSearchQuery = searchQuery;
 		this.apiReply = apiReply;
 		attach(listener);
@@ -49,11 +49,11 @@ public class HotelListDownloaderTask extends DownloaderTask {
 	@Override
 	protected JSONObject doInBackground(Void... params) {
 
-		Log.i(TAG, "doInBackground: start");
+		DLog.i(TAG, "doInBackground: start");
 		// String searchQuery = EvaProtocol.getEvatureResponse(mQueryString);
 		//mProgress = EvaDownloaderTaskInterface.PROGRESS_EXPEDIA_HOTEL_FETCH;
 		publishProgress();
-		Log.i(TAG, "doInBackground: Calling Expedia");
+		DLog.i(TAG, "doInBackground: Calling Expedia");
 //		JSONObject hotelListResponse = xpediaProtocol.getExpediaAnswer(context, apiReply, MyApplication.getExpediaAppState(), mCurrencyCode);
 //		if (hotelListResponse == null) {
 //			Log.w(TAG, "null hotelist response!");
@@ -81,7 +81,7 @@ public class HotelListDownloaderTask extends DownloaderTask {
             mProgress = DownloaderStatus.Finished;
         } catch (EanWsError ewe) {
             // If this exception occurs, it's likely an input error and should be recoverable.
-            Log.d(TAG, "An APILevel Exception occurred.", ewe);
+            DLog.d(TAG, "An APILevel Exception occurred.", ewe);
             mProgress = DownloaderStatus.FinishedWithError;
         } catch (UrlRedirectionException ure) {
             VHAApplication.sendRedirectionToast();

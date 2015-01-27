@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.R;
 import com.virtual_hotel_agent.search.util.VolumeUtil;
 import com.virtual_hotel_agent.search.util.VolumeUtil.VolumeListener;
@@ -76,14 +76,14 @@ public class VolumeSettingsDialog extends BaseActivity
 	
 	@Override 
 	public void onResume() {
-		Log.d(TAG, "onResume()");
+		DLog.d(TAG, "onResume()");
 		super.onResume();
 		VolumeUtil.register(this, this);
 	}
 	
 	@Override
 	public void onPause() {
-		Log.d(TAG, "onPause()");
+		DLog.d(TAG, "onPause()");
 		VolumeUtil.unregister(this);
 		super.onPause();
 	}

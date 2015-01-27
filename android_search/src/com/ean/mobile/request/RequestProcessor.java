@@ -40,7 +40,7 @@ import org.json.JSONObject;
 import com.ean.mobile.Constants;
 import com.ean.mobile.exception.EanWsError;
 import com.ean.mobile.exception.UrlRedirectionException;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GoogleAnalytics;
 import com.google.analytics.tracking.android.MapBuilder;
@@ -73,12 +73,12 @@ public final class RequestProcessor {
             final JSONObject jsonResponse = performApiRequest(request);
             return request.consume(jsonResponse);
         } catch (JSONException jsone) {
-        	VHAApplication.logError(Constants.LOG_TAG, "Unable to process JSON", jsone);
+        	DLog.e(Constants.LOG_TAG, "Unable to process JSON", jsone);
             CommonParameters.customerSessionId = null;
         } catch (IOException ioe) {
-        	VHAApplication.logError(Constants.LOG_TAG, "Could not read response from API", ioe);
+        	DLog.e(Constants.LOG_TAG, "Could not read response from API", ioe);
         } catch (URISyntaxException use) {
-        	VHAApplication.logError(Constants.LOG_TAG, "Improper URI syntax", use);
+        	DLog.e(Constants.LOG_TAG, "Improper URI syntax", use);
         }
         return null;
     }
@@ -106,11 +106,11 @@ public final class RequestProcessor {
             ((HttpURLConnection) connection).setFixedLengthStreamingMode(0);
             
             endpoint = connection.getURL().getHost();
-            Log.d(Constants.LOG_TAG, request.getName()+": secure endpoint (host only): " + endpoint);
+            DLog.d(Constants.LOG_TAG, request.getName()+": secure endpoint (host only): " + endpoint);
         }
         else {
         	endpoint = connection.getURL().toString();
-        	Log.d(Constants.LOG_TAG, request.getName()+": endpoint: " + endpoint);
+        	DLog.d(Constants.LOG_TAG, request.getName()+": endpoint: " + endpoint);
         }
         // force application/json
         connection.setRequestProperty("Accept", "application/json, */*");
@@ -142,7 +142,7 @@ public final class RequestProcessor {
             ((HttpURLConnection) connection).disconnect();
         }
         final long timeTaken = System.currentTimeMillis() - startTime;
-        Log.d(Constants.LOG_TAG, request.getName()+ " took " + timeTaken + " milliseconds.");
+        DLog.d(Constants.LOG_TAG, request.getName()+ " took " + timeTaken + " milliseconds.");
         
         if (BuildConfig.DEBUG == false) {
 			Tracker defaultTracker = GoogleAnalytics.getInstance(VHAApplication.getAppContext()).getDefaultTracker();

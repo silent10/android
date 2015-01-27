@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.evaapis.EvaException;
-import com.evature.util.Log;
+import com.evature.util.DLog;
 
 
 
@@ -33,7 +33,7 @@ public class EvaSpeechComponent {
 	EvaComponent.EvaConfig mConfig;
 	
 	Context mContext;
-		
+
 	public EvaSpeechComponent(Context context, EvaComponent.EvaConfig config) {
 		mConfig = config;
 		mContext = context;
@@ -90,7 +90,7 @@ public class EvaSpeechComponent {
 				debugData.putLong(RESULT_TIME_RECORDING, mSpeechAudioStreamer.totalTimeRecording);
 				debugData.putLong(RESULT_TIME_SERVER, mVoiceClient.timeWaitingForServer);
 				debugData.putLong(RESULT_TIME_RESPONSE, mVoiceClient.timeSpentReadingResponse);
-				debugData.putLong(RESULT_TIME_EXECUTE, mVoiceClient.timeSpentExecute);
+				debugData.putLong(RESULT_TIME_EXECUTE, mVoiceClient.timeSpentUploading);
 				
 				mListener.speechResultOK(evaJson, debugData, cookie); 
 				
@@ -113,7 +113,7 @@ public class EvaSpeechComponent {
 		protected Object doInBackground(Object... arg0) {
 			
 			if (mVoiceClient.getInTransaction()) {
-				Log.i(TAG, "<<< Waiting for previous transaction to complete");
+				DLog.i(TAG, "<<< Waiting for previous transaction to complete");
 				int count = 0;
 				int MAX_WAIT_FOR_TRANSFER = 12 * 10; // 12 seconds max wait for finish of previous request
 			
@@ -121,7 +121,7 @@ public class EvaSpeechComponent {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						Log.e(TAG, "Exception waiting for transfer to complete", e);
+						DLog.e(TAG, "Exception waiting for transfer to complete", e);
 					}
 					count++;
 				}
@@ -136,15 +136,15 @@ public class EvaSpeechComponent {
 					if (e instanceof IOException) {
 						IOException ioe = (IOException) e;
 						if (ioe.getMessage().equals("Request aborted")) {
-							Log.w(TAG, "Request was aborted");
+							DLog.w(TAG, "Request was aborted");
 							return null;
 						}
 					}
-					Log.e(TAG, "Exception starting voice request", e);
+					DLog.e(TAG, "Exception starting voice request", e);
 				}
 			}
 			else {
-				Log.w(TAG, "Request was canceled");
+				DLog.w(TAG, "Request was canceled");
 			}
 			return null;
 		}
@@ -183,8 +183,8 @@ public class EvaSpeechComponent {
 	public void start(SpeechRecognitionResultListener listener, Object cookie, boolean editLastUtterance) throws EvaException {
 		this.cookie = cookie;
 		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
-		mVoiceClient = new EvaVoiceClient(mContext, mConfig, mSpeechAudioStreamer, editLastUtterance);
 		mSpeechAudioStreamer.initRecorder();
+		mVoiceClient = new EvaVoiceClient(mContext, mConfig, mSpeechAudioStreamer, editLastUtterance);
 		dictationTask = new EvaHttpDictationTask(mVoiceClient, listener);
 		dictationTask.execute((Object[])null);
 	}
