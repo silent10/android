@@ -10,7 +10,7 @@ import java.io.InputStream;
 
 import com.evature.util.DLog;
 
-public class DebugStream extends InputStream {
+class DebugInputStream extends InputStream {
 	long timeOfLastBuffer = -1;
 	
 	private static final String TAG = "WrapStream";
@@ -18,7 +18,7 @@ public class DebugStream extends InputStream {
 	private InputStream wrapped;
 	private DataOutputStream dos;
 	
-    public DebugStream(InputStream wrapped, boolean save, String savePath) {
+    public DebugInputStream(InputStream wrapped, boolean save, String savePath) {
     	DLog.i(TAG, "<<< Started");
         this.wrapped = wrapped;
         mDebugSave = save;

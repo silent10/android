@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.location.Location;
 import android.os.AsyncTask;
 
 import com.evaapis.crossplatform.EvaApiReply;
@@ -159,9 +160,10 @@ import com.evature.util.DLog;
 //			if (externalIpAddress != null) {
 //				evatureUrl += ("&ip_addr=" + externalIpAddress);
 //			}
-			double latitude = EvatureLocationUpdater.getLatitude();
-			if (latitude != EvatureLocationUpdater.NO_LOCATION) {
-				double longitude = EvatureLocationUpdater.getLongitude();
+			Location location = mEva.getLocation();
+			if (location != null) {
+				double latitude = location.getLatitude();
+				double longitude = location.getLongitude();
 				evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
 			}
 			if (mEditLastUtterance) {

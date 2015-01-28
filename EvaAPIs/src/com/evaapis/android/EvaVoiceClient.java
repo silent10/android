@@ -19,15 +19,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+
 import com.evature.util.DLog;
 
 @SuppressLint("DefaultLocale")
@@ -49,7 +53,7 @@ public class EvaVoiceClient {
 	private boolean mInTransaction = false;
 //	HttpPost mHttpPost = null;
 	
-	private final EvaComponent.EvaConfig mConfig;
+	private final EvaComponent mEva;
 
 	// debug time measurements
 	public long timeSpentReadingResponse;
@@ -73,9 +77,9 @@ public class EvaVoiceClient {
 	 * @param config 
 	 * @param speechAudioStreamer
 	 */
-	public EvaVoiceClient(Context context, final EvaComponent.EvaConfig config,
+	public EvaVoiceClient(Context context, final EvaComponent eva,
 			final SpeechAudioStreamer speechAudioStreamer, final boolean editLastUtterance) {
-		mConfig = config;
+		mEva = eva;
 		mContext = context;
 		mSpeechAudioStreamer = speechAudioStreamer;	
 		this.editLastUtterance = editLastUtterance; 
@@ -112,44 +116,49 @@ public class EvaVoiceClient {
 	private URL getURL() throws Exception
 	{
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+		
+		EvaComponent.EvaConfig config = mEva.mConfig;
 
-		qparams.add(new BasicNameValuePair("site_code", mConfig.siteCode));
-		qparams.add(new BasicNameValuePair("api_key", mConfig.appKey));
+		qparams.add(new BasicNameValuePair("site_code", config.siteCode));
+		qparams.add(new BasicNameValuePair("api_key", config.appKey));
 		qparams.add(new BasicNameValuePair("sdk_version", EvaComponent.SDK_VERSION));
-		if (mConfig.appVersion != null) {
-			qparams.add(new BasicNameValuePair("app_version", mConfig.appVersion));
+		if (config.appVersion != null) {
+			qparams.add(new BasicNameValuePair("app_version", config.appVersion));
 		}
-		qparams.add(new BasicNameValuePair("uid",  mConfig.deviceId));
+		qparams.add(new BasicNameValuePair("uid",  config.deviceId));
 		qparams.add(new BasicNameValuePair("ffi_chains", "true"));
 		qparams.add(new BasicNameValuePair("ffi_statement", "true"));
-		qparams.add(new BasicNameValuePair("session_id", mConfig.sessionId));
-		if (mConfig.context != null) {
-			qparams.add(new BasicNameValuePair("context", mConfig.context));
+		qparams.add(new BasicNameValuePair("session_id", config.sessionId));
+		if (config.context != null) {
+			qparams.add(new BasicNameValuePair("context", config.context));
 		}
-		if (mConfig.scope != null) {
-			qparams.add(new BasicNameValuePair("scope", mConfig.scope));
+		if (config.scope != null) {
+			qparams.add(new BasicNameValuePair("scope", config.scope));
 		}
 		try {
-			double longitude = EvatureLocationUpdater.getLongitude();
-			double latitude = EvatureLocationUpdater.getLatitude();
-			if (latitude != EvatureLocationUpdater.NO_LOCATION) {
-				qparams.add(new BasicNameValuePair("longitude",""+longitude));
-				qparams.add(new BasicNameValuePair("latitude",""+latitude));
+			Location location = mEva.getLocation();
+			if (location != null) {
+				double longitude = location.getLongitude();
+				double latitude = location.getLatitude();
+				if (latitude != EvaLocationUpdater.NO_LOCATION) {
+					qparams.add(new BasicNameValuePair("longitude",""+longitude));
+					qparams.add(new BasicNameValuePair("latitude",""+latitude));
+				}
 			}
 		} catch (Exception e1) {
 			DLog.e(TAG, "Exception setting location", e1);
 		}
 		
-		if (mConfig.vrService != null && !"none".equals(mConfig.vrService)) {
-			qparams.add(new BasicNameValuePair("vr_service", mConfig.vrService));
+		if (config.vrService != null && !"none".equals(config.vrService)) {
+			qparams.add(new BasicNameValuePair("vr_service", config.vrService));
 		}
 		
-		if (mConfig.language != null) {
-			qparams.add(new BasicNameValuePair("language", mConfig.language.replaceAll("-.*$", "")));
+		if (config.language != null) {
+			qparams.add(new BasicNameValuePair("language", config.language.replaceAll("-.*$", "")));
 		}
 		
-		if (mConfig.locale != null) {
-			qparams.add(new BasicNameValuePair("locale", mConfig.locale));
+		if (config.locale != null) {
+			qparams.add(new BasicNameValuePair("locale", config.locale));
 		}
 		else {
 			Locale currentLocale = Locale.getDefault();
@@ -164,13 +173,13 @@ public class EvaVoiceClient {
 			qparams.add(new BasicNameValuePair("edit_last_utterance", "true"));
 		}
 		
-		for (String key : mConfig.extraParams.keySet()) {
-			String val = mConfig.extraParams.get(key);
+		for (String key : config.extraParams.keySet()) {
+			String val = config.extraParams.get(key);
 			if (val != null)
 				qparams.add(new BasicNameValuePair(key, val));
 		}
 		
-		String host = mConfig.vproxyHost.toLowerCase();
+		String host = config.vproxyHost.toLowerCase();
 		if (host.startsWith("http") == false) {
 			host = "https://"+host;
 		}
@@ -187,7 +196,7 @@ public class EvaVoiceClient {
 			port = PORT;
 		}
 
-		URI uri = URIUtils.createURI(protocol, host, port, mConfig.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
+		URI uri = URIUtils.createURI(protocol, host, port, config.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
 		return uri.toURL();
 	}
 

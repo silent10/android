@@ -182,7 +182,7 @@ public class SoundLevelView extends View {
 			}
 		}
 		soundBuffIndex = index;
-		DLog.i(TAG, "@@@ added "+numOfPoints+"  to buffer, peak="+peakSound+"  minSound="+minSound);
+//		DLog.i(TAG, "@@@ added "+numOfPoints+"  to buffer, peak="+peakSound+"  minSound="+minSound);
 		
 //		if (springiness != 0) {
 //			postDelayed(animator, 15);

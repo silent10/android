@@ -36,7 +36,7 @@ import com.ean.mobile.hotel.Reservation;
 import com.ean.mobile.hotel.RoomOccupancy;
 import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvaComponent;
-import com.evaapis.android.EvatureLocationUpdater;
+import com.evaapis.android.EvaLocationUpdater;
 import com.evature.util.DLog;
 import com.evature.util.DLog.LogLevel;
 import com.google.analytics.tracking.android.GoogleAnalytics;
@@ -137,7 +137,7 @@ public class VHAApplication extends Application {
         CommonParameters.locale = Locale.US.toString();
         CommonParameters.currencyCode = Currency.getInstance(Locale.US).getCurrencyCode();
 		
-		EvatureLocationUpdater.initContext(this);
+		EvaLocationUpdater.initContext(this);
 		
 		super.onCreate();
 		VHAApplication.context = getApplicationContext();

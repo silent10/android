@@ -1,5 +1,8 @@
 package com.evaapis.android;
 
+import com.evaapis.EvaException;
+import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,9 +10,10 @@ import android.os.Bundle;
 
 
 
-abstract public class EvaBaseActivity extends Activity implements EvaSearchReplyListener { 
+abstract public class EvaBaseActivity extends Activity implements EvaSearchReplyListener, SpeechRecognitionResultListener { 
 
 	protected EvaComponent eva;
+	protected EvaSpeechComponent speechRecognition;
 	
 	public EvaBaseActivity() {
 	}
@@ -49,14 +53,33 @@ abstract public class EvaBaseActivity extends Activity implements EvaSearchReply
 	protected void onCreate(Bundle arg0) {
 		eva = new EvaComponent(this, this);
 		eva.onCreate(arg0);
+		speechRecognition = new EvaSpeechComponent(eva);
 		super.onCreate(arg0);
 	}
 	
 	
+	// note: you should play a "beep" before calling this function to notify users a recording is starting
+	//       also visual feedback is recommended
 	public void searchWithVoice(Object cookie, boolean editLastUtterance)
 	{
-		eva.searchWithVoice(cookie, editLastUtterance);
+		try {
+			speechRecognition.start(this, cookie, editLastUtterance);
+		}
+		catch (EvaException e) {
+			speechResultError(e.getMessage(), cookie);
+		}
 	}
+	
+	// override to modify GUI - eg, enable microphone button
+	public void speechResultOK(String evaJson, Bundle debugData, Object cookie ) {
+		eva.speechResultOK(evaJson, debugData, cookie);
+	}
+	
+	// override 
+	public void speechResultError(String message, Object cookie) {
+		eva.speechResultError(message, cookie);
+	}
+
 
 	public void searchWithText(String searchString, Object cookie, boolean editLastUtterance) {
 		eva.searchWithText(searchString, cookie, editLastUtterance);
@@ -76,6 +99,15 @@ abstract public class EvaBaseActivity extends Activity implements EvaSearchReply
 	
 	public void resetSession() {
 		eva.resetSession();
+	}
+	
+	public void cancelSearch() {
+		if (speechRecognition.isInSpeechRecognition()) {
+			speechRecognition.cancel();
+		}
+		else {
+			eva.cancelSearch();
+		}
 	}
 	
 }

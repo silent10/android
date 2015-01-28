@@ -10,36 +10,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
+import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.OnInitListener;
-import android.view.Gravity;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.evaapis.R;
 import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
-import com.evature.evaspeechrecognition.SpeechRecognition;
 import com.evature.util.DLog;
 
 
@@ -48,8 +33,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 									SpeechRecognitionResultListener,
 									EvaSearchReplyListener, OnInitListener{ 
 
-	public static final int VOICE_RECOGNITION_REQUEST_CODE_EVA = 0xBABE;
-	public static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
+//	public static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
 	
 	private final String TAG = "EvaComponent";
 	
@@ -82,8 +66,8 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private boolean mTtsConfigured = false;
 	private TextToSpeech mTts = null;
 
-//	private ExternalIpAddressGetter mExternalIpAddressGetter;
-	private EvatureLocationUpdater mLocationUpdater;
+	private EvaLocationUpdater mLocationUpdater;
+
 	
 	Activity activity;
 	private EvaSearchReplyListener replyListener;
@@ -93,10 +77,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	private static final String DefaultApiVersion = "v1.0";
 	public static final String SDK_VERSION = "android_1.2";
 	
-	private Object voiceActivityCookie;
 	private EvaTextClient mEvaTextClient;
-
-	private boolean editLastUtterance;
 
 	private String pendingSayit;
 	
@@ -163,10 +144,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public EvaComponent(Activity activity, EvaSearchReplyListener replyListener) {
 		this(activity, replyListener, null);
-		this.activity = activity;
-		this.replyListener = replyListener;
-		mLocationUpdater = new EvatureLocationUpdater();
-		//mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
 	}
 	
 	public EvaComponent(Activity activity, EvaSearchReplyListener replyListener, EvaConfig config) {
@@ -179,15 +156,17 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		this.activity = activity;
 		getDeviceId(); // fill the device Id in the mConfig
 		this.replyListener = replyListener;
-		mLocationUpdater = new EvatureLocationUpdater();
-		//mExternalIpAddressGetter = new ExternalIpAddressGetter(mConfig.webServiceHost);
+		// default: enabled location updates - use setDeviceLocationEnabled(false) to disable
+		mLocationUpdater = new EvaLocationUpdater(activity);
 	}
+	
 	
 	public void speak(String sayIt) {
 		speak(sayIt, true);
 	}
 
 	public void speak(String sayIt, boolean flush) {
+		// TODO: add utterance id, listener, check for errors, refactor to its own class
 		if (mTts != null) {
 			if (mTtsConfigured)
 				mTts.speak(sayIt, flush ? TextToSpeech.QUEUE_FLUSH : TextToSpeech.QUEUE_ADD, null);
@@ -234,15 +213,17 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public void onPause()
 	{
-//		mExternalIpAddressGetter.pause();
-		mLocationUpdater.stopGPS();
+		if (mLocationUpdater != null) {
+			mLocationUpdater.stopGPS();
+		}
 	}
 	
 	
 	// Request updates at startupResults
 	public void onResume() {
-//		mExternalIpAddressGetter.start();
-		mLocationUpdater.startGPS();
+		if (mLocationUpdater != null) {
+			mLocationUpdater.startGPS();
+		}
 	}
 	
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -326,26 +307,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	// Handle the results from the speech recognition activity
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch(requestCode) {
-			case VOICE_RECOGNITION_REQUEST_CODE_EVA:
-				if (resultCode == Activity.RESULT_OK) {
-					DLog.i(TAG, "speech recognition activity result "+resultCode);
-					Bundle bundle = data.getExtras();
-					String evaJson = bundle.getString(EvaSpeechComponent.RESULT_EVA_REPLY);
-					speechResultOK(evaJson, bundle, voiceActivityCookie);
-				}
-				else if (resultCode == Activity.RESULT_CANCELED) {
-					String message;
-					if (data == null) {
-						message = "Canceled";
-					}
-					else {
-						message = data.getStringExtra(EvaSpeechComponent.RESULT_EVA_ERR_MESSAGE);
-					}
-					speechResultError(message, voiceActivityCookie);
-				}
-				voiceActivityCookie = null;
-				break;
-				
+			/*
 			case VOICE_RECOGNITION_REQUEST_CODE_GOOGLE:
 				// send the N-Best to VProxy for choice
 				if (data != null && data.getExtras() != null) {
@@ -363,6 +325,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 					}
 				}
 				break;
+			*/
 		}
 	}
 	
@@ -420,7 +383,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 
 	public void onCreate(Bundle arg0) {
-		EvatureLocationUpdater.initContext(activity);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
 		sharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -437,27 +399,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
                 detailsIntent, null, new RecognizerLanguageChecker(), null, Activity.RESULT_OK, null, null);
 	}
 	
-	
-	public void searchWithVoice(Object cookie, boolean editLastUtterance)
-	{
-		// stop the TTS speech - so that we don't record the generated speech
-		if (mTts != null) {
-			mTts.stop();
-		}
-		DLog.i(TAG, "search with voice starting, lang="+getPreferedLanguage());
-
-		Intent intent = new Intent(activity.getApplicationContext(), EvaSpeechRecognitionActivity.class);
-		getDeviceId();
-		intent.putExtra("evaConfig", mConfig);
-		intent.putExtra("debug", mDebug);
-		this.editLastUtterance =editLastUtterance;  
-		voiceActivityCookie = cookie;
-		
-		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_EVA);
-	}
-	
-			
-	
+/*	
+ *  "Experimental" - using a custom dialog to show the Android speech recognition 
+ * 
 	public void searchWithLocalVoiceRecognitionCustomDialog(int nbest, final Object cookie) {
 
 		class Listener implements RecognitionListener {
@@ -630,8 +574,13 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		recognizer.setRecognitionListener(listener );
 		recognizer.startListening(intent);
 		DLog.i(TAG, "starting recognizer");
-	}
+	}*/
 	
+	
+	/*
+	 * "Experimental" - Use Android speech recognition - with secret "recordingkey" to send us the AMR recording 
+	 */
+	/*
 	public void searchWithLocalVoiceRecognition(int nbest, Object cookie, boolean editLastUtterance) {
 //		// Fire an intent to start the speech recognition activity.
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -653,9 +602,9 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		activity.startActivityForResult(intent, VOICE_RECOGNITION_REQUEST_CODE_GOOGLE);
 		voiceActivityCookie = cookie;
 		this.editLastUtterance = editLastUtterance;
-	}
+	}*/
 	
-	public void stopSearch() {
+	public void cancelSearch() {
 		if (mEvaTextClient != null) {
 			mEvaTextClient.cancel(true);
 			mEvaTextClient = null;
@@ -671,6 +620,13 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		mEvaTextClient.execute();
 	}
 	
+	/****
+	 * Send several possible input-texts to Eva (sorted by most probable first), allow Eva to choose the best input_text
+	 * This is useful for sending results of SpeechRecognition which can return multiple possibilities.
+	 * @param nBestTexts
+	 * @param cookie
+	 * @param editLastUtterance
+	 */
 	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie, boolean editLastUtterance) {
 		DLog.i(TAG, "search with text starting");
 		if (mEvaTextClient != null) {
@@ -680,7 +636,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		mEvaTextClient.execute();
 	}
 	
-
+	/*
 	public void searchWithMultipleText(ArrayList<String> nBestTexts, Object cookie, boolean editLastUtterance, String recordingKey) {
 		DLog.i(TAG, "search with text starting");
 		if (mEvaTextClient != null) {
@@ -690,7 +646,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		mEvaTextClient.setRecordingKey(recordingKey);
 		mEvaTextClient.execute();
 	}
-	
+	*/
 	
 	
 	public void replyToDialog(int replyIndex) {
@@ -802,6 +758,28 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	public void setAppVersion(String ver) {
 		mConfig.appVersion = ver;
+	}
+	
+	public void setDeviceLocationEnabled(boolean isEnabled) {
+		if (isEnabled) {
+			if (mLocationUpdater == null) {
+				mLocationUpdater = new EvaLocationUpdater(activity);
+				mLocationUpdater.startGPS();
+			}
+		}
+		else {
+			if (mLocationUpdater!= null) {
+				mLocationUpdater.stopGPS();
+				mLocationUpdater = null;
+			}
+		}
+	}
+	
+	public Location getLocation() {
+		if (mLocationUpdater != null) {
+			return mLocationUpdater.getLocation();
+		}
+		return null;
 	}
 
 }

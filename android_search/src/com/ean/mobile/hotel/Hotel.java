@@ -36,7 +36,7 @@ import android.location.Location;
 import android.text.Html;
 
 import com.ean.mobile.LatLongAddress;
-import com.evaapis.android.EvatureLocationUpdater;
+import com.evaapis.android.EvaLocationUpdater;
 import com.evature.util.DLog;
 import com.virtual_hotel_agent.search.VHAApplication;
 
@@ -162,9 +162,9 @@ public final class Hotel {
 			double hotelLongitude = address.longitude.doubleValue();
 			double myLongitude, myLatitude;
 			try {
-				myLongitude = EvatureLocationUpdater.getLongitude();
-				if (myLongitude != EvatureLocationUpdater.NO_LOCATION) {
-					myLatitude = EvatureLocationUpdater.getLatitude();
+				myLongitude = EvaLocationUpdater.getLongitude();
+				if (myLongitude != EvaLocationUpdater.NO_LOCATION) {
+					myLatitude = EvaLocationUpdater.getLatitude();
 					float[] results = new float[3];
 					Location.distanceBetween(myLatitude, myLongitude,
 							hotelLatitude, hotelLongitude, results);

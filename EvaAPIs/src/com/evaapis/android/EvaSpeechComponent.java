@@ -10,7 +10,12 @@ import com.evaapis.EvaException;
 import com.evature.util.DLog;
 
 
-
+/******
+ * Thread with:
+ * Streamer( = Recorder -> Encoder) -> Http
+ * 
+ * @author iftah
+ */
 public class EvaSpeechComponent {
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
@@ -30,17 +35,17 @@ public class EvaSpeechComponent {
 	EvaVoiceClient mVoiceClient = null;
 	Object cookie;
 
-	EvaComponent.EvaConfig mConfig;
+	EvaComponent  mEva;
 	
 	Context mContext;
 
-	public EvaSpeechComponent(Context context, EvaComponent.EvaConfig config) {
-		mConfig = config;
+	public EvaSpeechComponent(Context context, EvaComponent eva) {
+		mEva = eva;
 		mContext = context;
 	}
 	
 	public EvaSpeechComponent(EvaComponent eva) {
-		this(eva.activity, eva.mConfig);
+		this(eva.activity, eva);
 	}
 	
 //	public EvaSpeechComponent(EvaBaseActivity evaActivity) {
@@ -184,7 +189,7 @@ public class EvaSpeechComponent {
 		this.cookie = cookie;
 		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
 		mSpeechAudioStreamer.initRecorder();
-		mVoiceClient = new EvaVoiceClient(mContext, mConfig, mSpeechAudioStreamer, editLastUtterance);
+		mVoiceClient = new EvaVoiceClient(mContext, mEva, mSpeechAudioStreamer, editLastUtterance);
 		dictationTask = new EvaHttpDictationTask(mVoiceClient, listener);
 		dictationTask.execute((Object[])null);
 	}

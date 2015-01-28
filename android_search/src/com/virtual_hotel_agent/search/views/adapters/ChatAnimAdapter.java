@@ -67,6 +67,7 @@ public class ChatAnimAdapter extends AnimationAdapter {
 			@Override
 			public void onAnimEnd(View view) {
 				view.setScaleY(1.0f);
+				view.setScaleX(1.0f);
 				if (animEndCallback != null) {
 					animEndCallback.onAnimEnd(view);
 				}
@@ -95,14 +96,21 @@ public class ChatAnimAdapter extends AnimationAdapter {
     	
     	final View chatBalloon = ((ViewGroup)view).getChildAt(0); // get the cHat 
 //    		Animator heightAnim = createHeightAnimatorForView(view, 0.1f, 1.0f);
-//		Animator heightAnim = ObjectAnimator.ofFloat(view, "scaleY", 0.1f, 1.0f);
+//		Animator scaleYAnim = ObjectAnimator.ofFloat(chatBalloon, "scaleY", 1.1f, 1.0f);
+//		Animator scaleXAnim = ObjectAnimator.ofFloat(chatBalloon, "scaleX", 1.1f, 1.0f);
     	Animator heightAnim = ObjectAnimator.ofFloat(chatBalloon, TRANSLATION_Z, 12f, 0f);
     	Animator yAnim = ObjectAnimator.ofFloat(chatBalloon, TRANSLATION_Y, -12f, 0f);
 		//view.setScaleY(0.1f);
     	chatBalloon.setTranslationZ(12f);
     	chatBalloon.setTranslationY(-12f);
+    	chatBalloon.setScaleX(1.1f);
+    	chatBalloon.setScaleY(1.1f);
 		heightAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
 		heightAnim.setDuration(mAnimationDurationMillis);
+//		scaleXAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
+//		scaleXAnim.setDuration(mAnimationDurationMillis);
+//		scaleYAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
+//		scaleYAnim.setDuration(mAnimationDurationMillis);
 		yAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
 		yAnim.setDuration(mAnimationDurationMillis);
 
@@ -110,12 +118,14 @@ public class ChatAnimAdapter extends AnimationAdapter {
     		
     		Animator translateX = ObjectAnimator.ofFloat(view, TRANSLATION_X, 0 - parent.getWidth(), 0);
     		translateX.setStartDelay(0);
-    		return new Animator[] {translateX, heightAnim};
+    		return new Animator[] {translateX, //scaleYAnim, scaleXAnim, 
+    				yAnim, heightAnim};
     	}
     	else {
     		Animator translateX = ObjectAnimator.ofFloat(view, TRANSLATION_X, parent.getWidth(), 0);
     		translateX.setStartDelay(250);
-    		return new Animator[]  {translateX, yAnim, heightAnim};
+    		return new Animator[]  {translateX, //scaleYAnim, scaleXAnim, 
+    				yAnim, heightAnim};
     	}
     }
     

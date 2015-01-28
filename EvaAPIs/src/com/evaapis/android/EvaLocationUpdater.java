@@ -9,7 +9,7 @@ import android.os.Bundle;
 import com.evature.util.DLog;
 
 
-public class EvatureLocationUpdater implements LocationListener {
+public class EvaLocationUpdater implements LocationListener {
 
 	private static final int UPDATE_DELAY = 5 * 60 * 1000; // Five minutes
 	private static final int UPDATE_DISTANCE = 5 * 1000; // Five kilometers
@@ -20,20 +20,8 @@ public class EvatureLocationUpdater implements LocationListener {
 	private LocationManager locationManager;
 	private Location currentLocation = null;
 
-	private static EvatureLocationUpdater thisInstance = null;
-	private static Context appContext = null;
-
-	public EvatureLocationUpdater() {
-		assert(thisInstance == null); // Guice should make sure only once instance exists
-		thisInstance = this;
-		if (appContext != null)
-			thisInstance.locationManager = (LocationManager) appContext.getSystemService(Context.LOCATION_SERVICE);
-	}
-
-	public static void initContext(Context context) {
-		appContext = context;
-		if (thisInstance != null)
-			thisInstance.locationManager = (LocationManager) appContext.getSystemService(Context.LOCATION_SERVICE);
+	public EvaLocationUpdater(Context context) {
+		locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 	}
 
 	public void stopGPS() {
@@ -69,18 +57,8 @@ public class EvatureLocationUpdater implements LocationListener {
 			currentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 	}
 
-	public static double getLatitude() {
-		if (thisInstance != null && thisInstance.currentLocation != null)
-			return thisInstance.currentLocation.getLatitude();
-		else
-			return NO_LOCATION;
-	}
-
-	public static double getLongitude() {
-		if (thisInstance != null && thisInstance.currentLocation != null)
-			return thisInstance.currentLocation.getLongitude();
-		else
-			return NO_LOCATION;
+	public Location getLocation() {
+		return currentLocation;
 	}
 
 	@Override

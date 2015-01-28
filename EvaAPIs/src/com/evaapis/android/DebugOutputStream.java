@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 import com.evature.util.DLog;
 
-public class DebugOutputStream extends OutputStream {
+class DebugOutputStream extends OutputStream {
 	long timeOfLastBuffer = -1;
 	
 	private static final String TAG = "WrapStream";
