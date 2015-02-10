@@ -6,9 +6,10 @@ import java.util.ArrayList;
  * Class to show Debug Logs - similar to android.util.Log
  * 
  * 1. Log text is appended with (file:line) - making the log line
- * double-clickable in Eclipse LogCat (jumps to logging source code) 2. All logs
- * can disabled with a single boolean flag 3. Log listener can be added - making
- * it possible to add custom logic everywhere an error log is called.
+ * double-clickable in Eclipse LogCat (jumps to logging source code) 
+ * 2. All logs can disabled with a single boolean flag 
+ * 3. Log listener can be added - making it possible to add custom 
+ * logic everywhere an error log is called.
  * 
  * @author iftah
  */

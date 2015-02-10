@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIUtils;
@@ -34,6 +36,10 @@ import android.preference.PreferenceManager;
 
 import com.evature.util.DLog;
 
+/****
+ * Send queue of encoded audio buffers to an http connection 
+ * @author iftah
+ */
 @SuppressLint("DefaultLocale")
 public class EvaVoiceClient {
 
@@ -47,8 +53,6 @@ public class EvaVoiceClient {
 	private static short PORT = (short) 443;
 
 	private String mEvaResponse;
-
-	private final SpeechAudioStreamer mSpeechAudioStreamer;
 
 	private boolean mInTransaction = false;
 //	HttpPost mHttpPost = null;
@@ -69,8 +73,11 @@ public class EvaVoiceClient {
 
 	private HttpURLConnection mConnection;
 
+	private LinkedBlockingQueue<byte[]> mSpeechBufferQueue;
 
 
+	private final static int MAX_WAIT_FOR_BUFFER = 5; // wait max seconds to get data from encoder 
+	
 	/****
 	 * 
 	 * @param context - android context
@@ -78,10 +85,10 @@ public class EvaVoiceClient {
 	 * @param speechAudioStreamer
 	 */
 	public EvaVoiceClient(Context context, final EvaComponent eva,
-			final SpeechAudioStreamer speechAudioStreamer, final boolean editLastUtterance) {
+			final LinkedBlockingQueue<byte[]> queue, final boolean editLastUtterance) {
 		mEva = eva;
 		mContext = context;
-		mSpeechAudioStreamer = speechAudioStreamer;	
+		mSpeechBufferQueue = queue;	
 		this.editLastUtterance = editLastUtterance; 
 	}
 
@@ -234,7 +241,7 @@ public class EvaVoiceClient {
 	 * @throws NumberFormatException
 	 * @throws Exception
 	 */
-	private void setAudioContent(HttpURLConnection connection, SpeechAudioStreamer speechAudioStreamer) throws Exception
+	private void setAudioContent(HttpURLConnection connection) throws Exception
 	{
 		String filepath = null;
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -246,11 +253,6 @@ public class EvaVoiceClient {
 		}
 		else {
 			mUploadStream = uploadStream;
-		}
-		
-		boolean success = speechAudioStreamer.start(mUploadStream);
-		if (!success) {
-			throw new Exception("Failed getting audio content");
 		}
 	}
 
@@ -264,7 +266,7 @@ public class EvaVoiceClient {
 
 		// Read response until the end
 		try {
-			while ((line = rd.readLine()) != null) { 
+			while ((line = rd.readLine()) != null && mInTransaction) { 
 				total.append(line); 
 			}
 		} catch (IOException e) {
@@ -319,21 +321,30 @@ public class EvaVoiceClient {
 		try {
 			URL url = getURL();
 			DLog.i(TAG,"<<< Sending post request to URL: "+url);
-
-			mConnection = getConnection(url);
-			
 			long t0 = System.nanoTime();
-			setAudioContent(mConnection, mSpeechAudioStreamer);
-			Thread.sleep(10);
+			mConnection = getConnection(url);
+			DLog.d(TAG, "<<< Connection opened in "+((System.nanoTime() - t0)/1000)+"ms");
+			t0 = System.nanoTime();
+			setAudioContent(mConnection);
 			// wait until write is complete
-			while (mInTransaction && mSpeechAudioStreamer.getIsRecording()) {
-				Thread.sleep(10);
+			while(true) {
+				byte[] buffer = mSpeechBufferQueue.poll(MAX_WAIT_FOR_BUFFER, TimeUnit.SECONDS);
+				if (buffer == null) {
+					DLog.w(TAG, "Waited for "+MAX_WAIT_FOR_BUFFER+" seconds for data from encoder");
+					break;
+				}
+				if (buffer.length == 0) {
+					// end of encoded stream
+					break;
+				}
+				if (mInTransaction) { // if not canceled already
+					mUploadStream.write(buffer);
+				}
 			}
 			long t1 = System.nanoTime();
 			timeSpentUploading = (t1 - t0) / 1000000;
 			if (mInTransaction) {
 				t0 = System.nanoTime();
-				//timeWaitingForServer = (t0 - mUploadStream.timeOfLastBuffer) / 1000000;
 				processResponse(mConnection);
 			}
 		}
@@ -361,6 +372,7 @@ public class EvaVoiceClient {
 			mInTransaction = false;
 		}
 	}
+	
 	/*
 	public static void sendAudioFile(Context context, EvaComponent.EvaConfig config, Uri fileuri, String filekey) {
 		HttpClient httpclient = null;
@@ -411,14 +423,37 @@ public class EvaVoiceClient {
 	}
 	*/
 
-	public void stopTransfer()
+	public void cancelTransfer()
 	{
-		
 		if(getInTransaction())
 		{
 			if( mConnection != null ) {
-				mConnection.disconnect();
-				mConnection = null;
+				// can't do networking on main thread
+				Thread t = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						if (mConnection != null) {
+							try {
+								if (mConnection.getOutputStream() != null) {
+									mConnection.getOutputStream().close();
+								}
+							} catch (IOException e) {
+								DLog.w(TAG, "Exception closing outputstream");
+							}
+							try {
+								if (mConnection.getInputStream() != null) {
+									mConnection.getInputStream().close();
+								}
+							} catch (IOException e) {
+								DLog.w(TAG, "Exception closing inputStream");
+							}
+
+							mConnection.disconnect();
+							mConnection = null;
+						}
+					}
+				});
+				t.start();
 			}
 
 			mInTransaction=false;

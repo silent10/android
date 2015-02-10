@@ -1,7 +1,7 @@
 package com.evaapis.android;
 
 import com.evaapis.EvaException;
-import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
+import com.evaapis.android.EvaSpeechRecogComponent.SpeechRecognitionResultListener;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -13,7 +13,7 @@ import android.os.Bundle;
 abstract public class EvaBaseActivity extends Activity implements EvaSearchReplyListener, SpeechRecognitionResultListener { 
 
 	protected EvaComponent eva;
-	protected EvaSpeechComponent speechRecognition;
+	protected EvaSpeechRecogComponent speechRecognition;
 	
 	public EvaBaseActivity() {
 	}
@@ -53,7 +53,7 @@ abstract public class EvaBaseActivity extends Activity implements EvaSearchReply
 	protected void onCreate(Bundle arg0) {
 		eva = new EvaComponent(this, this);
 		eva.onCreate(arg0);
-		speechRecognition = new EvaSpeechComponent(eva);
+		speechRecognition = new EvaSpeechRecogComponent(eva);
 		super.onCreate(arg0);
 	}
 	
@@ -62,12 +62,7 @@ abstract public class EvaBaseActivity extends Activity implements EvaSearchReply
 	//       also visual feedback is recommended
 	public void searchWithVoice(Object cookie, boolean editLastUtterance)
 	{
-		try {
-			speechRecognition.start(this, cookie, editLastUtterance);
-		}
-		catch (EvaException e) {
-			speechResultError(e.getMessage(), cookie);
-		}
+		speechRecognition.startRecognizer(this, cookie, editLastUtterance);
 	}
 	
 	// override to modify GUI - eg, enable microphone button

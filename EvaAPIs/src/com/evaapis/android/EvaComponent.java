@@ -20,10 +20,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.TextToSpeech.OnInitListener;
 
-import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
+import com.evaapis.android.EvaSpeechRecogComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evature.util.DLog;
 
@@ -31,7 +29,7 @@ import com.evature.util.DLog;
 
 public class EvaComponent implements OnSharedPreferenceChangeListener, 
 									SpeechRecognitionResultListener,
-									EvaSearchReplyListener, OnInitListener{ 
+									EvaSearchReplyListener { 
 
 //	public static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
 	
@@ -62,9 +60,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 
 	private boolean mDebug;
 	
-	
-	private boolean mTtsConfigured = false;
-	private TextToSpeech mTts = null;
+	private EvaSpeak mSpeak;
 
 	private EvaLocationUpdater mLocationUpdater;
 
@@ -79,7 +75,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 	private EvaTextClient mEvaTextClient;
 
-	private String pendingSayit;
 	
 	final static String NETWORK_ERROR = "There was an error contacting the server, please check your internet connection or try again later";
 	
@@ -98,6 +93,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		public String deviceId;
 		public String context;// "h" for hotels, "f" for flights, etc... see docs
 		public String scope; // same values as context
+		public boolean locationEnabled; // track the device location
 		
 		public String vproxyHost;
 		public String webServiceHost;
@@ -111,6 +107,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			webServiceHost = DefaultEvaWSHost;
 			vproxyHost = DefaultVProxyHost;
 			apiVersion = DefaultApiVersion;
+			locationEnabled = false;
 			extraParams = new HashMap<String,String>();
 		}
 
@@ -156,60 +153,10 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		this.activity = activity;
 		getDeviceId(); // fill the device Id in the mConfig
 		this.replyListener = replyListener;
-		// default: enabled location updates - use setDeviceLocationEnabled(false) to disable
-		mLocationUpdater = new EvaLocationUpdater(activity);
-	}
-	
-	
-	public void speak(String sayIt) {
-		speak(sayIt, true);
-	}
-
-	public void speak(String sayIt, boolean flush) {
-		// TODO: add utterance id, listener, check for errors, refactor to its own class
-		if (mTts != null) {
-			if (mTtsConfigured)
-				mTts.speak(sayIt, flush ? TextToSpeech.QUEUE_FLUSH : TextToSpeech.QUEUE_ADD, null);
-			else {
-				pendingSayit = sayIt;
-			}
-		}
-	}
-	
-	private void setTtsLanguage(String destLanguage) {
-		// Set preferred language to whatever the user used to speak to phone.
-//		Locale aLocale = /*Locale.US*/ new Locale(destLanguage);
-//		int result = mTts.setLanguage(aLocale);
-//		if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-//			mTts.setLanguage(Locale.US); // US English is always available on Android
-//		}
-//		Log.i(TAG, "Set TTS language to "+mTts.getLanguage());
-	}
-
-	// Implements TextToSpeech.OnInitListener.
-	public void onInit(int status) {
-		if (status == TextToSpeech.SUCCESS) {
-			setTtsLanguage(getPreferedLanguage());
-			mTtsConfigured = true;
-			if (pendingSayit != null) {
-				speak(pendingSayit, true);
-				pendingSayit = null;
-			}
-		} else {
-			// Initialization failed.
-			mTts = null;
-			mTtsConfigured = false;
-		}
+		setDeviceLocationEnabled(mConfig.locationEnabled);
 	}
 	
 
-	public void onDestroy() {
-		// Don't forget to shutdown!
-		if (mTts != null) {
-			mTts.stop();
-			mTts.shutdown();
-		}
-	}
 	
 	public void onPause()
 	{
@@ -343,12 +290,12 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		if (mDebug && apiReply.JSONReply != null) {
 			JSONObject debugJsonData = new JSONObject();
 			try {
-				debugJsonData.put("Time spent recording", debugData.getLong(EvaSpeechComponent.RESULT_TIME_RECORDING)+"ms");
-				debugJsonData.put("Time in HTTP Execute", debugData.getLong(EvaSpeechComponent.RESULT_TIME_EXECUTE)+"ms");
-				debugJsonData.put("Time spent server side", debugData.getLong(EvaSpeechComponent.RESULT_TIME_SERVER)+"ms");
-				debugJsonData.put("Time reading HTTP response", debugData.getLong(EvaSpeechComponent.RESULT_TIME_RESPONSE)+"ms");
-				if (debugJsonData.has(EvaSpeechComponent.RESULT_TIME_ACTIVITY_CREATE)) {
-					debugJsonData.put("Time spent creating activity", debugData.getLong(EvaSpeechComponent.RESULT_TIME_ACTIVITY_CREATE)+"ms");					
+				debugJsonData.put("Time spent recording", debugData.getLong(EvaSpeechRecogComponent.RESULT_TIME_RECORDING)+"ms");
+				debugJsonData.put("Time in HTTP Execute", debugData.getLong(EvaSpeechRecogComponent.RESULT_TIME_EXECUTE)+"ms");
+				debugJsonData.put("Time spent server side", debugData.getLong(EvaSpeechRecogComponent.RESULT_TIME_SERVER)+"ms");
+				debugJsonData.put("Time reading HTTP response", debugData.getLong(EvaSpeechRecogComponent.RESULT_TIME_RESPONSE)+"ms");
+				if (debugJsonData.has(EvaSpeechRecogComponent.RESULT_TIME_ACTIVITY_CREATE)) {
+					debugJsonData.put("Time spent creating activity", debugData.getLong(EvaSpeechRecogComponent.RESULT_TIME_ACTIVITY_CREATE)+"ms");					
 				}
 				apiReply.JSONReply.put("debug", debugJsonData);
 			} catch (JSONException e) {
@@ -359,6 +306,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		onEvaReply(apiReply, cookie);
 	}
 
+	
 	@Override
 	public void speechResultError(String message, Object cookie) {
 		//Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
@@ -389,14 +337,33 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		setDebug(sharedPreferences.getBoolean(DEBUG_PREF_KEY, false));
 		setVrService(sharedPreferences.getString(VRSERV_PREF_KEY, "none")); 
 		setPreferedLanguage(sharedPreferences.getString(LANG_PREF_KEY, "en"));
-		if (mTts == null)
-			mTtsConfigured = false;
-		mTts = new TextToSpeech(activity, this);
+		mSpeak = new EvaSpeak(activity);
 		
 		// the language set to the voice recoginition will replace the PreferedLanguage with specific English variant  (eg. en-US or en-GB)
 		Intent detailsIntent =  new Intent(RecognizerIntent.ACTION_GET_LANGUAGE_DETAILS);
         activity.sendOrderedBroadcast(
                 detailsIntent, null, new RecognizerLanguageChecker(), null, Activity.RESULT_OK, null, null);
+	}
+	
+	public void onDestroy() {
+		mSpeak.onDestroy();
+	}
+	
+	
+	public void speak(String sayIt) {
+		speak(sayIt, true);
+	}
+	
+	public void speak(String sayIt, boolean flush) {
+		speak(sayIt, flush, null);
+	}
+
+	public void speak(String sayIt, boolean flush, Runnable onComplete) {
+		mSpeak.speak(sayIt, flush, onComplete);
+	}
+	
+	public void stopSpeak() {
+		mSpeak.stop();
 	}
 	
 /*	
@@ -761,6 +728,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	}
 	
 	public void setDeviceLocationEnabled(boolean isEnabled) {
+		mConfig.locationEnabled = isEnabled;
 		if (isEnabled) {
 			if (mLocationUpdater == null) {
 				mLocationUpdater = new EvaLocationUpdater(activity);

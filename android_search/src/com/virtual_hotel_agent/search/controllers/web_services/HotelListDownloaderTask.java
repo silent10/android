@@ -73,7 +73,6 @@ public class HotelListDownloaderTask extends DownloaderTask {
 
             HotelList listResponse = RequestProcessor.run(request);
 			VHAApplication.updateFoundHotels(listResponse, true);
-
               
 			VHAApplication.departureDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("departureDate"));
 			VHAApplication.arrivalDate = API_DATE_PARSER.parseLocalDate(apiReply.ean.get("arrivalDate"));

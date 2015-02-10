@@ -156,15 +156,15 @@ public final class Hotel {
         return this.name;
     }
 
-	public double getDistanceFromMe() {
+	public double getDistanceFromLocation(Location location) {
 		if (distance == -2) {
 			double hotelLatitude = address.latitude.doubleValue();
 			double hotelLongitude = address.longitude.doubleValue();
 			double myLongitude, myLatitude;
 			try {
-				myLongitude = EvaLocationUpdater.getLongitude();
+				myLongitude = location.getLongitude();
 				if (myLongitude != EvaLocationUpdater.NO_LOCATION) {
-					myLatitude = EvaLocationUpdater.getLatitude();
+					myLatitude = location.getLatitude();
 					float[] results = new float[3];
 					Location.distanceBetween(myLatitude, myLongitude,
 							hotelLatitude, hotelLongitude, results);

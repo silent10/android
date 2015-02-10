@@ -18,6 +18,7 @@
 
 package com.virtual_hotel_agent.search.controllers.activities;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +40,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -66,8 +68,9 @@ import com.ean.mobile.hotel.HotelInformation;
 import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
-import com.evaapis.android.EvaSpeechComponent;
+import com.evaapis.android.EvaSpeechRecogComponent;
 import com.evaapis.crossplatform.EvaApiReply;
+import com.evaapis.crossplatform.EvaLocation;
 import com.evaapis.crossplatform.EvaWarning;
 import com.evaapis.crossplatform.ParsedText.LocationMarkup;
 import com.evaapis.crossplatform.ParsedText.TimesMarkup;
@@ -136,7 +139,7 @@ public class MainActivity extends BaseActivity implements
 	static private HotelListDownloaderTask mSearchExpediaTask = null;
 	static private HotelDownloaderTask mHotelDownloader = null;
 	
-	private EvaSpeechComponent speechSearch = null;
+	private EvaSpeechRecogComponent speechSearch = null;
 	
 	MainView mainView;
 
@@ -148,6 +151,9 @@ public class MainActivity extends BaseActivity implements
 	@Override
 	public void onDestroy() {
 		VHAApplication.EVA.onDestroy();
+		if (speechSearch != null) {
+			speechSearch.onDestroy();
+		}
         super.onDestroy();
 	}
 	
@@ -156,7 +162,7 @@ public class MainActivity extends BaseActivity implements
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-			case EvaComponent.VOICE_RECOGNITION_REQUEST_CODE_GOOGLE:
+			/*case EvaComponent.VOICE_RECOGNITION_REQUEST_CODE_GOOGLE:
 				// store the text in a new or existing chat-item
 				if (data != null && data.getExtras() != null) {
 					Bundle bundle = data.getExtras();
@@ -171,7 +177,7 @@ public class MainActivity extends BaseActivity implements
 						}
 					}
 				}
-			break;
+			break;*/
 			default:
 			break;
 		}
@@ -322,7 +328,7 @@ public class MainActivity extends BaseActivity implements
 		
 		EventBus.getDefault().register(this);
 		setVolumeControlStream(VolumeUtil.currentStream); // TODO: move to EvaComponent?
-		speechSearch = new EvaSpeechComponent(eva);
+		speechSearch = new EvaSpeechRecogComponent(eva);
 		eva.registerPreferenceListener();
 		eva.setScope("h");
 		
@@ -689,17 +695,17 @@ public class MainActivity extends BaseActivity implements
 		ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
 		VHAApplication.EVA.speak("");
 		
-		if ("google_local".equals(VHAApplication.EVA.getVrService())) {
-			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, ADDED_TEXT_COOKIE, editLastUtterance);
-			Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
-			if (defaultTracker != null) 
-				defaultTracker.send(MapBuilder
-					    .createEvent("native_speech_search", "native_speech_search_start", "", editLastUtterance ? 1l: 0l)
-					    .build()
-					   );
-			
-			return;
-		}
+//		if ("google_local".equals(VHAApplication.EVA.getVrService())) {
+//			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, ADDED_TEXT_COOKIE, editLastUtterance);
+//			Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+//			if (defaultTracker != null) 
+//				defaultTracker.send(MapBuilder
+//					    .createEvent("native_speech_search", "native_speech_search_start", "", editLastUtterance ? 1l: 0l)
+//					    .build()
+//					   );
+//			
+//			return;
+//		}
 		
 		if (speechSearch.isInSpeechRecognition() == true) {
 			speechSearch.stop();
@@ -995,10 +1001,12 @@ public class MainActivity extends BaseActivity implements
 		
 		ChatItem currentItem;
 		boolean switchToResult;
+		private EvaApiReply reply;
 		
-		ChatItemDownloaderListener(ChatItem chatItem, boolean switchToResult) {
+		ChatItemDownloaderListener(ChatItem chatItem, boolean switchToResult, EvaApiReply reply) {
 			currentItem = chatItem;
 			this.switchToResult = switchToResult;
+			this.reply = reply;
 		}
 		
 		
@@ -1045,7 +1053,23 @@ public class MainActivity extends BaseActivity implements
 					mainView.showTab(mainView.getHotelsListTabName());
 					HotelListFragment fragment = mainView.getHotelsListFragment();
 					if (fragment != null) {
-						fragment.newHotelsList();
+						Location target = null;
+						if (reply.flow.Elements.length > 0 && reply.flow.Elements[0].Type == FlowElement.TypeEnum.Hotel) {
+							EvaLocation location = reply.flow.Elements[0].RelatedLocations[0];
+							if ("GPS".equals(location.derivedFrom)) {
+								target = VHAApplication.EVA.getLocation();
+							}
+							else if (location.Type == EvaLocation.TypeEnum.Airport ||
+									location.Type == EvaLocation.TypeEnum.Landmark ||
+									location.Type == EvaLocation.TypeEnum.Address ||
+									location.Type.ordinal() > EvaLocation.TypeEnum._Landmark_subtype_.ordinal()
+									) {
+								target = new Location("Eva");
+								target.setLatitude(location.Latitude);
+								target.setLongitude(location.Longitude);
+							}
+						}
+						fragment.newHotelsList(target);
 					}
 					else {
 						DLog.e(TAG, "Unexpected hotel list fragment is null");
@@ -1123,7 +1147,7 @@ public class MainActivity extends BaseActivity implements
 		SettingsAPI.setShowIntroTips(this, false);
 		
 		mSearchExpediaTask = new HotelListDownloaderTask();
-		mSearchExpediaTask.initialize(new ChatItemDownloaderListener(_chatItem, _switchToResult), 
+		mSearchExpediaTask.initialize(new ChatItemDownloaderListener(_chatItem, _switchToResult, _reply), 
 				 _reply); // TODO: change to be based on flow element, 
 //		if (currentHotelSearch.getStatus() == Status.HasResults) {
 //			// this chat item was already activated and has results - bypass the cloud service and fake results
@@ -1135,14 +1159,17 @@ public class MainActivity extends BaseActivity implements
 //		}
 	}
 	
-	class FlashHandler extends Handler {
-		MainView mainView;
-		public FlashHandler(MainView mainView) {
+	static class FlashHandler extends Handler {
+		WeakReference<MainView> mainView;
+		public FlashHandler(WeakReference<MainView> mainView) {
 			this.mainView = mainView;
 		}
 		@Override
 		public void handleMessage(Message msg) {
-			mainView.flashSearchButton(3);
+			MainView view = mainView.get();
+			if (view != null) {
+				view.flashSearchButton(3);
+			}
 			super.handleMessage(msg);
 		}
 	}
@@ -1233,7 +1260,7 @@ public class MainActivity extends BaseActivity implements
 			DLog.d(TAG, "Question asked");
 			// give some delay to the flashing - to happen while question is asked
 			if (mFlashButton == null) {
-				 mFlashButton = new FlashHandler(mainView);
+				 mFlashButton = new FlashHandler(new WeakReference<MainView>(mainView));
 			}
 			mFlashButton.sendEmptyMessageDelayed(1, 2000);
 			break;
@@ -1339,7 +1366,7 @@ public class MainActivity extends BaseActivity implements
 //		if (isNewSession() == false) {
 			mainView.showTab(mainView.CHAT_TAB_INDEX);
 			VHAApplication.EVA.resetSession();
-			VHAApplication.EVA.stopSearch();
+			VHAApplication.EVA.cancelSearch();
 			ChatItem myChat = new ChatItem(ChatItem.START_NEW_SESSION);
 			addChatItem(myChat);
 			String greeting = "Starting a new search. How may I help you?";
@@ -1368,7 +1395,7 @@ public class MainActivity extends BaseActivity implements
 			mHotelDownloader.cancel(true);
 			mHotelDownloader = null;
 		}
-		VHAApplication.EVA.stopSearch();
+		VHAApplication.EVA.cancelSearch();
 		if (speechSearch != null) {
 			speechSearch.cancel();
 		}

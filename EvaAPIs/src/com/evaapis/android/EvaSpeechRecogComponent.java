@@ -1,6 +1,7 @@
 package com.evaapis.android;
 
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -16,7 +17,7 @@ import com.evature.util.DLog;
  * 
  * @author iftah
  */
-public class EvaSpeechComponent {
+public class EvaSpeechRecogComponent {
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 	public static final String TAG = "EvaSpeechComponent";
@@ -31,7 +32,7 @@ public class EvaSpeechComponent {
 	public static final String RESULT_EVA_ERR_MESSAGE = "EVA_ERR_MESSAGE";
 	
 	protected SpeechAudioStreamer mSpeechAudioStreamer;
-	private EvaHttpDictationTask dictationTask=null;
+	private EvaHttpThread dictationTask=null;
 	EvaVoiceClient mVoiceClient = null;
 	Object cookie;
 
@@ -39,12 +40,13 @@ public class EvaSpeechComponent {
 	
 	Context mContext;
 
-	public EvaSpeechComponent(Context context, EvaComponent eva) {
+	public EvaSpeechRecogComponent(Context context, EvaComponent eva) {
 		mEva = eva;
 		mContext = context;
+		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
 	}
 	
-	public EvaSpeechComponent(EvaComponent eva) {
+	public EvaSpeechRecogComponent(EvaComponent eva) {
 		this(eva.activity, eva);
 	}
 	
@@ -72,12 +74,12 @@ public class EvaSpeechComponent {
 		return dictationTask != null && dictationTask.mListener != null;
 	}
 	
-	private class EvaHttpDictationTask extends AsyncTask<Object, Object, Object>
+	private class EvaHttpThread extends AsyncTask<Object, Object, Object>
 	{
 		public SpeechRecognitionResultListener mListener;
 		private EvaVoiceClient  mVoiceClient;
 		
-		EvaHttpDictationTask(EvaVoiceClient voiceClient, SpeechRecognitionResultListener listener) {
+		EvaHttpThread(EvaVoiceClient voiceClient, SpeechRecognitionResultListener listener) {
 			mVoiceClient = voiceClient;
 			mListener = listener;
 		}
@@ -132,7 +134,7 @@ public class EvaSpeechComponent {
 				}
 			}
 
-			mVoiceClient.stopTransfer();
+			mVoiceClient.cancelTransfer();
 
 			if (isCancelled() == false) {
 				try {
@@ -168,29 +170,38 @@ public class EvaSpeechComponent {
 	}
 	
 	public void cancel() {
+		if (dictationTask != null) {
+			dictationTask.mListener = null;
+		}
 		if (mSpeechAudioStreamer != null) {
 			mSpeechAudioStreamer.stop();
-			if (mVoiceClient.getInTransaction())
-			{
-				Thread tr = new Thread()
-				{
-					public void run()
-					{
-						mVoiceClient.stopTransfer();
-					}
-				};
-				tr.start();
-			}
-			dictationTask.mListener = null;
+		}
+		if (mVoiceClient != null)
+		{
+			mVoiceClient.cancelTransfer();
 		}
 	}
 
-	public void start(SpeechRecognitionResultListener listener, Object cookie, boolean editLastUtterance) throws EvaException {
+	public void startRecognizer(SpeechRecognitionResultListener listener, Object cookie, boolean editLastUtterance)  {
+		DLog.d(TAG, "<<< Starting Speech Recognicition");
 		this.cookie = cookie;
-		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
-		mSpeechAudioStreamer.initRecorder();
-		mVoiceClient = new EvaVoiceClient(mContext, mEva, mSpeechAudioStreamer, editLastUtterance);
-		dictationTask = new EvaHttpDictationTask(mVoiceClient, listener);
+		// start thread
+		LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
+	
+		// start a thread - reading from microphone to encoder to queue
+		boolean success = mSpeechAudioStreamer.startStreaming(queue);
+		if (!success) {
+			DLog.e(TAG, "Failed getting audio content");
+			return;
+		}
+
+		// start a thread - from queue to http connection
+		mVoiceClient = new EvaVoiceClient(mContext, mEva, queue, editLastUtterance);
+		dictationTask = new EvaHttpThread(mVoiceClient, listener);
 		dictationTask.execute((Object[])null);
+	}
+	
+	public void onDestroy() {
+		mSpeechAudioStreamer.onDestroy();
 	}
 }

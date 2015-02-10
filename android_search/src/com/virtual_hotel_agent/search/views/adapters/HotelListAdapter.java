@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
 import android.support.v7.graphics.Palette;
 import android.support.v7.graphics.Palette.Swatch;
 import android.support.v7.widget.CardView;
@@ -41,6 +42,7 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 	private LayoutInflater mInflater;
 	private HotelListFragment mParent;
 	static BitmapDrawable mHotelIcon;
+	private Location targetLocation;
 //	static Drawable mTripadvisorPlaceHolder;
 
 	public interface OnHotelClickListener {
@@ -59,6 +61,10 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 	
 	private List<Hotel>  getHotels() {
 		return VHAApplication.FOUND_HOTELS;
+	}
+	
+	public void setTargetLocation(Location location) {
+		targetLocation = location;
 	}
 
 	@Override
@@ -121,15 +127,19 @@ public class HotelListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
 		if (holder.name.getText().equals(name) == false) {
 			holder.name.setText(name);
-		
 	
-			// Calculate hotel distance
-			double distance = hotel.getDistanceFromMe();
-			if (distance > 0 && distance < DISTANCE_DELTA) {
-				DecimalFormat distanceFormat = new DecimalFormat("#.#");
-				String formattedDistance = distanceFormat.format(distance);
-				holder.distance.setText(formattedDistance + "km");
-			} else {
+			if (targetLocation != null) {
+				// Calculate hotel distance
+				double distance = hotel.getDistanceFromLocation(targetLocation);
+				if (distance > 0 && distance < DISTANCE_DELTA) {
+					DecimalFormat distanceFormat = new DecimalFormat("#.#");
+					String formattedDistance = distanceFormat.format(distance);
+					holder.distance.setText(formattedDistance + "km");
+				} else {
+					holder.distance.setVisibility(View.GONE);
+				}
+			}
+			else {
 				holder.distance.setVisibility(View.GONE);
 			}
 			

@@ -4,7 +4,6 @@ package com.evaapis.android;
 
 import java.nio.ByteBuffer;
 
-import com.evature.util.DLog;
 
 /***
  * When moving this file - remember to fix FLACStreamEncoder.cpp

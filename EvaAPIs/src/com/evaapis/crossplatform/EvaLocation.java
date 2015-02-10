@@ -2,7 +2,9 @@ package com.evaapis.crossplatform;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -41,25 +43,125 @@ public class EvaLocation implements Serializable {
 	public double Longitude;
 	public enum TypeEnum {
 		Unknown,
-		City, Airport, Country, Area, State, Property, Company, Chain, Postal_Code, Address, Island, Landmark, Generic_Location
-		
+		Continent, City, Airport, Country, Area, State, Property, Company, Chain, Postal_Code, Address, Island, Landmark, Generic_Location,
+
+		_Landmark_subtype_,
+		Agricultural_Facility,   
+	    Airfield,  
+	    Amphitheater,  
+	    Amusement_Park,   
+	    Ancient_Site,   
+	    Arch,  
+	    Athletic_Field,   
+	    Bridge,  
+	    Building,  
+	    Boundary_Marker,   
+	    Battlefield,  
+	    Bus_Station,   
+	    Church,  
+	    Cemetery,  
+	    Communication_Center,   
+	    Casino,  
+	    Castle,  
+	    Courthouse,  
+	    Business_Center,   
+	    Community_Center,   
+	    Facility_Center,   
+	    Medical_Center,   
+	    Convent,  
+	    Dam,  
+	    Diplomatic_Facility,   
+	    Estate,  
+	    Facility,  
+	    Farm,  
+	    Farmstead,  
+	    Fort,  
+	    Gate,  
+	    Garden,  
+	    House,  
+	    Country_House,   
+	    Hospital,  
+	    Historical_Site,   
+	    Hotel,  
+	    Military_Installation,   
+	    Research_Institue,   
+	    Library,  
+	    Lighthouse,  
+	    Shopping_Mall,   
+	    Brewery,  
+	    Abandoned_Factory,   
+	    Military_Base,   
+	    Market,  
+	    Mine,  
+	    Chrome_Mine,   
+	    Monument,  
+	    Mosque,  
+	    Mission,  
+	    Abandoned_Mission,   
+	    Monastery,  
+	    Metro,  
+	    Museum,  
+	    Observation_Point,   
+	    Observatory,  
+	    Radio_Observatory,   
+	    Opera_House,   
+	    Palace,  
+	    Pagoda,  
+	    Pool,  
+	    Power_Station,   
+	    Border_Post,   
+	    Point,  
+	    Pyramid,  
+	    Golf_Course,   
+	    Race_Track,   
+	    Restaurant,  
+	    Religious_Site,   
+	    Ranch,  
+	    Resort,  
+	    Railway_Station,   
+	    Railroad_Stop,   
+	    Ruin,  
+	    Railroad_Yard,   
+	    School,  
+	    College,  
+	    Military_School,   
+	    Technical_School,   
+	    Shrine,  
+	    Stadium,  
+	    Meteorological_Station,   
+	    Theater,  
+	    Tomb,  
+	    Temple,  
+	    Tower,  
+	    Transit_Terminal,   
+	    Triangulation_Station,   
+	    University_Prep_School,    
+	    University,  
+	    Veterinary_Facility,   
+	    Wall,  
+	    Zoo		
 	};
 	public TypeEnum Type;
 	public String Name;
-	public EvaTime Departure = null; // Complex Eva Time object
-	public EvaTime Arrival = null; // Complex Eva Time object
-	public EvaTime Stay = null;
+	public EvaTime Departure; // Complex Eva Time object
+	public EvaTime Arrival; 
+	public EvaTime Stay;
 	public HashSet<String> purpose;
 	public String derivedFrom = "";
-	public HotelAttributes hotelAttributes = null;
+	public HotelAttributes hotelAttributes;
 	
-	public FlightAttributes flightAttributes = null;
+	public FlightAttributes flightAttributes;
 	
+	public HashMap<String, String> Keys;
+	
+	public EvaLocation nearestCustomerLocation;  // for example, asking a cruise to Las Vegas will search a cruise to nearest port
 	
 
 	public EvaLocation(JSONObject location, List<String> parseErrors) {
 		try {
-			index = location.getInt("Index");
+			if (location.has("Index")) {
+				index = location.getInt("Index");
+			}
 			if (location.has("Next"))
 				next = location.getInt("Next");
 			if (location.has("All Airports Code"))
@@ -139,7 +241,25 @@ public class EvaLocation implements Serializable {
 					purpose.add(new String(jPurpose.getString(index)));
 				}
 			}
+			
+			if (location.has("Keys")) {
+				JSONObject jKeys = location.getJSONObject("Keys");
+				Keys = new HashMap<String, String>(jKeys.length());
+				Iterator<String> keys = jKeys.keys();
 
+		        while( keys.hasNext() ){
+		            String key = (String)keys.next();
+		            if( jKeys.get(key) instanceof String ){
+		            	Keys.put(key, (String)jKeys.get(key));
+		            }
+		        }
+			}
+			
+			
+			
+			if (location.has("Nearest Customer Location")) {
+				nearestCustomerLocation = new EvaLocation(location.getJSONObject("Nearest Customer Location"), parseErrors);
+			}
 		} catch (JSONException e) {
 			DLog.e(TAG, "Error parsing JSON",e);
 			parseErrors.add("Error during parsing location attributes: "+e.getMessage());

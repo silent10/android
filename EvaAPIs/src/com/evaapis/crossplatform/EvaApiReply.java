@@ -21,32 +21,35 @@ public class EvaApiReply implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private final String TAG = "EvaApiReply";
-	public String sayIt = null;
-	public String sessionId = null;
-	public String processedText = null;
-	public String originalInputText = null;
-	public EvaChat chat = null;
-	public EvaDialog dialog = null;
+	public String sayIt;
+	public String sessionId;
+	public String transactionId;
+	public String processedText;
+	public String originalInputText;
+	public EvaChat chat;
+	public EvaDialog dialog;
 	public EvaLocation[] locations;
 	public EvaLocation[] alt_locations;
-	public Map<String, String> ean = null;
-	public Sabre sabre = null;
-	public RequestAttributes requestAttributes = null;
-	public Map<String, Boolean> geoAttributes = null;
-	public FlightAttributes flightAttributes = null;
-	public HotelAttributes hotelAttributes = null;
-	public ServiceAttributes serviceAttributes = null;
-	public EvaTravelers travelers = null;
-	public EvaMoney money = null;
-	public PNRAttributes pnrAttributes = null;
-	public Flow flow = null;  // covers the top level understanding of what the user asks for, and what to do next
+	public Map<String, String> ean;
+	public Sabre sabre;
+	public RequestAttributes requestAttributes;
+	public Map<String, Boolean> geoAttributes;
+	public FlightAttributes flightAttributes;
+	public HotelAttributes hotelAttributes;
+	public ServiceAttributes serviceAttributes;
+	public CruiseAttributes cruiseAttributes;
+	public EvaTravelers travelers;
+	public EvaMoney money;
+	public PNRAttributes pnrAttributes;
+	public Flow flow;  // covers the top level understanding of what the user asks for, and what to do next
 	
-	public String errorMessage = null; // error code returned from Eva service
+	public String errorMessage; // error code returned from Eva service
 	public List<EvaWarning> evaWarnings = new ArrayList<EvaWarning>();
 	public List<String>  parseErrors = new ArrayList<String>();  // errors identified during the parsing
 	public ParsedText parsedText;
 	
 	public transient JSONObject JSONReply;
+
 
 	public EvaApiReply(String fullReply) {
 		initFromJson(fullReply);
@@ -66,6 +69,9 @@ public class EvaApiReply implements Serializable {
 			else {
 				if (jFullReply.has("session_id")) {
 					sessionId = jFullReply.getString("session_id");
+				}
+				if (jFullReply.has("transaction_key")) {
+					transactionId = jFullReply.getString("transaction_key");
 				}
 				JSONObject jApiReply = jFullReply.getJSONObject("api_reply");
 				if (jApiReply.has("ProcessedText")) {
@@ -163,6 +169,11 @@ public class EvaApiReply implements Serializable {
 					}
 					requestAttributes = new RequestAttributes(jApiReply.getJSONObject("Request Attributes"), parseErrors);
 				}
+				
+				if (jApiReply.has("Cruise Attributes")) {
+					cruiseAttributes = new CruiseAttributes(jApiReply.getJSONObject("Cruise Attributes"), parseErrors);
+				}
+				
 				if (jApiReply.has("Flow")) {
 					flow = new Flow(jApiReply.getJSONArray("Flow"), parseErrors, locations);
 				}

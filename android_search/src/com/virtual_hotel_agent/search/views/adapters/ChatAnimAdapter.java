@@ -103,10 +103,10 @@ public class ChatAnimAdapter extends AnimationAdapter {
 		//view.setScaleY(0.1f);
     	chatBalloon.setTranslationZ(12f);
     	chatBalloon.setTranslationY(-12f);
-    	chatBalloon.setScaleX(1.1f);
-    	chatBalloon.setScaleY(1.1f);
 		heightAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
 		heightAnim.setDuration(mAnimationDurationMillis);
+//		chatBalloon.setScaleX(1.1f);
+//		chatBalloon.setScaleY(1.1f);
 //		scaleXAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);
 //		scaleXAnim.setDuration(mAnimationDurationMillis);
 //		scaleYAnim.setStartDelay(mAnimationDurationMillis+mAnimationDelayMillis);

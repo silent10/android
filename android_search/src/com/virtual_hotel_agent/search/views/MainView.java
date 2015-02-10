@@ -32,8 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.evaapis.EvaException;
-import com.evaapis.android.EvaSpeechComponent;
-import com.evaapis.android.EvaSpeechComponent.SpeechRecognitionResultListener;
+import com.evaapis.android.EvaSpeechRecogComponent;
+import com.evaapis.android.EvaSpeechRecogComponent.SpeechRecognitionResultListener;
 import com.evaapis.android.SoundLevelView;
 import com.evaapis.android.SpeechAudioStreamer;
 import com.evature.util.DLog;
@@ -385,10 +385,10 @@ public class MainView {
 	
 	static class SearchHandler extends Handler {
 		private boolean processing = false;
-		private EvaSpeechComponent speechSearch;
+		private EvaSpeechRecogComponent speechSearch;
 		private MainView view;
 		
-		public SearchHandler(EvaSpeechComponent speechSearch, MainView view) {
+		public SearchHandler(EvaSpeechRecogComponent speechSearch, MainView view) {
 			this.speechSearch = speechSearch;
 			this.view = view;
 		}
@@ -450,7 +450,7 @@ public class MainView {
 		}
 	};
 	
-	public void startSpeechSearch(final EvaSpeechComponent speechSearch, Object cookie, boolean editLastUtterance) {
+	public void startSpeechSearch(final EvaSpeechRecogComponent speechSearch, Object cookie, boolean editLastUtterance) {
 		//showStatus("Listening...");
 		
 		activateSearchButton();
@@ -460,7 +460,7 @@ public class MainView {
 		try {
 			Handler handler = mUpdateLevel.get();
 			if (handler != null) {
-				speechSearch.start(mSpeechSearchListener, cookie, editLastUtterance);
+				speechSearch.startRecognizer(mSpeechSearchListener, cookie, editLastUtterance);
 				handler.sendEmptyMessageDelayed(0, 50);
 			}
 			else {

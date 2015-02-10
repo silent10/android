@@ -3,6 +3,7 @@ package com.virtual_hotel_agent.search.views.fragments;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.internal.widget.AdapterViewCompat;
 import android.support.v7.internal.widget.AdapterViewCompat.OnItemClickListener;
@@ -186,6 +187,13 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 			mAdapter.notifyDataSetChanged();
 		}
 	}
+	
+	public void setTargetLocation(Location location) {
+		if (mAdapter != null && location != null) {
+			mAdapter.setTargetLocation(location);
+			mAdapter.notifyDataSetChanged();
+		}
+	}
 
 	public void onEvent( HotelItemClicked event) {
 		
@@ -302,8 +310,6 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 			// error may be because too much time has passed - so cache will not work
 			((MainActivity) getActivity()).clearExpediaCache();
 		}
-
-		
 	}
 
 	@Override
@@ -335,7 +341,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 		}
 	}
 
-	public void newHotelsList() {
+	public void newHotelsList(Location targetLocation) {
 		if (mAdapter == null) {
 			DLog.e(TAG, "Unexpected adapter is null");
 			return;
@@ -344,6 +350,7 @@ public class HotelListFragment extends Fragment implements OnHotelClickListener,
 		//mAnimAdapter.reset();
 		//mHotelListView.clearChoices();
 		setAdapter();
+		setTargetLocation(targetLocation);
 		//mAdapter.notifyDataSetChanged();
 	}
 

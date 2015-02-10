@@ -23,6 +23,15 @@ import com.virtual_hotel_agent.search.R;
 // based on http://developer.android.com/reference/android/view/ViewGroup.html
 // https://developer.android.com/training/material/shadows-clipping.html
 
+/*****
+ * This is a custom made View in the shape of a simple Chat Balloon  (aka chat bubble)
+ * Balloon pointer can point either left or right, and has width and height 
+ * 
+ * The ChatBalloon expects a single child - If you wish to have more than one then make that child a viewGroup itself, eg. LinearLayout 
+ * 
+ * @author iftah
+ *
+ */
 public class ChatBalloon extends ViewGroup {
 
 	private static final String TAG = "ChatBalloon";

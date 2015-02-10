@@ -137,8 +137,6 @@ public class VHAApplication extends Application {
         CommonParameters.locale = Locale.US.toString();
         CommonParameters.currencyCode = Currency.getInstance(Locale.US).getCurrencyCode();
 		
-		EvaLocationUpdater.initContext(this);
-		
 		super.onCreate();
 		VHAApplication.context = getApplicationContext();
 	}
