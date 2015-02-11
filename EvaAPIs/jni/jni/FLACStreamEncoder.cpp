@@ -710,6 +710,8 @@ FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder 
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 	}
 
+	env->DeleteLocalRef(arr);
+
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 

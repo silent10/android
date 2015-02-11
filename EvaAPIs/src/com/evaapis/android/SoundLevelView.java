@@ -84,23 +84,22 @@ public class SoundLevelView extends View {
 
 		float xStep = getXStep();
 		if (xStep == 0) {
-			xStep = width / (4*soundBuff.length);
+			xStep = width / (3*soundBuff.length);
 			setXStep(xStep);
 		}
 		float xStep2 = 2*xStep;
 		float centerStep = (1.5f*xStep);
 		float xStep3 = 3*xStep;
-		float xStep4 = 4*xStep;
 		
 		float curX;
 		if ((gravity & Gravity.RIGHT) == Gravity.RIGHT){
-			curX = width - numOfPoints * xStep4;
+			curX = width - numOfPoints * xStep3;
 		}
 		else if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
 			curX = 0;
 		}
 		else {
-			curX = (width - numOfPoints * xStep4) / 2;
+			curX = (width - numOfPoints * xStep3) / 2;
 		}
 
 		path.reset();

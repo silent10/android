@@ -365,10 +365,7 @@ public class EvaVoiceClient {
 			hadError = true;
 		}
 		finally {
-			if (mConnection != null) {
-				mConnection.disconnect();
-				mConnection = null;
-			}
+			mConnection = null;
 			mInTransaction = false;
 		}
 	}
@@ -425,39 +422,7 @@ public class EvaVoiceClient {
 
 	public void cancelTransfer()
 	{
-		if(getInTransaction())
-		{
-			if( mConnection != null ) {
-				// can't do networking on main thread
-				Thread t = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						if (mConnection != null) {
-							try {
-								if (mConnection.getOutputStream() != null) {
-									mConnection.getOutputStream().close();
-								}
-							} catch (IOException e) {
-								DLog.w(TAG, "Exception closing outputstream");
-							}
-							try {
-								if (mConnection.getInputStream() != null) {
-									mConnection.getInputStream().close();
-								}
-							} catch (IOException e) {
-								DLog.w(TAG, "Exception closing inputStream");
-							}
-
-							mConnection.disconnect();
-							mConnection = null;
-						}
-					}
-				});
-				t.start();
-			}
-
-			mInTransaction=false;
-		}
+		mInTransaction=false;
 	}
 
 	public boolean getInTransaction()
