@@ -4,22 +4,18 @@ package com.virtual_hotel_agent.search.views.adapters;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.evature.util.DLog;
 import com.nhaarman.listviewanimations.ArrayAdapter;
 import com.virtual_hotel_agent.search.R;
-import com.virtual_hotel_agent.search.VHAApplication;
 import com.virtual_hotel_agent.search.models.chat.ChatItem;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.ChatType;
 import com.virtual_hotel_agent.search.models.chat.ChatItem.Status;
@@ -39,7 +35,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	int  myChatTextColor;
 	int  vhaChatTextColor;
 	
-	public ChatAdapter(final ChatFragment chatFragment, int resource, int textViewResourceId, final ChatItemList chatList) {
+	public ChatAdapter(final ChatFragment chatFragment, final ChatItemList chatList) {
 		super(chatList);
 		mChatList = chatList;
 		this.chatFragment = chatFragment;
@@ -118,26 +114,28 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 //			Ln.d("Creating view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
 			switch (viewType) {
 			case Me:
-				row = mInflater.inflate(R.layout.row_mychat, parent, false);
-				MeRowHolder holder = new MeRowHolder();
-				holder.editText = (EditText) row.findViewById(R.id.editText);
-				holder.editText.setOnEditorActionListener(chatFragment.editorActionHandler);
-				holder.deleteButton = (ImageButton) row.findViewById(R.id.buttonDelete);
-				holder.deleteButton.setOnClickListener(chatFragment.deleteHandler);
-				holder.microphoneButton = (ImageButton) row.findViewById(R.id.buttonMicrophone);
-				holder.microphoneButton.setOnClickListener(chatFragment.micButtonHandler);
-				holder.label = (TextView) row.findViewById(R.id.label);
-				holder.inEdit = row.findViewById(R.id.edit_chat_item);
-				row.setTag(R.id.chat_row_holder, holder);
+				row = mInflater.inflate(R.layout.row_user_chat, parent, false);
+				UserRowHolder userHolder = new UserRowHolder();
+				userHolder.editText = (EditText) row.findViewById(R.id.editText);
+				userHolder.editText.setOnEditorActionListener(chatFragment.editorActionHandler);
+				userHolder.chatbubble = row.findViewById(R.id.chat_bubble);
+				userHolder.label = (TextView) row.findViewById(R.id.label);
+				userHolder.inEdit = row.findViewById(R.id.edit_chat_item);
+				row.setTag(R.id.chat_row_holder, userHolder);
 				break;
 			case DialogQuestion:
 			case VirtualAgentError:
 			case VirtualAgent:
 			case VirtualAgentWelcome:
-				row = mInflater.inflate(R.layout.row_vha_chat, parent, false);
-				break;
 			case VirtualAgentContinued:
-				row = mInflater.inflate(R.layout.row_vha_extra, parent, false);
+				row = mInflater.inflate(R.layout.row_vha_chat, parent, false);
+				VhaRowHolder evaHolder = new VhaRowHolder();
+				//evaHolder.cruisesFoundIcon = (ImageView) row.findViewById(R.id.cruises_found_icon);
+				evaHolder.searchingProgress = (ProgressBar) row.findViewById(R.id.progressBar_search);
+				evaHolder.subLabel = (TextView) row.findViewById(R.id.sub_label);
+				evaHolder.label = (TextView) row.findViewById(R.id.label);
+				evaHolder.chatbubble = row.findViewById(R.id.chat_bubble);
+				row.setTag(R.id.chat_row_holder, evaHolder);	
 				break;
 			case DialogAnswer:
 				row = mInflater.inflate(R.layout.row_vha_dialog, parent, false);
@@ -175,10 +173,6 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		
 		// some row types require more than label setting...
 		switch (viewType) {
-		case VirtualAgentContinued:
-			label.setTextColor(vhaChatTextColor);
-			label.setTypeface(null, Typeface.NORMAL);
-			break;
 			
 		case DialogAnswer:
 			DialogAnswerChatItem dialogItem = (DialogAnswerChatItem)chatItem;
@@ -204,7 +198,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 //				icon.setTextColor(myChatNoSessionText);
 //			}
 			
-			MeRowHolder meHolder = (MeRowHolder) row.getTag(R.id.chat_row_holder); 
+			UserRowHolder meHolder = (UserRowHolder) row.getTag(R.id.chat_row_holder); 
 			
 			if (chatItem.getStatus() == Status.InEdit) {
 				meHolder.editText.setText(chatItem.getChat().toString());
@@ -216,8 +210,26 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				meHolder.inEdit.setVisibility(View.GONE);
 			}
 			break;
-			
+
+//		case VirtualAgentContinued:
+//			label.setTextColor(vhaChatTextColor);
+//			label.setTypeface(null, Typeface.NORMAL);
+//			break;
+
 		default:
+			VhaRowHolder evaHolder = (VhaRowHolder) holder;
+			if (chatItem.getSubLabel() == null) {
+				evaHolder.subLabel.setVisibility(View.GONE);
+				evaHolder.searchingProgress.setVisibility(View.GONE);
+				//evaHolder.cruisesFoundIcon.setVisibility(View.GONE);
+			}
+			else {
+				evaHolder.subLabel.setText(chatItem.getSubLabel());
+				evaHolder.subLabel.setVisibility(View.VISIBLE);
+				evaHolder.searchingProgress.setVisibility(chatItem.getStatus() == Status.InSearch ? View.VISIBLE : View.GONE);
+				//evaHolder.cruisesFoundIcon.setVisibility(chatItem.getStatus() == Status.HAS_RESULTS ? View.VISIBLE :View.GONE);
+			}
+
 //			View right_pane = row.findViewById(R.id.right_pane);
 //			ImageView topImg = (ImageView) row.findViewById(R.id.top_icon);
 //			ProgressBar progress = (ProgressBar) row.findViewById(R.id.progressBar_search);
@@ -273,12 +285,18 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	
 	private static class RowHolder {
 		TextView label;
+		View chatbubble;
 	}
 	
-	public static class MeRowHolder extends RowHolder {
+	public static class UserRowHolder extends RowHolder {
 		public View inEdit;
 		public EditText editText;
-		public ImageButton microphoneButton;
-		public ImageButton deleteButton;
 	}
+	
+	private static class VhaRowHolder extends RowHolder {
+		// public ImageView hotelsFoundIcon;
+		public ProgressBar searchingProgress;
+		public TextView subLabel;
+	}
+
 }

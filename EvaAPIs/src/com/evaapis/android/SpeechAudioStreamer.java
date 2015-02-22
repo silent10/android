@@ -45,25 +45,32 @@ public class SpeechAudioStreamer {
 //	private int[] mBufferShorts = null;
 	private boolean mIsRecording = false;
 
-	public static final int MOVING_AVERAGE_BUFFER_SIZE = 5;
-	private static final long SILENCE_PERIOD = 700;
+	// VAD Parameters,  default values
+	private int mMovingAverageWindow = 5;		// volume level is average of last X chunks
+	private long mPreVadRecordingTime = 150; 	// time from start of recording where no VAD is considered
+	private long mNoisePeriod = 200;   			// minimum continuous noisy time to be considered "Noise"
+	private long mSilencePeriod = 700; 			// minimum continuous silent time to be considered "Silence" 
+
+	
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 
 	private int mSampleRate;
 
-	int mBufferIndex = 0;
-	float mMovingAverageBuffer[] = new float[MOVING_AVERAGE_BUFFER_SIZE];
-	float mSoundLevelBuffer[] = new float[26];
+	int mBufferIndex = 0;  // cyclic buffers index (cell used is:  index modulo buffer size)
+	float mMovingAverageBuffer[]; // this is used to decide volume level  (eg. average of the last 5 buffers) 
+	float mSoundLevelBuffer[] = new float[26]; // this is passed to the visualization of the sound-level
 
-	long mLastStart = -1;
-	private int mSoundLevel;
+	long mStartLastSilence = -1;
+	long mStartLastNoise = -1;
+	private int mCurrentSoundLevel;
 	private float mPeakSoundLevel;
 	private float mMinSoundLevel;
 	
 	public boolean wasNoise;
+	private int mRecorderBufferSize;
 
-	private int mBufferSize;
+
 
 	public SpeechAudioStreamer(Context context, int sampleRate) {
 //		fifoPath = context.getApplicationInfo().dataDir + "/flac_stream_fifo";
@@ -76,21 +83,25 @@ public class SpeechAudioStreamer {
 //		mDebugSavePCM = false;
 		
 		
-		mBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+		mRecorderBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-		if (mBufferSize <= 0) {
-			DLog.e(TAG, "<<< bufferSize = "+mBufferSize);
+		if (mRecorderBufferSize <= 0) {
+			DLog.e(TAG, "<<< bufferSize = "+mRecorderBufferSize);
 			return;
 		}
-		mBufferSize *= 2; // for extra safety, do not loose audio even if delayed reading a bit
-		mBuffer = new byte[mBufferSize];
-		DLog.i(TAG, "<<< Initialized buffer to "+mBufferSize);
+		mRecorderBufferSize *= 2; // for extra safety, do not loose audio even if delayed reading a bit
+		mBuffer = new byte[mRecorderBufferSize];
+		DLog.i(TAG, "<<< Initialized buffer to "+mRecorderBufferSize);
+		
+		mMovingAverageBuffer = new float[getMovingAverageWindow()];
 	}
 
 	private boolean initRecorder() {
 		DLog.i(TAG, "<<< Initializing Recorder");
 		
 		wasNoise = false;
+		mStartLastSilence = -1;
+		mStartLastNoise = -1;
 		mPeakSoundLevel = 0f;
 		mMinSoundLevel = 999999f;
 		if (mRecorder != null) {
@@ -99,7 +110,7 @@ public class SpeechAudioStreamer {
 		}
 		mRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
 				AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
-				mBufferSize);
+				mRecorderBufferSize);
 		
 		DLog.d(TAG, "<<< Recorder state after init: "+mRecorder.getState());
 		if (mRecorder.getState() != AudioRecord.STATE_INITIALIZED) {
@@ -135,8 +146,14 @@ public class SpeechAudioStreamer {
 		mBufferIndex++;
 	}
 
+
 	// called roughly every 50ms with 1600 bytes
-	private Boolean checkForSilence(int numberOfReadBytes) {
+	/***
+	 * @param numberOfReadBytes
+	 * @param startOfRecording
+	 * @return  true when detected silence, false when detected noise, null when undetermined
+	 */
+	private Boolean checkForSilence(int numberOfReadBytes, long startOfRecording) {
 
 		if (numberOfReadBytes == 0)
 			return null;
@@ -154,20 +171,20 @@ public class SpeechAudioStreamer {
 		float currentVolume = 0.0f;
 		for (int i = 0; i < numberOfReadBytes; i += 2) {
 			short sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
-//			mBufferShorts[i/2] = sample;
-			currentVolume += sample * sample;  // Math.abs(sample)
+			currentVolume += sample * sample;
 		}
 		// volume: average of the current chunk
 		currentVolume /= numberOfReadBytes;
 
 		// Analyze movingAverage buffer.
-		mMovingAverageBuffer[mBufferIndex % MOVING_AVERAGE_BUFFER_SIZE] = currentVolume;
+		mMovingAverageBuffer[mBufferIndex % mMovingAverageBuffer.length] = currentVolume;
 		float movingAverage = 0.0f;
-		for (int i = 0; i < MOVING_AVERAGE_BUFFER_SIZE; ++i)
+		int numOfVolumes = Math.min(mBufferIndex+1, mMovingAverageBuffer.length); 
+		for (int i = 0; i < numOfVolumes; ++i)
 			movingAverage += mMovingAverageBuffer[i];
 
-		movingAverage /= MOVING_AVERAGE_BUFFER_SIZE;
-		this.mSoundLevel = (int) movingAverage;
+		movingAverage /= numOfVolumes;
+		this.mCurrentSoundLevel = (int) movingAverage;
 
 		// reduce Peak and increase minSound - to allow temporary peak/min to disappear over time
 //		float dist = mPeakSoundLevel - mMinSoundLevel;
@@ -191,32 +208,58 @@ public class SpeechAudioStreamer {
 //			return false;
 //		}
 
-
-//		Log.i(TAG, "current D: "+(temp - mMinSoundLevel)+  "  peak D: "+(mPeakSoundLevel-mMinSoundLevel));
-		if ((movingAverage - mMinSoundLevel) <= (mPeakSoundLevel-mMinSoundLevel) * 0.20f) { // became silent
-			if (mLastStart == -1) {
-				mLastStart = System.currentTimeMillis();
-				return null;
-			} else {
-				if ((System.currentTimeMillis() - mLastStart) > SILENCE_PERIOD) {
-					// long time of silence
-					return true;
-				}
-				// not enough time past
-				return null;
-			}
-		} else {
-			if (mLastStart != -1) {
-				// noise again
-				mLastStart = -1;
-			}
+		long timeRecording = (System.nanoTime() - startOfRecording) / 1000000;
+		if (timeRecording < getPreVadRecordingTime()) {
+			// too soon to consider VAD
+			return null;
 		}
 
-		return false;
+		float volumeLevelFraction = ((float)(movingAverage - mMinSoundLevel))  / (mPeakSoundLevel-mMinSoundLevel);  
+//		Log.i(TAG, "current D: "+(temp - mMinSoundLevel)+  "  peak D: "+(mPeakSoundLevel-mMinSoundLevel));
+		if (volumeLevelFraction <=  0.20f) { // became silent
+			mStartLastNoise = -1;
+			
+			// found start of silence ?
+			if (mStartLastSilence == -1) {
+				mStartLastSilence = System.currentTimeMillis();
+				return null;
+			}
+			
+			// long time of silence ?
+			if ((System.currentTimeMillis() - mStartLastSilence) > getSilencePeriod()) {
+				return true;
+			}
+			// not enough silent time passed
+			return null;
+		} 
+
+		// this is not a silence chunk
+		mStartLastSilence = -1;
+		
+		if (volumeLevelFraction >= 0.70f) {
+			// this is a noise sequence
+			
+			// start of noise?
+			if (mStartLastNoise == -1) {
+				mStartLastNoise = System.currentTimeMillis();
+				return null;
+			}
+			
+			// long time noise?
+			if ((System.currentTimeMillis() - mStartLastNoise) > getNoisePeriod()) {
+				return false;
+			}
+			// not enough noisy time passed
+			return null;
+		}
+		
+		// this is not a noise chunk
+		mStartLastNoise = -1;
+		return null;
 	}
 
 	public int getSoundLevel() {
-		return mSoundLevel;
+		return mCurrentSoundLevel;
 	}
 	
 	/****
@@ -249,6 +292,7 @@ public class SpeechAudioStreamer {
 
 		public void run() {
 			long t0 = System.nanoTime();
+			
 			DLog.d(TAG, "<<< Starting producer thread");
 
 			if (mDebugSavePCM) {
@@ -274,7 +318,7 @@ public class SpeechAudioStreamer {
 				}
 				
 
-				for (int i = 0; i < MOVING_AVERAGE_BUFFER_SIZE; i++) {
+				for (int i = 0; i < mMovingAverageBuffer.length; i++) {
 					mMovingAverageBuffer[i] = 0.0f;
 				}
 				for (int i=0; i<mSoundLevelBuffer.length; i++) {
@@ -311,7 +355,8 @@ public class SpeechAudioStreamer {
 							DLog.e(TAG, "<<< Interruprted Producer stream", e);
 						}
 					} else {
-						Boolean hadSilence = checkForSilence(readSize);
+						Boolean hadSilence = checkForSilence(readSize, t0);
+						
 						if (!wasNoise && Boolean.FALSE == hadSilence) {
 							DLog.i(TAG, "<<< Found initial noise");
 							wasNoise = true;
@@ -328,11 +373,9 @@ public class SpeechAudioStreamer {
 							if (mDebugSavePCM) {
 								dos.write(mBuffer, 0, readSize);
 							}
-
 //							Thread.sleep(10);
 						}
 					}
-
 				}
 				encoder.flush();
 
@@ -359,12 +402,15 @@ public class SpeechAudioStreamer {
 				mIsRecording = false;
 
 				DLog.d(TAG, "<<< Releasing Recorder");
-				mRecorder.release();
-				mRecorder = null;
-
+				if (mRecorder != null) {
+					mRecorder.release();
+					mRecorder = null;
+				}
 				DLog.d(TAG, "<<< Releasing Encoder");
-				encoder.release();
-				encoder = null;
+				if (encoder != null) {
+					encoder.release();
+					encoder = null;
+				}
 				totalTimeRecording = (System.nanoTime() - t0) / 1000000;
 				DLog.d(TAG, "<<< All done.");
 			}
@@ -484,9 +530,6 @@ public class SpeechAudioStreamer {
 		mIsRecording = false;
 	}
 	
-	public void isDoneEncoding() {
-	}
-	
 	public boolean getIsRecording() {
 		return mIsRecording;
 	}
@@ -496,5 +539,40 @@ public class SpeechAudioStreamer {
 			mRecorder.release();
 			mRecorder = null;
 		}
+	}
+
+	public int getMovingAverageWindow() {
+		return mMovingAverageWindow;
+	}
+
+	public void setMovingAverageWindow(int mMovingAverageWindow) {
+		this.mMovingAverageWindow = mMovingAverageWindow;
+		if (mMovingAverageBuffer == null || mMovingAverageBuffer.length != mMovingAverageWindow) {
+			mMovingAverageBuffer = new float[mMovingAverageWindow];
+		}
+	}
+
+	public long getPreVadRecordingTime() {
+		return mPreVadRecordingTime;
+	}
+
+	public void setPreVadRecordingTime(long mPreVadRecordingTime) {
+		this.mPreVadRecordingTime = mPreVadRecordingTime;
+	}
+
+	public long getNoisePeriod() {
+		return mNoisePeriod;
+	}
+
+	public void setNoisePeriod(long mNoisePeriod) {
+		this.mNoisePeriod = mNoisePeriod;
+	}
+
+	public long getSilencePeriod() {
+		return mSilencePeriod;
+	}
+
+	public void setSilencePeriod(long mSilencePeriod) {
+		this.mSilencePeriod = mSilencePeriod;
 	}
 }

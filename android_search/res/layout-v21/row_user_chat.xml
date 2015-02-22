@@ -7,7 +7,8 @@
     android:paddingTop="4dp"
      >
 
-      <com.virtual_hotel_agent.search.util.ChatBalloon 
+      <com.virtual_hotel_agent.search.util.ChatBalloon
+          android:id="@+id/chat_bubble" 
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:animateLayoutChanges="true"
@@ -45,8 +46,6 @@
 	          android:gravity="start"
 	          android:orientation="horizontal" >
 
-<!-- 	              android:minHeight="56dp" -->
-
 	          <EditText
 	              android:id="@+id/editText"
 	              android:layout_width="match_parent"
@@ -62,34 +61,6 @@
 	              android:textSize="16sp" 
 	              />
 	
-	        
-	          
-	           <ImageButton
-	              android:id="@+id/buttonMicrophone"
-	              android:layout_width="wrap_content"
-	              android:layout_height="48dp"
-	              android:layout_alignParentTop="true"
-	              android:layout_alignParentRight="true"
-	              android:background="@drawable/microphone_48"
-	              android:backgroundTint="#ccc"
-	              android:padding="12dp"
-	              android:adjustViewBounds="true"
-			      android:scaleType="fitCenter" 
-	              android:contentDescription="@string/microphone_button"/>
-	             
-		           
-	          <ImageButton
-	              android:id="@+id/buttonDelete"
-	              android:layout_width="wrap_content"
-	              android:layout_height="48dp"
-	              android:layout_toLeftOf="@+id/buttonMicrophone"
-	              android:layout_alignParentTop="true"
-	              android:background="@drawable/remove_utterance"
-	              android:backgroundTint="#ccc"
-	              android:padding="12dp"
-	              android:adjustViewBounds="true"
-			      android:scaleType="fitCenter" 	              
-	              android:contentDescription="@string/delete_utterance_button"/>
 	      </RelativeLayout>
 
 	      </LinearLayout>

@@ -18,6 +18,7 @@ public class EvaChat  implements Serializable {
 	public Boolean meaningOfLife = null;
 	public Boolean who = null;
 	public String name = null;
+	public boolean newSession;
 
 	public EvaChat(JSONObject jChat, List<String> parseErrors) {
 		DLog.d(TAG, "CTOR");
@@ -34,6 +35,8 @@ public class EvaChat  implements Serializable {
 				who = jChat.getBoolean("Who/What");
 			if (jChat.has("Name"))
 				name = jChat.getString("Name");
+			
+			newSession = jChat.optBoolean("New Session", false);
 		} catch (JSONException e) {
 			DLog.e(TAG, "Parse JSON", e);
 			parseErrors.add("Error during parsing eva chat: "+e.getMessage());

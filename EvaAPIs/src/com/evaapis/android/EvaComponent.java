@@ -331,7 +331,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	
 
 	public void onCreate(Bundle arg0) {
-
 		mSpeak = new EvaSpeak(activity);
 		
 		// the language set to the voice recoginition will replace the PreferedLanguage with specific English variant  (eg. en-US or en-GB)
@@ -343,7 +342,6 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void onDestroy() {
 		mSpeak.onDestroy();
 	}
-	
 	
 	public void speak(String sayIt) {
 		speak(sayIt, true);

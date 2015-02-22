@@ -50,6 +50,7 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 //	static ChatItem lastActivated = null;
 	
 	protected transient SpannableString chat = new SpannableString("");
+	private   String subLabel; // will be shown below the text in muted color
 	protected ChatType chatType;
 	protected boolean inSession = true;
 	
@@ -162,6 +163,15 @@ public class ChatItem  implements Serializable { // http://stackoverflow.com/a/2
 		return chatType;
 	}
 
+
+	public void setSubLabel(String text) {
+		this.subLabel = text;
+	}
+	
+	public String getSubLabel() {
+		return subLabel;
+	}
+	
 	
 	final static ChatType[] chatTypeValues = ChatType.values();
 	public static final String START_NEW_SESSION = "Start new search";

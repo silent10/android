@@ -70,7 +70,7 @@ public class DownloadUrl {
 			Scheme sch = new Scheme("https", sf, 443);
 			httpclient.getConnectionManager().getSchemeRegistry().register(sch);
 		}
-
+		
 		
 		
 		HttpResponse response = httpclient.execute(request);

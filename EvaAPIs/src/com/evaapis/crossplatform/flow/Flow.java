@@ -39,6 +39,9 @@ public class Flow  implements Serializable {
 				else if (flowType.equals( FlowElement.TypeEnum.Reply.name())) {
 					elementsToAdd.add( new ReplyElement(jElement, parseErrors, locations));
 				}
+				else if (flowType.equals( FlowElement.TypeEnum.Statement.name())) {
+					elementsToAdd.add( new StatementElement(jElement, parseErrors, locations));
+				}
 				else {
 					elementsToAdd.add( new FlowElement(jElement, parseErrors, locations));
 				}

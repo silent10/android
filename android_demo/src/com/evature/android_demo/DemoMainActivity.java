@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.evaapis.android.EvaBaseActivity;
 import com.evaapis.android.EvaComponent;
+import com.evaapis.android.SpeechAudioStreamer;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaWarning;
 import com.evature.util.DLog;
@@ -65,11 +66,49 @@ public class DemoMainActivity extends EvaBaseActivity implements OnSharedPrefere
 		recordButton = (Button) findViewById(R.id.button_start);
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	if ("google_local".equals(eva.getVrService())) {
-        			//eva.searchWithLocalVoiceRecognition(4, null);
-            		eva.searchWithLocalVoiceRecognitionCustomDialog(4, null);
-        			return;
-        		}
+//            	if ("google_local".equals(eva.getVrService())) {
+//        			//eva.searchWithLocalVoiceRecognition(4, null);
+//            		eva.searchWithLocalVoiceRecognitionCustomDialog(4, null);
+//        			return;
+//        		}
+        
+            	SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(DemoMainActivity.this);
+            	SpeechAudioStreamer speechAudioStreamer = speechRecognition.getSpeechAudioStreamer();
+            	
+            	String movingAvg = sharedPreferences.getString("eva_moving_average_window", "x");
+            	String silencePeriod = sharedPreferences.getString("eva_silence_period", "x");
+            	String noisePeriod = sharedPreferences.getString("eva_noise_period", "150");
+            	String preVad = sharedPreferences.getString("eva_pre_vad", "120");
+            	
+            	try {
+            		speechAudioStreamer.setMovingAverageWindow(Integer.parseInt(movingAvg));
+            	}
+            	catch (NumberFormatException e) {
+            		speechAudioStreamer.setMovingAverageWindow(5);
+            		sharedPreferences.edit().putString("eva_moving_average_window", "5").apply();
+            	}
+            	try {
+            		speechAudioStreamer.setSilencePeriod(Integer.parseInt(silencePeriod));
+            	}
+            	catch (NumberFormatException e) {
+            		speechAudioStreamer.setSilencePeriod(700);
+            		sharedPreferences.edit().putString("eva_silence_period", "700").apply();
+            	}
+            	try {
+            		speechAudioStreamer.setNoisePeriod(Integer.parseInt(noisePeriod));
+            	}
+            	catch (NumberFormatException e) {
+            		speechAudioStreamer.setNoisePeriod(150);
+            		sharedPreferences.edit().putString("eva_noise_period", "150").apply();
+            	}
+            	
+            	try {
+            		speechAudioStreamer.setPreVadRecordingTime(Integer.parseInt(preVad));
+            	}
+            	catch (NumberFormatException e) {
+            		speechAudioStreamer.setPreVadRecordingTime(120);
+            		sharedPreferences.edit().putString("eva_pre_vad", "120").apply();
+            	}
             	
             	searchWithVoice("voice", false);
             }

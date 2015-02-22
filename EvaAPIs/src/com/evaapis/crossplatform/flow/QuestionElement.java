@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.evaapis.crossplatform.EvaLocation;
+import com.evaapis.crossplatform.flow.FlowElement.TypeEnum;
 import com.evature.util.DLog;
 
 public class QuestionElement extends FlowElement {
@@ -32,6 +33,7 @@ public class QuestionElement extends FlowElement {
 	public String questionSubCategory;
 	public String[] choices;
 	
+	public TypeEnum actionType;  // what type of flow element does this question relate to 
 	
 	public QuestionElement(JSONObject jFlowElement, List<String> parseErrors,
 			EvaLocation[] locations) {
@@ -68,6 +70,16 @@ public class QuestionElement extends FlowElement {
 				choices = new String[jChoices.length()];
 				for (int index=0; index < jChoices.length(); index++) {
 					choices[index] = jChoices.getString(index);
+				}
+			}
+			
+			if (jFlowElement.has("ActionType")) {
+				try {
+					actionType = TypeEnum.valueOf(jFlowElement.getString("ActionType"));
+				}
+				catch(IllegalArgumentException e) {
+					DLog.w(TAG, "Unexpected ActionType in QuestionFlow element", e);
+					actionType = TypeEnum.Other;
 				}
 			}
 		}

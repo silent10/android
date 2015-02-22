@@ -59,92 +59,94 @@ android:layout_height="match_parent">
         android:layout_alignParentBottom="true"
         android:background="@color/chat_background"
         >
-<!--         android:layout_above="@+id/bottom_bar" -->
 
-</android.support.modified.v4.view.ViewPager>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@+id/bottom_bar" 
-        android:visibility="gone"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
-        android:id="@+id/status_panel"
-        android:background="@color/half_black"
-        >
-
-        <TextView
-            android:id="@+id/text_listeningStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/listening_"
-            android:textColor="#dddddd" />
-        
-    </LinearLayout>
+	</android.support.modified.v4.view.ViewPager>
 
     
-<!--     <ImageView  -->
-<!--         android:id="@+id/trip_advisor_promo" -->
-<!--         android:layout_width="wrap_content" -->
-<!--         android:layout_height="wrap_content" -->
-<!--         android:visibility="gone" -->
-<!--         android:contentDescription="Now with TripAdvisor Ratings"/> -->
-    
-    <RelativeLayout
-        android:id="@id/bottom_bar"
-        android:layout_width="fill_parent"
-        android:layout_height="95dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-         >
-
+         <ImageButton
+         android:id="@+id/restart_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="48dp"
+         android:layout_height="48dp"
+         android:layout_alignParentBottom="true"
+         android:layout_alignParentRight="true"
+         android:layout_marginBottom="30dp"
+         android:layout_marginRight="28dp"
+         android:onClick="vhaClickHandler"
+         android:adjustViewBounds="true"
+         android:scaleType="fitCenter"
+         android:background="@drawable/custom_button"
+         android:contentDescription="Restart"
+         android:src="@drawable/trash_icon"
+         android:padding="6dp"
+         android:elevation="6dp"
+         android:visibility="invisible"
+           />
+     
+     
      <ImageButton
-        android:id="@+id/search_button"
+         android:id="@+id/undo_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="48dp"
+         android:layout_height="48dp"
+         android:layout_alignParentBottom="true"
+         android:layout_alignParentLeft="true"
+         android:layout_marginBottom="30dp"
+         android:layout_marginLeft="28dp"
+         android:onClick="vhaClickHandler"
+         android:adjustViewBounds="true"
+         android:scaleType="fitCenter"
+         android:background="@drawable/custom_button"
+         android:contentDescription="Undo"
+         android:src="@drawable/undo_icon"
+         android:padding="6dp"
+         android:elevation="6dp"
+         android:visibility="invisible"
+           />
+    
+    
+
+     <FrameLayout android:id="@+id/voice_search_container"
+        android:layout_height="110dp"
+        android:layout_width="110dp"
+    	android:layout_centerHorizontal="true"
+    	android:layout_marginBottom="5dp"
+        android:layout_alignParentBottom="true"
+        >  
+        
+     <ImageButton
+        android:id="@+id/voice_search_button"
         android:layout_width="76dp"
         android:layout_height="76dp"
-        android:layout_marginBottom="16dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:contentDescription="@string/microphone_button"
-        android:onClick="myClickHandler"
-        android:padding="12dp"
-        android:src="@drawable/animated_microphone"
-        android:text="@string/button"
+       	android:onClick="vhaClickHandler"
+        android:layout_gravity="center"
+        android:padding="0dp"
+        android:adjustViewBounds="false"
         android:elevation="8dp"
-        android:hapticFeedbackEnabled="true"
+        android:scaleType="fitXY"
         android:background="@drawable/transition_button_activate"
-        android:stateListAnimator="@anim/button_elevation"
+        android:src="@drawable/evature_microphone_icon"
          />
+     
      
     <com.evaapis.android.SoundLevelView
         android:id="@+id/surfaceView_sound_wave"
-        android:layout_width="58dp"
-        android:layout_height="58dp"
-    	android:layout_centerHorizontal="true"    
-        android:layout_marginBottom="22.5dp"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
         android:elevation="9dp"
+        android:visibility="gone"
          />
-        
-    <ProgressBar
+
+     <ProgressBar
             android:id="@+id/progressBar1"
             android:layout_width="70dp"
             android:layout_height="70dp"
-           	android:layout_centerHorizontal="true"    
-        	android:layout_marginBottom="19dp"
-        	android:layout_alignParentBottom="true"
-        	android:elevation="10dp"
+            android:layout_gravity="center"    
+            android:elevation="10dp"
             android:visibility="gone" />
-<!--         	android:indeterminateDrawable="@drawable/progress_bar"     -->
     
-     
-    
-     </RelativeLayout>
-
+    </FrameLayout>
 
 </RelativeLayout> <!--  end of main layout -->
 

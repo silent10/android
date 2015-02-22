@@ -86,7 +86,7 @@ public class ChatFragment extends Fragment implements OnItemClickListener {
 		mChatListView = (ListView) root.findViewById(R.id.chat_list);
 		
 		// Connect the data of the chat history to the view:
-		mChatAdapter = new ChatAdapter(this, R.layout.row_vha_chat, R.id.label, mChatListModel);
+		mChatAdapter = new ChatAdapter(this, mChatListModel);
 
 		mAnimAdapter = new ChatAnimAdapter(mChatAdapter, 0, 300, new MyOnDismissCallback(), null);//new MyOnAnimEndCallback());
 		mAnimAdapter.setAbsListView(mChatListView);

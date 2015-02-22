@@ -87,7 +87,7 @@ import com.evature.util.DLog;
 			
 //			// TODO REMOVE!!!!!!!!!!!
 //			if (BuildConfig.DEBUG)
-//			evatureUrl = "http://10.0.0.52:8008"; 
+//			evatureUrl = "http://192.168.0.107:8008"; 
 			
 			evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());

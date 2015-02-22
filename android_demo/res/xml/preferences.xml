@@ -66,6 +66,38 @@
             android:key="eva_save_encoded"
             android:summary="@string/save_encoded_file_flac_"
             android:title="@string/save_encoded" />
+
+        <PreferenceCategory android:title="VAD - Voice Activity Detection"
+            >
+            <EditTextPreference 
+				android:numeric="integer"
+				android:title="pre-VAD recording time"
+				android:summary="Time at the begining of the recording where the VAD isn't considered"
+				android:key="eva_pre_vad"
+                />
+            
+            <EditTextPreference 
+				android:numeric="integer"
+				android:title="Silence Period"
+				android:summary="Minimum continuous silent time to be considered 'Silence'"
+				android:key="eva_silence_period"
+                />
+            
+            <EditTextPreference 
+				android:numeric="integer"
+				android:title="Noise Period"
+				android:summary="Minimum continuous noisy time to be considered 'Noise'"
+				android:key="eva_noise_period"
+                />
+            
+            <EditTextPreference 
+				android:numeric="integer"
+				android:title="Moving Average Window"
+				android:summary="Number of recent recorder chunks to average when considering current volume level"
+				android:key="eva_moving_average_window"
+                />
+            
+        </PreferenceCategory>
         
         
      <PreferenceScreen android:title="Context"

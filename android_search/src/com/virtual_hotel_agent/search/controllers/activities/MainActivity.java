@@ -41,6 +41,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Typeface;
 import android.location.Location;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -69,6 +71,7 @@ import com.ean.mobile.request.CommonParameters;
 import com.evaapis.android.EvaComponent;
 import com.evaapis.android.EvaSearchReplyListener;
 import com.evaapis.android.EvaSpeechRecogComponent;
+import com.evaapis.android.EvaSpeechRecogComponent.SpeechRecognitionResultListener;
 import com.evaapis.crossplatform.EvaApiReply;
 import com.evaapis.crossplatform.EvaLocation;
 import com.evaapis.crossplatform.EvaWarning;
@@ -146,6 +149,28 @@ public class MainActivity extends BaseActivity implements
 	private boolean mMultiPane;
 
 	private MenuItem soundControlMenuItem;
+	
+	private ToneGenerator toneGenerator;  // TODO: replace with custom sounds
+
+	
+	// Assumes the use of Google Analytics campaign
+	// "utm" parameters, like "utm_source"
+	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
+
+
+	static class AddedTextCookie {
+		ChatItem storeResultInItem;
+	}
+
+	// Different requests to Eva all come back to the same callback (onEvaReply)
+	// (eg text vs voice, add vs delete or replace)
+	// the "cookie" parameter that you use for the request is returned in the
+	// callback, so you can differentiate between the different calls
+	private static final AddedTextCookie ADDED_TEXT_COOKIE = new AddedTextCookie();
+	private static final Object DELETED_UTTERANCE_COOKIE = new Object();
+	
+	
+	
 
 	
 	@Override
@@ -156,6 +181,8 @@ public class MainActivity extends BaseActivity implements
 		}
         super.onDestroy();
 	}
+	
+	
 	
 	
 // Handle the results from the speech recognition activity
@@ -187,22 +214,65 @@ public class MainActivity extends BaseActivity implements
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+
+	private SpeechRecognitionResultListener mSpeechSearchListener = new SpeechRecognitionResultListener() {
+		
+		@Override
+		public void speechResultError(final String message, final Object cookie) {
+			mainView.hideSpeechWave();
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
+						Thread.sleep(120);
+						toneGenerator.startTone(ToneGenerator.TONE_PROP_NACK, 25);
+					} catch (InterruptedException e) {
+					}
+					finally {
+						runOnUiThread(new Runnable() {
+							public void run() {
+								VHAApplication.EVA.speechResultError(message, cookie);
+							}
+						});
+					}
+				}
+			});
+			t.start();
+
+			
+		}
+
+		@Override
+		public void speechResultOK(final String evaJson, final Bundle debugData, final Object cookie) {
+			mainView.hideSpeechWave();
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
+						Thread.sleep(120); // small delay
+						toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 25);
+					} catch (InterruptedException e) {
+					}
+					finally {
+						runOnUiThread(new Runnable() {
+							public void run() {
+								VHAApplication.EVA.speechResultOK(evaJson, debugData, cookie);
+							};
+						});
+					}
+				}
+			});
+			t.start();
+			
+		}
+	};
 	
-	// This examples assumes the use of Google Analytics campaign
-	// "utm" parameters, like "utm_source"
-	private static final String CAMPAIGN_SOURCE_PARAM = "utm_source";
+	
+	
+	
 
-
-	static class AddedTextCookie {
-		ChatItem storeResultInItem;
-	}
-
-	// Different requests to Eva all come back to the same callback (onEvaReply)
-	// (eg text vs voice, add vs delete or replace)
-	// the "cookie" parameter that you use for the request is returned in the
-	// callback, so you can differentiate between the different calls
-	private static final AddedTextCookie ADDED_TEXT_COOKIE = new AddedTextCookie();
-	private static final Object DELETED_UTTERANCE_COOKIE = new Object();
 	 /*
 	   * Given a URI, returns a map of campaign data that can be sent with
 	   * any GA hit.
@@ -393,6 +463,7 @@ public class MainActivity extends BaseActivity implements
 			clearChatList();
 		}
 		
+		toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 	
 
 //		setDebugData(DebugTextType.None, null);
@@ -692,10 +763,10 @@ public class MainActivity extends BaseActivity implements
 		// MainActivity.this.eva.searchWithVoice("voice");
 
 		//		TutorialController.onMicrophonePressed(this);
-		ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
-		VHAApplication.EVA.speak("");
 		
 //		if ("google_local".equals(VHAApplication.EVA.getVrService())) {
+//			ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
+//			VHAApplication.EVA.speak("");
 //			VHAApplication.EVA.searchWithLocalVoiceRecognition(4, ADDED_TEXT_COOKIE, editLastUtterance);
 //			Tracker defaultTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
 //			if (defaultTracker != null) 
@@ -706,7 +777,10 @@ public class MainActivity extends BaseActivity implements
 //			
 //			return;
 //		}
-		
+
+		ADDED_TEXT_COOKIE.storeResultInItem = chatItem;
+		VHAApplication.EVA.speak("");
+
 		if (speechSearch.isInSpeechRecognition() == true) {
 			speechSearch.stop();
 			return;
@@ -719,19 +793,32 @@ public class MainActivity extends BaseActivity implements
 				    .build()
 				   );
 		
-		
-		mainView.startSpeechSearch(speechSearch, ADDED_TEXT_COOKIE, editLastUtterance);
+		mainView.startSpeechRecognition(mSpeechSearchListener, speechSearch, ADDED_TEXT_COOKIE, editLastUtterance);
 	}
 	
 	// search button click handler ("On Click property" of the button in the xml)
 	// http://stackoverflow.com/questions/6091194/how-to-handle-button-clicks-using-the-xml-onclick-within-fragments
-	public void myClickHandler(View view) {
+	public void buttonClickHandler(View view) {
 		switch (view.getId()) {
 
-		case R.id.search_button:
-			voiceRecognitionSearch(null, false);
+		case R.id.restart_button:
+			startNewSession(true);
+		break;
+
+		case R.id.voice_search_button:
+			if (speechSearch.isInSpeechRecognition() == true) {
+				speechSearch.stop();
+			}
+			else {
+				voiceRecognitionSearch(null, false);
+			}
+		break;
+		
+		case R.id.undo_button:
+			ChatFragment chatFragment = mainView.getChatFragment();
+//			undoLastUserChat();
 			break;
-			
+
 //		case R.id.add_utterance_button:
 //			ChatFragment chatFragment = mainView.getChatFragment();
 //			if (chatFragment != null)

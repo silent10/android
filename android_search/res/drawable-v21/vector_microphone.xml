@@ -1,0 +1,15 @@
+ <vector xmlns:android="http://schemas.android.com/apk/res/android"
+     android:height="56dp"
+     android:width="56dp"
+     android:viewportHeight="480"
+     android:viewportWidth="480" >
+         <path
+             android:name="top"
+             android:fillColor="#ffffffff"
+             android:pathData="@string/microphone_top" />
+         <path
+             android:name="bottom"
+             android:fillColor="#ffffffff"
+             android:pathData="@string/microphone_bottom" />
+         
+ </vector>

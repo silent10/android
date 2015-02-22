@@ -43,7 +43,7 @@ public class EvaLocation implements Serializable {
 	public double Longitude;
 	public enum TypeEnum {
 		Unknown,
-		Continent, City, Airport, Country, Area, State, Property, Company, Chain, Postal_Code, Address, Island, Landmark, Generic_Location,
+		Continent, City, Airport, Country, Area, State, Property, Company, Chain, Postal_Code, Address, Island, Landmark, Generic_Location, Sea,
 
 		_Landmark_subtype_,
 		Agricultural_Facility,   
