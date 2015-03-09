@@ -132,18 +132,18 @@ public class CruiseAttributes {
 			family = cruiseAttributes.optBoolean("Family");
 			romantic = cruiseAttributes.optBoolean("Romantic");
 			adventure = cruiseAttributes.optBoolean("Adventure");
-			childFree = cruiseAttributes.optBoolean("ChildFree");
+			childFree = cruiseAttributes.optBoolean("Child Free");
 			yacht = cruiseAttributes.optBoolean("Yacht");
 			barge = cruiseAttributes.optBoolean("Barge");
-			sailingShip = cruiseAttributes.optBoolean("SailingShip");
-			riverCruise = cruiseAttributes.optBoolean("RiverCruise");
-			forSingles = cruiseAttributes.optBoolean("ForSingles");
-			forGays = cruiseAttributes.optBoolean("ForGays");
+			sailingShip = cruiseAttributes.optBoolean("Sailing Ship");
+			riverCruise = cruiseAttributes.optBoolean("River Cruise");
+			forSingles = cruiseAttributes.optBoolean("For Singles");
+			forGays = cruiseAttributes.optBoolean("For Gays");
 			steamboat = cruiseAttributes.optBoolean("Steamboat");
-			petFriendly = cruiseAttributes.optBoolean("PetFriendly");
+			petFriendly = cruiseAttributes.optBoolean("Pet Friendly");
 			yoga = cruiseAttributes.optBoolean("Yoga");
-			landTour = cruiseAttributes.optBoolean("LandTour");
-			oneWay = cruiseAttributes.optBoolean("OneWay");
+			landTour = cruiseAttributes.optBoolean("Land Tour");
+			oneWay = cruiseAttributes.optBoolean("One Way");
 			
 			if (cruiseAttributes.has("Cabin")) {
 				try {
