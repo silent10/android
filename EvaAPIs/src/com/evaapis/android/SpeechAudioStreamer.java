@@ -146,43 +146,19 @@ public class SpeechAudioStreamer {
 		mBufferIndex++;
 	}
 
+	float accumulator = 0;
+	int samplesAccumulated = 0;
+	
+	private Boolean handleVolumeSample(float currentVolume, long startOfRecording) {
 
-	// called roughly every 50ms with 1600 bytes
-	/***
-	 * @param numberOfReadBytes
-	 * @param startOfRecording
-	 * @return  true when detected silence, false when detected noise, null when undetermined
-	 */
-	private Boolean checkForSilence(int numberOfReadBytes, long startOfRecording) {
-
-		if (numberOfReadBytes == 0)
-			return null;
-		
-		//Log.d(TAG, "Read "+numberOfReadBytes);
-		
-		if (mBuffer.length != numberOfReadBytes) {
-			DLog.w(TAG, "<<< unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
-			if (mBuffer.length < numberOfReadBytes) {
-				numberOfReadBytes = mBuffer.length;
-			}
-		}
-
-		// Analyze Sound.
-		float currentVolume = 0.0f;
-		for (int i = 0; i < numberOfReadBytes; i += 2) {
-			short sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
-			currentVolume += sample * sample;
-		}
-		// volume: average of the current chunk
-		currentVolume /= numberOfReadBytes;
-
-		// Analyze movingAverage buffer.
 		mMovingAverageBuffer[mBufferIndex % mMovingAverageBuffer.length] = currentVolume;
 		float movingAverage = 0.0f;
 		int numOfVolumes = Math.min(mBufferIndex+1, mMovingAverageBuffer.length); 
 		for (int i = 0; i < numOfVolumes; ++i)
 			movingAverage += mMovingAverageBuffer[i];
 
+		// Analyze movingAverage buffer.
+		
 		movingAverage /= numOfVolumes;
 		this.mCurrentSoundLevel = (int) movingAverage;
 
@@ -191,6 +167,12 @@ public class SpeechAudioStreamer {
 //		float factor = dist * 0.01f;
 //		mPeakSoundLevel -= factor;
 //		mMinSoundLevel += factor;
+		
+		long timeRecording = (System.nanoTime() - startOfRecording) / 1000000;
+		if (timeRecording < getPreVadRecordingTime()) {
+			// too soon to consider VAD
+			return null;
+		}
 //		
 		if (movingAverage > mPeakSoundLevel) {
 			mPeakSoundLevel = movingAverage;
@@ -208,11 +190,7 @@ public class SpeechAudioStreamer {
 //			return false;
 //		}
 
-		long timeRecording = (System.nanoTime() - startOfRecording) / 1000000;
-		if (timeRecording < getPreVadRecordingTime()) {
-			// too soon to consider VAD
-			return null;
-		}
+		
 
 		float volumeLevelFraction = ((float)(movingAverage - mMinSoundLevel))  / (mPeakSoundLevel-mMinSoundLevel);  
 //		Log.i(TAG, "current D: "+(temp - mMinSoundLevel)+  "  peak D: "+(mPeakSoundLevel-mMinSoundLevel));
@@ -258,6 +236,55 @@ public class SpeechAudioStreamer {
 		return null;
 	}
 
+	// called roughly every 50ms with 1600 bytes
+	/***
+	 * @param numberOfReadBytes
+	 * @param startOfRecording
+	 * @return  true when detected silence, false when detected noise, null when undetermined
+	 */
+	private void checkForSilence(int numberOfReadBytes, long startOfRecording) {
+
+		if (numberOfReadBytes == 0)
+			return;
+		
+		//Log.d(TAG, "Read "+numberOfReadBytes);
+		
+		if (mBuffer.length != numberOfReadBytes) {
+			DLog.w(TAG, "<<< unexpected numread="+numberOfReadBytes+" but buffer has "+mBuffer.length);
+			if (mBuffer.length < numberOfReadBytes) {
+				numberOfReadBytes = mBuffer.length;
+			}
+		}
+		
+		int SAMPLES_PER_VOLUME = 50 * 16;  // 50ms at 16000 samples per second
+
+		// Analyze Sound.
+		float currentVolume = -1f;
+		for (int i = 0; i < numberOfReadBytes; i += 2) {
+			short sample = (short) ((mBuffer[i]) | mBuffer[i + 1] << 8);
+			accumulator += sample * sample;
+			samplesAccumulated++;
+			if (samplesAccumulated >= SAMPLES_PER_VOLUME) {
+				// volume: average of the current chunk
+				currentVolume = accumulator / SAMPLES_PER_VOLUME;
+				accumulator = 0.0f;
+				samplesAccumulated = 0;
+				
+				Boolean hadSilence = handleVolumeSample(currentVolume, startOfRecording);
+				
+				if (!wasNoise && Boolean.FALSE == hadSilence) {
+					DLog.d(TAG, "<<< Found initial noise");
+					wasNoise = true;
+				}
+				if (wasNoise && Boolean.TRUE == hadSilence) {
+					DLog.d(TAG, "<<< was noise and now silent - stopping recording");
+					mIsRecording = false;
+				}
+			}
+		}
+
+	}
+
 	public int getSoundLevel() {
 		return mCurrentSoundLevel;
 	}
@@ -292,6 +319,9 @@ public class SpeechAudioStreamer {
 
 		public void run() {
 			long t0 = System.nanoTime();
+			
+			accumulator = 0.0f;
+			samplesAccumulated = 0;
 			
 			DLog.d(TAG, "<<< Starting producer thread");
 
@@ -355,15 +385,10 @@ public class SpeechAudioStreamer {
 							DLog.e(TAG, "<<< Interruprted Producer stream", e);
 						}
 					} else {
-						Boolean hadSilence = checkForSilence(readSize, t0);
 						
-						if (!wasNoise && Boolean.FALSE == hadSilence) {
-							DLog.i(TAG, "<<< Found initial noise");
-							wasNoise = true;
-						}
-						if (wasNoise && Boolean.TRUE == hadSilence) {
-							mIsRecording = false;
-						} else {
+						checkForSilence(readSize, t0);
+						
+						if (mIsRecording) {
 							try {
 								encode(mBuffer, readSize);
 							} catch (IOException e) {

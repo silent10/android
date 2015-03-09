@@ -137,18 +137,7 @@ public class EvaSpeechRecogComponent {
 			mVoiceClient.cancelTransfer();
 
 			if (isCancelled() == false) {
-				try {
-					mVoiceClient.startVoiceRequest();
-				} catch (Exception e) {
-					if (e instanceof IOException) {
-						IOException ioe = (IOException) e;
-						if (ioe.getMessage().equals("Request aborted")) {
-							DLog.w(TAG, "Request was aborted");
-							return null;
-						}
-					}
-					DLog.e(TAG, "Exception starting voice request", e);
-				}
+				mVoiceClient.startVoiceRequest();
 			}
 			else {
 				DLog.w(TAG, "Request was canceled");

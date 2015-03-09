@@ -61,7 +61,28 @@ public class EvaApiReply implements Serializable {
 		try {
 			this.JSONReply = new JSONObject(fullReply);
 			JSONObject jFullReply = JSONReply;
-			DLog.d(TAG, "eva_reply: " + jFullReply.toString(2));
+			if (DLog.DebugMode) {
+				DLog.d(TAG, "Eva Reply:");
+				// Android log buffer truncates extra long text - so split to lines into chunks
+				String replyStr = jFullReply.toString(2);
+				int start = 0;
+				int chunkSize = 512;
+				int end = chunkSize;
+				while (end < replyStr.length()) {
+					android.util.Log.d(TAG, replyStr.substring(start, end));
+					start = end;
+					end += chunkSize;
+				}
+				android.util.Log.d(TAG, replyStr.substring(start, replyStr.length()));
+
+				// splitting by \n isn't good - slows down the device too much when connected by USB to LogCat
+//				String[] splitLines = jFullReply.toString(2).split("\n");
+//				for (String line : splitLines) {
+//					// don't go through the listeners and (File:Line) suffix of DLog
+//					android.util.Log.d(TAG, line);
+//				}
+			}
+			
 			boolean status = jFullReply.optBoolean("status", false);
 			if (!status) {
 				errorMessage = jFullReply.optString("message", "Unknown Error");

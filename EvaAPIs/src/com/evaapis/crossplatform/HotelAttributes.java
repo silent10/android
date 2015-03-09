@@ -166,8 +166,8 @@ public class HotelAttributes  implements Serializable {
 			
 			if (jHotelAttributes.has("Quality")) {
 				JSONArray jQuality = jHotelAttributes.getJSONArray("Quality");
-				minStars = jQuality.getInt(0);
-				maxStars = jQuality.getInt(1);
+				minStars = jQuality.get(0) != null ?  jQuality.getInt(0) : null;
+				maxStars = jQuality.get(1) != null ? jQuality.getInt(1) : null;
 			}
 			
 			if (jHotelAttributes.has("Pool")) {

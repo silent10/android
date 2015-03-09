@@ -43,6 +43,9 @@ import com.evature.util.DLog;
 @SuppressLint("DefaultLocale")
 public class EvaVoiceClient {
 
+	private static final int CONNECT_TIMEOUT = 5000;
+	private static final int READ_TIMEOUT = 6000;
+
 	private static final String TAG = "EvaVoiceClient";
 
 	private String LANGUAGE = "ENUS";
@@ -98,8 +101,8 @@ public class EvaVoiceClient {
 //		HttpProtocolParams.setContentCharset(params, "UTF-8");
 //		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 //		HttpProtocolParams.setUseExpectContinue(params, false);
-//		HttpConnectionParams.setConnectionTimeout(params, 10000); // wait 10 seconds to establish connection
-//		HttpConnectionParams.setSoTimeout(params, 120000); // wait 120 seconds to get first byte in response
+//		HttpConnectionParams.setConnectionTimeout(params, CONNECT_TIMEOUT); 
+//		HttpConnectionParams.setSoTimeout(params, READ_TIMEOUT);
 //
 //		// Initialize the HTTP client
 //		HttpClient httpclient = new DefaultHttpClient(params);
@@ -108,9 +111,9 @@ public class EvaVoiceClient {
 //		try {
 //			sf = new EvatureSSLSocketFactory(null);
 //		} catch (UnrecoverableKeyException e) {
-//			Log.e(TAG, "UnrecoverableKeyException", e);
+//			DLog.e(TAG, "UnrecoverableKeyException", e);
 //		} catch (KeyStoreException e) {
-//			Log.e(TAG, "KeyStoreException", e);
+//			DLog.e(TAG, "KeyStoreException", e);
 //		}
 //		sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 //		Scheme sch = new Scheme("https", sf, PORT);
@@ -225,8 +228,8 @@ public class EvaVoiceClient {
 //		conn.setRequestProperty("Accept-Encoding","gzip");
 //		conn.setRequestProperty("Transfer-Encoding","chunked");
 
-		conn.setReadTimeout(10000);
-		conn.setConnectTimeout(10000);
+		conn.setReadTimeout(READ_TIMEOUT);
+		conn.setConnectTimeout(CONNECT_TIMEOUT);
 		conn.setDoOutput(true);
 		conn.setDoInput(true);
 		conn.setChunkedStreamingMode(512);
@@ -315,7 +318,7 @@ public class EvaVoiceClient {
 		return mEvaResponse;
 	}
 
-	public void startVoiceRequest() throws Exception{
+	public void startVoiceRequest() {
 		mInTransaction = true;
 		hadError = false;
 		try {
@@ -341,6 +344,7 @@ public class EvaVoiceClient {
 					mUploadStream.write(buffer);
 				}
 			}
+			
 			long t1 = System.nanoTime();
 			timeSpentUploading = (t1 - t0) / 1000000;
 			if (mInTransaction) {
@@ -350,7 +354,7 @@ public class EvaVoiceClient {
 		}
 		catch (IOException e) {
 			if ("Connection already shutdown".equals(e.getMessage())) {
-				DLog.i(TAG, "Connection already shutdown");
+				DLog.w(TAG, "Connection already shutdown");
 			}
 			if ("Request aborted".equals(e.getMessage())) {
 				DLog.i(TAG, "Request aborted");

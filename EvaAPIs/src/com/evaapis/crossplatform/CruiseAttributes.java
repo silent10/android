@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.evaapis.crossplatform.EvaLocation.TypeEnum;
 import com.evature.util.DLog;
 
 public class CruiseAttributes {
@@ -21,11 +22,71 @@ public class CruiseAttributes {
 		public String name;
 		public String key;
 	}
-
 	
 	public Cruiseline cruiselines[];
-	
 	public Cruiseship cruiseships[];
+	
+	public enum CabinEnum {
+		Other, 
+		
+		Windowless,
+		RegularCabin,
+		Balcony,
+		PortHole, 
+		Picture,
+		FullWall,
+		Internal,
+		Oceanview,
+		Window,
+		External,
+		Suite,
+		Cabin,
+		MiniSuite,
+		FamilySuite,
+		PresidentialSuite
+	};
+	
+	public CabinEnum cabin;
+
+	public enum PoolEnum {
+		Other,
+		Any, Indoor, Outdoor, Children
+	};
+	
+	public PoolEnum  pool;
+
+	public boolean family;
+	public boolean romantic;
+	public boolean adventure;
+	public boolean childFree; // adult only
+	public boolean yacht;
+	public boolean barge;
+	public boolean sailingShip;
+	public boolean riverCruise;
+	public boolean forSingles;
+	public boolean forGays;
+	public boolean steamboat;
+	public boolean petFriendly;
+	public boolean yoga;
+	public boolean landTour;
+	public boolean oneWay;
+	
+	public enum BoardEnum {
+		Other,
+		FullBoard, AllInclusive
+	};
+	public BoardEnum board;
+
+	public Integer minStars;
+	public Integer maxStars;
+
+	public enum ShipSizeEnum {
+		Other,
+		Small, Medium, Large
+	}
+	public ShipSizeEnum shipSize;
+
+	
 
 	public CruiseAttributes(JSONObject cruiseAttributes, List<String> parseErrors) {
 
@@ -67,6 +128,69 @@ public class CruiseAttributes {
 					cruiseships[i] = cruiseship;
 				}
 			}
+			
+			family = cruiseAttributes.optBoolean("Family");
+			romantic = cruiseAttributes.optBoolean("Romantic");
+			adventure = cruiseAttributes.optBoolean("Adventure");
+			childFree = cruiseAttributes.optBoolean("ChildFree");
+			yacht = cruiseAttributes.optBoolean("Yacht");
+			barge = cruiseAttributes.optBoolean("Barge");
+			sailingShip = cruiseAttributes.optBoolean("SailingShip");
+			riverCruise = cruiseAttributes.optBoolean("RiverCruise");
+			forSingles = cruiseAttributes.optBoolean("ForSingles");
+			forGays = cruiseAttributes.optBoolean("ForGays");
+			steamboat = cruiseAttributes.optBoolean("Steamboat");
+			petFriendly = cruiseAttributes.optBoolean("PetFriendly");
+			yoga = cruiseAttributes.optBoolean("Yoga");
+			landTour = cruiseAttributes.optBoolean("LandTour");
+			oneWay = cruiseAttributes.optBoolean("OneWay");
+			
+			if (cruiseAttributes.has("Cabin")) {
+				try {
+					cabin = CabinEnum.valueOf(cruiseAttributes.getString("Cabin").replace(" ", "").replace("-", ""));
+				}
+				catch(IllegalArgumentException e) {
+					DLog.w(TAG, "Unexpected Cabin Type", e);
+					cabin = CabinEnum.Other;
+				}
+			}
+			
+			if (cruiseAttributes.has("Pool")) {
+				try {
+					pool = PoolEnum.valueOf(cruiseAttributes.getString("Pool").replace(" ", ""));
+				}
+				catch(IllegalArgumentException e) {
+					DLog.w(TAG, "Unexpected Pool Type", e);
+					pool = PoolEnum.Other;
+				}
+			}
+			
+			if (cruiseAttributes.has("Board")) {
+				try {
+					board = BoardEnum.valueOf(cruiseAttributes.getString("Board").replace(" ", ""));
+				}
+				catch(IllegalArgumentException e) {
+					DLog.w(TAG, "Unexpected Board Type", e);
+					board = BoardEnum.Other;
+				}
+			}
+			
+			if (cruiseAttributes.has("Ship Size")) {
+				try {
+					shipSize = ShipSizeEnum.valueOf(cruiseAttributes.getString("Ship Size").replace(" ", ""));
+				}
+				catch(IllegalArgumentException e) {
+					DLog.w(TAG, "Unexpected ShipSize Type", e);
+					shipSize = ShipSizeEnum.Other;
+				}
+			}
+			
+			if (cruiseAttributes.has("Quality")) {
+				JSONArray jQuality = cruiseAttributes.getJSONArray("Quality");
+				minStars = jQuality.get(0) != null ?  jQuality.getInt(0) : null;
+				maxStars = jQuality.get(1) != null ? jQuality.getInt(1) : null;
+			}
+			
 		} catch (JSONException e) {
 			DLog.e(TAG, "Problem parsing JSON", e);
 			parseErrors
