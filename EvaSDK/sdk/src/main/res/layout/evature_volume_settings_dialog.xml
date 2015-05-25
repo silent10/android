@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#efefef"
+     >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dip" >
+
+        <RelativeLayout
+            android:id="@+id/volume_warning_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffaa"
+            android:padding="4dip"
+            >
+
+            <ImageView
+                android:id="@+id/imageView_volume_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_above="@+id/header_divider"
+                android:src="@drawable/evature_speaker_warning_icon" />
+
+            <TextView
+                android:id="@+id/textView_volume_warning_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/imageView_volume_warning"
+                android:layout_alignParentTop="true"
+                android:text="@string/evature_low_volume_header"
+                android:textColor="#222"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:id="@+id/header_divider"
+                android:layout_below="@+id/textView_volume_warning_header" />
+
+            <TextView
+                android:id="@+id/textView_volume_warning"
+                android:layout_below="@+id/header_divider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:textColor="#222"
+                android:text="@string/evature_low_volume_warning" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dip" >
+
+            
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="0"
+                android:text="@string/evature_volume_"
+                android:textColor="#222"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <SeekBar
+                android:id="@+id/seekBar_volume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1" />
+            
+            <ImageView
+                android:id="@+id/volume_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0" 
+                android:src="@drawable/evature_speaker_icon"
+                />
+                
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_marginTop="15dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#222"
+            android:visibility="gone"
+            android:text="Use this Audio device:" />
+
+        <RadioGroup 
+            android:id="@+id/radioGroup_audio"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+        <RadioButton
+            android:id="@+id/radioButton_speaker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Speaker" />
+
+        <RadioButton
+            android:id="@+id/radioButton_bluetooth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Bluetooth" />
+
+        <RadioButton
+            android:id="@+id/radioButton_headphones"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Headphones" />
+        </RadioGroup>
+    </LinearLayout>
+    
+
+</ScrollView>

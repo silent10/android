@@ -80,6 +80,7 @@ public class EvaSpeak implements TextToSpeech.OnInitListener {
 	}
 
 	public void stop() {
+		onCompleteUtterance.clear();
 		if (mTtsConfigured) {
 			mTts.stop();
 		}

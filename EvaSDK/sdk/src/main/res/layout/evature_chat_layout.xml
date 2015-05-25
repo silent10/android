@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ProgressWheel="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/eva_chat_background"
+    android:orientation="vertical" >
+
+
+	<ImageButton
+         android:id="@+id/volume_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="36dp"
+         android:layout_height="36dp"
+         android:layout_marginRight="6dp"
+         android:layout_centerVertical="true"
+         android:onClick="buttonClickHandler"
+         android:contentDescription="Volume"
+         android:scaleType="fitCenter"
+         android:adjustViewBounds="true"
+         android:src="@drawable/evature_speaker_icon"
+         android:background="@null"
+         android:padding="0dp"
+           />
+
+    
+      <ListView
+        android:id="@+id/chat_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_centerHorizontal="true"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay"
+        android:drawSelectorOnTop="true"
+        android:stackFromBottom="false"
+        android:transcriptMode="normal"
+        android:listSelector="@null"
+        
+        android:cacheColorHint="@android:color/transparent" 
+        >
+    </ListView>
+
+     <FrameLayout android:id="@+id/voice_search_container"
+        android:layout_height="110dp"
+        android:layout_width="110dp"
+    	android:layout_centerHorizontal="true"
+    	android:layout_marginBottom="5dp"
+        android:layout_alignParentBottom="true"
+        >  
+        
+     <ImageButton
+        android:id="@+id/voice_search_button"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+       	android:onClick="buttonClickHandler"
+        android:layout_gravity="center"
+        android:padding="0dp"
+        android:adjustViewBounds="false"
+        android:elevation="8dp"
+        android:scaleType="fitXY"
+        android:background="@drawable/evature_transition_button_activate"
+        android:src="@drawable/evature_microphone_icon"
+         />
+     
+     
+    <com.evature.evasdk.evaapis.android.SoundLevelView
+        android:id="@+id/surfaceView_sound_wave"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
+        android:elevation="9dp"
+        android:visibility="gone"
+         />
+
+    <com.evature.evasdk.ProgressWheel
+		        android:id="@+id/progressBarEvaProcessing"
+		        android:layout_width="76dp"
+		        android:layout_height="76dp"
+		        ProgressWheel:textSize="14sp"
+		        ProgressWheel:barLength="8dp" 
+		        ProgressWheel:barColor="#ffffff"
+		        ProgressWheel:barWidth="5dp"
+		        ProgressWheel:rimWidth="0dp" 
+		        ProgressWheel:spinSpeed="3dp"
+		        ProgressWheel:barSizeChange="true"
+		     	android:layout_gravity="center"
+		        android:elevation="10dp"
+		        android:visibility="gone"
+		         />
+    
+<!--  ProgressBar just dosn't fit before Android Lolipop -->
+<!--     <ProgressBar -->
+<!--         android:id="@+id/progressBarEvaProcessing" -->
+<!--         style="?android:attr/progressBarStyleLarge" -->
+<!--         android:layout_width="74dp" -->
+<!--         android:layout_height="74dp" -->
+<!--         android:layout_gravity="center"     -->
+<!--         android:elevation="10dp" -->
+<!--         android:visibility="gone" /> -->
+    
+    </FrameLayout>
+    
+        
+     
+     <ImageButton
+         android:id="@+id/restart_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="76dp"
+         android:layout_height="76dp"
+         android:layout_alignParentBottom="true"
+         android:layout_alignParentRight="true"
+         android:layout_marginBottom="22dp"
+         android:layout_marginRight="28dp"
+         android:onClick="buttonClickHandler"
+         android:adjustViewBounds="true"
+         android:scaleType="fitCenter"
+         android:scaleX="0.64"
+         android:scaleY="0.64"
+         android:background="@drawable/evature_custom_button"
+         android:contentDescription="Restart"
+         android:src="@drawable/evature_trash"
+         android:padding="12dp"
+         android:elevation="6dp"
+         android:visibility="invisible"
+           />
+     
+     
+     <ImageButton
+         android:id="@+id/undo_button"
+         style="?android:attr/buttonStyleSmall"
+         android:layout_width="76dp"
+         android:layout_height="76dp"
+         android:layout_alignParentBottom="true"
+         android:layout_alignParentLeft="true"
+         android:layout_marginBottom="22dp"
+         android:layout_marginLeft="28dp"
+         android:onClick="buttonClickHandler"
+         android:adjustViewBounds="true"
+         android:scaleType="fitCenter"
+         android:scaleX="0.64"
+         android:scaleY="0.64"
+         android:background="@drawable/evature_custom_button"
+         android:contentDescription="Undo"
+         android:src="@drawable/evature_undo"
+         android:padding="12dp"
+         android:elevation="6dp"
+         android:visibility="invisible"
+           />
+    
+    
+  
+</RelativeLayout>

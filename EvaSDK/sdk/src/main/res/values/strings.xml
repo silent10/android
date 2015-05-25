@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+
+    <string name="app_name">Eva SDK</string>
+
+    <!-- ********************************** Evature: Voice Search & Chat *********************************** -->
+    <string name="evature_listening">Listening...</string>
+    <string name="evature_user_start_new">Start new search</string>
+    <string name="evature_greeting">What cruise can I find for you?</string>
+    <string name="evature_start_new_session_speak">Starting a new search. How may I help you?</string>
+    <string name="evature_examples_greetings">You can try me by tapping on the microphone and saying any of these examples:</string>
+    <string name="evature_audio_control">Audio Control</string>
+    <string name="evature_low_volume_warning">Our experience shows that users with low volume settings do not notice when the they are being asked.</string>
+    <string name="evature_low_volume_header">Your volume is too low!</string>
+    <string name="undo_tutorial">Drag the microphone button to the left to undo the last utterance.</string>
+    <string name="no_cruises">Sorry, no matching cruises found.\nDrag the microphone button to the left to undo.</string>
+    <string name="evature_volume_">Volume:</string>
+    <string name="evature_ok">OK</string>
+    <string name="evature_stop">Stop</string>    
+    <color name="times_markup">#4CAF50</color>
+    <color name="locations_markup">#03A9F4</color>
+    <color name="eva_chat_background">#ffeeeeee</color>
+    <color name="eva_chat_text">#f5f5f5</color>
+    <color name="eva_chat_secondary_text">#d5d5df</color>
+    
+    
+    <!--  for Lollipop vector animations -->
+    <string name="flat_microphone_bottom">
+        m37.14123,239.43086l-0.14124,0.06943c0.14124,0.33484 64.84821,0.61557 152.39124,0.69519c1.83185,0.00052 3.66574,0.00256 5.35645,0.00461c8.31805,0.01022 14.23744,0.03522 17.05789,0.06534l0,0.29962c0,0.05563 12.54678,0.10056 28.19444,0.10056l0.14122,0c15.64764,0 28.05319,-0.04492 28.05319,-0.10056l0,-0.30014c2.81848,-0.03012 8.5986,-0.0546 16.91666,-0.06482c1.69077,-0.00204 3.52457,-0.00409 5.49774,-0.00458c87.54294,-0.07965 152.39117,-0.36038 152.39117,-0.69522l0,-0.06943c0,-0.05307 -12.54678,-0.09647 -27.49036,-0.09647c-14.94156,0 -27.48831,0.04288 -27.48831,0.09647l0,0.06943c0,0.14548 -16.21255,0.27615 -43.13797,0.37158c-27.06668,0.09494 -63.85974,0.15417 -105.0246,0.15417c-41.16293,0 -77.67545,-0.05872 -104.60089,-0.15417c-26.92543,-0.09543 -43.27921,-0.22662 -43.27921,-0.37158l0,-0.06943c0,-0.05307 -12.40555,-0.09647 -27.48835,-0.09647c-14.94353,0 -27.34908,0.0434 -27.34908,0.09647l0,0l0,0z
+    </string>
+    <string name="flat_microphone_top">
+ 		m149.82813,239.31331l0,1.37338c0,0.39922 40.37372,0.72298 90.17188,0.72298c49.79813,0 90.17188,-0.32376 90.17188,-0.72298l0,-1.37338c0,-0.39922 -40.37375,-0.72298 -90.17188,-0.72298c-49.79816,0 -90.17188,0.32376 -90.17188,0.72298z
+    </string>
+    <string name="microphone_top">
+         m199.09375,151.67343l0,85.64641c0,24.8958 18.43437,45.08647 41.17188,45.08647c22.73749,0 41.17188,-20.19067 41.17188,-45.08647l0,-85.64641c0,-24.89584 -18.43439,-45.08647 -41.17188,-45.08647c-22.7375,0 -41.17188,20.19064 -41.17188,45.08647z
+    </string>
+    <string name="microphone_bottom">
+        m163.55322,229.33879l-0.05322,8.10013c0.05322,39.07115 24.43787,71.82872 57.42822,81.11958c0.69034,0.05988 1.38142,0.29782 2.01855,0.53659c3.13466,1.19073 5.36536,4.10956 6.42822,7.62341l0,34.96161c0,6.49176 4.72823,11.73291 10.625,11.73291l0.05322,0c5.89677,0 10.57178,-5.24115 10.57178,-11.73291l0,-35.02148c1.06213,-3.51385 3.24036,-6.3728 6.375,-7.56354c0.63715,-0.23877 1.32822,-0.47672 2.07181,-0.53589c32.99033,-9.29156 57.42819,-42.04913 57.42819,-81.12029l0,-8.10013c0,-6.19392 -4.72821,-11.25697 -10.35965,-11.25697c-5.63071,0 -10.35892,5.00319 -10.35892,11.25697l0,8.10013c0,16.97412 -6.10965,32.22166 -16.25641,43.3596c-10.20001,11.07809 -24.06538,17.98672 -39.57825,17.98672c-15.51213,0 -29.27177,-6.84952 -39.41856,-17.98672c-10.14677,-11.13794 -16.30965,-26.4446 -16.30965,-43.3596l0,-8.10013c0,-6.19392 -4.675,-11.25697 -10.35892,-11.25697c-5.63142,0 -10.30643,5.06305 -10.30643,11.25697l0,0l0,0z
+    </string>
+    
+    
+</resources>
