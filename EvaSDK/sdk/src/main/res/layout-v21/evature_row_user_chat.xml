@@ -7,7 +7,7 @@
     android:paddingTop="4dp"
      >
 
-      <com.lht.eva.icruise.activity.voice_search.ChatBalloon
+      <com.evature.evasdk.ChatBalloon
           android:id="@+id/chat_bubble" 
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
@@ -55,7 +55,6 @@
 	              android:layout_alignParentTop="true"
 	              android:layout_alignParentLeft="true"
 	              android:inputType="textMultiLine"
-	              android:layout_toLeftOf="@+id/buttonDelete"
 	              android:layout_marginLeft="-2dip"
 	              android:gravity="top"
 	              android:text="Lorem ipsum bla bla"
@@ -85,5 +84,5 @@
 	      </RelativeLayout>
 
 	      </LinearLayout>
- 	</com.lht.eva.icruise.activity.voice_search.ChatBalloon>
+ 	</com.evature.evasdk.ChatBalloon>
 </LinearLayout>

@@ -1,3 +1,6 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+
 apply plugin: 'com.android.library'
 
 
@@ -7,9 +10,48 @@ android {
 
     sourceSets {
         main {
-            jni.srcDirs = ['ogg/src', 'flac/src/libFLAC']
+            //jni.srcDirs = ['ogg/src', 'flac/src/libFLAC', 'jni']
+            jniLibs.srcDir 'src/main/libs' //set .so files location to libs
+            jni.srcDirs = [] //disable automatic ndk-build call
         }
     }
+
+    productFlavors {
+        x86 {
+            ndk {
+                abiFilter "x86"
+            }
+        }
+        mips {
+            ndk {
+                abiFilter "mips"
+            }
+        }
+        armv7 {
+            ndk {
+                abiFilter "armeabi-v7a"
+            }
+        }
+        arm {
+            ndk {
+                abiFilter "armeabi"
+            }
+        }
+        fat
+    }
+
+// call regular ndk-build(.cmd) script from app directory
+//    task ndkBuild(type: Exec) {
+//        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//            commandLine 'ndk-build.cmd', '-C', file('jni').absolutePath
+//        } else {
+//            commandLine 'ndk-build', '-C', file('jni').absolutePath
+//        }
+//    }
+//
+//    tasks.withType(JavaCompile) {
+//        compileTask -> compileTask.dependsOn ndkBuild
+//    }
 
     defaultConfig {
         minSdkVersion 8
@@ -29,7 +71,16 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-
-
+// http://tools.android.com/tech-docs/new-build-system/tips#TOC-Improving-Build-Server-performance.
+project.ext.preDexLibs = !project.hasProperty('disablePreDex')
+subprojects {
+    project.plugins.whenPluginAdded { plugin ->
+        if ("com.android.build.gradle.AppPlugin".equals(plugin.class.name)) {
+            project.android.dexOptions.preDexLibraries = rootProject.ext.preDexLibs
+        } else if ("com.android.build.gradle.LibraryPlugin".equals(plugin.class.name)) {
+            project.android.dexOptions.preDexLibraries = rootProject.ext.preDexLibs
+        }
+    }
+}
 
 

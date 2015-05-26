@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EvaSDK.iml" filepath="$PROJECT_DIR$/EvaSDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/exampleApp/exampleApp.iml" filepath="$PROJECT_DIR$/exampleApp/exampleApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/sdk/sdk.iml" filepath="$PROJECT_DIR$/sdk/sdk.iml" />
     </modules>
   </component>

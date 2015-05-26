@@ -19,7 +19,7 @@
     <string name="evature_stop">Stop</string>    
     <color name="times_markup">#4CAF50</color>
     <color name="locations_markup">#03A9F4</color>
-    <color name="eva_chat_background">#ffeeeeee</color>
+    <color name="eva_chat_background">#CC000000</color>
     <color name="eva_chat_text">#f5f5f5</color>
     <color name="eva_chat_secondary_text">#d5d5df</color>
     
