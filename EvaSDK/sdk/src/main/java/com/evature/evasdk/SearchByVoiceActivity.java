@@ -27,6 +27,7 @@ import com.evature.evasdk.evaapis.crossplatform.flow.ReplyElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.StatementElement;
 import com.evature.evasdk.model.ChatItem;
 import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.EvaAppSetup;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,11 +40,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 
 	@SuppressWarnings("nls")
 	private static final String TAG = "SearchByVoiceActivity";
-	@SuppressWarnings("nls")
-	private static final String API_KEY = "96da6323-a6fb-46b1-ac1c-5ab7f956e8db";
-	@SuppressWarnings("nls")
-	private static final String SITE_CODE = "icr";
-	
+
 	private static final boolean AUTO_OPEN_MICROPHONE = true;
 
 	private static class StoreResultData {
@@ -112,10 +109,10 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 			config.deviceId = deviceId;
 		}*/
 		config.locationEnabled = false;  // no need for tracking location of phone for Cruises
-		config.appKey = API_KEY;
-		config.siteCode = SITE_CODE;
-		config.scope = "r"; // cruise
-		config.context = "r";
+		config.appKey = EvaAppSetup.API_KEY;
+		config.siteCode = EvaAppSetup.SITE_CODE;
+		config.scope = EvaAppSetup.SCOPE; // cruise
+		config.context = EvaAppSetup.SCOPE;
 		config.setParameter("ffi_icr_keys_v2", ""); // Add ICR location keys to the Eva Response
 		config.setParameter("add_text", ""); // allow semantic coloring
 		config.setParameter("auto_open_mic", String.valueOf(AUTO_OPEN_MICROPHONE));
@@ -705,15 +702,10 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		} else if (viewId == R.id.undo_button) {
 			undoLastUserChat();
 		}
-		else if (viewId == R.id.volume_button) {
-			Intent intent = new Intent(this, VolumeSettingsDialog.class);
-			startActivity(intent);
-//				String testText = "Cruise to the Mediterranian in July for 10 days";
-//				ChatItem ci = new ChatItem(testText);
-//				mView.addChatItem(ci);
-//				TEXT_TYPED_COOKIE.storeResultInItem = ci;
-//				eva.searchWithText(testText, TEXT_TYPED_COOKIE, false);
-		}
+//		else if (viewId == R.id.volume_button) {
+//			Intent intent = new Intent(this, VolumeSettingsDialog.class);
+//			startActivity(intent);
+//		}
 	}// End of evatureClickHandler
 	
 	private void undoLastUserChat() {

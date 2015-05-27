@@ -1,0 +1,5 @@
+modes: [
+    ignore(*.tdd, **/generated_file_warning.txt)
+]
+
+datetimeFormat: "MMM d, yyyy hh:mm a zzz"

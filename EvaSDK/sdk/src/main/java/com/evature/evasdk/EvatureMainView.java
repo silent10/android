@@ -101,7 +101,7 @@ public class EvatureMainView implements OnItemClickListener  {
 		mSearchButtonCont = mainActivity.findViewById(R.id.voice_search_container);
 		mProgressBar = (ProgressWheel)mainActivity.findViewById(R.id.progressBarEvaProcessing);
 		
-		mVolumeButton = (ImageButton) mainActivity.findViewById(R.id.volume_button);
+		//mVolumeButton = (ImageButton) mainActivity.findViewById(R.id.volume_button);
 		
 		mChatListView = (ListView) mainActivity.findViewById(R.id.chat_list);
 		

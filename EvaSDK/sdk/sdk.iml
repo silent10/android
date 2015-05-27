@@ -54,6 +54,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/assets" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/aidl" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/generated-sources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/ogg/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/flac/src/libFLAC" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/jni" isTestSource="false" />

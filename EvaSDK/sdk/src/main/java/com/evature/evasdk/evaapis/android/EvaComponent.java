@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 
-public class EvaComponent implements OnSharedPreferenceChangeListener,
+public class EvaComponent implements
                                     EvaSpeechRecogComponent.SpeechRecognitionResultListener,
 									EvaSearchReplyListener { 
 
@@ -171,7 +171,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			mLocationUpdater.startGPS();
 		}
 	}
-	
+	/*
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		DLog.i(TAG, "Preference "+key+" changed");
 		setLocale(sharedPreferences.getString(LOCALE_PREF_KEY, "US"));
@@ -213,6 +213,15 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 		String oldLanguage = getPreferedLanguage();
 		setPreferedLanguage(sharedPreferences.getString(LANG_PREF_KEY, "en"));
 	}
+
+
+	public void registerPreferenceListener() {
+		SharedPreferences prefs =  PreferenceManager.getDefaultSharedPreferences(this.activity);
+		prefs.registerOnSharedPreferenceChangeListener(this);
+
+		this.onSharedPreferenceChanged(prefs, "");
+	}
+	*/
 	
 
 
@@ -274,13 +283,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 			*/
 		}
 	}
-	
-	public void registerPreferenceListener() {
-		SharedPreferences prefs =  PreferenceManager.getDefaultSharedPreferences(this.activity);
-		prefs.registerOnSharedPreferenceChangeListener(this);
-		
-		this.onSharedPreferenceChanged(prefs, "");
-	}
+
 
 	@Override
 	public void speechResultOK(String evaJson, Bundle debugData, Object cookie) {
@@ -346,7 +349,7 @@ public class EvaComponent implements OnSharedPreferenceChangeListener,
 	public void onDestroy() {
 		mSpeak.onDestroy();
 	}
-	
+
 	public void speak(String sayIt) {
 		speak(sayIt, true);
 	}

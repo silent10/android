@@ -14,44 +14,9 @@ android {
             //jniLibs.srcDir 'src/main/libs' //set .so files location to libs
             //jni.srcDirs = [] //disable automatic ndk-build call
         }
+
+        main.java.srcDirs += 'src/main/generated-sources'
     }
-
-//    productFlavors {
-//        x86 {
-//            ndk {
-//                abiFilter "x86"
-//            }
-//        }
-//        mips {
-//            ndk {
-//                abiFilter "mips"
-//            }
-//        }
-//        armv7 {
-//            ndk {
-//                abiFilter "armeabi-v7a"
-//            }
-//        }
-//        arm {
-//            ndk {
-//                abiFilter "armeabi"
-//            }
-//        }
-//        fat
-//    }
-
-// call regular ndk-build(.cmd) script from app directory
-//    task ndkBuild(type: Exec) {
-//        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-//            commandLine 'ndk-build.cmd', '-C', file('jni').absolutePath
-//        } else {
-//            commandLine 'ndk-build', '-C', file('jni').absolutePath
-//        }
-//    }
-//
-//    tasks.withType(JavaCompile) {
-//        compileTask -> compileTask.dependsOn ndkBuild
-//    }
 
     defaultConfig {
         minSdkVersion 8
@@ -84,21 +49,15 @@ buildscript {
 
 task genSources << {
     println "Generating sources...."
-//    ant.fmpp configuration:"src/main/resources/codegen/config.fmpp",
-//            sourceRoot:"src/main/resources/codegen/templates",
-//            outputRoot:"target/generated-sources/main/java";
+    ant.fmpp configuration:"src/main/codegen/config.fmpp",
+            sourceRoot:"src/main/codegen/templates",
+            outputRoot:"src/main/generated-sources",
+            data:"tdd(../setup.tdd)";
 }
 tasks.withType(JavaCompile) {
     compileTask -> compileTask.dependsOn genSources
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir 'target/generated-sources/main/java'
-        }
-    }
-}
 
 gradle.projectsEvaluated {
     preBuild.dependsOn genSources
