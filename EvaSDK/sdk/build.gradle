@@ -10,35 +10,35 @@ android {
 
     sourceSets {
         main {
-            //jni.srcDirs = ['ogg/src', 'flac/src/libFLAC', 'jni']
-            jniLibs.srcDir 'src/main/libs' //set .so files location to libs
-            jni.srcDirs = [] //disable automatic ndk-build call
+            jni.srcDirs = ['ogg/src', 'flac/src/libFLAC', 'jni']
+            //jniLibs.srcDir 'src/main/libs' //set .so files location to libs
+            //jni.srcDirs = [] //disable automatic ndk-build call
         }
     }
 
-    productFlavors {
-        x86 {
-            ndk {
-                abiFilter "x86"
-            }
-        }
-        mips {
-            ndk {
-                abiFilter "mips"
-            }
-        }
-        armv7 {
-            ndk {
-                abiFilter "armeabi-v7a"
-            }
-        }
-        arm {
-            ndk {
-                abiFilter "armeabi"
-            }
-        }
-        fat
-    }
+//    productFlavors {
+//        x86 {
+//            ndk {
+//                abiFilter "x86"
+//            }
+//        }
+//        mips {
+//            ndk {
+//                abiFilter "mips"
+//            }
+//        }
+//        armv7 {
+//            ndk {
+//                abiFilter "armeabi-v7a"
+//            }
+//        }
+//        arm {
+//            ndk {
+//                abiFilter "armeabi"
+//            }
+//        }
+//        fat
+//    }
 
 // call regular ndk-build(.cmd) script from app directory
 //    task ndkBuild(type: Exec) {
@@ -67,8 +67,45 @@ android {
     }
 }
 
+
+buildscript {
+    repositories {
+        maven {
+            url "http://repo1.maven.org/maven2/"
+        }
+    }
+
+    dependencies {
+        classpath group: 'net.sourceforge.fmpp', name: 'fmpp', version: '0.9.15'
+    }
+
+    ant.taskdef(name: 'fmpp', classname:'fmpp.tools.AntTask', classpath: buildscript.configurations.classpath.asPath)
+}
+
+task genSources << {
+    println "Generating sources...."
+//    ant.fmpp configuration:"src/main/resources/codegen/config.fmpp",
+//            sourceRoot:"src/main/resources/codegen/templates",
+//            outputRoot:"target/generated-sources/main/java";
+}
+tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn genSources
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'target/generated-sources/main/java'
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    preBuild.dependsOn genSources
+}
+
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: 'libs', include: ['*.jar', '*.so'])
 }
 
 // http://tools.android.com/tech-docs/new-build-system/tips#TOC-Improving-Build-Server-performance.

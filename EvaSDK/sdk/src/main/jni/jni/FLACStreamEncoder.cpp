@@ -95,7 +95,7 @@ void throwByName(JNIEnv * env, const char * name, const char * msg)
  * Constants
  **/
 static char const * const FLACStreamEncoder_classname =
-		"com/evaapis/android/FLACStreamEncoder";
+		"com/evature/evasdk/evaapis/android/FLACStreamEncoder";
 static char const * const FLACStreamEncoder_mObject = "mObject";
 static char const * const FLACStreamEncoder_writeCallback = "writeCallback";
 
@@ -717,7 +717,7 @@ FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder 
 
 
 JNIEXPORT
-void Java_com_evaapis_android_FLACStreamEncoder_initFifo(JNIEnv * env,
+void Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_initFifo(JNIEnv * env,
 		jobject obj, jstring outfile) {
 	/*
 	 Iftah:  I added the mkfifo part to allow streaming the data to Java...
@@ -731,13 +731,13 @@ void Java_com_evaapis_android_FLACStreamEncoder_initFifo(JNIEnv * env,
 }
 
 JNIEXPORT
-void Java_com_evaapis_android_FLACStreamEncoder_deinitFifo(JNIEnv * env,
+void Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_deinitFifo(JNIEnv * env,
 		jobject obj, jstring outfile) {
 	unlink(convert_jstring_path(env, outfile));
 }
 
 JNIEXPORT
-void Java_com_evaapis_android_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
+void Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 		jstring outfile, jint sample_rate, jint channels,
 		jint bits_per_sample, jboolean verify, jint frame_size) {
 	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
@@ -769,7 +769,7 @@ Java_Callbacks_nativeMethod(JNIEnv *env, jobject obj, jint depth)
 */
 
 JNIEXPORT
-void Java_com_evaapis_android_FLACStreamEncoder_initWithCallback(JNIEnv * env, jobject obj,
+void Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_initWithCallback(JNIEnv * env, jobject obj,
 		jint sample_rate, jint channels,
 		jint bits_per_sample, jboolean verify, jint frame_size) {
 	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
@@ -793,7 +793,7 @@ void Java_com_evaapis_android_FLACStreamEncoder_initWithCallback(JNIEnv * env, j
 
 
 JNIEXPORT
-void Java_com_evaapis_android_FLACStreamEncoder_deinit(JNIEnv * env,
+void Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_deinit(JNIEnv * env,
 		jobject obj) {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 	delete encoder;
@@ -805,7 +805,7 @@ void Java_com_evaapis_android_FLACStreamEncoder_deinit(JNIEnv * env,
 	}
 }
 
-JNIEXPORT jint Java_com_evaapis_android_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
+JNIEXPORT jint Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_write(JNIEnv * env, jobject obj,
 		jobject buffer, jint bufsize)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
@@ -826,7 +826,7 @@ JNIEXPORT jint Java_com_evaapis_android_FLACStreamEncoder_write(JNIEnv * env, jo
 }
 
 JNIEXPORT
-void Java_com_evaapis_android_FLACStreamEncoder_flush(JNIEnv * env,
+void Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_flush(JNIEnv * env,
 		jobject obj) {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
@@ -839,7 +839,7 @@ void Java_com_evaapis_android_FLACStreamEncoder_flush(JNIEnv * env,
 	encoder->flush();
 }
 
-JNIEXPORT jfloat Java_com_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
+JNIEXPORT jfloat Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIEnv * env, jobject obj)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 
@@ -852,7 +852,7 @@ JNIEXPORT jfloat Java_com_evaapis_android_FLACStreamEncoder_getMaxAmplitude(JNIE
 	return encoder->getMaxAmplitude();
 }
 
-JNIEXPORT jfloat Java_com_evaapis_android_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
+JNIEXPORT jfloat Java_com_evature_evasdk_evaapis_android_FLACStreamEncoder_getAverageAmplitude(JNIEnv * env, jobject obj)
 {
 	FLACStreamEncoder * encoder = get_encoder(env, obj);
 

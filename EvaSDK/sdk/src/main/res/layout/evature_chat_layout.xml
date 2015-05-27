@@ -3,25 +3,26 @@
     xmlns:ProgressWheel="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="12dp"
     android:background="@color/eva_chat_background"
     android:orientation="vertical" >
 
 
-	<ImageButton
-         android:id="@+id/volume_button"
-         style="?android:attr/buttonStyleSmall"
-         android:layout_width="36dp"
-         android:layout_height="36dp"
-         android:layout_marginRight="6dp"
-         android:layout_centerVertical="true"
-         android:onClick="buttonClickHandler"
-         android:contentDescription="Volume"
-         android:scaleType="fitCenter"
-         android:adjustViewBounds="true"
-         android:src="@drawable/evature_speaker_icon"
-         android:background="@null"
-         android:padding="0dp"
-           />
+	<!--<ImageButton-->
+         <!--android:id="@+id/volume_button"-->
+         <!--style="?android:attr/buttonStyleSmall"-->
+         <!--android:layout_width="36dp"-->
+         <!--android:layout_height="36dp"-->
+         <!--android:layout_marginRight="6dp"-->
+         <!--android:layout_centerVertical="true"-->
+         <!--android:onClick="buttonClickHandler"-->
+         <!--android:contentDescription="Volume"-->
+         <!--android:scaleType="fitCenter"-->
+         <!--android:adjustViewBounds="true"-->
+         <!--android:src="@drawable/evature_speaker_icon"-->
+         <!--android:background="@null"-->
+         <!--android:padding="0dp"-->
+           <!--/>-->
 
     
       <ListView
