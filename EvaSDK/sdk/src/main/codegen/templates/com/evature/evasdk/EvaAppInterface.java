@@ -2,10 +2,28 @@
 
 package com.evature.evasdk;
 
+import android.content.Context;
+
+<#if scope.cruise>
+import com.evature.evasdk.evaapis.crossplatform.CruiseAttributes;
+</#if>
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
+import com.evature.evasdk.evaapis.crossplatform.RequestAttributes;
+
+import java.util.Date;
 
 
 public interface EvaAppInterface {
+
+<#if async_count >
+    interface AsyncCountResult {
+        /***
+         * When the count of a query (eg. how many search results for flights from NY to LA on monday) is returned, this method is activated with the result
+         * @param count
+         */
+        void handleCountResult(int count);
+    }
+</#if>
 
 <#if scope.flight>
 
@@ -14,17 +32,16 @@ public interface EvaAppInterface {
      * @param from
      * @param to
      */
-    void handleFlightSearch(EvaLocation from,  EvaLocation to);
+    void handleFlightSearch(Context context, EvaLocation from,  EvaLocation to);
 
-    <#if (features.getCount)?? >
-
+    <#if (async_count)?? >
     /****
      *
      * @param from
      * @param to
-     * @return  number of matching flights
+     *
      */
-    int getFlightCount(EvaLocation from,  EvaLocation to);
+    void getFlightCount(Context context, EvaLocation from,  EvaLocation to);
     </#if>
 </#if>
 <#if scope.cruise>
@@ -34,16 +51,25 @@ public interface EvaAppInterface {
      * @param from
      * @param to
      */
-    void handleCruiseSearch(EvaLocation from,  EvaLocation to);
-    <#if (features.getCount)?? >
+    void handleCruiseSearch(Context context,
+                            EvaLocation from, EvaLocation to,
+                            Date dateFrom, Date dateTo,
+                            Integer durationMin, Integer durationMax,
+                            CruiseAttributes attributes,
+                            RequestAttributes.SortEnum sortBy);
+    <#if (async_count)?? >
 
     /****
      *
      * @param from
      * @param to
-     * @return number of matching cruises
      */
-    int getCruiseCount(EvaLocation from,  EvaLocation to);
+    void getCruiseCount(Context context,
+                        EvaLocation from, EvaLocation to,
+                        Date dateFrom, Date dateTo,
+                        Integer durationMin, Integer durationMax,
+                        CruiseAttributes attributes,
+                        AsyncCountResult callback);
     </#if>
 </#if>
 

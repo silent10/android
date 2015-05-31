@@ -3,13 +3,14 @@ package com.evature.evasdk.evaapis.crossplatform.flow;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.util.DLog;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class FlightFlowElement extends FlowElement {
+public class FlightFlowElement extends FlowElement  implements Serializable {
 
 	private static final String TAG = "FlightFlowElement";
 	public String RoundTripSayit;

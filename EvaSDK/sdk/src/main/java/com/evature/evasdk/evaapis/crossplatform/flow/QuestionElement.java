@@ -1,5 +1,6 @@
 package com.evature.evasdk.evaapis.crossplatform.flow;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -9,7 +10,7 @@ import org.json.JSONObject;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.util.DLog;
 
-public class QuestionElement extends FlowElement {
+public class QuestionElement extends FlowElement  implements Serializable {
 
 	private final static String TAG = "QuestionElement";
 	public enum QuestionType {

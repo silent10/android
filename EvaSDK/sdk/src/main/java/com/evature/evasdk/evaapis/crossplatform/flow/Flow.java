@@ -13,7 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class Flow  implements Serializable {
+public class Flow  implements Serializable  {
 
 	private static final String TAG = "Flow";
 	public FlowElement[]  Elements;

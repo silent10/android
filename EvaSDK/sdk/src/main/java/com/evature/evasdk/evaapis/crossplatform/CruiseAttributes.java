@@ -2,6 +2,7 @@ package com.evature.evasdk.evaapis.crossplatform;
 
 import com.evature.evasdk.util.DLog;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,15 +11,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class CruiseAttributes {
+public class CruiseAttributes implements Serializable {
 	private static final String TAG = "CruiseAttributes";
 	
-	public static class Cruiseline {
+	public static class Cruiseline implements Serializable {
 		public String name;
 		public String key;
 	}
 	
-	public static class Cruiseship {
+	public static class Cruiseship implements Serializable{
 		public String name;
 		public String key;
 	}

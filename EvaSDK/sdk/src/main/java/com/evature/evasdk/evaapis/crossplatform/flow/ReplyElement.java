@@ -2,13 +2,14 @@ package com.evature.evasdk.evaapis.crossplatform.flow;
 
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class ReplyElement extends FlowElement {
+public class ReplyElement extends FlowElement   implements Serializable {
 	public String AttributeKey;
 	public String AttributeType;
 

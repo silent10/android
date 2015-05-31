@@ -2,6 +2,7 @@ package com.evature.evasdk.evaapis.crossplatform;
 
 import com.evature.evasdk.util.DLog;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class ParsedText {
+public class ParsedText implements Serializable {
 
 	static public class TimesMarkup {
 		public String text;

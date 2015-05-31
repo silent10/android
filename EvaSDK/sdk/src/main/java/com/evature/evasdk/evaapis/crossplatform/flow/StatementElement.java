@@ -1,5 +1,6 @@
 package com.evature.evasdk.evaapis.crossplatform.flow;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.json.JSONException;
@@ -8,7 +9,7 @@ import org.json.JSONObject;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.util.DLog;
 
-public class StatementElement extends FlowElement {
+public class StatementElement extends FlowElement  implements Serializable {
 	private static final String TAG = "StatementElement";
 
 	public enum StatementTypeEnum {

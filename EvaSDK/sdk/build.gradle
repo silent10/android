@@ -8,6 +8,8 @@ android {
     compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
+    publishNonDefault true   // http://stackoverflow.com/a/29163361/519995
+
     sourceSets {
         main {
             jni.srcDirs = ['ogg/src', 'flac/src/libFLAC', 'jni']

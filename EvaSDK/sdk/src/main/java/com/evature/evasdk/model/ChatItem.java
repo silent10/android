@@ -8,6 +8,7 @@ import java.io.Serializable;
 import android.text.Html;
 import android.text.SpannableString;
 
+import com.evature.evasdk.EvaAppSearchModel;
 import com.evature.evasdk.util.DLog;
 
 
@@ -36,7 +37,7 @@ public class ChatItem  implements Serializable {
 	private   ChatType chatType;
 	private   Status status;
 	private   String evaReplyId;
-	//private   SearchModel searchModel;
+	private EvaAppSearchModel searchModel;
 	private boolean alreadyAnimated = false;
 	
 
@@ -155,11 +156,11 @@ public class ChatItem  implements Serializable {
 		return alreadyAnimated;
 	}
 
-//	public SearchModel getSearchModel() {
-//		return searchModel;
-//	}
-//	public void setSearchModel(SearchModel searchModel) {
-//		this.searchModel = searchModel;
-//	}
+	public EvaAppSearchModel getSearchModel() {
+		return searchModel;
+	}
+	public void setSearchModel(EvaAppSearchModel searchModel) {
+		this.searchModel = searchModel;
+	}
 
 }

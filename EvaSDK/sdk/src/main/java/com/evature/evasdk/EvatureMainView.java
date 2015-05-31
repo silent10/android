@@ -766,12 +766,10 @@ public class EvatureMainView implements OnItemClickListener  {
 			
 		case MultiChoiceQuestion:
 		case Eva:
-			/*
-			TODO:
 			if (item.getSearchModel() != null) {
-				SearchUtility.performSearching(mEvaActivity, item.getSearchModel());
+                item.getSearchModel().triggerSearch(mEvaActivity);
 				return;
-			}*/
+			}
 			editEvaChat(item, position);
 			break;
 			
