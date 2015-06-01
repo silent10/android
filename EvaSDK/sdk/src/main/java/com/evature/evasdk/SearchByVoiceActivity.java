@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 
 
@@ -347,7 +348,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		super.onSaveInstanceState(savedInstanceState);
 		
 		mView.handleBackPressed(); // cancel edit chat item if one is being edited
-		savedInstanceState.putSerializable(EVATURE_CHAT_LIST,  mView.getChatListModel());
+		savedInstanceState.putSerializable(EVATURE_CHAT_LIST, mView.getChatListModel());
 		savedInstanceState.putString(EVATURE_SESSION_ID, eva.getSessionId());
 	}
 
@@ -366,12 +367,17 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	@Override
 	protected void onResume() {
 		super.onResume();
-        for (WeakReference<ImageButton> weakRef : EvaButton.evaButtons) {
+        for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
+            WeakReference<ImageButton> weakRef = iterator.next();
             ImageButton imgButton = weakRef.get();
-            if (imgButton != null) {
+            if (imgButton == null) {
+                iterator.remove();
+            }
+            else {
                 //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 1.0f, 0.0f);
                 EvatureMainView.animateButton(imgButton, "alpha", 400, 1.0f, 0.0f);
             }
+
         }
 
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -412,9 +418,13 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	protected void onPause() {
 		DLog.i(TAG, "onPause");
         evaSessionId = eva.getSessionId();
-        for (WeakReference<ImageButton> weakRef : EvaButton.evaButtons) {
+        for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
+            WeakReference<ImageButton> weakRef = iterator.next();
             ImageButton imgButton = weakRef.get();
-            if (imgButton != null) {
+            if (imgButton == null) {
+                iterator.remove();
+            }
+            else {
                 //EvatureMainView.scaleButton(imgButton, 400, 0f, 0.666f);
                 EvatureMainView.animateButton(imgButton, "alpha", 400, 0.0f, 1.0f);
             }
