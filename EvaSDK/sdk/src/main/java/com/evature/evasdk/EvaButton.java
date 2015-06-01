@@ -15,23 +15,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * Created by iftah on 5/26/15.
  */
 public class EvaButton {
 
-    public static ImageButton searchButton;
+    public static ArrayList<WeakReference<ImageButton>> evaButtons = new ArrayList<WeakReference<ImageButton>>();
     private static float MARGIN_BOTTOM = 24;  // margin in DIP
 
 
     public static void addDefaultButton(final Activity activity) {
-        if (EvaButton.searchButton!= null) {
-            EvaButton.searchButton.setVisibility(View.VISIBLE);
-        }
-        EvaButton.searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.voice_search_button, null);
+
+        ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.voice_search_button, null);
+        WeakReference<ImageButton> weakRef = new WeakReference<ImageButton>(searchButton);
+        evaButtons.add(weakRef);
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

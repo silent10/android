@@ -17,6 +17,7 @@ import android.text.style.StyleSpan;
 import android.transition.ChangeImageTransform;
 import android.view.View;
 import android.view.Window;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.evature.evasdk.evaapis.android.EvaComponent;
@@ -39,6 +40,7 @@ import com.evature.evasdk.EvaAppSetup;
 
 import org.w3c.dom.NodeList;
 
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -364,9 +366,12 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	@Override
 	protected void onResume() {
 		super.onResume();
-        if (EvaButton.searchButton != null) {
-            //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 1.0f, 0.0f);
-            EvatureMainView.animateButton(EvaButton.searchButton, "alpha", 400, 1.0f, 0.0f);
+        for (WeakReference<ImageButton> weakRef : EvaButton.evaButtons) {
+            ImageButton imgButton = weakRef.get();
+            if (imgButton != null) {
+                //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 1.0f, 0.0f);
+                EvatureMainView.animateButton(imgButton, "alpha", 400, 1.0f, 0.0f);
+            }
         }
 
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -407,10 +412,14 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	protected void onPause() {
 		DLog.i(TAG, "onPause");
         evaSessionId = eva.getSessionId();
-        if (EvaButton.searchButton != null) {
-            //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 0f, 0.666f);
-            EvatureMainView.animateButton(EvaButton.searchButton, "alpha", 400, 0.0f, 1.0f);
+        for (WeakReference<ImageButton> weakRef : EvaButton.evaButtons) {
+            ImageButton imgButton = weakRef.get();
+            if (imgButton != null) {
+                //EvatureMainView.scaleButton(imgButton, 400, 0f, 0.666f);
+                EvatureMainView.animateButton(imgButton, "alpha", 400, 0.0f, 1.0f);
+            }
         }
+
         eva.onPause();
 		eva.cancelSearch();
 		isPaused = true; // don't allow speech callbacks to start followup recording
