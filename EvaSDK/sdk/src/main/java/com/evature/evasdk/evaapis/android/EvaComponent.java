@@ -30,8 +30,6 @@ public class EvaComponent implements
                                     EvaSpeechRecogComponent.SpeechRecognitionResultListener,
 									EvaSearchReplyListener { 
 
-//	public static final int VOICE_RECOGNITION_REQUEST_CODE_GOOGLE = 0xBEEF;
-	
 	private final String TAG = "EvaComponent";
 	
 
@@ -40,18 +38,6 @@ public class EvaComponent implements
 	public static final String LANG_PREF_KEY   = "eva_preference_language";
 	public static final String VRSERV_PREF_KEY = "eva_vr_service";
 	public static final String DEVICE_ID_PREF_KEY = "eva_device_id";
-	
-	public static final String VPROXY_HOST_PREF_KEY = "eva_vproxy_host";
-	public static final String WEBSERV_HOST_PREF_KEY = "eva_web_service_host";
-	public static final String API_VER_PREF_KEY = "eva_api_ver";
-	
-	public static final String CONTEXT_FLIGHTS_PREF_KEY = "eva_context_flights"; 
-	public static final String CONTEXT_HOTELS_PREF_KEY = "eva_context_hotels";  
-	public static final String CONTEXT_VACATION_PREF_KEY = "eva_context_vacation";
-	public static final String CONTEXT_CAR_PREF_KEY = "eva_context_car";
-	public static final String CONTEXT_CRUISE_PREF_KEY = "eva_context_cruise";  
-	public static final String CONTEXT_SKI_PREF_KEY = "eva_context_ski";     
-	public static final String CONTEXT_EXPLORE_PREF_KEY = "eva_context_explore"; 
 
 
 	// Eva Config

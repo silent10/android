@@ -1,9 +1,12 @@
 <resources>
 
-    <!-- Base application theme. -->
     <!--<style name="AppTheme" parent="Theme.AppC ompat.Light.DarkActionBar">-->
-    <style name="AppTheme" parent="android:Theme.Black">
+    <style name="AppTheme.Base" parent="android:Theme.Black">
         <!-- Customize your theme here. -->
+    </style>
+    <!-- Base application theme. -->
+
+    <style name="AppTheme" parent="AppTheme.Base">
     </style>
 
 </resources>

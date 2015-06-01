@@ -20,6 +20,7 @@ import android.os.Message;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -38,6 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -66,14 +68,14 @@ public class EvatureMainView implements OnItemClickListener  {
 	private ImageButton mVolumeButton;
 	private View mSearchButtonCont;
 	private ProgressWheel mProgressBar;
-	
+
 	private ArrayList<ChatItem> mChatListModel;
 	private ChatAdapter mChatAdapter;
 	
 	private int mEditedChatItemIndex = -1;
 	private SearchByVoiceActivity mEvaActivity;
 	private ListView mChatListView;
-	
+
 	private boolean mSideButtonsVisible;
 
 	private WeakReference<Handler> mUpdateLevel;
@@ -104,7 +106,8 @@ public class EvatureMainView implements OnItemClickListener  {
 		//mVolumeButton = (ImageButton) mainActivity.findViewById(R.id.volume_button);
 		
 		mChatListView = (ListView) mainActivity.findViewById(R.id.chat_list);
-		
+
+
 		// Connect the data of the chat history to the view:
 		if (chatList == null) {
 			mChatListModel = new ArrayList<ChatItem>();
@@ -125,9 +128,8 @@ public class EvatureMainView implements OnItemClickListener  {
 		
 		setupSearchButtonDrag();
 	}
-	
-	
-	private static void scaleButton(final View button, int duration, float fromScale, float toScale) {
+
+	public static void scaleButton(final View button, int duration, float fromScale, float toScale) {
 		button.setVisibility(View.VISIBLE);
 		// no idea why the 1.5 factor is needed, but without it the size is smaller than when using setScale!
 		ScaleAnimation anim = new ScaleAnimation(fromScale, 1.5f*toScale, fromScale, 1.5f*toScale, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f );
@@ -141,19 +143,25 @@ public class EvatureMainView implements OnItemClickListener  {
 		else {
 			button.setEnabled(false);
 			anim.setAnimationListener(new AnimationListener() {
-				@Override public void onAnimationStart(Animation animation) {}
-				@Override public void onAnimationRepeat(Animation animation) {}
-				@Override
-				public void onAnimationEnd(Animation animation) {
-			        button.setVisibility(View.INVISIBLE);
-				}
-			});
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    button.setVisibility(View.INVISIBLE);
+                }
+            });
 		}
 		button.startAnimation(anim);
 	}
 	
 	@SuppressLint("NewApi")
-	private static void animateButton(final View button, String animProperty, int duration, float from, float to) {
+	public static void animateButton(final View button, String animProperty, int duration, float from, float to) {
 		// TODO: use http://nineoldandroids.com/ (for compatibility with older devices)
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			button.setVisibility(View.VISIBLE);
@@ -191,8 +199,8 @@ public class EvatureMainView implements OnItemClickListener  {
 			
 			
 			// hide undo/reset button
-			scaleButton(mUndoButton, animDuration/2, INITIAL_SCALE_SIDE_BUTTON, 0f);
-			scaleButton(mResetButton, animDuration/2, INITIAL_SCALE_SIDE_BUTTON, 0f);
+			scaleButton(mUndoButton, animDuration / 2, INITIAL_SCALE_SIDE_BUTTON, 0f);
+			scaleButton(mResetButton, animDuration / 2, INITIAL_SCALE_SIDE_BUTTON, 0f);
 		}
 	}
 	
@@ -286,12 +294,14 @@ public class EvatureMainView implements OnItemClickListener  {
 					if (mSideButtonsVisible) {
 						int searchCenter = (searchRight+searchLeft)/2;
 						float delta = x - searchCenter;
-					
-						if (x > searchCenter+margin) {
-							int resetCenter = (mResetButton.getRight()+ mResetButton.getLeft())/2;
-							delta = Math.min(delta, resetCenter - searchCenter);
+
+                        if (x > searchCenter+margin) {
+                            FrameLayout resetButtonCont = (FrameLayout) mResetButton.getParent();
+                            int resetButtonCenter = (resetButtonCont.getRight()+ resetButtonCont.getLeft())/2;
+
+							delta = Math.min(delta, resetButtonCenter - searchCenter);
 							// linearly scale button up based on distance
-							float fraction =  Math.min(1f, (x - searchRight) / Math.max(1f, (resetCenter - searchRight)));
+							float fraction =  Math.min(1f, (x - searchCenter - margin) / Math.max(1f, (resetButtonCenter - searchCenter - margin)));
 							
 							// TODO: use com.nineoldandroids.view.ViewHelper for older devices
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -307,10 +317,11 @@ public class EvatureMainView implements OnItemClickListener  {
 							hoveringReset = fraction > 0.7;
 						}
 						else if (x < searchCenter-margin) {
-							int undoCenter = (mUndoButton.getRight()+mUndoButton.getLeft())/2;
+                            FrameLayout undoButtonCont = (FrameLayout) mUndoButton.getParent();
+                            int undoCenter = (undoButtonCont.getRight()+undoButtonCont.getLeft())/2;
 							delta = Math.max(delta, undoCenter - searchCenter);
 							// linearly scale button up based on distance
-							float fraction =  Math.min(1f, (searchLeft - x) / Math.max(1f, (searchLeft - undoCenter)));
+							float fraction =  Math.min(1f, (searchCenter - margin- x ) / Math.max(1f, (searchCenter - undoCenter - margin)));
 							
 							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 								float scale = INITIAL_SCALE_SIDE_BUTTON + (1f-INITIAL_SCALE_SIDE_BUTTON)*fraction;
@@ -512,12 +523,12 @@ public class EvatureMainView implements OnItemClickListener  {
 		anim1.setInterpolator(new DecelerateInterpolator());
 		anim2.setInterpolator(new BounceInterpolator());
 		anim1.addListener(new AnimatorListenerAdapter() {
-		    @Override
-		    public void onAnimationEnd(Animator animation) {
-		        super.onAnimationEnd(animation);
-		        anim2.start();
-		    }
-		});
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                anim2.start();
+            }
+        });
 		anim1.start();
 	}
 	
@@ -657,8 +668,12 @@ public class EvatureMainView implements OnItemClickListener  {
 	// used to hide microphone when editing existing chatItem
 	public void toggleMainButtons(boolean showMainButtons) {
 		mainButtonsShown = showMainButtons;
-		DLog.d(TAG, "Setting main button to "+showMainButtons);
-		mSearchButtonCont.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
+		DLog.d(TAG, "Setting main button to " + showMainButtons);
+        FrameLayout undoButtonCont = (FrameLayout) mUndoButton.getParent();
+        FrameLayout resetButtonCont = (FrameLayout) mResetButton.getParent();
+        mSearchButtonCont.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
+        undoButtonCont.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
+        resetButtonCont.setVisibility(showMainButtons ? View.VISIBLE : View.GONE);
 	}
 	
 	
@@ -721,7 +736,7 @@ public class EvatureMainView implements OnItemClickListener  {
 			sendEmptyMessageDelayed(0, UPDATE_SOUND_VIEW_INTERVAL);
 			super.handleMessage(msg);
 		}
-	};
+	}
 
 	
 	public void startSpeechRecognition(final EvaSpeechRecogComponent.SpeechRecognitionResultListener listener, final EvaSpeechRecogComponent speechSearch, Object cookie, boolean editLastUtterance) {
@@ -821,11 +836,12 @@ public class EvatureMainView implements OnItemClickListener  {
 				}
 				if (mChatAdapter != null) {
 					mChatAdapter.add(chatItem);
+                    scrollToPosition(mChatAdapter.getCount() -1);
 				}
 				else if (mChatListModel != null) {
 					mChatListModel.add(chatItem);
+                    scrollToPosition(mChatListModel.size()-1);
 				}
-				scrollToPosition(mChatListModel.size()-1);
 			}
 		});
 	}
@@ -975,7 +991,7 @@ public class EvatureMainView implements OnItemClickListener  {
 				return;
 			}
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
-			boolean editLastUtterance = false == preModifiedString.equals("");
+			boolean editLastUtterance = !preModifiedString.equals("");
 			SpannableString preEditChat = editedChatItem.getChat();
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
@@ -995,8 +1011,7 @@ public class EvatureMainView implements OnItemClickListener  {
 		mChatAdapter.notifyDataSetChanged();
 	}
 	
-	
-	
+
 	public void dismissItems(int start,  int end, ChatAdapter.DismissStep step) {
 		if (start < 0) {
 			return;
@@ -1014,21 +1029,17 @@ public class EvatureMainView implements OnItemClickListener  {
 	@SuppressLint("NewApi")
 	public void scrollToPosition(final int scrollTo) {
 		mChatListView.post(new Runnable() {
-			@Override
-			public void run() {
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-					mChatListView.smoothScrollToPositionFromTop(scrollTo, 110);
-				}
-				else {
-					mChatListView.smoothScrollToPosition(scrollTo);
-				}
-			}
-		});
-
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    mChatListView.smoothScrollToPositionFromTop(scrollTo, 110);
+                } else {
+                    mChatListView.smoothScrollToPosition(scrollTo);
+                }
+            }
+        });
 	}
-	
-	
-	
+
 	public final OnEditorActionListener editorActionHandler = new OnEditorActionListener() {
 		
 		@Override
@@ -1069,11 +1080,11 @@ public class EvatureMainView implements OnItemClickListener  {
 	
 	public void notifyDataChanged() {
 		mEvaActivity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mChatAdapter.notifyDataSetChanged();
-			}
-		});
+            @Override
+            public void run() {
+                mChatAdapter.notifyDataSetChanged();
+            }
+        });
 	}
 
 	public void voiceResponseToChatItem(ChatItem storeResultInItem, SpannableString chat) {
@@ -1096,11 +1107,6 @@ public class EvatureMainView implements OnItemClickListener  {
 		else {
 			mVolumeButton.setVisibility(View.GONE);
 		}
-	}
-
-	public void restoreFromSeralizeable(Serializable chatList) {
-		mChatListModel = (ArrayList<ChatItem>) chatList;
-		
 	}
 
 	

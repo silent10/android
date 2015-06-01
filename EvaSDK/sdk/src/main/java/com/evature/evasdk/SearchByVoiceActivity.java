@@ -8,12 +8,15 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.transition.ChangeImageTransform;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.evature.evasdk.evaapis.android.EvaComponent;
@@ -82,7 +85,10 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	private EvatureMainView mView;
 
 	private ToneGenerator toneGenerator;  // TODO: replace with custom sounds
-	
+
+    private static String evaSessionId = "1";
+    private static ArrayList<ChatItem> chatItems = new ArrayList<ChatItem>();
+
 
 	private boolean isPaused;
 	private boolean mShownWarningsTutorial;
@@ -100,7 +106,15 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.evature_chat_layout);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            Window window = this.getWindow();
+//            window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
+//            window.setSharedElementEnterTransition(new ChangeImageTransform());
+//            window.setSharedElementExitTransition(new ChangeImageTransform());
+//        }
+
+
+        setContentView(R.layout.evature_chat_layout);
 		
 		// show Eva logs only in Debug build
 		DLog.DebugMode = BuildConfig.DEBUG;
@@ -126,32 +140,36 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		isPaused = false;
 		// setup the Chat View
 		if (savedInstanceState == null) {
-			mView = new EvatureMainView(this, null);
+            if (evaSessionId.equals("1")) {
+                chatItems.clear();
+                mView = new EvatureMainView(this, chatItems);
+                String greeting = getResources().getString(R.string.evature_greeting);
+                int pos = greeting.length();
+                String seeExamples = "\nTap here to see some examples.";
+                SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
+                int col = getResources().getColor(R.color.eva_chat_secondary_text);
+                sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
+                sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
+                ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
+                mView.addChatItem(chat);
+                speak(greeting, true, new Runnable() {
 
-			String greeting = getResources().getString(R.string.evature_greeting);
-			int pos = greeting.length();
-			String seeExamples = "\nTap here to see some examples.";
-			SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-			int col = getResources().getColor(R.color.eva_chat_secondary_text);
-			sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
-			sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
-			ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
-			mView.addChatItem(chat);
-			speak(greeting, true, new Runnable() {
-				
-				@Override
-				public void run() {
-					mView.flashSearchButton(5);
-					if (EvaAppSetup.AUTO_OPEN_MICROPHONE) {
-						voiceRecognitionSearch(null, false);
-					}
-				}
-			});
+                    @Override
+                    public void run() {
+                        mView.flashSearchButton(5);
+                        if (EvaAppSetup.AUTO_OPEN_MICROPHONE) {
+                            voiceRecognitionSearch(null, false);
+                        }
+                    }
+                });
+            }
+            else {
+                mView = new EvatureMainView(this, chatItems);
+                eva.setSessionId(evaSessionId);
+            }
 		}
 		else {
-			@SuppressWarnings("unchecked")
-			ArrayList<ChatItem> chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
-			
+			chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
 			mView = new EvatureMainView(this, chatItems );
 			eva.setSessionId(savedInstanceState.getString(EVATURE_SESSION_ID));
 			mView.flashSearchButton(5);
@@ -346,6 +364,12 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	@Override
 	protected void onResume() {
 		super.onResume();
+        if (EvaButton.searchButton != null) {
+            //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 1.0f, 0.0f);
+            EvatureMainView.animateButton(EvaButton.searchButton, "alpha", 400, 1.0f, 0.0f);
+        }
+
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 		isPaused = false;
 		Intent intent = getIntent();
 		if ("com.google.android.gms.actions.SEARCH_ACTION".equals(intent.getAction())) {
@@ -382,7 +406,12 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	@Override
 	protected void onPause() {
 		DLog.i(TAG, "onPause");
-		eva.onPause();
+        evaSessionId = eva.getSessionId();
+        if (EvaButton.searchButton != null) {
+            //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 0f, 0.666f);
+            EvatureMainView.animateButton(EvaButton.searchButton, "alpha", 400, 0.0f, 1.0f);
+        }
+        eva.onPause();
 		eva.cancelSearch();
 		isPaused = true; // don't allow speech callbacks to start followup recording
 		// cancel recording if during recording
