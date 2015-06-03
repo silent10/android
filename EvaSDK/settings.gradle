@@ -1,1 +1,1 @@
-include ':sdk', ':exampleApp'
+include ':sdk', ':exampleAppCruises', ':exampleAppFlights'

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import com.evature.evasdk.R;
 import com.evature.evasdk.util.DLog;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -104,7 +105,7 @@ public class EvaSpeechRecogComponent {
 			else
 			{
  				if (mVoiceClient.hadError) {
- 					mListener.speechResultError(EvaComponent.NETWORK_ERROR, cookie);
+ 					mListener.speechResultError(mContext.getResources().getString(R.string.evature_network_error), cookie);
 				}
 				else {
 					mListener.speechResultError("No result found", cookie);

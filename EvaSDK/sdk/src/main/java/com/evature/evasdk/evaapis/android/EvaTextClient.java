@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.location.Location;
 import android.os.AsyncTask;
 
+import com.evature.evasdk.R;
 import com.evature.evasdk.evaapis.crossplatform.EvaApiReply;
 import com.evature.evasdk.util.DLog;
 import com.evature.evasdk.util.DownloadUrl;
@@ -83,10 +84,7 @@ import com.evature.evasdk.util.DownloadUrl;
 			startOfTextSearch = System.nanoTime();
 			String evatureUrl = mEva.mConfig.vproxyHost;
 			
-//			// TODO REMOVE!!!!!!!!!!!
-//			if (BuildConfig.DEBUG)
-//			evatureUrl = "http://192.168.0.107:8008"; 
-			
+
 			evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
 			evatureUrl += ("site_code=" + mEva.getSiteCode());
 			evatureUrl += ("&api_key=" + mEva.getApiKey());
@@ -123,7 +121,15 @@ import com.evature.evasdk.util.DownloadUrl;
 			if (mEva.mConfig.appVersion != null) {
 				evatureUrl += "&app_version="+ mEva.mConfig.appVersion;
 			}
-			try {
+            if (mEva.getAutoOpenMicrophone()) {
+                evatureUrl += "&auto_open_mic=1";
+            }
+            if (mEva.semanticHighlightingEnabled()) {
+                evatureUrl += "&add_text=1"; // ask Eva to reply with Semantic highlighting meta data
+            }
+
+
+            try {
 				evatureUrl += "&time_zone="+URLEncoder.encode((""+TimeZone.getDefault().getRawOffset()/3600000.0).replaceFirst("\\.0+$",  ""), "UTF-8");
 				evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.RELEASE), "UTF-8");
 				evatureUrl += "&device="+URLEncoder.encode(android.os.Build.MODEL, "UTF-8");
@@ -158,13 +164,20 @@ import com.evature.evasdk.util.DownloadUrl;
 //			if (externalIpAddress != null) {
 //				evatureUrl += ("&ip_addr=" + externalIpAddress);
 //			}
-			Location location = mEva.getLocation();
-			if (location != null) {
-				double latitude = location.getLatitude();
-				double longitude = location.getLongitude();
-				evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
-			}
-			if (mEditLastUtterance) {
+            try {
+                Location location = mEva.getLocation();
+                if (location != null) {
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
+                    if (latitude != EvaLocationUpdater.NO_LOCATION) {
+                        evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
+                    }
+                }
+            } catch (Exception e1) {
+                DLog.e(TAG, "Exception setting location", e1);
+            }
+
+            if (mEditLastUtterance) {
 				evatureUrl += "&edit_last_utterance=true";
 			}
 			if (recordingKey != null) {
@@ -182,7 +195,7 @@ import com.evature.evasdk.util.DownloadUrl;
 					DLog.w(TAG, "IOException in request to Evature: "+e.getMessage());
 					retries++;
 					try {
-						Thread.sleep(10);
+						Thread.sleep(10); // wait 10ms to give OS time to free resources, maybe it will help
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 					}
@@ -190,7 +203,7 @@ import com.evature.evasdk.util.DownloadUrl;
 			}
 			// had 3 IOExceptions in a row - give up
 			EvaApiReply errorReply = new EvaApiReply("{\"status\": false }");
-			errorReply.errorMessage = EvaComponent.NETWORK_ERROR;
+			errorReply.errorMessage = mEva.activity.getResources().getString(R.string.evature_network_error);
 			return errorReply;
 
 		}

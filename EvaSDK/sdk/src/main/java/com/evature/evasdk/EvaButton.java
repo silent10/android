@@ -19,6 +19,9 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
+import com.evature.evasdk.appinterface.AppScope;
+import com.evature.evasdk.evaapis.android.EvaComponent;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -30,8 +33,11 @@ public class EvaButton {
     public static ArrayList<WeakReference<ImageButton>> evaButtons = new ArrayList<WeakReference<ImageButton>>();
     private static float MARGIN_BOTTOM = 24;  // margin in DIP
 
-
     public static void addDefaultButton(final Activity activity) {
+        addDefaultButton(activity, null);
+    }
+
+    public static void addDefaultButton(final Activity activity, final AppScope evaContext) {
 
         ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.voice_search_button, null);
         WeakReference<ImageButton> weakRef = new WeakReference<ImageButton>(searchButton);
@@ -51,6 +57,9 @@ public class EvaButton {
 //                }
 //                else {
                     Intent intent = new Intent(activity, SearchByVoiceActivity.class);
+                    if (evaContext != null) {
+                        intent.putExtra(SearchByVoiceActivity.INTENT_EVA_CONTEXT, evaContext.toString());
+                    }
                     activity.startActivity(intent);
 //                }
 

@@ -10,7 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/exampleApp" />
+            <option value="$PROJECT_DIR$/exampleAppCruises" />
+            <option value="$PROJECT_DIR$/exampleAppFlights" />
             <option value="$PROJECT_DIR$/sdk" />
           </set>
         </option>

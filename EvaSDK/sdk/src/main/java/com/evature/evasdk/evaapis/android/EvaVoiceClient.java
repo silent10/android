@@ -14,7 +14,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
@@ -85,8 +88,6 @@ public class EvaVoiceClient {
 	/****
 	 * 
 	 * @param context - android context
-	 * @param config 
-	 * @param speechAudioStreamer
 	 */
 	public EvaVoiceClient(Context context, final EvaComponent eva,
 			final LinkedBlockingQueue<byte[]> queue, final boolean editLastUtterance) {
@@ -126,88 +127,98 @@ public class EvaVoiceClient {
 
 	private URL getURL() throws Exception
 	{
+
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		
+
 		EvaComponent.EvaConfig config = mEva.mConfig;
 
-		qparams.add(new BasicNameValuePair("site_code", config.siteCode));
-		qparams.add(new BasicNameValuePair("api_key", config.appKey));
-		qparams.add(new BasicNameValuePair("sdk_version", EvaComponent.SDK_VERSION));
-		if (config.appVersion != null) {
-			qparams.add(new BasicNameValuePair("app_version", config.appVersion));
-		}
-		qparams.add(new BasicNameValuePair("uid",  config.deviceId));
-		qparams.add(new BasicNameValuePair("ffi_chains", "true"));
-		qparams.add(new BasicNameValuePair("ffi_statement", "true"));
-		qparams.add(new BasicNameValuePair("session_id", config.sessionId));
-		if (config.context != null) {
-			qparams.add(new BasicNameValuePair("context", config.context));
-		}
-		if (config.scope != null) {
-			qparams.add(new BasicNameValuePair("scope", config.scope));
-		}
-		try {
-			Location location = mEva.getLocation();
-			if (location != null) {
-				double longitude = location.getLongitude();
-				double latitude = location.getLatitude();
-				if (latitude != EvaLocationUpdater.NO_LOCATION) {
-					qparams.add(new BasicNameValuePair("longitude",""+longitude));
-					qparams.add(new BasicNameValuePair("latitude",""+latitude));
-				}
-			}
-		} catch (Exception e1) {
-			DLog.e(TAG, "Exception setting location", e1);
-		}
+        String evatureUrl = config.vproxyHost;
+
+        evatureUrl += "/"+mEva.mConfig.apiVersion+"?";
+        evatureUrl += ("site_code=" + mEva.getSiteCode());
+        evatureUrl += ("&api_key=" + mEva.getApiKey());
+        //evatureUrl += ("&language=" + mLanguage);
+        evatureUrl += ("&session_id=" + mEva.getSessionId());
+        evatureUrl += ("&sdk_version="+EvaComponent.SDK_VERSION);
+        evatureUrl += "&ffi_chains=true&ffi_statement=true";
+        String language = mEva.getPreferedLanguage();
+        if (language != null && !"".equals(language)) {
+            evatureUrl += "&language="+language.replaceAll("-.*$", "");
+        }
+        if (mEva.getLocale() != null) {
+            evatureUrl += ("&locale="+ mEva.getLocale());
+        }
+        else {
+            Locale currentLocale = Locale.getDefault();
+            evatureUrl += "&locale="+ currentLocale.getCountry();
+        }
+
+
+        if (mEva.getDeviceId() != null) {
+            evatureUrl += "&uid="+mEva.getDeviceId();
+        }
+        if (mEva.getContext() != null) {
+            evatureUrl += "&context="+mEva.getContext();
+        }
+        if (mEva.getScope() != null) {
+            evatureUrl += "&scope="+mEva.getScope();
+        }
+        if (mEva.mConfig.appVersion != null) {
+            evatureUrl += "&app_version="+ mEva.mConfig.appVersion;
+        }
+        if (mEva.getAutoOpenMicrophone()) {
+            evatureUrl += "&auto_open_mic=1";
+        }
+        if (mEva.semanticHighlightingEnabled()) {
+            evatureUrl += "&add_text=1"; // ask Eva to reply with Semantic highlighting meta data
+        }
+
+
+        try {
+            Location location = mEva.getLocation();
+            if (location != null) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                if (latitude != EvaLocationUpdater.NO_LOCATION) {
+                    evatureUrl += ("&longitude=" + longitude + "&latitude=" + latitude);
+                }
+            }
+        } catch (Exception e1) {
+            DLog.e(TAG, "Exception setting location", e1);
+        }
+
+
+        try {
+            evatureUrl += "&time_zone="+ URLEncoder.encode(("" + TimeZone.getDefault().getRawOffset() / 3600000.0).replaceFirst("\\.0+$", ""), "UTF-8");
+            evatureUrl += "&android_ver="+URLEncoder.encode(String.valueOf(android.os.Build.VERSION.RELEASE), "UTF-8");
+            evatureUrl += "&device="+URLEncoder.encode(android.os.Build.MODEL, "UTF-8");
+
+            HashMap<String, String> extraParams = mEva.getExtraParams();
+            for (String key : extraParams.keySet()) {
+                String val = extraParams.get(key);
+                if (val != null)
+                    evatureUrl += "&"+key+"="+URLEncoder.encode(val, "UTF-8");
+            }
+        } catch (UnsupportedEncodingException e) {
+            DLog.e(TAG, "UnsupportedEncodingException", e);
+        }
+
+
 		
 		if (config.vrService != null && !"none".equals(config.vrService)) {
-			qparams.add(new BasicNameValuePair("vr_service", config.vrService));
-		}
-		
-		if (config.language != null) {
-			qparams.add(new BasicNameValuePair("language", config.language.replaceAll("-.*$", "")));
-		}
-		
-		if (config.locale != null) {
-			qparams.add(new BasicNameValuePair("locale", config.locale));
-		}
-		else {
-			Locale currentLocale = Locale.getDefault();
-			qparams.add(new BasicNameValuePair("locale", currentLocale.getCountry())); 
-		}
-		
-		qparams.add(new BasicNameValuePair("time_zone", (""+TimeZone.getDefault().getRawOffset()/3600000.0).replaceFirst("\\.0+$",  "")));
-		qparams.add(new BasicNameValuePair("android_ver", String.valueOf(android.os.Build.VERSION.RELEASE)));
-		qparams.add(new BasicNameValuePair("device", android.os.Build.MODEL));
-		
-		if (editLastUtterance) {
-			qparams.add(new BasicNameValuePair("edit_last_utterance", "true"));
-		}
-		
-		for (String key : config.extraParams.keySet()) {
-			String val = config.extraParams.get(key);
-			if (val != null)
-				qparams.add(new BasicNameValuePair(key, val));
-		}
-		
-		String host = config.vproxyHost.toLowerCase();
-		if (host.startsWith("http") == false) {
-			host = "https://"+host;
-		}
-		int port = -1;
-		String protocol = "https";
-		try {
-			URL aURL = new URL(host);
-			port = aURL.getPort();
-			host = aURL.getHost();
-			protocol = aURL.getProtocol();
-		}catch (MalformedURLException e) {
-		}
-		if (port == -1) {
-			port = PORT;
+            evatureUrl += "&vr_service="+ URLEncoder.encode(config.vrService, "UTF-8");
 		}
 
-		URI uri = URIUtils.createURI(protocol, host, port, config.apiVersion, URLEncodedUtils.format(qparams, "UTF-8"), null);
+
+        if (editLastUtterance) {
+            evatureUrl += "&edit_last_utterance=true";
+        }
+
+		String host = config.vproxyHost.toLowerCase();
+		if (host.startsWith("http") == false) {
+            evatureUrl = "https://"+evatureUrl;
+		}
+        URI uri = new URI(evatureUrl);
 		return uri.toURL();
 	}
 
@@ -240,7 +251,6 @@ public class EvaVoiceClient {
 
 	/***
 	 * Start the recording and return it as 
-	 * @param speechAudioStreamer
 	 * @return
 	 * @throws NumberFormatException
 	 * @throws Exception

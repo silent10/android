@@ -28,15 +28,15 @@ import java.util.UUID;
 
 public class EvaComponent implements
                                     EvaSpeechRecogComponent.SpeechRecognitionResultListener,
-									EvaSearchReplyListener { 
+									EvaSearchReplyListener {
 
-	private final String TAG = "EvaComponent";
+    private final String TAG = "EvaComponent";
 	
 
-	public static final String DEBUG_PREF_KEY  = "eva_debug";
-	public static final String LOCALE_PREF_KEY = "eva_preference_locale";
-	public static final String LANG_PREF_KEY   = "eva_preference_language";
-	public static final String VRSERV_PREF_KEY = "eva_vr_service";
+//	public static final String DEBUG_PREF_KEY  = "eva_debug";
+//	public static final String LOCALE_PREF_KEY = "eva_preference_locale";
+//	public static final String LANG_PREF_KEY   = "eva_preference_language";
+//	public static final String VRSERV_PREF_KEY = "eva_vr_service";
 	public static final String DEVICE_ID_PREF_KEY = "eva_device_id";
 
 
@@ -49,21 +49,21 @@ public class EvaComponent implements
 
 	private EvaLocationUpdater mLocationUpdater;
 
-	
-	Activity activity;
+    public static Object evaAppHandler;  // this implements search handling functions, provided by the app
+
+
+    Activity activity;
 	private EvaSearchReplyListener replyListener;
 
 	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
 	private static final String DefaultEvaWSHost = "http://apiuseh.evaws.com";
 	private static final String DefaultApiVersion = "v1.0";
-	public static final String SDK_VERSION = "android_1.2";
+	public static final String SDK_VERSION = "android_2.0";
 	
 	private EvaTextClient mEvaTextClient;
 
-	
-	final static String NETWORK_ERROR = "There was an error contacting the server, please check your internet connection or try again later";
-	
-	/*****
+
+    /*****
 	 * This class simplifies passing all the needed parameters down the levels of abstraction
 	 */
 	public static class EvaConfig implements Serializable {
@@ -79,14 +79,21 @@ public class EvaComponent implements
 		public String context;// "h" for hotels, "f" for flights, etc... see docs
 		public String scope; // same values as context
 		public boolean locationEnabled; // track the device location
-		
+
+        public boolean semanticHighlightingTimes = true;
+        public boolean semanticHighlightingLocations = true;
+
+        public boolean autoOpenMicrophone = false;
+
 		public String vproxyHost;
 		public String webServiceHost;
 		public String apiVersion;
 		
 		public HashMap<String, String> extraParams;
 		
-		public EvaConfig() {
+		public EvaConfig(String apiKey, String siteCode) {
+            this.siteCode = siteCode;
+            this.appKey = apiKey;
 			sessionId = "1";
 			language = "en";
 			webServiceHost = DefaultEvaWSHost;
@@ -99,7 +106,8 @@ public class EvaComponent implements
 		public void setParameter(String key, String value) {
 			extraParams.put(key, value);
 		}
-	}
+
+    }
 
 	public class RecognizerLanguageChecker extends BroadcastReceiver
 	{
@@ -130,7 +138,7 @@ public class EvaComponent implements
 	
 	public EvaComponent(Activity activity, EvaSearchReplyListener replyListener, EvaConfig config) {
 		if (config == null) {
-			mConfig = new EvaConfig();
+			mConfig = new EvaConfig("","");
 		}
 		else {
 			mConfig = config;
@@ -712,7 +720,14 @@ public class EvaComponent implements
 	public void setAppVersion(String ver) {
 		mConfig.appVersion = ver;
 	}
-	
+
+    public boolean getSemanticHighlightTimes() {return mConfig.semanticHighlightingTimes; }
+    public boolean getSemanticHighlightLocations() { return mConfig.semanticHighlightingLocations;}
+
+    public boolean semanticHighlightingEnabled() {
+        return getSemanticHighlightTimes() || getSemanticHighlightLocations();
+    }
+
 	public void setDeviceLocationEnabled(boolean isEnabled) {
 		mConfig.locationEnabled = isEnabled;
 		if (isEnabled) {
@@ -735,5 +750,9 @@ public class EvaComponent implements
 		}
 		return null;
 	}
+
+    public boolean getAutoOpenMicrophone() {
+        return mConfig.autoOpenMicrophone;
+    }
 
 }

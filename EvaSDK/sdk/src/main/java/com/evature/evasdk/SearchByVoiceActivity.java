@@ -8,18 +8,19 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.transition.ChangeImageTransform;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.evature.evasdk.appinterface.AppSetup;
+import com.evature.evasdk.appinterface.AsyncCountResult;
+import com.evature.evasdk.appinterface.CruiseCount;
+import com.evature.evasdk.appinterface.CruiseSearch;
 import com.evature.evasdk.evaapis.android.EvaComponent;
 import com.evature.evasdk.evaapis.android.EvaSearchReplyListener;
 import com.evature.evasdk.evaapis.android.EvaSpeechRecogComponent;
@@ -35,10 +36,8 @@ import com.evature.evasdk.evaapis.crossplatform.flow.QuestionElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.ReplyElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.StatementElement;
 import com.evature.evasdk.model.ChatItem;
+import com.evature.evasdk.model.appmodel.AppCruiseSearchModel;
 import com.evature.evasdk.util.DLog;
-import com.evature.evasdk.EvaAppSetup;
-
-import org.w3c.dom.NodeList;
 
 import java.lang.ref.WeakReference;
 import java.text.ParseException;
@@ -46,17 +45,16 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
 
 public class SearchByVoiceActivity extends Activity implements EvaSearchReplyListener, VolumeUtil.VolumeListener {
 
-
-
 	@SuppressWarnings("nls")
 	private static final String TAG = "SearchByVoiceActivity";
+
+    public static final String INTENT_EVA_CONTEXT = "evature_context";
 
 	private static class StoreResultData {
 		ChatItem storeResultInItem;
@@ -122,19 +120,37 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		// show Eva logs only in Debug build
 		DLog.DebugMode = BuildConfig.DEBUG;
 		
-		Intent myIntent = getIntent();
-		Bundle bundle = myIntent.getExtras();
-		DLog.i("EvatureChatActivity", "Bundle: " + bundle);
+		Intent theIntent = getIntent();
+		Bundle bundle = theIntent.getExtras();
+		DLog.i(TAG, "Bundle: " + bundle);
 
 		toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
-		EvaComponent.EvaConfig config = new EvaComponent.EvaConfig();
+		EvaComponent.EvaConfig config = new EvaComponent.EvaConfig(AppSetup.apiKey, AppSetup.siteCode);
 		// Override Eva's deviceId with ICR deviceId
 		/*TODO String deviceId =  ICruiseUtility.getDeviceID(this);
 		if (deviceId != null && deviceId.equals("") == false) {
 			config.deviceId = deviceId;
 		}*/
-		EvaAppSetup.setupEva(config);
+        if (AppSetup.deviceId != null) {
+            config.deviceId =  AppSetup.deviceId;
+        }
+        config.appVersion = AppSetup.appVersion;
+
+        config.scope = AppSetup.scopeStr;
+        config.context = theIntent.getStringExtra(INTENT_EVA_CONTEXT);
+
+        for (String key : AppSetup.extraParams.keySet()) {
+            String val = AppSetup.extraParams.get(key);
+            if (val != null)
+                config.extraParams.put(key, val);
+        }
+
+        config.locationEnabled = AppSetup.locationTracking;
+
+        config.semanticHighlightingTimes = AppSetup.semanticHighlightingTimes;
+        config.semanticHighlightingLocations = AppSetup.semanticHighlightingLocations;
+        config.autoOpenMicrophone = AppSetup.autoOpenMicrophone;
 
 		eva = new EvaComponent(this, this, config);
 		eva.onCreate(savedInstanceState);
@@ -148,7 +164,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
                 mView = new EvatureMainView(this, chatItems);
                 String greeting = getResources().getString(R.string.evature_greeting);
                 int pos = greeting.length();
-                String seeExamples = "\nTap here to see some examples.";
+                String seeExamples = getResources().getString(R.string.evature_tap_for_examples);
                 SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
                 int col = getResources().getColor(R.color.eva_chat_secondary_text);
                 sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
@@ -160,7 +176,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
                     @Override
                     public void run() {
                         mView.flashSearchButton(5);
-                        if (EvaAppSetup.AUTO_OPEN_MICROPHONE) {
+                        if (eva.getAutoOpenMicrophone()) {
                             voiceRecognitionSearch(null, false);
                         }
                     }
@@ -190,35 +206,71 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 
         EvaLocation from = null;
         EvaLocation to = null;
-        if (flow.Type ==  FlowElement.TypeEnum.Cruise) {
-            if (flow.RelatedLocations.length < 2) {
-                DLog.w(TAG, "Cruise search without two locations?");
-                chatItem.setSearchModel(null);
-                return;
-            }
-            from = flow.RelatedLocations[0];
-            to = flow.RelatedLocations[1];
-        }
-        else {
-            // alternative - for partial flow
-            if (flow.Type ==  FlowElement.TypeEnum.Question) {
-                QuestionElement qe = (QuestionElement)flow;
-                if (qe.actionType ==  FlowElement.TypeEnum.Cruise) {
-                    // cruises have (for now) only origin and destination
-                    if (reply.locations.length > 0) {
-                        from = reply.locations[0];
-                    }
-                    if (reply.locations.length > 1) {
-                        to = reply.locations[1];
-                    }
+        FlowElement.TypeEnum  searchType = null;
+        boolean isComplete = false;
+        switch (flow.Type) {
+            case Cruise:
+            case Flight:
+            case Car:
+                if (flow.RelatedLocations.length < 2) {
+                    DLog.w(TAG, flow.Type.toString()+" search without two locations?");
+                    chatItem.setSearchModel(null);
+                    return;
                 }
-            }
+                searchType = flow.Type;
+                from = flow.RelatedLocations[0];
+                to = flow.RelatedLocations[1];
+                isComplete = true;
+                break;
+
+            case Hotel:
+                if (flow.RelatedLocations.length < 1) {
+                    DLog.w(TAG, flow.Type.toString()+" search without a location");
+                    chatItem.setSearchModel(null);
+                    return;
+                }
+                searchType = flow.Type;
+                from = flow.RelatedLocations[0];
+                isComplete = true;
+                break;
+
+            case Question:
+                QuestionElement qe = (QuestionElement)flow;
+                searchType = qe.actionType;
+                // cruises have (for now) only origin and destination
+                if (reply.locations.length > 0) {
+                    from = reply.locations[0];
+                }
+                if (reply.locations.length > 1) {
+                    to = reply.locations[1];
+                }
+                isComplete = false;
+                break;
         }
 
-        Date dateFrom=null, dateTo=null;
-        Integer durationFrom=null, durationTo=null;
 
-        String departure = (from != null && from.Departure != null) ?  from.Departure.Date : null;
+        switch (searchType) {
+
+            case Cruise:
+                findNumberOfCruiseResults(isComplete, from, to, reply, chatItem);
+                break;
+
+            case Flight:
+                findNumberOfFlightResults(isComplete, from, to, reply, chatItem);
+                break;
+        }
+
+    }
+
+    private void findNumberOfFlightResults(boolean isComplete, EvaLocation from, EvaLocation to, EvaApiReply reply, ChatItem chatItem) {
+    }
+
+
+    private void findNumberOfCruiseResults(boolean isComplete, EvaLocation from, EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
+        Date dateFrom = null, dateTo = null;
+        Integer durationFrom = null, durationTo = null;
+
+        String departure = (from != null && from.Departure != null) ? from.Departure.Date : null;
         if (departure != null) {
             try {
                 Date startDepDate = evaDateFormat.parse(departure);
@@ -232,7 +284,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
                     dateTo = c.getTime();
                 }
             } catch (ParseException e) {
-                DLog.e(TAG, "Failed to parse eva departure date: "+departure);
+                DLog.e(TAG, "Failed to parse eva departure date: " + departure);
                 e.printStackTrace();
             }
         }
@@ -241,13 +293,11 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
             if (to.Stay.MinDelta != null && to.Stay.MaxDelta != null) {
                 durationFrom = EvaTime.daysDelta(to.Stay.MinDelta);
                 durationTo = EvaTime.daysDelta(to.Stay.MaxDelta);
-            }
-            else {
+            } else {
                 durationFrom = to.Stay.daysDelta();
                 durationTo = durationFrom;
             }
         }
-
 
         if (from != null && from.nearestCustomerLocation != null) {
             from = from.nearestCustomerLocation;
@@ -263,84 +313,85 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
         final Integer fDurationFrom = durationFrom;
         final Integer fDurationTo = durationTo;
         final Context context = this;
+        final boolean fIsComplete = isComplete;
         RequestAttributes.SortEnum sortBy = null;
         if (reply.requestAttributes != null) {
             sortBy = reply.requestAttributes.sortBy;
         }
 
+        chatItem.setSearchModel(new AppCruiseSearchModel(isComplete, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes, sortBy));
         chatItem.setStatus(ChatItem.Status.SEARCHING);
         chatItem.setSubLabel("Searching...");
-        chatItem.setSearchModel(new EvaAppSearchModel(from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes, sortBy ));
         mView.notifyDataChanged();
 
-        EvaAppSetup.evaAppHandler.getCruiseCount(context, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes, new EvaAppInterface.AsyncCountResult() {
-            @Override
-            public void handleCountResult(final int count) {
-                if (count < 0) {
-                    DLog.w(TAG, "No count response from icruise");
-                    chatItem.setSearchModel(null); // don't allow tapping to see empty search results
-                    chatItem.setSubLabel(null);
-                    chatItem.setStatus(ChatItem.Status.NONE);
-                    mView.notifyDataChanged();
-                }
-                else {
-                    Thread t= new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            DLog.d(TAG, "Count result: "+count);
-                            if (count == 0) {
-                                boolean alreadySpoken = pendingReplySayit.cancel == true;
 
-                                // attempt to cancel the pending sayit - no need to ask question or say the cruise if there are no results
-                                pendingReplySayit.cancel = true;
-                                synchronized (pendingReplySayit) {
-                                    pendingReplySayit.notifyAll();
-                                }
+        if (EvaComponent.evaAppHandler instanceof CruiseCount) {
+            // count the results and update teh chat item,  if there is only one result then activate search right away
+            ((CruiseCount) EvaComponent.evaAppHandler).getCruiseCount(context, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes, new AsyncCountResult() {
+                @Override
+                public void handleCountResult(final int count) {
+                    if (count < 0) {
+                        DLog.w(TAG, "No count response");
+                        chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+                        chatItem.setSubLabel(null);
+                        chatItem.setStatus(ChatItem.Status.NONE);
+                        mView.notifyDataChanged();
+                    } else {
+                        Thread t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DLog.d(TAG, "Count result: " + count);
+                                if (count == 0) {
+                                    boolean alreadySpoken = pendingReplySayit.cancel == true;
 
-                                // hide the searching sublabel
-                                chatItem.setSubLabel(null);
-                                chatItem.setStatus(ChatItem.Status.NONE);
-                                String noCruisesStr = getString(R.string.no_cruises);
-                                if (alreadySpoken) {
-                                    ChatItem noCruises = new ChatItem(noCruisesStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
-                                    mView.addChatItem(noCruises);
+                                    // attempt to cancel the pending sayit - no need to ask question or say the cruise if there are no results
+                                    pendingReplySayit.cancel = true;
+                                    synchronized (pendingReplySayit) {
+                                        pendingReplySayit.notifyAll();
+                                    }
+
+                                    // hide the searching sublabel
+                                    chatItem.setSubLabel(null);
+                                    chatItem.setStatus(ChatItem.Status.NONE);
+                                    String noCruisesStr = getString(R.string.no_cruises);
+                                    if (alreadySpoken) {
+                                        ChatItem noCruises = new ChatItem(noCruisesStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
+                                        mView.addChatItem(noCruises);
+                                    } else {
+                                        chatItem.setChat(noCruisesStr);
+                                        chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+                                        mView.notifyDataChanged();
+                                    }
+                                    speak(noCruisesStr, false);
+                                } else {
+                                    // there are results - can go ahead and say the pending sayIt
+                                    synchronized (pendingReplySayit) {
+                                        pendingReplySayit.notifyAll();
+                                    }
+                                    if (count == 1) {
+                                        chatItem.setSubLabel("One cruise found.\nTap here to see it.");
+                                    } else {
+                                        chatItem.setSubLabel(count + " cruises found.\nTap here to see them.");
+                                    }
+                                    chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
+                                    if (fIsComplete || count == 1) {
+                                        if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
+                                            // this is a final flow element, not a question, so trigger cruise search
+                                            // alternatively, there is only one left - no need to ask more questions
+                                            ((CruiseSearch) EvaComponent.evaAppHandler).handleCruiseSearch(context, true, fFrom, fTo, fDateFrom, fDateTo, fDurationFrom, fDurationTo, reply.cruiseAttributes, null);
+                                        }
+                                    }
                                 }
-                                else {
-                                    chatItem.setChat(noCruisesStr);
-                                    chatItem.setSearchModel(null); // don't allow tapping to see empty search results
-                                    mView.notifyDataChanged();
-                                }
-                                speak(noCruisesStr, false);
+                                mView.notifyDataChanged();
                             }
-                            else {
-                                // there are results - can go ahead and say the pending sayIt
-                                synchronized (pendingReplySayit) {
-                                    pendingReplySayit.notifyAll();
-                                }
-                                if (count == 1) {
-                                    chatItem.setSubLabel("One cruise found.\nTap here to see it.");
-                                }
-                                else {
-                                    chatItem.setSubLabel(count+" cruises found.\nTap here to see them.");
-                                }
-                                chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
-                                if (flow.Type == FlowElement.TypeEnum.Cruise || count == 1) {
-                                    // this is a final flow element, not a question, so trigger cruise search
-                                    // alternatively, there is only one left - no need to ask more questions
-                                    EvaAppSetup.evaAppHandler.handleCruiseSearch(context, fFrom, fTo, fDateFrom, fDateTo, fDurationFrom, fDurationTo, reply.cruiseAttributes, null);
-                                }
-                            }
-                            mView.notifyDataChanged();
-                        }
-                    });
-                    t.start();
+                        });
+                        t.start();
+                    }
                 }
-            }
-        });
-
+            });
+        }
 
     }
-
 
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -701,7 +752,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 			@Override
 			public void run() {
 				mView.flashSearchButton(3);
-				if (EvaAppSetup.AUTO_OPEN_MICROPHONE) {
+				if (eva.getAutoOpenMicrophone()) {
 					voiceRecognitionSearch(null, false);
 				}
 			}
@@ -789,9 +840,9 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					chat.setSpan( new ErrorSpan(getResources()), warning.position, warning.position+warning.text.length(), 0);
 				}
 			}
-			if (EvaAppSetup.SEMANTIC_HIGHLIGHTING && reply.parsedText != null) {
+			if (eva.semanticHighlightingEnabled() && reply.parsedText != null) {
 				try {
-					if (EvaAppSetup.SEMANTIC_HIGHLIGHT_TIMES && reply.parsedText.times != null) {
+					if (eva.getSemanticHighlightTimes() && reply.parsedText.times != null) {
 						int col = getResources().getColor(R.color.times_markup);
 						
 						for (ParsedText.TimesMarkup time : reply.parsedText.times) {
@@ -799,7 +850,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 						}
 					}
 					
-					if (EvaAppSetup.SEMANTIC_HIGHLIGHT_LOCATIONS && reply.parsedText.locations != null) {
+					if (eva.getSemanticHighlightLocations() && reply.parsedText.locations != null) {
 						int col = getResources().getColor(R.color.locations_markup);
 						
 						for (ParsedText.LocationMarkup location: reply.parsedText.locations) {
@@ -949,7 +1000,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 										public void run() {
 											DLog.d(TAG, "Question asked");
 											mView.flashSearchButton(3);
-											if (EvaAppSetup.AUTO_OPEN_MICROPHONE) {
+											if (eva.getAutoOpenMicrophone()) {
 												voiceRecognitionSearch(null, false);
 											}
 										}
@@ -971,7 +1022,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					public void run() {
 						DLog.d(TAG, "New session started");
 						mView.flashSearchButton(3);
-						if (EvaAppSetup.AUTO_OPEN_MICROPHONE) {
+						if (eva.getAutoOpenMicrophone()) {
 							voiceRecognitionSearch(null, false);
 						}
 					}
@@ -996,20 +1047,10 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 			case Explore:
 			case Train:
 			case Cruise:
-				if (EvaAppSetup.ASYNC_COUNT) {
-					findNumberOfResults(reply, flow, chatItem);
-				}
-				else {
-
-				}
+            case Question:
+                findNumberOfResults(reply, flow, chatItem);
 				break;
 
-			case Question:
-				if (EvaAppSetup.ASYNC_COUNT) {
-					findNumberOfResults(reply, flow, chatItem);
-				}
-				break;
-				
 			case Statement:
 				StatementElement se = (StatementElement) flow;
 				switch (se.StatementType) {
@@ -1021,9 +1062,9 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 						break;
 				}
 				break;
-			
-			default:
-				DLog.w(TAG, "Unexpected flow type "+flow.Type);
+
+            default:
+                DLog.w(TAG, "Unexpected flow type "+flow.Type);
 				break;
 
 		}

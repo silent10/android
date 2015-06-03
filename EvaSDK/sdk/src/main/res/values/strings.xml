@@ -12,8 +12,10 @@
     <string name="evature_audio_control">Audio Control</string>
     <string name="evature_low_volume_warning">Our experience shows that users with low volume settings do not notice when the they are being asked.</string>
     <string name="evature_low_volume_header">Your volume is too low!</string>
+    <string name="evature_tap_for_examples">\nTap here to see some examples.</string>
     <string name="undo_tutorial">Drag the microphone button to the left to undo the last utterance.</string>
     <string name="no_cruises">Sorry, no matching cruises found.\nDrag the microphone button to the left to undo.</string>
+    <string name="evature_network_error">There was an error contacting the server, please check your internet connection or try again later</string>
     <string name="evature_volume_">Volume:</string>
     <string name="evature_ok">OK</string>
     <string name="evature_stop">Stop</string>    
