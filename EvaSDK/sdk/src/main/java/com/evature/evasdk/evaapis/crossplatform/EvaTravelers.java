@@ -11,11 +11,15 @@ import org.json.JSONObject;
 
 public class EvaTravelers  implements Serializable{
 	private final static String TAG = "EvaTravellers";
-	public Integer adult = null;
-	public Integer child = null;
-	public Integer infant = null;
-	public Integer elderly = null;
-	
+	private Integer adult = null;        // null means it wasn't specified by the user,  0 means it was explicitly specified to zero by the user
+	private Integer child = null;
+	private Integer infant = null;
+	private Integer elderly = null;
+
+    public EvaTravelers() {
+
+    }
+
 	public EvaTravelers(JSONObject jTravelers, List<String> parseErrors) {
 		try {
 			if (jTravelers.has("Adult")) {
@@ -35,26 +39,59 @@ public class EvaTravelers  implements Serializable{
 			DLog.e(TAG, "Travelers Parse error ", e);
 		}
 	}
-	
-	public Integer allAdults() {
-		int result = 0;
-		if (adult != null) {
-			result = adult.intValue();
-		}
-		if (elderly != null) {
-			result += elderly.intValue();
-		}
-		return result;
+
+    /***
+     * @return Integer number of adults (not elderly!) specified,  null if none were specified
+     */
+    public Integer sepcifiedAdults() {
+        return adult;
+    }
+
+    /***
+     * @return Integer number of children (not infants!) specified,  null if none were specified
+     */
+    public Integer sepcifiedChildren() {
+        return child;
+    }
+
+    /***
+     * @return Integer number of elderly (not adults!) specified,  null if none were specified
+     */
+    public Integer sepcifiedElderly() {
+        return elderly;
+    }
+
+    /***
+     * @return Integer number of infants (not children!) specified,  null if none were specified
+     */
+    public Integer sepcifiedInfants() {
+        return infant;
+    }
+
+    /***
+     * @return Total number of adults (adult+elderly) - if none are specified the result is zero
+     */
+	public int getAllAdults() {
+        return getAdults() + getElderly();
 	}
-	
-	public Integer allChildren() {
-		int result = 0;
-		if (child != null) {
-			result = child.intValue();
-		}
-		if (infant != null) {
-			result += infant.intValue();
-		}
-		return result;
+
+    /***
+     * @return Total number of children (children+infants) - if none are specified the result is zero
+     */
+	public int getAllChildren() {
+        return getChildren() + getInfants();
 	}
+
+    public int getAdults() {
+        return adult == null ? 0 : adult.intValue();
+    }
+    public int getChildren() {
+        return child == null ? 0 : child.intValue();
+    }
+    public int getElderly() {
+        return elderly == null ? 0 : elderly.intValue();
+    }
+    public int getInfants() {
+        return infant == null ? 0 : infant.intValue();
+    }
 }

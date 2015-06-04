@@ -34,7 +34,7 @@ android {
     }
 }
 
-
+/*
 buildscript {
     repositories {
         maven {
@@ -60,10 +60,10 @@ tasks.withType(JavaCompile) {
     compileTask -> compileTask.dependsOn genSources
 }
 
-
 gradle.projectsEvaluated {
     preBuild.dependsOn genSources
 }
+*/
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar', '*.so'])

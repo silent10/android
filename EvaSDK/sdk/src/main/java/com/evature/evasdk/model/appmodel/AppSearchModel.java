@@ -11,4 +11,12 @@ public abstract class AppSearchModel implements Serializable {
     protected boolean isComplete; // true if this search is "complete" - contains all the mandatory fields
 
     public abstract void triggerSearch(Context context);
+
+    AppSearchModel(boolean isComplete) {
+        this.isComplete = isComplete;
+    }
+
+    public void setIsComplete(boolean complete) {
+        isComplete = complete;
+    }
 }

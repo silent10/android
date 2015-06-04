@@ -45,22 +45,7 @@ public class EvaButton {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //searchButton.setVisibility(View.GONE);
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    Window window = activity.getWindow();
-//                    window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
-//                    window.setSharedElementEnterTransition(new ChangeImageTransform());
-//                    window.setSharedElementExitTransition(new ChangeImageTransform());
-//                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, searchButton, "eva_microphone_button");
-//                    Intent intent = new Intent(activity, SearchByVoiceActivity.class);
-//                    activity.startActivity(intent, options.toBundle());
-//                }
-//                else {
-                    Intent intent = new Intent(activity, SearchByVoiceActivity.class);
-                    if (evaContext != null) {
-                        intent.putExtra(SearchByVoiceActivity.INTENT_EVA_CONTEXT, evaContext.toString());
-                    }
-                    activity.startActivity(intent);
+            startSearchByVoice(activity, evaContext);
 //                }
 
             }
@@ -81,6 +66,24 @@ public class EvaButton {
 
         activity.getWindow().addContentView(rl, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    public static void startSearchByVoice( Activity activity, AppScope evaContext) {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                    Window window = activity.getWindow();
+//                    window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
+//                    window.setSharedElementEnterTransition(new ChangeImageTransform());
+//                    window.setSharedElementExitTransition(new ChangeImageTransform());
+//                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, searchButton, "eva_microphone_button");
+//                    Intent intent = new Intent(activity, SearchByVoiceActivity.class);
+//                    activity.startActivity(intent, options.toBundle());
+//                }
+//                else {
+        Intent intent = new Intent(activity, SearchByVoiceActivity.class);
+        if (evaContext != null) {
+            intent.putExtra(SearchByVoiceActivity.INTENT_EVA_CONTEXT, evaContext.toString());
+        }
+        activity.startActivity(intent);
     }
 
 }

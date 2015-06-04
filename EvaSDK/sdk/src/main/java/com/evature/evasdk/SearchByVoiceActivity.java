@@ -13,6 +13,7 @@ import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -21,13 +22,17 @@ import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.appinterface.AsyncCountResult;
 import com.evature.evasdk.appinterface.CruiseCount;
 import com.evature.evasdk.appinterface.CruiseSearch;
+import com.evature.evasdk.appinterface.FlightCount;
+import com.evature.evasdk.appinterface.FlightSearch;
 import com.evature.evasdk.evaapis.android.EvaComponent;
 import com.evature.evasdk.evaapis.android.EvaSearchReplyListener;
 import com.evature.evasdk.evaapis.android.EvaSpeechRecogComponent;
 import com.evature.evasdk.evaapis.crossplatform.EvaApiReply;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.EvaTime;
+import com.evature.evasdk.evaapis.crossplatform.EvaTravelers;
 import com.evature.evasdk.evaapis.crossplatform.EvaWarning;
+import com.evature.evasdk.evaapis.crossplatform.FlightAttributes;
 import com.evature.evasdk.evaapis.crossplatform.ParsedText;
 import com.evature.evasdk.evaapis.crossplatform.RequestAttributes;
 import com.evature.evasdk.evaapis.crossplatform.ServiceAttributes;
@@ -37,6 +42,7 @@ import com.evature.evasdk.evaapis.crossplatform.flow.ReplyElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.StatementElement;
 import com.evature.evasdk.model.ChatItem;
 import com.evature.evasdk.model.appmodel.AppCruiseSearchModel;
+import com.evature.evasdk.model.appmodel.AppFlightSearchModel;
 import com.evature.evasdk.util.DLog;
 
 import java.lang.ref.WeakReference;
@@ -202,7 +208,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 
 
 
-    private void findNumberOfResults(final EvaApiReply reply, final FlowElement flow, final ChatItem chatItem) {
+    private void findSearchResults(final EvaApiReply reply, final FlowElement flow, final ChatItem chatItem) {
 
         EvaLocation from = null;
         EvaLocation to = null;
@@ -252,34 +258,225 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
         switch (searchType) {
 
             case Cruise:
-                findNumberOfCruiseResults(isComplete, from, to, reply, chatItem);
+                findCruiseResults(isComplete, from, to, reply, chatItem);
                 break;
 
             case Flight:
-                findNumberOfFlightResults(isComplete, from, to, reply, chatItem);
+                findFlightResults(isComplete, from, to, reply, chatItem);
+                break;
+
+            case Hotel:
+                findHotelResults(isComplete, from, to, reply, chatItem);
                 break;
         }
 
     }
 
-    private void findNumberOfFlightResults(boolean isComplete, EvaLocation from, EvaLocation to, EvaApiReply reply, ChatItem chatItem) {
+    private void findFlightResults(final boolean isComplete, final EvaLocation from, final EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
+
+        // TODO: we default to round trip - maybe should use AppSetup to decide if default to round trip or one way?
+        boolean oneWay = reply.flightAttributes != null && reply.flightAttributes.oneWay != null && reply.flightAttributes.oneWay.booleanValue() == true;
+
+        Date departDateMin = null;
+        Date departDateMax = null;
+        String departureStr = (from != null && from.Departure != null) ? from.Departure.Date : null;
+        if (departureStr != null) {
+            try {
+                departDateMin = evaDateFormat.parse(departureStr);
+
+                Integer days = from.Departure.daysDelta();
+                if (days != null) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(departDateMin); // Now use today date.
+                    c.add(Calendar.DATE, days.intValue()); // Adding duration days
+                    departDateMax = c.getTime();
+                }
+            } catch (ParseException e) {
+                DLog.e(TAG, "Failed to parse eva departure date: " + departureStr);
+                e.printStackTrace();
+            }
+        }
+
+        Date returnDateMin = null;
+        Date returnDateMax = null;
+
+        if (!oneWay) {
+            String returnStr = (to != null && to.Departure != null) ? to.Departure.Date : null;
+            if (returnStr == null) {
+                oneWay = true;
+            }
+            else {
+                try {
+                    returnDateMin = evaDateFormat.parse(returnStr);
+
+                    Integer days = to.Departure.daysDelta();
+                    if (days != null) {
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(departDateMin);
+                        c.add(Calendar.DATE, days.intValue()); // Adding duration days
+                        returnDateMax = c.getTime();
+                    }
+                } catch (ParseException e) {
+                    DLog.e(TAG, "Failed to parse eva departure date: " + departureStr);
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        final Context context = this;
+        RequestAttributes.SortEnum sortBy = null;
+        if (reply.requestAttributes != null) {
+            sortBy = reply.requestAttributes.sortBy;
+        }
+
+        final Boolean nonstop;
+        final Boolean redeye;
+        final String[] airlines;
+        final String food;
+        final FlightAttributes.SeatType seatType;
+        final FlightAttributes.SeatClass[] seatClass;
+
+        if (reply.flightAttributes == null) {
+            nonstop = null;
+            redeye = null;
+            airlines = null;
+            food = null;
+            seatType = null;
+            seatClass = null;
+        }
+        else {
+            FlightAttributes fa = reply.flightAttributes;
+            nonstop = fa.nonstop;
+            redeye = fa.redeye;
+            airlines = fa.airlines;
+            food = fa.food;
+            seatType = fa.seatType;
+            seatClass = fa.seatClass;
+        }
+
+        chatItem.setSearchModel(new AppFlightSearchModel(isComplete, from, to, departDateMin, departDateMax, returnDateMin, returnDateMax, reply.travelers,
+                oneWay, nonstop, seatClass, airlines, redeye, food, seatType,
+                sortBy));
+
+
+
+        if (EvaComponent.evaAppHandler instanceof FlightCount) {
+            chatItem.setStatus(ChatItem.Status.SEARCHING);
+            chatItem.setSubLabel("Searching...");
+            mView.notifyDataChanged();
+
+            // TODO: this is the same count handler as for cruises!  de-dup !
+            AsyncCountResult flightCountHandler = new AsyncCountResult() {
+                @Override
+                public void handleCountResult(final int count) {
+                    if (count < 0) {
+                        DLog.w(TAG, "No count response");
+                        chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+                        chatItem.setSubLabel(null);
+                        chatItem.setStatus(ChatItem.Status.NONE);
+                        mView.notifyDataChanged();
+                    }
+                    else {
+                        Thread t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                DLog.d(TAG, "Count result: " + count);
+                                if (count == 0) {
+                                    boolean alreadySpoken = pendingReplySayit.cancel == true;
+
+                                    // attempt to cancel the pending sayit - no need to ask question or say the cruise if there are no results
+                                    pendingReplySayit.cancel = true;
+                                    synchronized (pendingReplySayit) {
+                                        pendingReplySayit.notifyAll();
+                                    }
+
+                                    // hide the searching sublabel
+                                    chatItem.setSubLabel(null);
+                                    chatItem.setStatus(ChatItem.Status.NONE);
+                                    String zeroCountStr = getString(R.string.no_cruises);
+                                    if (alreadySpoken) {
+                                        ChatItem noCruises = new ChatItem(zeroCountStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
+                                        mView.addChatItem(noCruises);
+                                    } else {
+                                        chatItem.setChat(zeroCountStr);
+                                        chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+                                        mView.notifyDataChanged();
+                                    }
+                                    speak(zeroCountStr, false);
+                                } else {
+                                    // there are results - can go ahead and say the pending sayIt
+                                    synchronized (pendingReplySayit) {
+                                        pendingReplySayit.notifyAll();
+                                    }
+                                    if (count == 1) {
+                                        chatItem.setSubLabel("One cruise found.\nTap here to see it.");
+                                    } else {
+                                        chatItem.setSubLabel(count + " cruises found.\nTap here to see them.");
+                                    }
+                                    chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
+                                    if (isComplete || count == 1) {
+                                        if (EvaComponent.evaAppHandler instanceof FlightSearch) {
+                                            // this is a final flow element, not a question, so trigger cruise search
+                                            // alternatively, there is only one left - no need to ask more questions
+                                            chatItem.getSearchModel().setIsComplete(true);
+                                            chatItem.getSearchModel().triggerSearch(context);
+                                        }
+                                    }
+                                }
+                                mView.notifyDataChanged();
+                            }
+                        });
+                        t.start();
+                    }
+                }
+            };
+
+            if (oneWay) {
+                ((FlightCount) EvaComponent.evaAppHandler).getOneWayFlightCount(context, isComplete, from, to,
+                        departDateMin, departDateMax, returnDateMin, returnDateMax, reply.travelers,
+                        nonstop, seatClass, airlines, redeye, food, seatType,
+                        flightCountHandler);
+            }
+            else {
+                ((FlightCount) EvaComponent.evaAppHandler).getRoundTripFlightCount(context, isComplete, from, to,
+                        departDateMin, departDateMax, returnDateMin, returnDateMax, reply.travelers,
+                        nonstop, seatClass, airlines, redeye, food, seatType,
+                        flightCountHandler);
+            }
+        }
+        else {
+            // count is not supported - trigger search if this is a complete flow action
+            if (isComplete) {
+                if (EvaComponent.evaAppHandler instanceof FlightSearch) {
+                    chatItem.getSearchModel().triggerSearch(context);
+                }
+                else {
+                    // TODO: insert new chat item saying the app doesn't support flight search?
+                    Log.e(TAG, "App reached flight search, but has no matching handler");
+                }
+            }
+        }
     }
 
 
-    private void findNumberOfCruiseResults(boolean isComplete, EvaLocation from, EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
+    private void findHotelResults(boolean isComplete, EvaLocation from, EvaLocation to, EvaApiReply reply, ChatItem chatItem) {
+
+    }
+
+    private void findCruiseResults(boolean isComplete, EvaLocation from, EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
         Date dateFrom = null, dateTo = null;
         Integer durationFrom = null, durationTo = null;
 
         String departure = (from != null && from.Departure != null) ? from.Departure.Date : null;
         if (departure != null) {
             try {
-                Date startDepDate = evaDateFormat.parse(departure);
-                dateFrom = startDepDate; //icrDateFormat.format(startDepDate);
+                dateFrom = evaDateFormat.parse(departure);
 
                 Integer days = from.Departure.daysDelta();
                 if (days != null) {
                     Calendar c = Calendar.getInstance();
-                    c.setTime(startDepDate); // Now use today date.
+                    c.setTime(dateFrom); // Now use today date.
                     c.add(Calendar.DATE, days.intValue()); // Adding duration days
                     dateTo = c.getTime();
                 }
@@ -1048,7 +1245,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 			case Train:
 			case Cruise:
             case Question:
-                findNumberOfResults(reply, flow, chatItem);
+                findSearchResults(reply, flow, chatItem);
 				break;
 
 			case Statement:

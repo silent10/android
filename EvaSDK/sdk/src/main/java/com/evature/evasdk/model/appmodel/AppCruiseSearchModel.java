@@ -33,7 +33,7 @@ public class AppCruiseSearchModel extends AppSearchModel {
                                 Integer durationMax,
                                 CruiseAttributes attributes,
                                 RequestAttributes.SortEnum sortBy) {
-        this.isComplete = isComplete;
+        super(isComplete);
         this.from = from;
         this.to = to;
         this.dateFrom = dateFrom;
@@ -45,7 +45,7 @@ public class AppCruiseSearchModel extends AppSearchModel {
     }
 
     public void triggerSearch(Context context) {
-        if (EvaComponent.evaAppHandler != null && EvaComponent.evaAppHandler instanceof CruiseSearch) {
+        if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
             ((CruiseSearch)EvaComponent.evaAppHandler).handleCruiseSearch(context, isComplete, from, to, dateFrom, dateTo, durationMin, durationMax, attributes, sortBy);
         }
     }
