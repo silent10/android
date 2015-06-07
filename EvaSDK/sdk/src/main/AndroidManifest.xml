@@ -4,11 +4,10 @@
         <!--android:allowBackup="true" android:label="@string/app_name"-->
         <!--android:icon="@drawable/ic_launcher" android:theme="@style/AppTheme">-->
     <activity
-        android:name="com.evature.evasdk.SearchByVoiceActivity"
+        android:name=".EvaChatScreenActivity"
         android:screenOrientation="portrait"
         android:windowSoftInputMode="adjustPan"
         android:theme="@android:style/Theme.Translucent.NoTitleBar"
-        android:excludeFromRecents="true"
         android:launchMode="singleInstance"
         >
         <intent-filter>

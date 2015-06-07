@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -14,7 +15,9 @@ import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -30,7 +33,6 @@ import com.evature.evasdk.evaapis.android.EvaSpeechRecogComponent;
 import com.evature.evasdk.evaapis.crossplatform.EvaApiReply;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.EvaTime;
-import com.evature.evasdk.evaapis.crossplatform.EvaTravelers;
 import com.evature.evasdk.evaapis.crossplatform.EvaWarning;
 import com.evature.evasdk.evaapis.crossplatform.FlightAttributes;
 import com.evature.evasdk.evaapis.crossplatform.ParsedText;
@@ -55,14 +57,15 @@ import java.util.Iterator;
 import java.util.Locale;
 
 
-public class SearchByVoiceActivity extends Activity implements EvaSearchReplyListener, VolumeUtil.VolumeListener {
+public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUtil.VolumeListener {
 
 	@SuppressWarnings("nls")
-	private static final String TAG = "SearchByVoiceActivity";
+	private static final String TAG = "EvaChatScreenComponent";
 
     public static final String INTENT_EVA_CONTEXT = "evature_context";
 
-	private static class StoreResultData {
+
+    private static class StoreResultData {
 		ChatItem storeResultInItem;
 		boolean editLastUtterance;
 		SpannableString preEditChat;
@@ -107,12 +110,21 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		public SpannableString chatText;
 	}
 	private PendingSayIt pendingReplySayit = new PendingSayIt();
-	
-	
+
+    private View rootView;
+
+    private Activity activity;
+    public Activity getActivity() {
+        return activity;
+    }
+
+    public EvaChatScreenComponent(Activity hostActivity) {
+        this.activity = hostActivity;
+    }
+
 	@SuppressLint("NewApi")
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		//super.onCreate(savedInstanceState);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            Window window = this.getWindow();
 //            window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
@@ -120,13 +132,10 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 //            window.setSharedElementExitTransition(new ChangeImageTransform());
 //        }
 
-
-        setContentView(R.layout.evature_chat_layout);
-		
 		// show Eva logs only in Debug build
 		DLog.DebugMode = BuildConfig.DEBUG;
 		
-		Intent theIntent = getIntent();
+		Intent theIntent = activity.getIntent();
 		Bundle bundle = theIntent.getExtras();
 		DLog.i(TAG, "Bundle: " + bundle);
 
@@ -158,21 +167,26 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
         config.semanticHighlightingLocations = AppSetup.semanticHighlightingLocations;
         config.autoOpenMicrophone = AppSetup.autoOpenMicrophone;
 
-		eva = new EvaComponent(this, this, config);
+		eva = new EvaComponent(activity, this, config);
 		eva.onCreate(savedInstanceState);
 		
 		speechSearch = new EvaSpeechRecogComponent(eva);
 		isPaused = false;
-		// setup the Chat View
-		if (savedInstanceState == null) {
+
+	}
+
+    public View createMainView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.evature_chat_layout, container, false);
+        if (savedInstanceState == null) {
             if (evaSessionId.equals("1")) {
                 chatItems.clear();
                 mView = new EvatureMainView(this, chatItems);
-                String greeting = getResources().getString(R.string.evature_greeting);
+                Resources resources = activity.getResources();
+                String greeting = resources.getString(R.string.evature_greeting);
                 int pos = greeting.length();
-                String seeExamples = getResources().getString(R.string.evature_tap_for_examples);
+                String seeExamples = resources.getString(R.string.evature_tap_for_examples);
                 SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-                int col = getResources().getColor(R.color.eva_chat_secondary_text);
+                int col = resources.getColor(R.color.eva_chat_secondary_text);
                 sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
                 sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
                 ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
@@ -192,19 +206,26 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
                 mView = new EvatureMainView(this, chatItems);
                 eva.setSessionId(evaSessionId);
             }
-		}
-		else {
-			chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
-			mView = new EvatureMainView(this, chatItems );
-			eva.setSessionId(savedInstanceState.getString(EVATURE_SESSION_ID));
-			mView.flashSearchButton(5);
-		}
-		
-		mView.setVolumeIcon();
-	}
-	
+        }
+        else {
+            chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
+            mView = new EvatureMainView(this, chatItems );
+            eva.setSessionId(savedInstanceState.getString(EVATURE_SESSION_ID));
+            mView.flashSearchButton(5);
+        }
+        mView.setVolumeIcon();
 
-	private final SimpleDateFormat evaDateFormat = new SimpleDateFormat("yyyy-M-dd", Locale.US);
+        return rootView;
+    }
+
+
+
+    public View getRootView() {
+        return rootView;
+    }
+
+
+    private final SimpleDateFormat evaDateFormat = new SimpleDateFormat("yyyy-M-dd", Locale.US);
 
 
 
@@ -324,7 +345,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
         }
 
 
-        final Context context = this;
+        final Context context = activity;
         RequestAttributes.SortEnum sortBy = null;
         if (reply.requestAttributes != null) {
             sortBy = reply.requestAttributes.sortBy;
@@ -394,7 +415,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
                                     // hide the searching sublabel
                                     chatItem.setSubLabel(null);
                                     chatItem.setStatus(ChatItem.Status.NONE);
-                                    String zeroCountStr = getString(R.string.no_cruises);
+                                    String zeroCountStr = activity.getString(R.string.no_cruises);
                                     if (alreadySpoken) {
                                         ChatItem noCruises = new ChatItem(zeroCountStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
                                         mView.addChatItem(noCruises);
@@ -509,7 +530,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
         final Date fDateTo = dateTo;
         final Integer fDurationFrom = durationFrom;
         final Integer fDurationTo = durationTo;
-        final Context context = this;
+        final Context context = activity;
         final boolean fIsComplete = isComplete;
         RequestAttributes.SortEnum sortBy = null;
         if (reply.requestAttributes != null) {
@@ -550,7 +571,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
                                     // hide the searching sublabel
                                     chatItem.setSubLabel(null);
                                     chatItem.setStatus(ChatItem.Status.NONE);
-                                    String noCruisesStr = getString(R.string.no_cruises);
+                                    String noCruisesStr = activity.getString(R.string.no_cruises);
                                     if (alreadySpoken) {
                                         ChatItem noCruises = new ChatItem(noCruisesStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
                                         mView.addChatItem(noCruises);
@@ -593,28 +614,25 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
 		DLog.d(TAG, "onSaveInstanceState");
-		super.onSaveInstanceState(savedInstanceState);
-		
 		mView.handleBackPressed(); // cancel edit chat item if one is being edited
 		savedInstanceState.putSerializable(EVATURE_CHAT_LIST, mView.getChatListModel());
 		savedInstanceState.putString(EVATURE_SESSION_ID, eva.getSessionId());
 	}
 
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-        DLog.i(TAG, "onRestoreInstanceState");
-        if (savedInstanceState != null) {
-            ArrayList<ChatItem> chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
-
-            mView = new EvatureMainView(this, chatItems );
-            eva.setSessionId(savedInstanceState.getString(EVATURE_SESSION_ID));
-            mView.flashSearchButton(5);
-        }
-    }
-
+//    handled in onCreate
+//    public void onRestoreInstanceState(Bundle savedInstanceState) {
+//        DLog.i(TAG, "onRestoreInstanceState");
+//        if (savedInstanceState != null) {
+//            ArrayList<ChatItem> chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
+//
+//            mView = new EvatureMainView(this, chatItems );
+//            eva.setSessionId(savedInstanceState.getString(EVATURE_SESSION_ID));
+//            mView.flashSearchButton(5);
+//        }
+//    }
+//
 	
-	@Override
-	protected void onResume() {
-		super.onResume();
+	public void onResume() {
         for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
             WeakReference<ImageButton> weakRef = iterator.next();
             ImageButton imgButton = weakRef.get();
@@ -628,9 +646,9 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 
         }
 
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 		isPaused = false;
-		Intent intent = getIntent();
+		Intent intent = activity.getIntent();
 		if ("com.google.android.gms.actions.SEARCH_ACTION".equals(intent.getAction())) {
 			eva.resetSession();
 			eva.cancelSearch();
@@ -647,23 +665,22 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 			mView.addChatItem(new ChatItem("Eva Thinking...", null, ChatItem.ChatType.Eva));
 			
 			// clear the intent - it shouldn't run again resuming!
-			onNewIntent(new Intent());
+			//activity.onNewIntent(new Intent());
 		}
 
 		eva.onResume();
-		VolumeUtil.register(this, this);
+		VolumeUtil.register(activity, this);
 		
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-	    super.onNewIntent(intent);
-	    // getIntent() should always return the most recent
-	    setIntent(intent);
-	}
-	
-	@Override
-	protected void onPause() {
+//	@Override
+//	protected void onNewIntent(Intent intent) {
+//	    super.onNewIntent(intent);
+//	    // getIntent() should always return the most recent
+//	    setIntent(intent);
+//	}
+
+	public void onPause() {
 		DLog.i(TAG, "onPause");
         evaSessionId = eva.getSessionId();
         for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
@@ -688,17 +705,14 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		   mView.hideSpeechWave();
 		   mView.deactivateSearchButton();
 	    }
-		VolumeUtil.unregister(this);
-		super.onPause();
+		VolumeUtil.unregister(activity);
 	}
 
-	@Override
-	protected void onDestroy() {
+    public void onDestroy() {
 		eva.onDestroy();
 		if (speechSearch != null) {
 			speechSearch.onDestroy();
 		}
-		super.onDestroy();
 	}
 	
 	public void speak(String sayIt) {
@@ -745,11 +759,11 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					} catch (InterruptedException e) {
 					}
 					finally {
-						runOnUiThread(new Runnable() {
-							public void run() {
-								eva.speechResultError(message, cookie);
-							}
-						});
+						activity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                eva.speechResultError(message, cookie);
+                            }
+                        });
 					}
 				}
 			});
@@ -770,11 +784,13 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					} catch (InterruptedException e) {
 					}
 					finally {
-						runOnUiThread(new Runnable() {
-							public void run() {
-								eva.speechResultOK(evaJson, debugData, cookie);
-							};
-						});
+						activity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                eva.speechResultOK(evaJson, debugData, cookie);
+                            }
+
+                            ;
+                        });
 					}
 				}
 			});
@@ -823,16 +839,16 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					Thread.sleep(25); // wait for beep to end - do NOT record the beep
 				} catch (InterruptedException e) {
 				}
-		        runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-						DLog.i(TAG, "Starting recognizer");
-						eva.stopSpeak();
-						mView.startSpeechRecognition(mSpeechSearchListener, speechSearch, VOICE_COOKIE, editLastUtterance);				
-						
-					}
-				});
+                activity.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        DLog.i(TAG, "Starting recognizer");
+                        eva.stopSpeak();
+                        mView.startSpeechRecognition(mSpeechSearchListener, speechSearch, VOICE_COOKIE, editLastUtterance);
+
+                    }
+                });
 			}
 		});
 		t.start();
@@ -899,7 +915,6 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 
 
 
-	@Override 
 	public void onBackPressed() {
 	   DLog.d(TAG, "onBackPressed Called");
 
@@ -913,7 +928,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 	   }
 
 		if (!mView.handleBackPressed()) {
-			super.onBackPressed();
+            activity.onBackPressed();
 		}
 	}
 	
@@ -933,13 +948,13 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		eva.resetSession();
 		// triggered by button - create a "start new session" fake chat
 		VOICE_COOKIE.storeResultInItem = null;
-		ChatItem myChat = new ChatItem(getString(R.string.evature_user_start_new));
+		ChatItem myChat = new ChatItem(activity.getString(R.string.evature_user_start_new));
 		mView.addChatItem(myChat);
-		String greeting = getString(R.string.evature_start_new_session_speak);
+		String greeting = activity.getString(R.string.evature_start_new_session_speak);
 		int pos = greeting.length();
 		String seeExamples = "\nTap here to see some examples.";
 		SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-		int col = getResources().getColor(R.color.eva_chat_secondary_text);
+		int col = activity.getResources().getColor(R.color.eva_chat_secondary_text);
 		sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 		sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 		ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
@@ -1034,13 +1049,13 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 						break;
 					}
 					//chat.setSpan( new ForegroundColorSpan(col), warning.position, warning.position+warning.text.length(), 0);
-					chat.setSpan( new ErrorSpan(getResources()), warning.position, warning.position+warning.text.length(), 0);
+					chat.setSpan( new ErrorSpan(activity.getResources()), warning.position, warning.position+warning.text.length(), 0);
 				}
 			}
 			if (eva.semanticHighlightingEnabled() && reply.parsedText != null) {
 				try {
 					if (eva.getSemanticHighlightTimes() && reply.parsedText.times != null) {
-						int col = getResources().getColor(R.color.times_markup);
+						int col = activity.getResources().getColor(R.color.times_markup);
 						
 						for (ParsedText.TimesMarkup time : reply.parsedText.times) {
 							chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
@@ -1048,7 +1063,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					}
 					
 					if (eva.getSemanticHighlightLocations() && reply.parsedText.locations != null) {
-						int col = getResources().getColor(R.color.locations_markup);
+						int col = activity.getResources().getColor(R.color.locations_markup);
 						
 						for (ParsedText.LocationMarkup location: reply.parsedText.locations) {
 							chat.setSpan( new ForegroundColorSpan(col), location.position, location.position+location.text.length(), 0);
@@ -1106,7 +1121,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		if (hasWarnings && !mShownWarningsTutorial) {
 			mShownWarningsTutorial = true;
 			ChatItem warnExplanation = new ChatItem("", reply.transactionId, ChatItem.ChatType.Eva);
-			warnExplanation.setSubLabel(getString(R.string.undo_tutorial));
+			warnExplanation.setSubLabel(activity.getString(R.string.undo_tutorial));
 			mView.addChatItem(warnExplanation);
 		}
 
@@ -1132,8 +1147,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 		for (FlowElement flow : reply.flow.Elements) {
 			ChatItem chatItem = null;
 			if (flow.Type == FlowElement.TypeEnum.Question) {
-				//SumitK-Comment - object question not used any where 
-				// Iftah: I used this question element for multiple choice answers... not integrated yet :(
+				// This question element for multiple choice answers... not integrated yet :(
 //				QuestionElement question = (QuestionElement) flow;
 				// DialogQuestionChatItem questionChatItem = new
 				// DialogQuestionChatItem(flow.getSayIt(), reply, flow);
@@ -1235,7 +1249,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 				ReplyElement replyElement = (ReplyElement) flow;
 				if (ServiceAttributes.CALL_SUPPORT.equals(replyElement.AttributeKey)) {
 					// TODO: trigger call support
-					Toast.makeText(this, "Phoning Call Support", Toast.LENGTH_LONG).show();
+					Toast.makeText(activity, "Phoning Call Support", Toast.LENGTH_LONG).show();
 				}
 				break;
 			case Flight:
@@ -1255,7 +1269,7 @@ public class SearchByVoiceActivity extends Activity implements EvaSearchReplyLis
 					case Unknown_Expression:
 					case Unsupported:
 						mShownWarningsTutorial = true;
-						chatItem.setSubLabel(getString(R.string.undo_tutorial));
+						chatItem.setSubLabel(activity.getString(R.string.undo_tutorial));
 						break;
 				}
 				break;

@@ -15,7 +15,6 @@
          <!--android:layout_height="36dp"-->
          <!--android:layout_marginRight="6dp"-->
          <!--android:layout_centerVertical="true"-->
-         <!--android:onClick="buttonClickHandler"-->
          <!--android:contentDescription="Volume"-->
          <!--android:scaleType="fitCenter"-->
          <!--android:adjustViewBounds="true"-->
@@ -55,7 +54,6 @@
         android:id="@+id/voice_search_button"
         android:layout_width="76dp"
         android:layout_height="76dp"
-       	android:onClick="buttonClickHandler"
         android:layout_gravity="center"
         android:padding="0dp"
         android:adjustViewBounds="false"
@@ -133,8 +131,6 @@
          style="?android:attr/buttonStyleSmall"
          android:layout_width="76dp"
          android:layout_height="76dp"
-
-         android:onClick="buttonClickHandler"
          android:adjustViewBounds="true"
          android:scaleType="fitCenter"
          android:scaleX="0.64"
@@ -175,7 +171,6 @@
              style="?android:attr/buttonStyleSmall"
              android:layout_width="76dp"
              android:layout_height="76dp"
-             android:onClick="buttonClickHandler"
              android:adjustViewBounds="true"
              android:scaleType="fitCenter"
              android:scaleX="0.64"

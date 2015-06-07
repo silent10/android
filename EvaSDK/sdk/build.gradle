@@ -67,6 +67,7 @@ gradle.projectsEvaluated {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar', '*.so'])
+    compile "com.android.support:support-v4:22.2.0"
 }
 
 // http://tools.android.com/tech-docs/new-build-system/tips#TOC-Improving-Build-Server-performance.

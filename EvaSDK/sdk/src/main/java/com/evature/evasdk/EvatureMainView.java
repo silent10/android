@@ -1,6 +1,5 @@
 package com.evature.evasdk;
 
-import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -9,6 +8,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -20,7 +20,6 @@ import android.os.Message;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -42,7 +41,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -73,7 +71,7 @@ public class EvatureMainView implements OnItemClickListener  {
 	private ChatAdapter mChatAdapter;
 	
 	private int mEditedChatItemIndex = -1;
-	private SearchByVoiceActivity mEvaActivity;
+	private EvaChatScreenComponent mEvaChatScreen;
 	private ListView mChatListView;
 
 	private boolean mSideButtonsVisible;
@@ -94,18 +92,31 @@ public class EvatureMainView implements OnItemClickListener  {
 	
 	
 	@SuppressLint("NewApi")
-	public EvatureMainView(final SearchByVoiceActivity mainActivity, ArrayList<ChatItem> chatList) {
-		mEvaActivity = mainActivity;
-		mSearchButton = (ImageButton) mainActivity.findViewById(R.id.voice_search_button);
-		mSoundView = (SoundLevelView)mainActivity.findViewById(R.id.surfaceView_sound_wave);
-		mUndoButton = (ImageButton)mainActivity.findViewById(R.id.undo_button);
-		mResetButton = (ImageButton)mainActivity.findViewById(R.id.restart_button);
-		mSearchButtonCont = mainActivity.findViewById(R.id.voice_search_container);
-		mProgressBar = (ProgressWheel)mainActivity.findViewById(R.id.progressBarEvaProcessing);
+	public EvatureMainView(final EvaChatScreenComponent mainScreen, ArrayList<ChatItem> chatList) {
+		mEvaChatScreen = mainScreen;
+
+        View view = mEvaChatScreen.getRootView();
+		mSearchButton = (ImageButton) view.findViewById(R.id.voice_search_button);
+		mSoundView = (SoundLevelView)view.findViewById(R.id.surfaceView_sound_wave);
+		mUndoButton = (ImageButton)view.findViewById(R.id.undo_button);
+		mResetButton = (ImageButton)view.findViewById(R.id.restart_button);
+		mSearchButtonCont = view.findViewById(R.id.voice_search_container);
+		mProgressBar = (ProgressWheel)view.findViewById(R.id.progressBarEvaProcessing);
+
+
+        View.OnClickListener clickHandler = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mEvaChatScreen.buttonClickHandler(view);
+            }
+        };
+        mUndoButton.setOnClickListener(clickHandler);
+        mResetButton.setOnClickListener(clickHandler);
+        mSearchButton.setOnClickListener(clickHandler);
 		
 		//mVolumeButton = (ImageButton) mainActivity.findViewById(R.id.volume_button);
 		
-		mChatListView = (ListView) mainActivity.findViewById(R.id.chat_list);
+		mChatListView = (ListView) view.findViewById(R.id.chat_list);
 
 
 		// Connect the data of the chat history to the view:
@@ -115,7 +126,7 @@ public class EvatureMainView implements OnItemClickListener  {
 		else {
 			mChatListModel = chatList;
 		}
-		mChatAdapter = new ChatAdapter(mEvaActivity, this, R.layout.evature_row_eva_chat, R.id.label, mChatListModel);
+		mChatAdapter = new ChatAdapter(mEvaChatScreen.getActivity(), this, R.layout.evature_row_eva_chat, R.id.label, mChatListModel);
 
 		mChatListView.setAdapter(mChatAdapter);
 		mChatListView.setOnItemClickListener(this);
@@ -217,8 +228,8 @@ public class EvatureMainView implements OnItemClickListener  {
 	}
 	
 	private void setupSearchButtonDrag() {
-		Resources r = mEvaActivity.getResources();
-		final int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
+		Resources r = mEvaChatScreen.getActivity().getResources();
+        final int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
 		
 		mSearchButton.setOnTouchListener(new View.OnTouchListener() {
 			boolean hoveringReset = false;
@@ -238,7 +249,7 @@ public class EvatureMainView implements OnItemClickListener  {
 				        if (y > mSearchButton.getTop()- margin && 
 				        		x < mSearchButton.getRight() + margin && x > mSearchButton.getLeft() - margin ) {
 				        	// mSearchButtonCont.performClick(); for some reason this doesn't work when the searchButton is embedded inside FrameLayout
-				        	mEvaActivity.buttonClickHandler(mSearchButton);
+				        	mEvaChatScreen.buttonClickHandler(mSearchButton);
 				        }
 					}
 					if (hoveringUndo) {
@@ -782,7 +793,7 @@ public class EvatureMainView implements OnItemClickListener  {
 		case MultiChoiceQuestion:
 		case Eva:
 			if (item.getSearchModel() != null) {
-                item.getSearchModel().triggerSearch(mEvaActivity);
+                item.getSearchModel().triggerSearch(mEvaChatScreen.getActivity());
 				return;
 			}
 			editEvaChat(item, position);
@@ -827,23 +838,22 @@ public class EvatureMainView implements OnItemClickListener  {
 	}*/
 	
 	public void addChatItem(final ChatItem chatItem) {
-		mEvaActivity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (mEditedChatItemIndex != -1 && chatItem.getType() == ChatItem.ChatType.User) {
-					// adding a "me" chat - close the editted me-chat
-					closeEditChatItem(false);
-				}
-				if (mChatAdapter != null) {
-					mChatAdapter.add(chatItem);
-                    scrollToPosition(mChatAdapter.getCount() -1);
-				}
-				else if (mChatListModel != null) {
-					mChatListModel.add(chatItem);
-                    scrollToPosition(mChatListModel.size()-1);
-				}
-			}
-		});
+        mEvaChatScreen.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mEditedChatItemIndex != -1 && chatItem.getType() == ChatItem.ChatType.User) {
+                    // adding a "me" chat - close the editted me-chat
+                    closeEditChatItem(false);
+                }
+                if (mChatAdapter != null) {
+                    mChatAdapter.add(chatItem);
+                    scrollToPosition(mChatAdapter.getCount() - 1);
+                } else if (mChatListModel != null) {
+                    mChatListModel.add(chatItem);
+                    scrollToPosition(mChatListModel.size() - 1);
+                }
+            }
+        });
 	}
 
 	private void addUtterance() {
@@ -902,7 +912,7 @@ public class EvatureMainView implements OnItemClickListener  {
 			for (int i=position+1; i< mChatListModel.size(); i++ ) {
 				ChatItem itemAfter = mChatListModel.get(i);
 				if (itemAfter.getType() == ChatItem.ChatType.User) {
-					Toast.makeText(mEvaActivity, "You can only modify your last utterance", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mEvaChatScreen.getActivity(), "You can only modify your last utterance", Toast.LENGTH_SHORT).show();
 					return;
 				}
 			}
@@ -931,13 +941,13 @@ public class EvatureMainView implements OnItemClickListener  {
 					"  Cruises in July, sorted by price",
 					"  Norwegian Jewel",
 				};
-			String greeting = mEvaActivity.getResources().getString(R.string.evature_examples_greetings);
+			String greeting = mEvaChatScreen.getActivity().getResources().getString(R.string.evature_examples_greetings);
 			String examplesString = "";
 			for (String example : examples) {
 				examplesString += "\n"+example;
 			}
 			SpannableString chatFormatted = new SpannableString(greeting+examplesString);
-			int col = mEvaActivity.getResources().getColor(R.color.eva_chat_secondary_text);
+			int col = mEvaChatScreen.getActivity().getResources().getColor(R.color.eva_chat_secondary_text);
 			chatFormatted.setSpan(new ForegroundColorSpan(col), greeting.length(), chatFormatted.length(), 0);
 			chatFormatted.setSpan( new StyleSpan(Typeface.ITALIC), greeting.length(), chatFormatted.length(), 0);
 			exampleChatItem = new ChatItem(chatFormatted, null, ChatItem.ChatType.Eva);
@@ -967,7 +977,7 @@ public class EvatureMainView implements OnItemClickListener  {
 			return;
 		}
 
-		InputMethodManager imm = (InputMethodManager)mEvaActivity.getSystemService( Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) mEvaChatScreen.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		if (imm == null) {
 			DLog.e(TAG, "no input method manager");
 		}
@@ -996,7 +1006,7 @@ public class EvatureMainView implements OnItemClickListener  {
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
 	
-			mEvaActivity.onEventChatItemModified(editedChatItem, preEditChat, false, editLastUtterance);
+			mEvaChatScreen.onEventChatItemModified(editedChatItem, preEditChat, false, editLastUtterance);
 		}
 		else {
 			// not submitting - just canceling edit
@@ -1079,7 +1089,7 @@ public class EvatureMainView implements OnItemClickListener  {
 	}
 	
 	public void notifyDataChanged() {
-		mEvaActivity.runOnUiThread(new Runnable() {
+        mEvaChatScreen.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mChatAdapter.notifyDataSetChanged();
@@ -1099,7 +1109,7 @@ public class EvatureMainView implements OnItemClickListener  {
 		if (mVolumeButton == null) {
 			return;
 		}
-		VolumeUtil.checkVolume(this.mEvaActivity);
+		VolumeUtil.checkVolume(this.mEvaChatScreen.getActivity());
 		if (VolumeUtil.isLowVolume()) {
 			mVolumeButton.setVisibility(View.VISIBLE);
 			mVolumeButton.setImageResource(VolumeUtil.getVolumeIcon());

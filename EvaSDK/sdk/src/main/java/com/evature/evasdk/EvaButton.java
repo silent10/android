@@ -1,26 +1,18 @@
 package com.evature.evasdk;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ActivityOptions;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
-import android.os.Build;
-import android.transition.ChangeImageTransform;
-import android.view.Display;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.evature.evasdk.appinterface.AppScope;
-import com.evature.evasdk.evaapis.android.EvaComponent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -30,14 +22,15 @@ import java.util.ArrayList;
  */
 public class EvaButton {
 
+    private static final String TAG = "EvaButton";
     public static ArrayList<WeakReference<ImageButton>> evaButtons = new ArrayList<WeakReference<ImageButton>>();
     private static float MARGIN_BOTTOM = 24;  // margin in DIP
 
-    public static void addDefaultButton(final Activity activity) {
+    public static void addDefaultButton(final FragmentActivity activity) {
         addDefaultButton(activity, null);
     }
 
-    public static void addDefaultButton(final Activity activity, final AppScope evaContext) {
+    public static void addDefaultButton(final FragmentActivity activity, final AppScope evaContext) {
 
         ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.voice_search_button, null);
         WeakReference<ImageButton> weakRef = new WeakReference<ImageButton>(searchButton);
@@ -46,8 +39,6 @@ public class EvaButton {
             @Override
             public void onClick(View v) {
             startSearchByVoice(activity, evaContext);
-//                }
-
             }
         });
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -68,22 +59,37 @@ public class EvaButton {
                 ViewGroup.LayoutParams.MATCH_PARENT));
     }
 
-    public static void startSearchByVoice( Activity activity, AppScope evaContext) {
+
+    public static void startSearchByVoice( FragmentActivity activity, AppScope evaContext) {
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //                    Window window = activity.getWindow();
 //                    window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
 //                    window.setSharedElementEnterTransition(new ChangeImageTransform());
 //                    window.setSharedElementExitTransition(new ChangeImageTransform());
 //                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, searchButton, "eva_microphone_button");
-//                    Intent intent = new Intent(activity, SearchByVoiceActivity.class);
+//                    Intent intent = new Intent(activity, EvaChatScreenComponent.class);
 //                    activity.startActivity(intent, options.toBundle());
 //                }
 //                else {
-        Intent intent = new Intent(activity, SearchByVoiceActivity.class);
+
+        Intent intent = new Intent(activity, EvaChatScreenActivity.class);
         if (evaContext != null) {
-            intent.putExtra(SearchByVoiceActivity.INTENT_EVA_CONTEXT, evaContext.toString());
+            intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
         }
         activity.startActivity(intent);
-    }
 
+//        Fragment newFragment = new EvaChatScreenFragment();
+//        // consider using Java coding conventions (upper first char class names!!!)
+//        FragmentManager manager = activity.getSupportFragmentManager();
+//        FragmentTransaction transaction = manager.beginTransaction();
+//
+//        // Replace whatever is in the fragment_container view with this fragment,
+//        // and add the transaction to the back stack
+//        //transaction.replace(R.id.fragment_container, newFragment);
+//        transaction.add(newFragment, "test123");
+//        transaction.addToBackStack(null);
+//
+//        // Commit the transaction
+//        transaction.commit();
+    }
 }
