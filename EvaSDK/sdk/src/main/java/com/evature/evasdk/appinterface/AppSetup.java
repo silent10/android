@@ -14,7 +14,10 @@
 package com.evature.evasdk.appinterface;
 
 
+import android.content.Context;
+
 import com.evature.evasdk.evaapis.android.EvaComponent;
+import com.evature.evasdk.evaapis.android.EvaSpeak;
 import com.evature.evasdk.util.DLog;
 
 import java.util.HashMap;
@@ -47,6 +50,8 @@ public class AppSetup {
         scopeStr = builder.toString();
     }
 
+//    private static EvaSpeak evaSpeak;
+
 
     /***
      * Setup Eva and wire the App callbacks
@@ -54,11 +59,14 @@ public class AppSetup {
      * @param siteCode
      * @param appHandler - inherits a set of interfaces from com.evature.evasdk.
      */
-    public static void initEva(String apiKey, String siteCode, Object appHandler) {
+    public static void initEva(/*Context context, */String apiKey, String siteCode, Object appHandler) {
         AppSetup.apiKey = apiKey;
         AppSetup.siteCode = siteCode;
         EvaComponent.evaAppHandler = appHandler;
+//        evaSpeak = new EvaSpeak(context);
     }
+
+//    public static EvaSpeak
 
     public static void evaLogs(boolean enabled) {
         DLog.DebugMode = enabled;

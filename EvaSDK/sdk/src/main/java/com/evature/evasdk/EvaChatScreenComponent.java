@@ -124,6 +124,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 	@SuppressLint("NewApi")
 	protected void onCreate(Bundle savedInstanceState) {
+        DLog.d(TAG, "onCreate");
 		//super.onCreate(savedInstanceState);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            Window window = this.getWindow();
@@ -176,6 +177,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	}
 
     public View createMainView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        DLog.d(TAG, "createMainView");
         rootView = inflater.inflate(R.layout.evature_chat_layout, container, false);
         if (savedInstanceState == null) {
             if (evaSessionId.equals("1")) {
@@ -633,6 +635,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 //
 	
 	public void onResume() {
+        DLog.d(TAG, "onResume");
         for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
             WeakReference<ImageButton> weakRef = iterator.next();
             ImageButton imgButton = weakRef.get();
@@ -914,8 +917,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	}
 
 
-
-	public void onBackPressed() {
+    /***
+     * returns true if handled internally
+     * @return
+     */
+	public boolean onBackPressed() {
 	   DLog.d(TAG, "onBackPressed Called");
 
 	   // cancel recording if during recording
@@ -924,12 +930,10 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		   speechSearch.cancel();
 		   mView.deactivateSearchButton();
 		   mView.hideSpeechWave();
-		   return;
+		   return true;
 	   }
 
-		if (!mView.handleBackPressed()) {
-            activity.onBackPressed();
-		}
+		return mView.handleBackPressed();
 	}
 	
 	

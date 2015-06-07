@@ -10,6 +10,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.Engine;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 
 import com.evature.evasdk.util.DLog;
 
@@ -36,7 +37,19 @@ public class EvaSpeak implements TextToSpeech.OnInitListener {
 	private ArrayList<PendingSayit> pendingSayit;  // say-it waiting while TTS is initializing
 	
 	private HashMap<String, Runnable>  onCompleteUtterance;
-	
+
+    private static EvaSpeak instance = null;
+    public static EvaSpeak getOrCreateInstance(Context context) {
+        if (instance == null) {
+            instance = new EvaSpeak(context);
+        }
+        return instance;
+    }
+
+    public static EvaSpeak getInstance() {
+        return instance;
+    }
+
 	@SuppressLint("NewApi")
 	@SuppressWarnings("deprecation")
 	public EvaSpeak(Context context) {
@@ -151,6 +164,7 @@ public class EvaSpeak implements TextToSpeech.OnInitListener {
 			// Initialization failed.
 			mTts = null;
 			mTtsConfigured = false;
+            DLog.w(TAG, "Text to Speech init failed: "+status);
 		}
 	}
 	

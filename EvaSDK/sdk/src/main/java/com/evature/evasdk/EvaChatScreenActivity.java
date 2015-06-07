@@ -53,4 +53,11 @@ public class EvaChatScreenActivity extends Activity {
         chatScreen.onDestroy();
         super.onDestroy();
     }
+
+    @Override
+    public void onBackPressed() {
+        if (!chatScreen.onBackPressed()) {
+            super.onBackPressed();
+        }
+    }
 }

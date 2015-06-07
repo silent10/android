@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.evature.evasdk.appinterface.AppScope;
+import com.evature.evasdk.evaapis.android.EvaSpeak;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -26,19 +27,20 @@ public class EvaButton {
     public static ArrayList<WeakReference<ImageButton>> evaButtons = new ArrayList<WeakReference<ImageButton>>();
     private static float MARGIN_BOTTOM = 24;  // margin in DIP
 
-    public static void addDefaultButton(final FragmentActivity activity) {
+    public static void addDefaultButton(FragmentActivity activity) {
         addDefaultButton(activity, null);
     }
 
-    public static void addDefaultButton(final FragmentActivity activity, final AppScope evaContext) {
+    public static void addDefaultButton(FragmentActivity activity, final AppScope evaContext) {
 
         ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.voice_search_button, null);
         WeakReference<ImageButton> weakRef = new WeakReference<ImageButton>(searchButton);
         evaButtons.add(weakRef);
+        final FragmentActivity fActivity = activity;
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            startSearchByVoice(activity, evaContext);
+            startSearchByVoice(fActivity, evaContext);
             }
         });
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -47,13 +49,17 @@ public class EvaButton {
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         params.addRule(RelativeLayout.CENTER_IN_PARENT);
+
         final float scale = activity.getResources().getDisplayMetrics().density;
         int pixels = (int) (MARGIN_BOTTOM * scale + 0.5f);
         params.bottomMargin = pixels;
         searchButton.setLayoutParams(params);
         RelativeLayout rl = new RelativeLayout(activity);
+        rl.setId(R.id.evature_root_view);
         rl.setGravity(Gravity.BOTTOM);
         rl.addView(searchButton);
+
+        EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
 
         activity.getWindow().addContentView(rl, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
@@ -71,25 +77,25 @@ public class EvaButton {
 //                    activity.startActivity(intent, options.toBundle());
 //                }
 //                else {
-
-        Intent intent = new Intent(activity, EvaChatScreenActivity.class);
-        if (evaContext != null) {
-            intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
-        }
-        activity.startActivity(intent);
-
-//        Fragment newFragment = new EvaChatScreenFragment();
-//        // consider using Java coding conventions (upper first char class names!!!)
-//        FragmentManager manager = activity.getSupportFragmentManager();
-//        FragmentTransaction transaction = manager.beginTransaction();
 //
-//        // Replace whatever is in the fragment_container view with this fragment,
-//        // and add the transaction to the back stack
-//        //transaction.replace(R.id.fragment_container, newFragment);
-//        transaction.add(newFragment, "test123");
-//        transaction.addToBackStack(null);
-//
-//        // Commit the transaction
-//        transaction.commit();
+//        Intent intent = new Intent(activity, EvaChatScreenActivity.class);
+//        if (evaContext != null) {
+//            intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
+//        }
+//        activity.startActivity(intent);
+
+        Fragment newFragment = new EvaChatScreenFragment();
+        // consider using Java coding conventions (upper first char class names!!!)
+        FragmentManager manager = activity.getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack
+        //transaction.replace(R.id.fragment_container, newFragment);
+        transaction.add(R.id.evature_root_view, newFragment);
+        transaction.addToBackStack(null);
+
+        // Commit the transaction
+        transaction.commit();
     }
 }

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="evature_chat_row_holder" type="id"/>
+    <item name="evature_root_view" type="id" />
 </resources>

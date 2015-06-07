@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 public class EvaChatScreenFragment extends Fragment {
     EvaChatScreenComponent chatScreen;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,4 +62,5 @@ public class EvaChatScreenFragment extends Fragment {
         chatScreen.onDestroy();
         super.onDestroy();
     }
+
 }
