@@ -6,11 +6,11 @@
          <path
              android:name="top"
              android:fillColor="#ffffffff"
-             android:pathData="@string/flat_microphone_top" />
+             android:pathData="@string/evature_flat_microphone_top" />
          
          <path
              android:name="bottom"
              android:fillColor="#ffffffff"
-             android:pathData="@string/flat_microphone_bottom" />
+             android:pathData="@string/evature_flat_microphone_bottom" />
          
  </vector>

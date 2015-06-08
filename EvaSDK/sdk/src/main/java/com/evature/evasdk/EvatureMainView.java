@@ -2,13 +2,16 @@ package com.evature.evasdk;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -875,6 +878,7 @@ public class EvatureMainView implements OnItemClickListener  {
 			closeEditChatItem(false);
 		}
 		else {
+            mEvaChatScreen.addEmptyFragment();
 			if (item.getType() == ChatItem.ChatType.MultiChoiceQuestion) {
 				// search for "Me" chat after
 				for (int i=position+1; i<mChatListModel.size(); i++) {
@@ -929,29 +933,30 @@ public class EvatureMainView implements OnItemClickListener  {
 	private ChatItem exampleChatItem;
 	private void showExamples() {
 		if (exampleChatItem != null && mChatListModel.contains(exampleChatItem)) {
-			return;
+			mChatListModel.remove(exampleChatItem);
+            exampleChatItem = null;
 		}
-		
-		if (exampleChatItem == null) {
-			
-			String[] examples = {
-					"  Cruise to Alaska in August", 
-					"  10 days cruise departing from Miami", 
-					"  Princess Cruises",
-					"  Cruises in July, sorted by price",
-					"  Norwegian Jewel",
-				};
-			String greeting = mEvaChatScreen.getActivity().getResources().getString(R.string.evature_examples_greetings);
-			String examplesString = "";
-			for (String example : examples) {
-				examplesString += "\n"+example;
-			}
-			SpannableString chatFormatted = new SpannableString(greeting+examplesString);
-			int col = mEvaChatScreen.getActivity().getResources().getColor(R.color.eva_chat_secondary_text);
-			chatFormatted.setSpan(new ForegroundColorSpan(col), greeting.length(), chatFormatted.length(), 0);
-			chatFormatted.setSpan( new StyleSpan(Typeface.ITALIC), greeting.length(), chatFormatted.length(), 0);
-			exampleChatItem = new ChatItem(chatFormatted, null, ChatItem.ChatType.Eva);
-		}
+
+        Resources resources = mEvaChatScreen.getActivity().getResources();
+        String examplesStr = resources.getString(R.string.evature_examples_flights);
+        List<String> examples = Arrays.asList(examplesStr.split("\n"));
+        // select random subset
+        int NUM_OF_EXAMPLES = Math.min(5, examples.size());
+        Random rand = new Random(System.currentTimeMillis());
+        for (int i=0; i<NUM_OF_EXAMPLES; i++) {
+            Collections.swap(examples, i, rand.nextInt(examples.size()));
+        }
+
+        String greeting = resources.getString(R.string.evature_examples_greetings);
+        String examplesString = "";
+        for (int i=0; i<NUM_OF_EXAMPLES; i++) {
+            examplesString += "\n"+examples.get(i);
+        }
+        SpannableString chatFormatted = new SpannableString(greeting+examplesString);
+        int col = resources.getColor(R.color.evature_chat_secondary_text);
+        chatFormatted.setSpan(new ForegroundColorSpan(col), greeting.length(), chatFormatted.length(), 0);
+        chatFormatted.setSpan(new StyleSpan(Typeface.ITALIC), greeting.length(), chatFormatted.length(), 0);
+        exampleChatItem = new ChatItem(chatFormatted, null, ChatItem.ChatType.Eva);
 		exampleChatItem.clearAlreadyAnimated();
 		addChatItem(exampleChatItem);
 		flashSearchButton(5);
@@ -968,6 +973,7 @@ public class EvatureMainView implements OnItemClickListener  {
 	 * @param isSubmitted - true if submit modification, false if revert to pre-modified text (or remove new utterance)
 	 */
 	private void closeEditChatItem(boolean isSubmitted) {
+        mEvaChatScreen.removeEmptyFragment();
 		if (mEditedChatItemIndex == -1) {
 			DLog.e(TAG, "Unexpected closed edit chat item");
 			return;

@@ -10,6 +10,10 @@ import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.style.ForegroundColorSpan;
@@ -90,6 +94,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	@SuppressWarnings("nls")
 	private static final String EVATURE_SESSION_ID = "evature.session_id";
 
+    private static final String EMPTY_FRAGMENT_TAG = "evature_empty_fragment_tag";
+
 	private EvaComponent eva;
 	private EvaSpeechRecogComponent speechSearch;
 	private EvatureMainView mView;
@@ -99,8 +105,10 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
     private static String evaSessionId = "1";
     private static ArrayList<ChatItem> chatItems = new ArrayList<ChatItem>();
 
+    private boolean mUseExtraFragmentForBackHack = false; // fragments can't capture "back" button, so instead can use special hack of starting an extra fragment and checking the fragment manager backstack
 
-	private boolean isPaused;
+
+    private boolean isPaused;
 	private boolean mShownWarningsTutorial;
 	private static class PendingSayIt {
 		public ChatItem chatItem;
@@ -118,8 +126,16 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         return activity;
     }
 
-    public EvaChatScreenComponent(Activity hostActivity) {
+
+
+    public EvaChatScreenComponent(Activity hostActivity,
+                                  boolean useExtraFragmentForBackHack
+                                  ) {
         this.activity = hostActivity;
+        this.mUseExtraFragmentForBackHack = useExtraFragmentForBackHack;
+    }
+    public EvaChatScreenComponent(Activity hostActivity) {
+        this(hostActivity, false);
     }
 
 	@SuppressLint("NewApi")
@@ -184,11 +200,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 chatItems.clear();
                 mView = new EvatureMainView(this, chatItems);
                 Resources resources = activity.getResources();
-                String greeting = resources.getString(R.string.evature_greeting);
+                String greeting = resources.getString(R.string.evature_greeting_flight);
                 int pos = greeting.length();
                 String seeExamples = resources.getString(R.string.evature_tap_for_examples);
                 SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-                int col = resources.getColor(R.color.eva_chat_secondary_text);
+                int col = resources.getColor(R.color.evature_chat_secondary_text);
                 sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
                 sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
                 ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
@@ -417,7 +433,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                                     // hide the searching sublabel
                                     chatItem.setSubLabel(null);
                                     chatItem.setStatus(ChatItem.Status.NONE);
-                                    String zeroCountStr = activity.getString(R.string.no_cruises);
+                                    String zeroCountStr = activity.getString(R.string.evature_zero_count);
                                     if (alreadySpoken) {
                                         ChatItem noCruises = new ChatItem(zeroCountStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
                                         mView.addChatItem(noCruises);
@@ -573,7 +589,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                                     // hide the searching sublabel
                                     chatItem.setSubLabel(null);
                                     chatItem.setStatus(ChatItem.Status.NONE);
-                                    String noCruisesStr = activity.getString(R.string.no_cruises);
+                                    String noCruisesStr = activity.getString(R.string.evature_zero_count);
                                     if (alreadySpoken) {
                                         ChatItem noCruises = new ChatItem(noCruisesStr, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
                                         mView.addChatItem(noCruises);
@@ -649,7 +665,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
         }
 
-        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+//        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 		isPaused = false;
 		Intent intent = activity.getIntent();
 		if ("com.google.android.gms.actions.SEARCH_ACTION".equals(intent.getAction())) {
@@ -849,7 +865,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                         DLog.i(TAG, "Starting recognizer");
                         eva.stopSpeak();
                         mView.startSpeechRecognition(mSpeechSearchListener, speechSearch, VOICE_COOKIE, editLastUtterance);
-
+                        addEmptyFragment();
                     }
                 });
 			}
@@ -952,13 +968,14 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		eva.resetSession();
 		// triggered by button - create a "start new session" fake chat
 		VOICE_COOKIE.storeResultInItem = null;
-		ChatItem myChat = new ChatItem(activity.getString(R.string.evature_user_start_new));
+        Resources resources = activity.getResources();
+		ChatItem myChat = new ChatItem(resources.getString(R.string.evature_user_start_new));
 		mView.addChatItem(myChat);
-		String greeting = activity.getString(R.string.evature_start_new_session_speak);
+		String greeting = resources.getString(R.string.evature_start_new_session_speak);
 		int pos = greeting.length();
-		String seeExamples = "\nTap here to see some examples.";
+		String seeExamples = resources.getString(R.string.evature_tap_for_examples);
 		SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-		int col = activity.getResources().getColor(R.color.eva_chat_secondary_text);
+		int col = resources.getColor(R.color.evature_chat_secondary_text);
 		sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
 		sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
 		ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
@@ -1036,7 +1053,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 //			mView.notifyDataChanged();
 //			return;
 //		}
-		
+
 		SpannableString chat = null;
 		boolean hasWarnings = false;
 		if (reply.processedText != null) {
@@ -1059,7 +1076,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 			if (eva.semanticHighlightingEnabled() && reply.parsedText != null) {
 				try {
 					if (eva.getSemanticHighlightTimes() && reply.parsedText.times != null) {
-						int col = activity.getResources().getColor(R.color.times_markup);
+						int col = activity.getResources().getColor(R.color.evature_times_markup);
 						
 						for (ParsedText.TimesMarkup time : reply.parsedText.times) {
 							chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
@@ -1067,7 +1084,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					}
 					
 					if (eva.getSemanticHighlightLocations() && reply.parsedText.locations != null) {
-						int col = activity.getResources().getColor(R.color.locations_markup);
+						int col = activity.getResources().getColor(R.color.evature_locations_markup);
 						
 						for (ParsedText.LocationMarkup location: reply.parsedText.locations) {
 							chat.setSpan( new ForegroundColorSpan(col), location.position, location.position+location.text.length(), 0);
@@ -1081,6 +1098,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		}
 		
 		mView.deactivateSearchButton();
+        removeEmptyFragment();
+
 
 		if (VOICE_COOKIE == cookie) {
 			if (chat != null) {
@@ -1125,13 +1144,39 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		if (hasWarnings && !mShownWarningsTutorial) {
 			mShownWarningsTutorial = true;
 			ChatItem warnExplanation = new ChatItem("", reply.transactionId, ChatItem.ChatType.Eva);
-			warnExplanation.setSubLabel(activity.getString(R.string.undo_tutorial));
+			warnExplanation.setSubLabel(activity.getString(R.string.evature_undo_tutorial));
 			mView.addChatItem(warnExplanation);
 		}
-
 	}
 
-	/**** Display chat items for each flow element - execute the first question
+    void addEmptyFragment() {
+        if (mUseExtraFragmentForBackHack) {
+            FragmentActivity fa = (FragmentActivity)activity;
+            FragmentManager manager = fa.getSupportFragmentManager();
+            Fragment empty = new Fragment();
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.evature_root_view, empty, EMPTY_FRAGMENT_TAG);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
+    }
+
+    void removeEmptyFragment() {
+        if (mUseExtraFragmentForBackHack) {
+            FragmentActivity fa = (FragmentActivity)activity;
+            FragmentManager manager = fa.getSupportFragmentManager();
+            if (manager.getBackStackEntryCount() == 2) {
+                Fragment fragment = manager.findFragmentByTag(EMPTY_FRAGMENT_TAG);
+                if (fragment != null) {
+                    manager.popBackStack();
+                } else {
+                    DLog.e(TAG, "Unexpected fragment stack state");
+                }
+            }
+        }
+    }
+
+    /**** Display chat items for each flow element - execute the first question
 	 * element or, if no question element, execute the first flow element
 	 * 
 	 * @param reply */
@@ -1273,7 +1318,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					case Unknown_Expression:
 					case Unsupported:
 						mShownWarningsTutorial = true;
-						chatItem.setSubLabel(activity.getString(R.string.undo_tutorial));
+						chatItem.setSubLabel(activity.getString(R.string.evature_undo_tutorial));
 						break;
 				}
 				break;
@@ -1287,7 +1332,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 	public void onEvaError(String message, EvaApiReply reply, boolean isServerError, Object cookie) {
 		mView.flashBadSearchButton(2);
-		
+        removeEmptyFragment();
+
 		// You can show the message with a Toast, or ChatItem
 		// Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 		// or

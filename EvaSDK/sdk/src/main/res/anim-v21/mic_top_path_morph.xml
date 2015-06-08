@@ -2,8 +2,8 @@
      <objectAnimator
          android:duration="450"
          android:propertyName="pathData"
-         android:valueFrom="@string/microphone_top"
-         android:valueTo="@string/flat_microphone_top"
+         android:valueFrom="@string/evature_microphone_top"
+         android:valueTo="@string/evature_flat_microphone_top"
          android:valueType="pathType"/>
  </set>
 								 
