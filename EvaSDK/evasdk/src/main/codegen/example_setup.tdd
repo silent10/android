@@ -1,0 +1,38 @@
+# encoding: UTF-8
+
+<#--
+ this file format is TDD,  see http://fmpp.sourceforge.net/tdd.html
+-->
+
+{
+  # site_code and api_key are provided to you by Evature when you sign up
+  site_code: "",
+  api_key: "",
+
+  # scope defines what your application supports
+  scope: {
+    flight:    false,
+    hotel:     false,
+    car:       false,
+    cruise:    true,
+    vacation:  false,
+    ski:       false,
+    explore:   false
+  },
+
+  location_disabled: true,      <#-- no need for tracking location of phone for cruises -->
+
+  semantic_highlighting: {
+    times,
+    locations
+  },
+
+  auto_open_microphone: true,   <#--  automatically open the microphone to record user after question or greeting  (hands-free UI) -->
+
+  async_count: true,            <#-- support to get count of results - async -->
+
+  url_params: {
+	ffi_icr_keys_v2: "",        <#-- Add ICR location keys to the Eva Response -->
+  },
+
+}

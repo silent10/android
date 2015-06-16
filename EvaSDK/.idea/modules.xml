@@ -3,9 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EvaSDK.iml" filepath="$PROJECT_DIR$/EvaSDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/evasdk/evasdk.iml" filepath="$PROJECT_DIR$/evasdk/evasdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/exampleAppCruises/exampleAppCruises.iml" filepath="$PROJECT_DIR$/exampleAppCruises/exampleAppCruises.iml" />
       <module fileurl="file://$PROJECT_DIR$/exampleAppFlights/exampleAppFlights.iml" filepath="$PROJECT_DIR$/exampleAppFlights/exampleAppFlights.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sdk/sdk.iml" filepath="$PROJECT_DIR$/sdk/sdk.iml" />
     </modules>
   </component>
 </project>
