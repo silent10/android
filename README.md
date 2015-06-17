@@ -1,11 +1,6 @@
 Evature Android SDK
 =======
 
-Including:
-* EVA demo app
-* EVA Android example App
-* EVA APIs
-
-Release 1.1
+Release 2.0
 
 See EvaSDKDocumentation.pdf for documentation
