@@ -1,16 +1,17 @@
 
 
-package com.evature.evasdk.evaapis.android;
+package com.evature.evasdk.evaapis;
 
 import java.nio.ByteBuffer;
 
 
 /***
  * When moving this file - remember to fix FLACStreamEncoder.cpp
- * 1) Function names: eg. Java_com_evaapis_android_FLACStreamEncoder_init
+ * 1) Function names: eg. Java_com_evature_evaapis_FLACStreamEncoder_init
  * 2) Class name const:  eg. FLACStreamEncoder_classname 
- * And rebuild NDK:
- * ~/devel/android-ndk-r8e/ndk-build  from EvaAPIs
+ * 3) And rebuild NDK:
+ * ~/devel/android-ndk-r8e/ndk-build  from project folder above the `jni` folder
+ * 4) move the resulting *.so files to jniLibs folder
  */
 
 public class FLACStreamEncoder

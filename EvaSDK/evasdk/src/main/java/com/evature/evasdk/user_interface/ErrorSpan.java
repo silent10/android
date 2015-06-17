@@ -1,4 +1,4 @@
-package com.evature.evasdk;
+package com.evature.evasdk.user_interface;
 
 
 import android.content.res.Resources;
@@ -9,6 +9,8 @@ import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.style.DynamicDrawableSpan;
+
+import com.evature.evasdk.R;
 
 /***
  * Draw a Red Wavy line below text (actually a horizontal-repeating bitmap)

@@ -1,4 +1,4 @@
-package com.evature.evasdk;
+package com.evature.evasdk.user_interface;
 
 
 import android.content.Context;
@@ -10,6 +10,8 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.evature.evasdk.R;
 
 // from https://github.com/Todd-Davies/ProgressWheel
 // Iftah: modified:

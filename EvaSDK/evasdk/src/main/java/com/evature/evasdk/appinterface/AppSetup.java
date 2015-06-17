@@ -16,8 +16,8 @@ package com.evature.evasdk.appinterface;
 
 import android.content.Context;
 
-import com.evature.evasdk.evaapis.android.EvaComponent;
-import com.evature.evasdk.evaapis.android.EvaSpeak;
+import com.evature.evasdk.evaapis.EvaComponent;
+import com.evature.evasdk.evaapis.EvaSpeak;
 import com.evature.evasdk.util.DLog;
 
 import java.util.HashMap;

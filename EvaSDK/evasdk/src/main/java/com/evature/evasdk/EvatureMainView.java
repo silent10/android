@@ -49,11 +49,14 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.evature.evasdk.evaapis.EvaException;
-import com.evature.evasdk.evaapis.android.EvaSpeechRecogComponent;
-import com.evature.evasdk.evaapis.android.SoundLevelView;
-import com.evature.evasdk.evaapis.android.SpeechAudioStreamer;
+import com.evature.evasdk.evaapis.EvaSpeechRecogComponent;
+import com.evature.evasdk.user_interface.SoundLevelView;
+import com.evature.evasdk.evaapis.SpeechAudioStreamer;
 import com.evature.evasdk.model.ChatItem;
+import com.evature.evasdk.user_interface.ChatAdapter;
+import com.evature.evasdk.user_interface.ProgressWheel;
 import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.util.VolumeUtil;
 
 
 /****

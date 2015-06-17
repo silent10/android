@@ -7,7 +7,7 @@
     android:gravity="right|top"
      >
 
-    <com.evature.evasdk.ChatBalloon
+    <com.evature.evasdk.user_interface.ChatBalloon
         android:id="@+id/chat_bubble" 
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
 	            android:textColor="@color/evature_chat_secondary_text" />
         </RelativeLayout>
     </LinearLayout>
-    </com.evature.evasdk.ChatBalloon>
+    </com.evature.evasdk.user_interface.ChatBalloon>
      
      <!-- 
     <TextView

@@ -1,4 +1,4 @@
-package com.evature.evasdk;
+package com.evature.evasdk.user_interface;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 
+import com.evature.evasdk.R;
 import com.evature.evasdk.util.DLog;
 
 

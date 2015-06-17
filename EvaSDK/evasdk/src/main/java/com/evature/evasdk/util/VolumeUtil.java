@@ -1,4 +1,4 @@
-package com.evature.evasdk;
+package com.evature.evasdk.util;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -9,7 +9,7 @@ import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.os.Handler;
 
-import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.R;
 
 public class VolumeUtil {
 

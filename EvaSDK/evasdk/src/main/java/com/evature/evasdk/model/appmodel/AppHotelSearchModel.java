@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.evature.evasdk.appinterface.FlightSearch;
 import com.evature.evasdk.appinterface.HotelSearch;
-import com.evature.evasdk.evaapis.android.EvaComponent;
+import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.EvaTravelers;
 import com.evature.evasdk.evaapis.crossplatform.FlightAttributes;

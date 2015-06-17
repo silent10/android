@@ -3,7 +3,7 @@ package com.evature.evasdk.model.appmodel;
 import android.content.Context;
 
 import com.evature.evasdk.appinterface.CruiseSearch;
-import com.evature.evasdk.evaapis.android.EvaComponent;
+import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.crossplatform.CruiseAttributes;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.RequestAttributes;

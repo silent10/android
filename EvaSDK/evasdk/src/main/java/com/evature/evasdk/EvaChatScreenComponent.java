@@ -28,14 +28,13 @@ import android.widget.Toast;
 import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.appinterface.AsyncCountResult;
 import com.evature.evasdk.appinterface.CruiseCount;
-import com.evature.evasdk.appinterface.CruiseSearch;
 import com.evature.evasdk.appinterface.FlightCount;
 import com.evature.evasdk.appinterface.FlightSearch;
 import com.evature.evasdk.appinterface.HotelCount;
 import com.evature.evasdk.appinterface.HotelSearch;
-import com.evature.evasdk.evaapis.android.EvaComponent;
-import com.evature.evasdk.evaapis.android.EvaSearchReplyListener;
-import com.evature.evasdk.evaapis.android.EvaSpeechRecogComponent;
+import com.evature.evasdk.evaapis.EvaComponent;
+import com.evature.evasdk.evaapis.EvaSearchReplyListener;
+import com.evature.evasdk.evaapis.EvaSpeechRecogComponent;
 import com.evature.evasdk.evaapis.crossplatform.EvaApiReply;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.EvaTime;
@@ -53,7 +52,10 @@ import com.evature.evasdk.model.ChatItem;
 import com.evature.evasdk.model.appmodel.AppCruiseSearchModel;
 import com.evature.evasdk.model.appmodel.AppFlightSearchModel;
 import com.evature.evasdk.model.appmodel.AppHotelSearchModel;
+import com.evature.evasdk.user_interface.ChatAdapter;
+import com.evature.evasdk.user_interface.ErrorSpan;
 import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.util.VolumeUtil;
 
 import java.lang.ref.WeakReference;
 import java.text.ParseException;
@@ -786,14 +788,14 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	
 	public void onResume() {
         DLog.d(TAG, "onResume");
-        for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
+        for (Iterator<WeakReference<ImageButton>> iterator = EvaChatTrigger.evaButtons.iterator(); iterator.hasNext();) {
             WeakReference<ImageButton> weakRef = iterator.next();
             ImageButton imgButton = weakRef.get();
             if (imgButton == null) {
                 iterator.remove();
             }
             else {
-                //EvatureMainView.scaleButton(EvaButton.searchButton, 400, 1.0f, 0.0f);
+                //EvatureMainView.scaleButton(EvaChatTrigger.searchButton, 400, 1.0f, 0.0f);
                 EvatureMainView.animateButton(imgButton, "alpha", 400, 1.0f, 0.0f);
             }
 
@@ -837,7 +839,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	public void onPause() {
 		DLog.i(TAG, "onPause");
         evaSessionId = eva.getSessionId();
-        for (Iterator<WeakReference<ImageButton>> iterator = EvaButton.evaButtons.iterator(); iterator.hasNext();) {
+        for (Iterator<WeakReference<ImageButton>> iterator = EvaChatTrigger.evaButtons.iterator(); iterator.hasNext();) {
             WeakReference<ImageButton> weakRef = iterator.next();
             ImageButton imgButton = weakRef.get();
             if (imgButton == null) {

@@ -1,4 +1,4 @@
-package com.evature.evasdk.evaapis.android;
+package com.evature.evasdk.user_interface;
 
 import android.content.Context;
 import android.graphics.Canvas;

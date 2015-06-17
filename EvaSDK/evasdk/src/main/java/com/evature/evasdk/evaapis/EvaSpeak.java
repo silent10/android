@@ -1,4 +1,4 @@
-package com.evature.evasdk.evaapis.android;
+package com.evature.evasdk.evaapis;
 
 import java.util.ArrayList;
 import java.util.HashMap;

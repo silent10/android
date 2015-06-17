@@ -1,4 +1,4 @@
-package com.evature.evasdk.evaapis.android;
+package com.evature.evasdk.evaapis;
 
 import android.content.Context;
 import android.os.AsyncTask;

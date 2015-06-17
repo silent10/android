@@ -1,16 +1,13 @@
 // Relevant example: http://windrealm.org/tutorials/android/listview-with-checkboxes-without-listactivity.php
-package com.evature.evasdk;
+package com.evature.evasdk.user_interface;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.PorterDuff.Mode;
 import android.os.Build;
 import android.text.SpannableString;
 import android.util.Log;
@@ -20,12 +17,12 @@ import android.view.ViewGroup;
 import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.evature.evasdk.EvatureMainView;
+import com.evature.evasdk.R;
 import com.evature.evasdk.model.ChatItem;
 
 

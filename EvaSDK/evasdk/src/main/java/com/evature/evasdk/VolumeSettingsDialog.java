@@ -12,6 +12,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.util.VolumeUtil;
 
 
 public class VolumeSettingsDialog extends Activity 

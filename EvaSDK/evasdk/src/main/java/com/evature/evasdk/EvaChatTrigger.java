@@ -15,7 +15,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.evature.evasdk.appinterface.AppScope;
-import com.evature.evasdk.evaapis.android.EvaSpeak;
+import com.evature.evasdk.evaapis.EvaSpeak;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -23,9 +23,9 @@ import java.util.ArrayList;
 /**
  * Created by iftah on 5/26/15.
  */
-public class EvaButton {
+public class EvaChatTrigger {
 
-    private static final String TAG = "EvaButton";
+    private static final String TAG = "EvaChatTrigger";
     public static ArrayList<WeakReference<ImageButton>> evaButtons = new ArrayList<WeakReference<ImageButton>>();
     private static float MARGIN_BOTTOM = 24;  // margin in DIP
 
