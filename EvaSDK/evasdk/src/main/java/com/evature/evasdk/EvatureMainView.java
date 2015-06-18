@@ -385,7 +385,7 @@ public class EvatureMainView implements OnItemClickListener  {
 		if (what == SearchButtonIcon.FLAT) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				mSearchButton.clearAnimation();
-				AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.animated_microphone);
+				AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.evature_animated_microphone);
 				mSearchButton.setImageDrawable(animatedDrawable);
 				animatedDrawable.start();
 
@@ -429,7 +429,7 @@ public class EvatureMainView implements OnItemClickListener  {
 //			}
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				mSearchButton.clearAnimation();
-				AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.animated_microphone_reverse);
+				AnimatedVectorDrawable animatedDrawable = (AnimatedVectorDrawable) mSearchButton.getResources().getDrawable(R.drawable.evature_animated_microphone_reverse);
 				mSearchButton.setImageDrawable(animatedDrawable);
 				animatedDrawable.start();
 			}

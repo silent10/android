@@ -1,13 +1,13 @@
  <animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
-   android:drawable="@drawable/vector_microphone_flat" >
+   android:drawable="@drawable/evature_vector_microphone_flat" >
 <!--      <target -->
 <!--          android:name="rotationGroup" -->
 <!--          android:animation="@anim/reverse_mic_rotation" /> -->
      <target
          android:name="top"
-         android:animation="@anim/reverse_mic_top_path_morph" />
+         android:animation="@anim/evature_reverse_mic_top_path_morph" />
      <target 
          android:name="bottom"
-         android:animation="@anim/reverse_mic_bottom_path_morph" />
+         android:animation="@anim/evature_reverse_mic_bottom_path_morph" />
  </animated-vector>
  

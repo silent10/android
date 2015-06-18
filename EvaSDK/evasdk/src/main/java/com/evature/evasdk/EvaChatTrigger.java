@@ -1,16 +1,13 @@
 package com.evature.evasdk;
 
-import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
@@ -37,7 +34,7 @@ public class EvaChatTrigger {
         // initialize TTS
         EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
 
-        ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.voice_search_button, null);
+        ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.evature_voice_search_button, null);
         WeakReference<ImageButton> weakRef = new WeakReference<ImageButton>(searchButton);
         evaButtons.add(weakRef);
         final FragmentActivity fActivity = activity;

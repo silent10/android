@@ -76,12 +76,12 @@ public class ChatBalloon extends ViewGroup {
 			mDensity = context.getResources().getDisplayMetrics().density;
 	
 			if (attrs != null) {
-				TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ChatBalloon, 0, defStyle);
+				TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.EvatureChatBalloon, 0, defStyle);
 				try {
-					mColor = a.getColor(R.styleable.ChatBalloon_pointerColor , 0xffffffff);
-					mPointerWidth = a.getDimensionPixelSize(R.styleable.ChatBalloon_pointerWidth, Math.round(mDensity * POINTER_WIDTH));
-					mPointerHeight = a.getDimensionPixelSize(R.styleable.ChatBalloon_pointerHeight, Math.round(mDensity * POINTER_HEIGHT));
-					String pointerSide = a.getString(R.styleable.ChatBalloon_pointerSide);
+					mColor = a.getColor(R.styleable.EvatureChatBalloon_pointerColor, 0xffffffff);
+					mPointerWidth = a.getDimensionPixelSize(R.styleable.EvatureChatBalloon_pointerWidth, Math.round(mDensity * POINTER_WIDTH));
+					mPointerHeight = a.getDimensionPixelSize(R.styleable.EvatureChatBalloon_pointerHeight, Math.round(mDensity * POINTER_HEIGHT));
+					String pointerSide = a.getString(R.styleable.EvatureChatBalloon_pointerSide);
 					if (pointerSide != null) {
 						try {
 							mPointerSide = PointerSide.valueOf(pointerSide);
@@ -435,8 +435,8 @@ public class ChatBalloon extends ViewGroup {
             // Pull the layout param values from the layout XML during
             // inflation.  This is not needed if you don't care about
             // changing the layout behavior in XML.
-            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.ChatBalloonLP);
-            gravity = a.getInt(R.styleable.ChatBalloonLP_android_layout_gravity, gravity);
+            TypedArray a = c.obtainStyledAttributes(attrs, R.styleable.EvatureChatBalloonLP);
+            gravity = a.getInt(R.styleable.EvatureChatBalloonLP_android_layout_gravity, gravity);
             a.recycle();
         }
 

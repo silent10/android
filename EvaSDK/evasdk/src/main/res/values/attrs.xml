@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
 
-	 <declare-styleable name="ProgressWheel">
+	 <declare-styleable name="EvatureProgressWheel">
         <attr name="text" format="string" />
         <attr name="textColor" format="color" />
         <attr name="textSize" format="dimension" />
@@ -19,14 +19,14 @@
         <attr name="barSizeChange" format="boolean" />
     </declare-styleable>  
 	 
-    <declare-styleable name="ChatBalloon">
+    <declare-styleable name="EvatureChatBalloon">
         <attr name="pointerColor" format="color|reference" />
         <attr name="pointerSide" format="string" />
         <attr name="pointerHeight" format="dimension" />
         <attr name="pointerWidth" format="dimension" />
     </declare-styleable>
     
-    <declare-styleable name="ChatBalloonLP">
+    <declare-styleable name="EvatureChatBalloonLP">
 	    <attr name="android:layout_gravity" />
 	</declare-styleable>
 	

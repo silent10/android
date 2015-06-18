@@ -15,7 +15,7 @@ import com.evature.evasdk.util.DLog;
 import com.evature.evasdk.util.VolumeUtil;
 
 
-public class VolumeSettingsDialog extends Activity 
+public class EvaVolumeSettingsDialog extends Activity
 	implements
         VolumeUtil.VolumeListener,
 		DialogInterface.OnDismissListener,
@@ -23,7 +23,7 @@ public class VolumeSettingsDialog extends Activity
 		OnSeekBarChangeListener//,
 //		OnCheckedChangeListener
 {
-	protected static final String TAG = "VolumeSettingsDialog";
+	protected static final String TAG = "EvaVolumeSettingsDialog";
 	private AlertDialog mDialog;
 	private View volumeWarning;
 	private ImageView volumeWarningIcon;

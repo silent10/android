@@ -12,7 +12,7 @@
           android:layout_marginLeft="2dip"
           android:layout_marginRight="2dip"
           android:layout_marginTop="4dip"
-          android:background="@drawable/chat_bubble_white"
+          android:background="@drawable/evature_chat_bubble_white"
           android:orientation="horizontal" >
 <!--           android:animateLayoutChanges="true" -->
 

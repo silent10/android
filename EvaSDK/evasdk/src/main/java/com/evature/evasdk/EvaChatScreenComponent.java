@@ -1029,7 +1029,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 			undoLastUserChat();
 		}
 //		else if (viewId == R.id.volume_button) {
-//			Intent intent = new Intent(this, VolumeSettingsDialog.class);
+//			Intent intent = new Intent(this, EvaVolumeSettingsDialog.class);
 //			startActivity(intent);
 //		}
 	}// End of evatureClickHandler
