@@ -38,7 +38,7 @@ public class AppSetup {
     public static String deviceId;   // if you have a unique identifier for the user/device (leave null and Eva will generate an internal ID)
     public static String appVersion; // recommended - will be passed to Eva for debugging and tracking
 
-    public static String scopeStr = "";
+    public static String scopeStr = null;
 
     public static HashMap<String, String> extraParams = new HashMap<String,String>();
 
@@ -50,8 +50,9 @@ public class AppSetup {
         scopeStr = builder.toString();
     }
 
-//    private static EvaSpeak evaSpeak;
-
+    public static void setAutoInferScope() {
+        scopeStr = null;
+    }
 
     /***
      * Setup Eva and wire the App callbacks
@@ -59,11 +60,10 @@ public class AppSetup {
      * @param siteCode
      * @param appHandler - inherits a set of interfaces from com.evature.evasdk.
      */
-    public static void initEva(/*Context context, */String apiKey, String siteCode, Object appHandler) {
+    public static void initEva(String apiKey, String siteCode, Object appHandler) {
         AppSetup.apiKey = apiKey;
         AppSetup.siteCode = siteCode;
         EvaComponent.evaAppHandler = appHandler;
-//        evaSpeak = new EvaSpeak(context);
     }
 
 //    public static EvaSpeak

@@ -23,8 +23,6 @@ public class EvaChatScreenFragment extends Fragment {
         super.onCreate(savedInstanceState);
         chatScreen = new EvaChatScreenComponent(getActivity(), true);
         chatScreen.onCreate(savedInstanceState);
-
-        final FragmentManager manager = getActivity().getSupportFragmentManager();
     }
 
 

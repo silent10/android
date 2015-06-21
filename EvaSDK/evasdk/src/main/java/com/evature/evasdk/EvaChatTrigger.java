@@ -1,5 +1,6 @@
 package com.evature.evasdk;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -77,10 +78,18 @@ public class EvaChatTrigger {
         return (ViewGroup) rootView;
     }
 
+    public static void startSearchByVoice(FragmentActivity activity) {
+        startSearchByVoice(activity, null);
+    }
     public static void startSearchByVoice(FragmentActivity activity, AppScope evaContext) {
         final FragmentManager manager = activity.getSupportFragmentManager();
 
         getOrCreateRootView(activity);
+
+        Intent theIntent = activity.getIntent();
+        if (evaContext != null) {
+            theIntent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
+        }
 
         Fragment newFragment = new EvaChatScreenFragment();
         FragmentTransaction transaction = manager.beginTransaction();

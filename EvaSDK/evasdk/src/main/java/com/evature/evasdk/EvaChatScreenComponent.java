@@ -25,9 +25,13 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.evature.evasdk.appinterface.AppScope;
 import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.appinterface.AsyncCountResult;
+import com.evature.evasdk.appinterface.CarCount;
+import com.evature.evasdk.appinterface.CarSearch;
 import com.evature.evasdk.appinterface.CruiseCount;
+import com.evature.evasdk.appinterface.CruiseSearch;
 import com.evature.evasdk.appinterface.FlightCount;
 import com.evature.evasdk.appinterface.FlightSearch;
 import com.evature.evasdk.appinterface.HotelCount;
@@ -176,7 +180,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
         config.appVersion = AppSetup.appVersion;
 
-        config.scope = AppSetup.scopeStr;
+        if (AppSetup.scopeStr == null) {
+            config.scope = inferScopeFromHandler();
+        }
+        else {
+            config.scope = AppSetup.scopeStr;
+        }
         config.context = theIntent.getStringExtra(INTENT_EVA_CONTEXT);
 
         for (String key : AppSetup.extraParams.keySet()) {
@@ -1524,8 +1533,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 				mView.dismissItems(index+1, mView.getChatListModel().size(), ChatAdapter.DismissStep.ANIMATE_RESTORE);
 			}
 		}
-		
-		
 	}
 
 	@Override
@@ -1533,5 +1540,21 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		mView.setVolumeIcon();
 	}
 
+    private String inferScopeFromHandler() {
+        StringBuilder builder = new StringBuilder();
+        if ((EvaComponent.evaAppHandler instanceof CarSearch) || (EvaComponent.evaAppHandler instanceof CarCount)) {
+            builder.append(AppScope.Car.toString());
+        }
+        if ((EvaComponent.evaAppHandler instanceof CruiseSearch) || (EvaComponent.evaAppHandler instanceof CruiseCount)) {
+            builder.append(AppScope.Cruise.toString());
+        }
+        if ((EvaComponent.evaAppHandler instanceof FlightSearch) || (EvaComponent.evaAppHandler instanceof FlightCount)) {
+            builder.append(AppScope.Flight.toString());
+        }
+        if ((EvaComponent.evaAppHandler instanceof HotelSearch) || (EvaComponent.evaAppHandler instanceof HotelCount)) {
+            builder.append(AppScope.Hotel.toString());
+        }
+        return builder.toString();
+    }
 }
 
