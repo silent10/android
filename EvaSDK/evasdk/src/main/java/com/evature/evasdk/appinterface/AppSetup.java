@@ -137,11 +137,10 @@ public class AppSetup {
                 // check this version of the SDK is the latest version
                 String versionUrl = "https://raw.githubusercontent.com/evature/android/master/EvaSDK/evasdk/version.properties";
                 try {
-                    String masterVersion = null;
                     String result = DownloadUrl.get(versionUrl);
                     Properties props=new Properties();
                     props.load(new StringReader(result));
-                    props.getProperty("VERSION_CODE", null);
+                    String masterVersion = props.getProperty("VERSION_CODE", null);
                     if (masterVersion == null) {
                         initHandler.initResult("Master SDK version not found, please check for SDK updates at https://github.com/evature/android", null);
                     }
