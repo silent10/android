@@ -135,7 +135,7 @@ public class AppSetup {
                     return;
                 }
                 // check this version of the SDK is the latest version
-                String versionUrl = "https://raw.githubusercontent.com/evature/android/master/EvaSDK/version.properties";
+                String versionUrl = "https://raw.githubusercontent.com/evature/android/master/EvaSDK/evasdk/version.properties";
                 try {
                     String masterVersion = null;
                     String result = DownloadUrl.get(versionUrl);
