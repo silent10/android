@@ -128,7 +128,6 @@ public class EvaVoiceClient {
 	private URL getURL() throws Exception
 	{
 
-		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 
 		EvaComponent.EvaConfig config = mEva.mConfig;
 

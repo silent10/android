@@ -155,7 +155,7 @@ import com.evature.evasdk.util.DownloadUrl;
 			}
 			if (mInputText != null) {
 				try {
-                        evatureUrl += ("&input_text=" + URLEncoder.encode(mInputText, "UTF-8"));
+                    evatureUrl += ("&input_text=" + URLEncoder.encode(mInputText, "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					DLog.e(TAG, "UnsupportedEncodingException", e); 
 				}
@@ -184,23 +184,14 @@ import com.evature.evasdk.util.DownloadUrl;
 				evatureUrl += "&recording_key="+recordingKey;
 			}
 			
-			int retries = 0;
-			while (retries < 3) {
-				DLog.i(TAG, "<< Sending Eva URL = " + evatureUrl);
-				try {
-					String result = DownloadUrl.sget(evatureUrl);
-					EvaApiReply apiReply = new EvaApiReply(result);
-					return apiReply;
-				} catch (IOException e) {
-					DLog.w(TAG, "IOException in request to Evature: "+e.getMessage());
-					retries++;
-					try {
-						Thread.sleep(10); // wait 10ms to give OS time to free resources, maybe it will help
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
-				}
-			}
+            DLog.i(TAG, "<< Sending Eva URL = " + evatureUrl);
+            try {
+                String result = DownloadUrl.get(evatureUrl);
+                EvaApiReply apiReply = new EvaApiReply(result);
+                return apiReply;
+            } catch (IOException e) {
+                DLog.w(TAG, "IOException in request to Evature: "+e.getMessage());
+            }
 			// had 3 IOExceptions in a row - give up
 			EvaApiReply errorReply = new EvaApiReply("{\"status\": false }");
 			errorReply.errorMessage = mEva.activity.getResources().getString(R.string.evature_network_error);

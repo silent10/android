@@ -17,15 +17,38 @@ android {
             //jni.srcDirs = [] //disable automatic ndk-build call
         }
 
-        main.java.srcDirs += 'src/main/generated-sources'
+        //main.java.srcDirs += 'src/main/generated-sources'
     }
 
+
+    // auto-increment version each build
+    def versionPropsFile = file('version.properties')
+    def Properties versionProps = new Properties()
+    if(versionPropsFile.exists())
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+    def code = versionProps['VERSION_CODE']
+    if (code == null)
+        code = 0
+    else
+        code = code.toInteger()
+    code += 1
+    def name = versionProps['VERSION_NAME']
+    if (name == null)
+        name = "2.0"
+
+    versionProps['VERSION_CODE']=code.toString()
+    versionProps['VERSION_NAME']=name.toString()
+    versionProps.store(versionPropsFile.newWriter(), null)
+
     defaultConfig {
+        versionCode code
+        versionName name+"."+ code
         minSdkVersion 8
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
     }
+
+
     buildTypes {
         release {
             minifyEnabled false

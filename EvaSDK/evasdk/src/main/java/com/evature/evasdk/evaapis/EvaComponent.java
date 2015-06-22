@@ -7,13 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 
+import com.evature.evasdk.BuildConfig;
 import com.evature.evasdk.evaapis.crossplatform.EvaApiReply;
 import com.evature.evasdk.util.DLog;
 
@@ -58,7 +57,7 @@ public class EvaComponent implements
 	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
 	private static final String DefaultEvaWSHost = "http://apiuseh.evaws.com";
 	private static final String DefaultApiVersion = "v1.0";
-	public static final String SDK_VERSION = "android_2.0";
+	public static final String SDK_VERSION = "android_"+ BuildConfig.VERSION_NAME;
 	
 	private EvaTextClient mEvaTextClient;
 
@@ -69,7 +68,7 @@ public class EvaComponent implements
 	public static class EvaConfig implements Serializable {
 		private static final long serialVersionUID = 1L;
 		public String sessionId;
-		public String appKey;
+		public String apiKey;
 		public String siteCode;
 		public String locale;// IL, UK or US - see docs
 		public String language;
@@ -93,7 +92,7 @@ public class EvaComponent implements
 		
 		public EvaConfig(String apiKey, String siteCode) {
             this.siteCode = siteCode;
-            this.appKey = apiKey;
+            this.apiKey = apiKey;
 			sessionId = "1";
 			language = "en";
 			webServiceHost = DefaultEvaWSHost;
@@ -646,11 +645,11 @@ public class EvaComponent implements
 	}
 
 	public String getApiKey() {
-		return mConfig.appKey;
+		return mConfig.apiKey;
 	}
 
 	public void setApiKey(String apiKey) {
-		mConfig.appKey = apiKey;
+		mConfig.apiKey = apiKey;
 	}
 	
 	public void setParameter(String key, String value) {
