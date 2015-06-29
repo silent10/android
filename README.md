@@ -1,8 +1,8 @@
-Eva Voice SDK - Android
+# Eva Voice SDK - Android
 
 Version 2.0
 
-# Introduction
+## Introduction
 
 Voice enable your travel application in a couple of hours using the latest Eva Voice SDK.
 
@@ -24,11 +24,11 @@ The beautiful user interface conforms to the latest Material Design guidelines a
 
 The SDK is open source. Fork us [on Github](https://github.com/evature/android)!
 
-# Step 1: Setup the SDK in your IDE
+## Step 1: Setup the SDK in your IDE
 
 Download or clone the SDK -  the code repository is located at [https://github.com/evature/android](https://github.com/evature/android)
 
-## Import to Android Studio (recommended by Google)
+### Import to Android Studio (recommended by Google)
 
 1. Import the SDK project to Android Studio:
 
@@ -47,7 +47,7 @@ dependencies {
 ```
 
 
-## Alternatively, Import to an Eclipse Workspace (Slightly more complex)
+### Alternatively, Import to an Eclipse Workspace (Slightly more complex)
 
 Integrating the SDK into an Eclipse project requires modifying the AndroidManifest.xml and copying the resource files:
 
@@ -63,7 +63,7 @@ Integrating the SDK into an Eclipse project requires modifying the AndroidManife
 
 Note that in the future when you wish to upgrade the SDK you may have to update the Android Manifest entries and/or the resource files that were copied from the SDK.
 
-# Step 2: Initialize and Configure Eva
+## Step 2: Initialize and Configure Eva
 
 Do you have your Eva SITE_CODE and API_KEY?
 
@@ -95,7 +95,7 @@ Optional settings can be accessed by public static fields/methods of the AppSetu
 
 See more details below at the "Advanced integration" section.
 
-# Step 3: Add the microphone button!
+## Step 3: Add the microphone button!
 
 For each activity you wish to voice-enable add a single line to onCreate:
 
@@ -141,7 +141,7 @@ public void onCreate ( Bundle savedInstanceState )
 **Note**: 
 Eva assumes the host activity is of type *android.support.v4.app.FragmentActivity*. If this isn’t the case in your application, let us know and we can provide a workaround.
 
-# Mini Integration Test - Say Hi!
+### Mini Integration Test - Say Hi!
 
 At this point the floating microphone action button is visible and you can start communicating with Eva. Kick off your application and navigate to the activities which you voice-enabled.
 Press the microphone and say "Hi" to Eva!
@@ -150,7 +150,18 @@ Assuming all went well you will hear the reply.
 
 At this point Speech Recognition, Natural Language Understanding and Dialog Management are working, but Eva doesn’t know anything about your application yet!
 
-# Step 4: Implement your applicative callbacks
+### Context parameter
+If your application supports multiple scopes (eg. Flight search and Hotel search) and the current activity is relevant only to one scope (eg. viewing flight search results, or flights search only page) you can help Eva by passing a second parameter of *AppScope*. 
+
+eg.
+
+```
+EvaChatTrigger.startSearchByVoice(FragmentActivity.this, AppScope.Flight);
+// or
+EvaChatTrigger.addDefaultButton(this, AppScope.Hotel);
+```
+
+## Step 4: Implement your applicative callbacks
 
 Remember the "MyTravelAppHandler" which we passed to *initEva* in step one? This object should implement interfaces from the com.evature.evasdk.appinterface namespace.
 
@@ -178,7 +189,7 @@ As you can tell from the above list, the current interfaces are pairs of **Searc
 
 Normally you should implement the **Search* interface, while the **Count* interface is optional but highly recommended.  
 
-## Applicative Search interfaces
+### Applicative Search interfaces
 
 The methods in these interfaces receive the requested search criteria as function arguments.
 
@@ -186,12 +197,12 @@ All you have to do is translate the arguments to your native types and trigger y
 
 The different interfaces and their parameters are fully documented in the javadocs. They are straightforward and simply describe the criteria as entered by the user (e.g. airport codes, departure dates, etc…).
 
-## Note:  null values of parameters
+#### Note:  null values of parameters
 
 If the user did not request a certain search criteria, it will be passed as "null", so please remember to check that each argument isn’t null before you use it.
 For example the “nonStop” parameter will be *True* if the user requested non-stop flights, *False* if the user specifically requested NOT non-stop flights, and *null* if the user did not mention this criteria at all.
 
-## The IsComplete argument
+#### The IsComplete argument
 
 One of the search methods’ parameters is called "*isComplete*". Unlike the other parameters, this is not a search criteria requested by the user but instead it is Eva’s dialog state. 
 While the user has not entered all the **mandatory** search parameters Eva will continue asking the user for more information. After each utterance and question Eva will trigger the relevant search function with the parameters entered so far and *isComplete=False*.  After the user has entered **all **the mandatory search parameters Eva will trigger a search with *isComplete=True*, and Eva will end the dialog by saying “searching for <*text describing the search*>”.
@@ -200,7 +211,7 @@ The most common use case would be ignoring calls with *isComplete=False*, and tr
 
 *isComplete=False is mostly used to update the traditional form-search display with the partial information received thus far.*
 
-## Applicative Count interfaces
+### Applicative Count interfaces
 
 If you app supports counting how many search results will be for a partial search (ie. isComplete=False), it is highly recommended that you implement the matching **Count* interface.
 
@@ -209,9 +220,9 @@ Simply activate your counting logic (it can be easily an async function, eg. a r
 
 When implemented, Eva will use these count results to display the number of results below Eva’s text while the user chats, and will have special handling for one result (no more questions required) and zero results (urge the user to change some of the requested criteria).
 
-# Advanced Integration
+## Advanced Integration
 
-## Look & Feel Customizations
+### Look & Feel Customizations
 
 Simple customizations of the Eva chat screen and the default microphone button are very easy; all the strings, colors, layouts and bitmaps used by the SDK are located in standard resource files.
 
@@ -219,7 +230,7 @@ Simply copy the resources to your project and modify them to fit your needs. All
 
 Let us know if you are encountering problems or if you wish to customize features which can’t be changed by modifying the resources. 
 
-## Google Now Integration
+### Google Now Integration
 
 The Eva Voice Interface SDK implemented Google Now integration.
 
@@ -238,7 +249,7 @@ Run from your command line:
 adb shell am start -a com.google.android.gms.actions.SEARCH_ACTION -e query "New York to Tokyo" your.app.package.here
 ```
 
-## Other App Setup settings
+### Other App Setup settings
 
 Remember the app Setup at step one ?
 
