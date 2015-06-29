@@ -1,6 +1,34 @@
+
 # Eva Voice SDK - Android
 
 Version 2.0
+
+
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+  - [Introduction](#introduction)
+  - [Step 1: Setup the SDK in your IDE](#step-1-setup-the-sdk-in-your-ide)
+    - [Import to Android Studio (recommended by Google)](#import-to-android-studio-recommended-by-google)
+    - [Alternatively, Import to an Eclipse Workspace (Slightly more complex)](#alternatively-import-to-an-eclipse-workspace-slightly-more-complex)
+  - [Step 2: Initialize and Configure Eva](#step-2-initialize-and-configure-eva)
+  - [Step 3: Add the microphone button!](#step-3-add-the-microphone-button)
+    - [Mini Integration Test - Say Hi!](#mini-integration-test---say-hi)
+    - [Context parameter](#context-parameter)
+  - [Step 4: Implement your applicative callbacks](#step-4-implement-your-applicative-callbacks)
+    - [Applicative Search interfaces](#applicative-search-interfaces)
+      - [Note:  null values of parameters](#note--null-values-of-parameters)
+      - [The IsComplete argument](#the-iscomplete-argument)
+    - [Applicative Count interfaces](#applicative-count-interfaces)
+  - [Advanced Integration](#advanced-integration)
+    - [Look & Feel Customizations](#look-&-feel-customizations)
+    - [Google Now Integration](#google-now-integration)
+    - [Other App Setup settings](#other-app-setup-settings)
+  - [Support](#support)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Introduction
 
@@ -155,7 +183,7 @@ If your application supports multiple scopes (eg. Flight search and Hotel search
 
 eg.
 
-```
+``` java
 EvaChatTrigger.startSearchByVoice(FragmentActivity.this, AppScope.Flight);
 // or
 EvaChatTrigger.addDefaultButton(this, AppScope.Hotel);
