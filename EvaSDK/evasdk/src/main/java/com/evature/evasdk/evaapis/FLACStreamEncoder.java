@@ -30,6 +30,9 @@ public class FLACStreamEncoder
 
   public FLACStreamEncoder()
   {
+      // touch the field and method to avoid Proguard removing them
+      mObject = -1;
+      writeCallback(null, 0, 0, 0);
   }
   
 
@@ -59,7 +62,7 @@ public class FLACStreamEncoder
   }
 
   
-  private void writeCallback(byte[] buffer, int length, int samples, int frame) {
+  public void writeCallback(byte[] buffer, int length, int samples, int frame) {
 //	  DLog.i(TAG, ">>>>>> write callback!!  buffer len "+length+",  frame: "+frame+",  samples: "+samples);
 	  if (this.callback != null) {
 		  callback.onWrite(buffer, length, samples, frame);
@@ -76,7 +79,7 @@ public class FLACStreamEncoder
    **/
 
   // Pointer to opaque data in C
-  private long  mObject;
+  public long  mObject;
 
   native public void initFifo(String outfile);
   

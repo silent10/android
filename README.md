@@ -288,6 +288,7 @@ They include:
 
 2. autoOpenMicrophone - set to True to enable full hands-free mode.
 When inactive the end-user needs to press the microphone button to talk each time. When active Eva automatically opens the microphone for the end-user after each question.
+We suggest NOT to automatically open the microphone.
 **Pros**:   Hands free operation
 **Cons**: 
 
@@ -296,8 +297,6 @@ When inactive the end-user needs to press the microphone button to talk each tim
     2. Not all users understand that the microphone was automatically activated resulting in many "empty" recordings.
 
     3. Many people get stage fright when the microphone opens automatically and begin to stutter.
-
-We suggest NOT to automatically open the microphone.
 
 3. appVersion - set this to a short string describing your application version. This may help us figure out if a bug is related to a certain version of the application.
 

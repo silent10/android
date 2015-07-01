@@ -48,6 +48,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.evaapis.EvaException;
 import com.evature.evasdk.evaapis.EvaSpeechRecogComponent;
 import com.evature.evasdk.user_interface.SoundLevelView;
@@ -144,6 +145,8 @@ public class EvatureMainView implements OnItemClickListener  {
 		mProgressBar.spin();
 		
 		setupSearchButtonDrag();
+
+        scrollToPosition(mChatAdapter.getCount() - 1);
 	}
 
 	public static void scaleButton(final View button, int duration, float fromScale, float toScale) {
@@ -865,22 +868,24 @@ public class EvatureMainView implements OnItemClickListener  {
 		if (mEditedChatItemIndex != -1) {
 			closeEditChatItem(false);
 		}
-		
+
 		ChatItem editChat = new ChatItem("");
 		editChat.setStatus(ChatItem.Status.EDITING);
 		toggleMainButtons(false);
 		addChatItem(editChat);
 		mEditedChatItemIndex = mChatListModel.size()-1;
+        mEvaChatScreen.addEmptyFragment();
 	}
 
 	
 	private void editEvaChat(ChatItem item, int position) {
-
+        if (AppSetup.tapToEditChat == false) {
+            return;
+        }
 		if (mEditedChatItemIndex != -1) {
 			closeEditChatItem(false);
 		}
 		else {
-            mEvaChatScreen.addEmptyFragment();
 			if (item.getType() == ChatItem.ChatType.MultiChoiceQuestion) {
 				// search for "Me" chat after
 				for (int i=position+1; i<mChatListModel.size(); i++) {
@@ -910,6 +915,9 @@ public class EvatureMainView implements OnItemClickListener  {
 	}
 
 	private void editMeChat(ChatItem current, int position) {
+        if (AppSetup.tapToEditChat == false) {
+            return;
+        }
 		if (mEditedChatItemIndex != -1) {
 			closeEditChatItem(false);
 		}
@@ -922,14 +930,15 @@ public class EvatureMainView implements OnItemClickListener  {
 					return;
 				}
 			}
-			
-			if (current.getStatus() != ChatItem.Status.EDITING) {
+
+            if (current.getStatus() != ChatItem.Status.EDITING) {
 				current.setStatus(ChatItem.Status.EDITING);
 				toggleMainButtons(false);
 				mEditedChatItemIndex = position;
 				mChatAdapter.notifyDataSetChanged();
 			}
-		}
+            mEvaChatScreen.addEmptyFragment();
+        }
 	}
 	
 	private ChatItem exampleChatItem;
@@ -940,10 +949,10 @@ public class EvatureMainView implements OnItemClickListener  {
 		}
 
         Resources resources = mEvaChatScreen.getActivity().getResources();
-        String examplesStr = resources.getString(R.string.evature_examples_flights);
-        List<String> examples = Arrays.asList(examplesStr.split("\n"));
+        List<String> examples = mEvaChatScreen.getExamplesStrings();
         // select random subset
-        int numOfExamples = Math.min(5, examples.size());
+        int MAX_NUM_OF_EXAMPLES = 5;
+        int numOfExamples = Math.min(MAX_NUM_OF_EXAMPLES, examples.size());
         Random rand = new Random(System.currentTimeMillis());
         for (int i=0; i< numOfExamples; i++) {
             Collections.swap(examples, i, rand.nextInt(examples.size()));

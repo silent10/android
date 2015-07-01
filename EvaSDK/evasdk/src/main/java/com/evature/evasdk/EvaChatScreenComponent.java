@@ -10,6 +10,8 @@ import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -22,6 +24,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -65,10 +69,12 @@ import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -132,6 +138,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
     private View rootView;
 
+    private int entryStackCount;
     private Activity activity;
     public Activity getActivity() {
         return activity;
@@ -160,9 +167,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 //            window.setSharedElementExitTransition(new ChangeImageTransform());
 //        }
 
-		// show Eva logs only in Debug build
-		DLog.DebugMode = BuildConfig.DEBUG;
-		
+
 		Intent theIntent = activity.getIntent();
 		Bundle bundle = theIntent.getExtras();
 		DLog.i(TAG, "Bundle: " + bundle);
@@ -202,11 +207,59 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 		eva = new EvaComponent(activity, this, config);
 		eva.onCreate(savedInstanceState);
+
+        FragmentActivity fa = (FragmentActivity)activity;
+        FragmentManager manager = fa.getSupportFragmentManager();
+        entryStackCount = manager.getBackStackEntryCount();
 		
 		speechSearch = new EvaSpeechRecogComponent(eva);
 		isPaused = false;
-
 	}
+
+    public List<String> getExamplesStrings() {
+
+        String evaContext = eva.getContext() == null ? eva.getScope() : eva.getContext();
+
+        List<String> examples = new ArrayList<String>();
+        Resources resources = activity.getResources();
+        if (evaContext.contains(AppScope.Flight.toString())) {
+            String[] examplesArr = resources.getStringArray(R.array.evature_examples_flights);
+            examples.addAll(Arrays.asList(examplesArr));
+        }
+        if (evaContext.contains(AppScope.Cruise.toString())) {
+            String[] examplesArr = resources.getStringArray(R.array.evature_examples_cruises);
+            examples.addAll(Arrays.asList(examplesArr));
+        }
+        if (evaContext.contains(AppScope.Car.toString())) {
+            String[] examplesArr = resources.getStringArray(R.array.evature_examples_cars);
+            examples.addAll(Arrays.asList(examplesArr));
+        }
+        if (evaContext.contains(AppScope.Hotel.toString())) {
+            String[] examplesArr = resources.getStringArray(R.array.evature_examples_hotels);
+            examples.addAll(Arrays.asList(examplesArr));
+        }
+        return examples;
+    }
+
+    private String getGreeting() {
+        Resources resources = activity.getResources();
+        String evaContext = eva.getContext() == null ? eva.getScope() : eva.getContext();
+
+        if (evaContext.equals(AppScope.Flight.toString())) {
+            return resources.getString(R.string.evature_greeting_flight);
+        }
+        if (evaContext.equals(AppScope.Cruise.toString())) {
+            return resources.getString(R.string.evature_greeting_cruise);
+        }
+        if (evaContext.equals(AppScope.Car.toString())) {
+            return resources.getString(R.string.evature_greeting_car);
+        }
+        if (evaContext.equals(AppScope.Hotel.toString())) {
+            return resources.getString(R.string.evature_greeting_hotel);
+        }
+
+        return resources.getString(R.string.evature_greeting);
+    }
 
     public View createMainView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         DLog.d(TAG, "createMainView");
@@ -216,7 +269,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 chatItems.clear();
                 mView = new EvatureMainView(this, chatItems);
                 Resources resources = activity.getResources();
-                String greeting = resources.getString(R.string.evature_greeting_flight);
+                String greeting = getGreeting();
                 int pos = greeting.length();
                 String seeExamples = resources.getString(R.string.evature_tap_for_examples);
                 SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
@@ -309,6 +362,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 break;
         }
 
+        if (searchType == null) {
+            return;
+        }
 
         switch (searchType) {
 
@@ -1304,9 +1360,30 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
      */
     public static class EmptyFragment extends Fragment {
         boolean necessary = true;
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            if (ChatAdapter.currentEditBox != null) {
+                Handler handler = new Handler(Looper.getMainLooper());
+                final Runnable r = new Runnable() {
+                    public void run() {
+                        if (ChatAdapter.currentEditBox != null) {
+                            EditText editTextToFocus = (EditText) ChatAdapter.currentEditBox.get();
+                            if (editTextToFocus != null) {
+                                editTextToFocus.requestFocus();
+                                getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                            }
+                        }
+                    }
+                };
+                handler.postDelayed(r, 1500);
+            }
+        }
+
         @Override
         public void onDestroy() {
-            DLog.i(TAG, "Destroying empty fragment, triggerback necessary: "+necessary);
+            DLog.i(TAG, "Destroying empty fragment, triggerback necessary: " + necessary);
             if (necessary) {
                 FragmentManager manager = getFragmentManager();
                 Fragment fragment = manager.findFragmentByTag(EvaChatScreenFragment.TAG);
@@ -1319,15 +1396,23 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
 
         public void notNecessaryAnymore() {
+            DLog.d(TAG, "Setting necessary to false");
             necessary = false;
         }
     }
 
+
     void addEmptyFragment() {
         if (mUseExtraFragmentForBackHack) {
-            FragmentActivity fa = (FragmentActivity)activity;
+            DLog.d(TAG, "Adding empty fragment");
+            FragmentActivity fa = (FragmentActivity) activity;
             FragmentManager manager = fa.getSupportFragmentManager();
-            Fragment empty = new EmptyFragment();
+            Fragment fragment = manager.findFragmentByTag(EMPTY_FRAGMENT_TAG);
+            if (fragment != null) {
+                DLog.e(TAG, "Unexpected fragment stack state - already has empty fragment");
+                return;
+            }
+            EmptyFragment empty = new EmptyFragment();
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.add(R.id.evature_root_view, empty, EMPTY_FRAGMENT_TAG);
             transaction.addToBackStack(null);
@@ -1337,19 +1422,50 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
     void removeEmptyFragment() {
         if (mUseExtraFragmentForBackHack) {
+            DLog.d(TAG, "Removing empty fragment");
             FragmentActivity fa = (FragmentActivity)activity;
             FragmentManager manager = fa.getSupportFragmentManager();
-            if (manager.getBackStackEntryCount() == 2) {
-                EmptyFragment fragment = (EmptyFragment) manager.findFragmentByTag(EMPTY_FRAGMENT_TAG);
-                fragment.notNecessaryAnymore();
-                if (fragment != null) {
-                    manager.popBackStack();
-                } else {
-                    DLog.e(TAG, "Unexpected fragment stack state");
-                }
+            Fragment fragment = manager.findFragmentByTag(EMPTY_FRAGMENT_TAG);
+            if (fragment == null) {
+                DLog.e(TAG, "Unexpected fragment stack state - missing empty fragment");
+                return;
             }
+            EmptyFragment emptyFragment = (EmptyFragment) fragment;
+            emptyFragment.notNecessaryAnymore();
+            manager.popBackStack();  // assume empty fragment is on top!
         }
+
     }
+
+
+    public void closeChatScreen() {
+        FragmentActivity fa = (FragmentActivity)activity;
+        FragmentManager manager = fa.getSupportFragmentManager();
+        Fragment fragment = manager.findFragmentByTag(EMPTY_FRAGMENT_TAG);
+//        FragmentTransaction transaction = manager.beginTransaction();
+        if (fragment != null) {
+            DLog.d(TAG, "Removing empty fragment");
+//            EmptyFragment emptyFragment = (EmptyFragment) fragment;
+//            emptyFragment.notNecessaryAnymore();
+//            transaction.remove(emptyFragment);
+            manager.popBackStack();  // assume empty fragment is on top!
+        }
+        else {
+            DLog.d(TAG, "No empty fragment found");
+        }
+        fragment = manager.findFragmentByTag(EvaChatScreenFragment.TAG);
+        if (fragment != null) {
+//            transaction.remove(fragment);
+            DLog.d(TAG, "Removing chat fragment");
+            manager.popBackStack();  // assume chat fragment is on top!
+        }
+        else {
+            DLog.e(TAG, "No chat fragment found!");
+        }
+//        transaction.commit();
+
+    }
+
 
     /**** Display chat items for each flow element - execute the first question
 	 * element or, if no question element, execute the first flow element
@@ -1495,6 +1611,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 						mShownWarningsTutorial = true;
 						chatItem.setSubLabel(activity.getString(R.string.evature_undo_tutorial));
 						break;
+                    case Chat:
+                        if (reply.originalInputText.toLowerCase().equals("bye bye")) {
+                            EvaChatTrigger.closeChatScreen(getActivity());
+                        }
+                        break;
 				}
 				break;
 

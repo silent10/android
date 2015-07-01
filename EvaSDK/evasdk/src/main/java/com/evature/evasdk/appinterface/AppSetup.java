@@ -49,6 +49,7 @@ public class AppSetup {
     public static boolean semanticHighlightingLocations = true;
     public static boolean autoOpenMicrophone = false;  // true for hands free usage
     public static boolean locationTracking = true;     // true to enable Eva tracking location - used for understanding "home" location
+    public static boolean tapToEditChat = false;
 
     public static String deviceId;   // if you have a unique identifier for the user/device (leave null and Eva will generate an internal ID)
     public static String appVersion; // recommended - will be passed to Eva for debugging and tracking
@@ -97,6 +98,9 @@ public class AppSetup {
                             DLog.w(TAG, err);
                         }
                     }
+                    else {
+                        DLog.d(TAG, "Eva init success");
+                    }
                 }
             };
         }
@@ -118,6 +122,11 @@ public class AppSetup {
                     JSONObject jobj = new JSONObject(result);
                     String msg = jobj.optString("message");
                     if ("Site-Code / API-Key invalid".equals(msg)) {
+                        Log.e(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        Log.e(TAG, "    Site-Code / API-Key invalid   ");
+                        Log.e(TAG, " Please check you have passed the correct credentials to initEva method, as provided by Evature.");
+                        Log.i(TAG, " If you have not done so, register for free trial at http://www.evature.com/registration/form ");
+                        Log.w(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         initHandler.initResult("Site-Code / API-Key invalid - please check you have passed the correct credentials to initEva method, as provided by Evature.", null);
                         return;
                     }
@@ -179,7 +188,6 @@ public class AppSetup {
         checkVersion.start();
     }
 
-//    public static EvaSpeak
 
     public static void evaLogs(boolean enabled) {
         DLog.DebugMode = enabled;

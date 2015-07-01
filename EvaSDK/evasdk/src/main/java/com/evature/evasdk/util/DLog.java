@@ -20,7 +20,7 @@ public class DLog {
 		VERBOSE, DEBUG, INFO, WARN, ERROR, WTF
 	}
 	
-	static public boolean DebugMode = true;
+	static public boolean DebugMode = false;
 
 	
 	public interface LogListener {

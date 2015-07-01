@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="right|top"
-     >
+    android:listSelector="@null"
+    >
 
     <com.evature.evasdk.user_interface.ChatBalloon
         android:id="@+id/chat_bubble" 
@@ -13,10 +14,12 @@
           android:layout_height="wrap_content"
           android:animateLayoutChanges="true"
           android:elevation="3dp"
+          android:minWidth="30dp"
           android:layout_gravity="right|top"
           android:layout_marginLeft="20dp"
           android:layout_marginBottom="6dp"
           android:layout_marginTop="4dp"
+          android:listSelector="@null"
           app:pointerSide="Right"
           app:pointerColor="#03A9F4"
            >

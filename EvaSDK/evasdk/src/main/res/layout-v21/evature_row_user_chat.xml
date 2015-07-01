@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingTop="4dp"
+    android:listSelector="@null"
      >
 
       <com.evature.evasdk.user_interface.ChatBalloon
@@ -17,6 +18,7 @@
           android:layout_marginRight="20dp"
           android:layout_marginBottom="6dp"
           android:layout_marginTop="4dp"
+          android:listSelector="@null"
           app:pointerSide="Left"
            >
 

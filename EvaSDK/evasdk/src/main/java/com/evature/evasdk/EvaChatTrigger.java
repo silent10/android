@@ -1,6 +1,8 @@
 package com.evature.evasdk;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -68,9 +70,15 @@ public class EvaChatTrigger {
         if (rootView == null) {
             EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
 
+            final TypedArray styledAttributes = activity.getTheme().obtainStyledAttributes(
+                    new int[] { android.R.attr.actionBarSize });
+            int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+            styledAttributes.recycle();
+
             RelativeLayout rl = new RelativeLayout(activity);
             rl.setId(R.id.evature_root_view);
             rl.setGravity(Gravity.BOTTOM);
+            rl.setPadding(0, actionBarSize, 0, 0);
             activity.getWindow().addContentView(rl, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
             rootView = rl;
@@ -99,6 +107,14 @@ public class EvaChatTrigger {
         transaction.commit();
     }
 
+
+    public static void closeChatScreen(Context activity) {
+        FragmentActivity fa = (FragmentActivity)activity;
+        FragmentManager manager = fa.getSupportFragmentManager();
+        Fragment fragment = manager.findFragmentByTag(EvaChatScreenFragment.TAG);
+        EvaChatScreenFragment evaChatScreenFragment = (EvaChatScreenFragment) fragment;
+        evaChatScreenFragment.closeChatFragment();
+    }
 
 //    public static void startSearchByVoiceActivity( FragmentActivity activity, AppScope evaContext) {
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

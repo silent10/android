@@ -2,6 +2,7 @@ package com.evature.evasdk.evaapis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -10,6 +11,7 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.TextToSpeech.Engine;
 import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
 import android.util.Log;
 
 import com.evature.evasdk.util.DLog;
@@ -152,6 +154,18 @@ public class EvaSpeak implements TextToSpeech.OnInitListener {
 	// Implements TextToSpeech.OnInitListener.
 	public void onInit(int status) {
 		if (status == TextToSpeech.SUCCESS) {
+            /*Voice currentVoice = mTts.getVoice();
+            Set<Voice> availableVoices = mTts.getVoices();
+            if (availableVoices.contains(currentVoice) == false) {
+                // current voice isn't in the available voices!   choose a different one
+
+                // first iteration - look for high quality English voice
+                for (Voice voice : availableVoices) {
+                    if (voice.)
+                }
+
+            }*/
+
 			//setTtsLanguage(getPreferedLanguage());
 			mTtsConfigured = true;
 			if (pendingSayit != null) {

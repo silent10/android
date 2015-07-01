@@ -3,11 +3,14 @@ package com.evature.evasdk;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.evature.evasdk.util.DLog;
 
 /**
  * Created by iftah on 6/4/15.
@@ -67,6 +70,10 @@ public class EvaChatScreenFragment extends Fragment {
     public void onDestroy() {
         chatScreen.onDestroy();
         super.onDestroy();
+    }
+
+    public void closeChatFragment() {
+        chatScreen.closeChatScreen();
     }
 
 }

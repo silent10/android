@@ -1,6 +1,7 @@
 // Relevant example: http://windrealm.org/tutorials/android/listview-with-checkboxes-without-listactivity.php
 package com.evature.evasdk.user_interface;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import android.widget.TextView;
 
 import com.evature.evasdk.EvatureMainView;
 import com.evature.evasdk.R;
+import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.model.ChatItem;
 
 
@@ -30,8 +32,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 
 	private static final String TAG = "ChatAdapter";
 	private static final int VIEW_TYPE_COUNT = ChatItem.ChatType.values().length+1;
-	
-	private final ArrayList<ChatItem> mChatList;
+    public static WeakReference currentEditBox;
+
+    private final ArrayList<ChatItem> mChatList;
 	private final EvatureMainView chatView;
 	private final LayoutInflater mInflater;
 
@@ -92,6 +95,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			view = mInflater.inflate(R.layout.evature_row_filler, parent, false);
 			view.setClickable(false);
 			view.setEnabled(false);
+            view.setVisibility(View.INVISIBLE);
 		}
 		return view;
 	}
@@ -232,10 +236,19 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				userHolder.editText.setText(chatItem.getChat().toString());
 				label.setVisibility(View.GONE);
 				userHolder.inEdit.setVisibility(View.VISIBLE);
+                if (AppSetup.tapToEditChat) {
+                    ChatAdapter.currentEditBox = new WeakReference(userHolder.editText);
+                }
 			}
 			else {
 				label.setVisibility(View.VISIBLE);
 				userHolder.inEdit.setVisibility(View.GONE);
+                if (AppSetup.tapToEditChat) {
+                    if (ChatAdapter.currentEditBox != null &&
+                            userHolder.editText == ChatAdapter.currentEditBox.get()) {
+                        ChatAdapter.currentEditBox = null;
+                    }
+                }
 			}
 			break;
 		
