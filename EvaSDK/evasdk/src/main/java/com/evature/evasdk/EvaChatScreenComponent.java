@@ -138,7 +138,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
     private View rootView;
 
-    private int entryStackCount;
     private Activity activity;
     public Activity getActivity() {
         return activity;
@@ -208,10 +207,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		eva = new EvaComponent(activity, this, config);
 		eva.onCreate(savedInstanceState);
 
-        FragmentActivity fa = (FragmentActivity)activity;
-        FragmentManager manager = fa.getSupportFragmentManager();
-        entryStackCount = manager.getBackStackEntryCount();
-		
 		speechSearch = new EvaSpeechRecogComponent(eva);
 		isPaused = false;
 	}
@@ -860,8 +855,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 iterator.remove();
             }
             else {
-                //EvatureMainView.scaleButton(EvaChatTrigger.searchButton, 400, 1.0f, 0.0f);
-                EvatureMainView.animateButton(imgButton, "alpha", 400, 1.0f, 0.0f);
+                //EvatureMainView.scaleButton(imgButton, 400, 1.0f, 0.0f);
+                //EvatureMainView.animateButton(imgButton, "alpha", 400, 1.0f, 0.0f);
+                imgButton.setVisibility(View.GONE);
             }
 
         }
@@ -883,7 +879,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 			mView.addChatItem(chat);
 			VOICE_COOKIE.storeResultInItem = chat;
 			eva.searchWithText(searchString, VOICE_COOKIE, false);
-			mView.addChatItem(new ChatItem("Eva Thinking...", null, ChatItem.ChatType.Eva));
+			mView.addChatItem(new ChatItem(getActivity().getString(R.string.evature_thinking), null, ChatItem.ChatType.Eva));
 			
 			// clear the intent - it shouldn't run again resuming!
 			//activity.onNewIntent(new Intent());
@@ -912,7 +908,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             }
             else {
                 //EvatureMainView.scaleButton(imgButton, 400, 0f, 0.666f);
-                EvatureMainView.animateButton(imgButton, "alpha", 400, 0.0f, 1.0f);
+                //EvatureMainView.animateButton(imgButton, "alpha", 400, 0.0f, 1.0f);
+                imgButton.setVisibility(View.VISIBLE);
             }
         }
 
@@ -970,6 +967,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		@Override
 		public void speechResultError(final String message, final Object cookie) {
 			DLog.d(TAG, "Speech recognition error: "+message);
+            String networkError = getActivity().getResources().getString(R.string.evature_network_error);
+            if (networkError.equals(message)) {
+                ChatItem myChat = new ChatItem(networkError, null, ChatItem.ChatType.Eva);
+                mView.addChatItem(myChat);
+            }
 			mView.hideSpeechWave();
 			Thread t = new Thread(new Runnable() {
 				@Override
@@ -1098,9 +1100,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 //			startActivity(intent);
 //		}
 	}// End of evatureClickHandler
-	
-	private void undoLastUserChat() {
 
+
+	private void undoLastUserChat() {
 		ArrayList<ChatItem> chatList= mView.getChatListModel();
 		if (chatList.size() > 0) {
 			int dismissFrom = -1;
@@ -1612,7 +1614,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 						chatItem.setSubLabel(activity.getString(R.string.evature_undo_tutorial));
 						break;
                     case Chat:
-                        if (reply.originalInputText.toLowerCase().equals("bye bye")) {
+                        if (reply.originalInputText != null && reply.originalInputText.toLowerCase().equals("bye bye")) {
                             EvaChatTrigger.closeChatScreen(getActivity());
                         }
                         break;

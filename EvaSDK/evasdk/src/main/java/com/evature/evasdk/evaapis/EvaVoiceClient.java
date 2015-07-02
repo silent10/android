@@ -224,7 +224,7 @@ public class EvaVoiceClient {
 	/*
 	 * This is a simpler helper function to setup the Header parameters
 	 */
-	private HttpURLConnection getConnection(URL url) throws IOException 
+	private HttpURLConnection getConnection(URL url) throws IOException
 	{
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		try {
@@ -302,10 +302,10 @@ public class EvaVoiceClient {
 //			is = new GZIPInputStream(is);
 //		}
 //
-		DLog.i(TAG, "status: "+connection.getResponseCode()+"  "+connection.getResponseMessage());
-		for ( Map.Entry<String,List<String>> header : connection.getHeaderFields().entrySet()) {
-		    System.out.println(header.getKey() + "=" + header.getValue());
-		}
+		DLog.d(TAG, "status: "+connection.getResponseCode()+"  "+connection.getResponseMessage());
+//		for ( Map.Entry<String,List<String>> header : connection.getHeaderFields().entrySet()) {
+//		    System.out.println(header.getKey() + "=" + header.getValue());
+//		}
 
 		if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) { 
 			mEvaResponse = inputStreamToString(connection.getInputStream()).toString();

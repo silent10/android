@@ -143,7 +143,8 @@ public class EvatureMainView implements OnItemClickListener  {
 		
 		//mProgressBar.getIndeterminateDrawable().setColorFilter(0xffffffff, android.graphics.PorterDuff.Mode.SRC_ATOP);
 		mProgressBar.spin();
-		
+
+        mSearchButton.setImageResource(R.drawable.evature_microphone_icon);
 		setupSearchButtonDrag();
 
         scrollToPosition(mChatAdapter.getCount() - 1);

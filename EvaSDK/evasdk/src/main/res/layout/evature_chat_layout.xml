@@ -36,8 +36,7 @@
         android:drawSelectorOnTop="true"
         android:stackFromBottom="false"
         android:transcriptMode="normal"
-        android:listSelector="@null"
-        
+        android:listSelector="@android:color/transparent"
         android:cacheColorHint="@android:color/transparent" 
         >
     </ListView>

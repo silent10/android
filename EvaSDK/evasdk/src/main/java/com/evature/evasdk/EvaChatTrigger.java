@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +32,28 @@ public class EvaChatTrigger {
         addDefaultButton(activity, null);
     }
 
+    private static ViewGroup.LayoutParams buttonLayoutParams = null;
+    public static ViewGroup.LayoutParams getDefaultButtonLayoutParams(Context context) {
+        if (buttonLayoutParams == null) {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.CENTER_IN_PARENT);
+
+            final float scale = context.getResources().getDisplayMetrics().density;
+            int pixels = (int) (MARGIN_BOTTOM * scale + 0.5f);
+            params.bottomMargin = pixels;
+            params.width = (int)(76f*scale+0.5f);
+            params.height = (int)(76f*scale+0.5f);
+            buttonLayoutParams = params;
+        }
+        return buttonLayoutParams;
+    }
+
+    public static void setDefaultButtonLayoutParams(ViewGroup.LayoutParams params) {
+        buttonLayoutParams = params;
+    }
+
+
     public static void addDefaultButton(FragmentActivity activity, final AppScope evaContext) {
         // initialize TTS
         EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
@@ -40,6 +61,7 @@ public class EvaChatTrigger {
         ImageButton searchButton = (ImageButton) LayoutInflater.from(activity).inflate(R.layout.evature_voice_search_button, null);
         WeakReference<ImageButton> weakRef = new WeakReference<ImageButton>(searchButton);
         evaButtons.add(weakRef);
+        searchButton.setImageResource(R.drawable.evature_microphone_icon);
         final FragmentActivity fActivity = activity;
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,19 +72,36 @@ public class EvaChatTrigger {
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            searchButton.setTransitionName("eva_microphone_button");
 //        }
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.addRule(RelativeLayout.CENTER_IN_PARENT);
-
-        final float scale = activity.getResources().getDisplayMetrics().density;
-        int pixels = (int) (MARGIN_BOTTOM * scale + 0.5f);
-        params.bottomMargin = pixels;
+        ViewGroup.LayoutParams params = getDefaultButtonLayoutParams(activity);
         searchButton.setLayoutParams(params);
 
         ViewGroup rootView = getOrCreateRootView(activity);
 
         rootView.addView(searchButton);
+    }
 
+    private static ViewGroup.LayoutParams overlayLayoutParams = null;
+    public static ViewGroup.LayoutParams getOverlayLayoutParams() {
+        if (overlayLayoutParams == null ) {
+            overlayLayoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+        return overlayLayoutParams;
+    }
+
+    public static void setOverlayLayoutParams(ViewGroup.LayoutParams params) {
+        overlayLayoutParams = params;
+    }
+
+    public static void setOverlayBelowActionBar(Context context) {
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+                new int[] { android.R.attr.actionBarSize });
+        int actionBarSize = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+        ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        params.topMargin = actionBarSize;
+        setOverlayLayoutParams(params);
     }
 
     private static ViewGroup getOrCreateRootView(FragmentActivity activity) {
@@ -70,17 +109,8 @@ public class EvaChatTrigger {
         if (rootView == null) {
             EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
 
-            final TypedArray styledAttributes = activity.getTheme().obtainStyledAttributes(
-                    new int[] { android.R.attr.actionBarSize });
-            int actionBarSize = (int) styledAttributes.getDimension(0, 0);
-            styledAttributes.recycle();
-
-            RelativeLayout rl = new RelativeLayout(activity);
-            rl.setId(R.id.evature_root_view);
-            rl.setGravity(Gravity.BOTTOM);
-            rl.setPadding(0, actionBarSize, 0, 0);
-            activity.getWindow().addContentView(rl, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
+            View rl = LayoutInflater.from(activity).inflate(R.layout.evature_overlay_container, null);
+            activity.getWindow().addContentView(rl, getOverlayLayoutParams());
             rootView = rl;
         }
         return (ViewGroup) rootView;
@@ -116,22 +146,23 @@ public class EvaChatTrigger {
         evaChatScreenFragment.closeChatFragment();
     }
 
-//    public static void startSearchByVoiceActivity( FragmentActivity activity, AppScope evaContext) {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                    Window window = activity.getWindow();
-//                    window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
-//                    window.setSharedElementEnterTransition(new ChangeImageTransform());
-//                    window.setSharedElementExitTransition(new ChangeImageTransform());
-//                    ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, searchButton, "eva_microphone_button");
-//                    Intent intent = new Intent(activity, EvaChatScreenComponent.class);
-//                    activity.startActivity(intent, options.toBundle());
-//                }
-//                else {
-//
-//        Intent intent = new Intent(activity, EvaChatScreenActivity.class);
-//        if (evaContext != null) {
-//            intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
-//        }
-//        activity.startActivity(intent);
-//    }
+    public static void startSearchByVoiceActivity( FragmentActivity activity, AppScope evaContext) {
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+            window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);
+            window.setSharedElementEnterTransition(new ChangeImageTransform());
+            window.setSharedElementExitTransition(new ChangeImageTransform());
+            ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, searchButton, "eva_microphone_button");
+            Intent intent = new Intent(activity, EvaChatScreenComponent.class);
+            activity.startActivity(intent, options.toBundle());
+        }
+        else {*/
+
+            Intent intent = new Intent(activity, EvaChatScreenActivity.class);
+            if (evaContext != null) {
+                intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
+            }
+            activity.startActivity(intent);
+        //}
+    }
 }
