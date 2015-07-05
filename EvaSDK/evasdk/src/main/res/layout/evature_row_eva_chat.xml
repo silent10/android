@@ -11,7 +11,7 @@
 	    android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:background="@drawable/evature_chat_bubble_blue"
-        android:orientation="vertical"    
+        android:orientation="vertical"
         android:layout_marginRight="2dp"
         android:layout_marginLeft="2dp"
         android:layout_marginTop="-2dp"

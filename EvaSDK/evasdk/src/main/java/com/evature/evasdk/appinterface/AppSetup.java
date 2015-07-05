@@ -99,7 +99,7 @@ public class AppSetup {
                         }
                     }
                     else {
-                        DLog.d(TAG, "Eva init success");
+                        DLog.d(TAG, "Eva Initialized Successfully");
                     }
                 }
             };

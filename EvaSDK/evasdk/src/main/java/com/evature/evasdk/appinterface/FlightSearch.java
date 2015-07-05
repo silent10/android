@@ -18,14 +18,12 @@ public interface FlightSearch {
 
     /***
      * handleOneWayFlightSearch - callback when Eva collects criteria to search for one way flights
-     * @param context - Android context, useful if the search should trigger a new activity
+     * @param context - Android context
      * @param isComplete - true if Eva considers the search flow "complete", ie. all the mandatory criteria have been requested by the user
      * @param origin - location of take-off
      * @param destination - location of landing
      * @param departDateMin - range of dates the user wishes to depart on
      * @param departDateMax   if only a single date is entered the Max date will be equal to the Min date
-     * @param returnDateMin
-     * @param returnDateMax
      * @param travelers - how many travelers, split into age categories
      * @param nonstop - True if the user requested nonstop, False if the user requested NOT nonstop, and null if the user did not mention this criteria
      * @param seatClass - array of seat classes (eg. economy, business, etc) requested by the user
@@ -39,7 +37,6 @@ public interface FlightSearch {
     void handleOneWayFlightSearch(Context context,
                                   boolean isComplete, EvaLocation origin, EvaLocation destination,
                                   Date departDateMin, Date departDateMax,
-                                  Date returnDateMin, Date returnDateMax,
                                   EvaTravelers travelers,
                                   Boolean nonstop,
                                   SeatClass[] seatClass,

@@ -89,13 +89,13 @@ public class AppFlightSearchModel extends AppSearchModel {
     public void triggerSearch(Context context) {
         if (EvaComponent.evaAppHandler instanceof FlightSearch) {
             if (oneWay) {
-                ((FlightSearch) EvaComponent.evaAppHandler).handleOneWayFlightSearch(context,  isComplete,  origin,  destination,
-                         departDateMin,  departDateMax,
-                         returnDateMin,  returnDateMax,
-                         travelers,
-                 nonstop, seatClass,airlines,
-                 redeye,
-                 food, seatType,sortBy, sortOrder);
+                ((FlightSearch) EvaComponent.evaAppHandler).handleOneWayFlightSearch(context,  isComplete,
+                        origin,  destination,
+                     departDateMin,  departDateMax,
+                     travelers,
+                     nonstop, seatClass,airlines,
+                     redeye,
+                     food, seatType,sortBy, sortOrder);
             }
             else {
                 ((FlightSearch) EvaComponent.evaAppHandler).handleRoundTripFlightSearch(context,  isComplete,  origin,  destination,
