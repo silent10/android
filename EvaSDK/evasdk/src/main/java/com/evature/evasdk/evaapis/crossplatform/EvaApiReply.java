@@ -21,7 +21,7 @@ import java.util.Map;
 public class EvaApiReply implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	public static boolean VERBOSE = false;
+	public static boolean VERBOSE = true;
 	private final String TAG = "EvaApiReply";
 	public String sayIt;
 	public String sessionId;
@@ -49,6 +49,7 @@ public class EvaApiReply implements Serializable {
 	public List<EvaWarning> evaWarnings = new ArrayList<EvaWarning>();
 	public List<String>  parseErrors = new ArrayList<String>();  // errors identified during the parsing
 	public ParsedText parsedText;
+    public List<String> sessionText = new ArrayList<String>();
 	
 	public transient JSONObject JSONReply;
 
@@ -200,6 +201,13 @@ public class EvaApiReply implements Serializable {
 				if (jApiReply.has("Flow")) {
 					flow = new Flow(jApiReply.getJSONArray("Flow"), parseErrors, locations);
 				}
+
+                if (jApiReply.has("SessionText")) {
+                    JSONArray jArray = jApiReply.getJSONArray("SessionText");
+                    for (int i=0; i<jArray.length(); i++) {
+                        sessionText.add(jArray.getString(i));
+                    }
+                }
 			}
 		} catch (JSONException e) {
 			DLog.e(TAG, "Bad EVA reply!", e);

@@ -65,7 +65,7 @@ public class EvaChatScreenActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (!chatScreen.onBackPressed()) {
-
+            chatScreen.speak("", true); // stop speech
             // back pressed, not handled internally, try to see if parent task should be created
             Intent upIntent = NavUtils.getParentActivityIntent(this);
             if (upIntent == null) {

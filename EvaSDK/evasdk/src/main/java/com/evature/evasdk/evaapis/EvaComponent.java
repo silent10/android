@@ -326,7 +326,7 @@ public class EvaComponent implements
 	
 
 	public void onCreate(Bundle arg0) {
-		mSpeak = EvaSpeak.getOrCreateInstance(activity);
+		mSpeak = EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
 		
 		// as described http://android-developers.blogspot.pt/2011/09/androids-http-clients.html
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) {

@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.evature.evasdk.appinterface.AppScope;
+import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.evaapis.EvaSpeak;
 
 import java.lang.ref.WeakReference;
@@ -66,7 +67,12 @@ public class EvaChatTrigger {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startSearchByVoice(fActivity, evaContext);
+                if (AppSetup.startEvaAsActivity) {
+                    startSearchByVoiceActivity(fActivity, evaContext);
+                }
+                else {
+                    startSearchByVoice(fActivity, evaContext);
+                }
             }
         });
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -146,7 +152,7 @@ public class EvaChatTrigger {
         evaChatScreenFragment.closeChatFragment();
     }
 
-    public static void startSearchByVoiceActivity( FragmentActivity activity, AppScope evaContext) {
+    public static void startSearchByVoiceActivity( Context activity, AppScope evaContext) {
        /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = activity.getWindow();
             window.addFlags(Window.FEATURE_ACTIVITY_TRANSITIONS);

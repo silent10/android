@@ -259,42 +259,45 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
     public View createMainView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         DLog.d(TAG, "createMainView");
         rootView = inflater.inflate(R.layout.evature_chat_layout, container, false);
-        if (savedInstanceState == null) {
-            if (evaSessionId.equals("1")) {
-                chatItems.clear();
-                mView = new EvatureMainView(this, chatItems);
-                Resources resources = activity.getResources();
-                String greeting = getGreeting();
-                int pos = greeting.length();
-                String seeExamples = resources.getString(R.string.evature_tap_for_examples);
-                SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-                int col = resources.getColor(R.color.evature_chat_secondary_text);
-                sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
-                sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
-                ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
-                mView.addChatItem(chat);
-                speak(greeting, true, new Runnable() {
+        if (savedInstanceState != null) {
+            chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
+            evaSessionId = savedInstanceState.getString(EVATURE_SESSION_ID);
+            eva.setSessionId(evaSessionId);
+        }
 
-                    @Override
-                    public void run() {
-                        mView.flashSearchButton(5);
-                        if (eva.getAutoOpenMicrophone()) {
-                            voiceRecognitionSearch(null, false);
-                        }
+        if (evaSessionId.equals("1")) {
+            chatItems.clear();
+            mView = new EvatureMainView(this, chatItems);
+            Resources resources = activity.getResources();
+            String greeting = getGreeting();
+            int pos = greeting.length();
+            String seeExamples = resources.getString(R.string.evature_tap_for_examples);
+            SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
+            int col = resources.getColor(R.color.evature_chat_secondary_text);
+            sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
+            sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
+            ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
+            mView.addChatItem(chat);
+            speak(greeting, true, new Runnable() {
+
+                @Override
+                public void run() {
+                    mView.flashSearchButton(5);
+                    if (eva.getAutoOpenMicrophone()) {
+                        voiceRecognitionSearch(null, false);
                     }
-                });
-            }
-            else {
-                mView = new EvatureMainView(this, chatItems);
-                eva.setSessionId(evaSessionId);
-            }
+                }
+            });
         }
         else {
-            chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
-            mView = new EvatureMainView(this, chatItems );
-            eva.setSessionId(savedInstanceState.getString(EVATURE_SESSION_ID));
+            mView = new EvatureMainView(this, chatItems);
+            eva.setSessionId(evaSessionId);
             mView.flashSearchButton(5);
+            if (eva.getAutoOpenMicrophone()) {
+                voiceRecognitionSearch(null, false);
+            }
         }
+
         mView.setVolumeIcon();
 
         return rootView;
@@ -441,12 +444,10 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                             }
                             chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
                             if (isComplete || count == 1) {
-                                if (EvaComponent.evaAppHandler instanceof FlightSearch) {
-                                    // this is a final flow element, not a question, so trigger cruise search
-                                    // alternatively, there is only one left - no need to ask more questions
-                                    chatItem.getSearchModel().setIsComplete(true);
-                                    chatItem.getSearchModel().triggerSearch(context);
-                                }
+                                // this is a final flow element, not a question, so trigger search
+                                // alternatively, there is only one left - no need to ask more questions
+                                chatItem.getSearchModel().setIsComplete(true);
+                                chatItem.getSearchModel().triggerSearch(context);
                             }
                         }
                         mView.notifyDataChanged();
@@ -574,15 +575,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             }
         }
         else {
-            // count is not supported - trigger search if this is a complete flow action
-            if (isComplete) {
-                if (EvaComponent.evaAppHandler instanceof FlightSearch) {
-                    chatItem.getSearchModel().triggerSearch(context);
-                }
-                else {
-                    // TODO: insert new chat item saying the app doesn't support flight search?
-                    Log.e(TAG, "App reached flight search, but has no matching handler");
-                }
+            // count is not supported - trigger search
+            if (EvaComponent.evaAppHandler instanceof FlightSearch) {
+                chatItem.getSearchModel().triggerSearch(context);
+            } else {
+                // TODO: insert new chat item saying the app doesn't support flight search?
+                Log.e(TAG, "App reached flight search, but has no matching handler");
             }
         }
     }
@@ -742,15 +740,13 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
         }
         else {
-            // count is not supported - trigger search if this is a complete flow action
-            if (isComplete) {
-                if (EvaComponent.evaAppHandler instanceof HotelSearch) {
-                    chatItem.getSearchModel().triggerSearch(context);
-                }
-                else {
-                    // TODO: insert new chat item saying the app doesn't support flight search?
-                    Log.e(TAG, "App reached hotel search, but has no matching handler");
-                }
+            // count is not supported - trigger search
+            if (EvaComponent.evaAppHandler instanceof HotelSearch) {
+                chatItem.getSearchModel().triggerSearch(context);
+            }
+            else {
+                // TODO: insert new chat item saying the app doesn't support search?
+                Log.e(TAG, "App reached hotel search, but has no matching handler");
             }
         }
     }
@@ -817,10 +813,19 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     chatItem
             );
 
-            // count the results and update teh chat item,  if there is only one result then activate search right away
+            // count the results and update the chat item,  if there is only one result then activate search right away
             ((CruiseCount) EvaComponent.evaAppHandler).getCruiseCount(activity, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes,
                     cruiseCountHandler);
-
+        }
+        else {
+            // count is not supported - trigger search
+            if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
+                chatItem.getSearchModel().triggerSearch(activity);
+            }
+            else {
+                // TODO: insert new chat item saying the app doesn't support search?
+                Log.e(TAG, "App reached hotel search, but has no matching handler");
+            }
         }
 
     }
@@ -927,7 +932,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	}
 
     public void onDestroy() {
-        eva.stopSpeak();
 		eva.onDestroy();
 		if (speechSearch != null) {
 			speechSearch.onDestroy();

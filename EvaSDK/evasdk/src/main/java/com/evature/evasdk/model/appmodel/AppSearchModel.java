@@ -19,4 +19,5 @@ public abstract class AppSearchModel implements Serializable {
     public void setIsComplete(boolean complete) {
         isComplete = complete;
     }
+    public boolean getIsComplete() {return isComplete;}
 }

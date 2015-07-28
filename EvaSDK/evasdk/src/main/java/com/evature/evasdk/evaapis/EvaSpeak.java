@@ -120,6 +120,9 @@ public class EvaSpeak implements TextToSpeech.OnInitListener {
 				HashMap<String, String> params = new HashMap<String, String>(1);
 				final String utteranceId = String.valueOf(spokenUtteranceId);
 				params.put(Engine.KEY_PARAM_UTTERANCE_ID, utteranceId);
+                if (flush) {
+                    onCompleteUtterance.clear();
+                }
 				if (onComplete != null) {
 					onCompleteUtterance.put(utteranceId, onComplete);
 				}
@@ -131,6 +134,7 @@ public class EvaSpeak implements TextToSpeech.OnInitListener {
 				}
 				if (flush) {
 					pendingSayit.clear();
+                    onCompleteUtterance.clear();
 				}
 				PendingSayit pendingPair = new PendingSayit();
 				pendingPair.sayIt = sayIt;
