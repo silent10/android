@@ -21,7 +21,25 @@ public class FlightAttributes  implements Serializable {
 	public Boolean twoWay = null; // Specific request for round trip. Example: ???????3 ticket roundtrip from tagbilaran to manila/
 							// 1/26/2011-1/30/2011????????
 	public String[] airlines;
-	public String food;
+	public enum FoodType {
+        Unknown, // shouldnt get this one
+
+        // Religious:
+        Kosher, GlattKosher, Muslim, Hindu,
+        // Vegetarian:
+        Vegetarian, Vegan, IndianVegetarian, RawVegetarian, OrientalVegetarian, LactoOvoVegetarian,
+        LactoVegetarian, OvoVegetarian, JainVegetarian,
+        // Medical meals:
+        Bland, Diabetic, FruitPlatter, GlutenFree, LowSodium, LowCalorie, LowFat, LowFibre,
+        NonCarbohydrate, NonLactose, SoftFluid, SemiFluid, UlcerDiet, NutFree, LowPurine,
+        LowProtein, HighFibre,
+        // Infant and child:
+        Baby, PostWeaning, Child, // In airline jargon, baby and infant < 2 years. 1 year < Toddler < 3 years.
+        // Other:
+        Seafood, Japanese
+
+    };
+    public FoodType food;
 	public enum SeatType { Unknown, Window, Aisle };
 	public SeatType seatType;
 	public enum SeatClass {
@@ -50,7 +68,14 @@ public class FlightAttributes  implements Serializable {
 				}
 			}
 			if (jFlightAttributes.has("Food")) {
-				food = jFlightAttributes.getString("Food");
+                try {
+                    food = FoodType.valueOf(jFlightAttributes.getString("Food").replace(" ","").replace("-",""));
+                }
+                catch(IllegalArgumentException e) {
+                    parseErrors.add("Unexpected SeatType " + jFlightAttributes.optString("Seat"));
+                    DLog.w(TAG, "Unexpected SeatType", e);
+                    food = FoodType.Unknown;
+                }
 			}
 			
 			if (jFlightAttributes.has("Seat")) {

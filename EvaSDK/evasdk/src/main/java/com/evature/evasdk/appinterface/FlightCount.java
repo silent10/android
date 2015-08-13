@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.EvaTravelers;
+import com.evature.evasdk.evaapis.crossplatform.FlightAttributes.FoodType;
 import com.evature.evasdk.evaapis.crossplatform.FlightAttributes.SeatClass;
 import com.evature.evasdk.evaapis.crossplatform.FlightAttributes.SeatType;
 
@@ -24,7 +25,7 @@ public interface FlightCount {
                               SeatClass[] seatClass,
                               String[] airlines,
                               Boolean redeye,
-                              String food,
+                              FoodType food,
                               SeatType seatType,
                               AsyncCountResult callback);
 
@@ -38,7 +39,7 @@ public interface FlightCount {
                                  SeatClass[] seatClass,
                                  String[] airlines,
                                  Boolean redeye,
-                                 String food,
+                                 FoodType food,
                                  SeatType seatType,
                                  AsyncCountResult callback
                                  );

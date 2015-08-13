@@ -6,6 +6,7 @@ import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
 import com.evature.evasdk.evaapis.crossplatform.EvaTravelers;
 import com.evature.evasdk.evaapis.crossplatform.FlightAttributes.SeatClass;
 import com.evature.evasdk.evaapis.crossplatform.FlightAttributes.SeatType;
+import com.evature.evasdk.evaapis.crossplatform.FlightAttributes.FoodType;
 import com.evature.evasdk.evaapis.crossplatform.RequestAttributes.SortOrderEnum;
 import com.evature.evasdk.evaapis.crossplatform.RequestAttributes.SortEnum;
 
@@ -42,7 +43,7 @@ public interface FlightSearch {
                                   SeatClass[] seatClass,
                                   String[] airlines,
                                   Boolean redeye,
-                                  String food,
+                                  FoodType food,
                                   SeatType seatType,
                                   SortEnum sortBy, SortOrderEnum sortOrder);
 
@@ -55,7 +56,7 @@ public interface FlightSearch {
                                      SeatClass[] seatClass,
                                      String[] airlines,
                                      Boolean redeye,
-                                     String food,
+                                     FoodType food,
                                      SeatType seatType,
                                      SortEnum sortBy, SortOrderEnum sortOrder);
 }

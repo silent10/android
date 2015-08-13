@@ -521,7 +521,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         final Boolean nonstop;
         final Boolean redeye;
         final String[] airlines;
-        final String food;
+        final FlightAttributes.FoodType food;
         final FlightAttributes.SeatType seatType;
         final FlightAttributes.SeatClass[] seatClass;
 

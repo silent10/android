@@ -30,7 +30,7 @@ public class AppFlightSearchModel extends AppSearchModel {
     private final Boolean redeye; // A Red eye flight - Boolean attribute; null= not specified, false = explicitly request NOT red eye, true = explicitly requested red eye flight
     private final boolean oneWay;
     private final String[] airlines;
-    private final String food;
+    private final FlightAttributes.FoodType food;
     private final FlightAttributes.SeatType seatType;
     private final FlightAttributes.SeatClass[] seatClass;
     private final RequestAttributes.SortOrderEnum sortOrder;
@@ -63,7 +63,7 @@ public class AppFlightSearchModel extends AppSearchModel {
                                 FlightAttributes.SeatClass[] seatClass,
                                 String[] airlines,
                                 Boolean redeye,
-                                String food,
+                                FlightAttributes.FoodType food,
                                 FlightAttributes.SeatType seatType,
                                 RequestAttributes.SortEnum sortBy,
                                 RequestAttributes.SortOrderEnum sortOrder) {

@@ -17,7 +17,7 @@ public class SoundLevelView extends View {
 	private float[] soundBuff;    // cyclic buffer of volume - (0 to index) or (index+1 to index+length (module buff size))
 	private int soundBuffIndex;
 	
-	private float[] velocities; 
+	//private float[] velocities;
 	private Paint paint;
 	private float peakSound;
 	private float minSound;
@@ -161,7 +161,7 @@ public class SoundLevelView extends View {
 		if (soundBuff == null) {
 			wasNull = true;
 			this.soundBuff = new float[buff.length];
-			velocities = new float[buff.length]; // need velocities for y values
+			//velocities = new float[buff.length]; // need velocities for y values
 		}
 		// append new data to end of soundBuff
 		int numOfPoints = (index-soundBuffIndex);
@@ -197,11 +197,11 @@ public class SoundLevelView extends View {
 			//peakSound = Integer.MIN_VALUE;
 			//minSound = Integer.MAX_VALUE;
 			soundBuff = null;
-			velocities = null;
+			//velocities = null;
 			soundBuffIndex = 0;
 		}
 	};
-	
+	/*
 	public void stopSpringAnimation() {
 		lastTime = -1;
 		removeCallbacks(animator);
@@ -210,9 +210,9 @@ public class SoundLevelView extends View {
 	public void startSpringAnimation() {
 		lastTime = AnimationUtils.currentAnimationTimeMillis();
 		postDelayed(animator, 1);
-	}
+	}*/
 	
-	private long lastTime = 0;
+	/*private long lastTime = 0;
 	private Runnable animator = new Runnable() {
 	    @Override
 	    public void run() {
@@ -259,5 +259,5 @@ public class SoundLevelView extends View {
 	        invalidate();
 	    }
 	};
-
+*/
 }
