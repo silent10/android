@@ -180,7 +180,7 @@ EvaChatTrigger.addDefaultButton(this, AppScope.Hotel);
 
 ## Step 4: Implement your applicative callbacks
 
-Remember the "MyTravelAppHandler" which we passed to *initEva* in step one? This object should implement interfaces from the com.evature.evasdk.appinterface namespace.
+Remember the "MyTravelAppHandler" which we passed to *initEva* in step two? This object should implement interfaces from the com.evature.evasdk.appinterface namespace.
 
 These interfaces include:
 
@@ -230,7 +230,7 @@ For example, this is a FlightSearch method:
      * @param seatClass - array of seat classes (eg. economy, business, etc) requested by the user
      * @param airlines - array of airline codes requested by the user
      * @param redeye - True if the user requested Red Eye flight, False if the user requested NOT Red Eye flight, and null if the user did not mention this criteria
-     * @param food - text describing food in flight as requested by the user, null if not mentioned
+     * @param food - enum describing food in flight as requested by the user, null if not mentioned
      * @param seatType - window/aisle seats, or null if not mentioned
      * @param sortBy - how should the results be sorted (eg. price, date, etc..), or null if not mentioned
      * @param sortOrder - ascending or descending or null if not mentioned
@@ -244,7 +244,7 @@ For example, this is a FlightSearch method:
                                   SeatClass[] seatClass,
                                   String[] airlines,
                                   Boolean redeye,
-                                  String food,
+                                  FoodType food,
                                   SeatType seatType,
                                   SortEnum sortBy, SortOrderEnum sortOrder);
 ```
@@ -315,7 +315,7 @@ adb shell am start -a com.google.android.gms.actions.SEARCH_ACTION -e query "New
 
 ### Other App Setup settings
 
-Remember the app Setup at step one ?
+Remember the app Setup at step two ?
 
 This class has a few optional settings which can be accessed by static methods.
 
