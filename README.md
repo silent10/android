@@ -154,6 +154,17 @@ public void onCreate ( Bundle savedInstanceState )
     });
 ```
 
+### Context parameter
+If your application supports multiple scopes (eg. Flight search and Hotel search) and the current activity is relevant only to one scope (eg. viewing flight search results, or flights search only page) you can help Eva by passing a second parameter of *AppScope*. 
+
+eg.
+
+``` java
+EvaChatTrigger.startSearchByVoice(FragmentActivity.this, AppScope.Flight);
+// or
+EvaChatTrigger.addDefaultButton(this, AppScope.Hotel);
+```
+
 
 **Note**: 
 Eva assumes the host activity is of type *android.support.v4.app.FragmentActivity*. If this isn’t the case in your application, let us know and we can provide a workaround.
@@ -167,16 +178,6 @@ Assuming all went well you will hear the reply.
 
 At this point Speech Recognition, Natural Language Understanding and Dialog Management are working, but Eva doesn’t know anything about your application yet!
 
-### Context parameter
-If your application supports multiple scopes (eg. Flight search and Hotel search) and the current activity is relevant only to one scope (eg. viewing flight search results, or flights search only page) you can help Eva by passing a second parameter of *AppScope*. 
-
-eg.
-
-``` java
-EvaChatTrigger.startSearchByVoice(FragmentActivity.this, AppScope.Flight);
-// or
-EvaChatTrigger.addDefaultButton(this, AppScope.Hotel);
-```
 
 ## Step 4: Implement your applicative callbacks
 
