@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Example App</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="no_credentials">Please setup your Evature Credentials in the settings. You can get credentials by signing up for a free <a href="http://www.evature.com/registration/form">http://www.evature.com/registration/form</a> </string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Credentials settings -->
+    <string name="pref_header_credentials">Credentials</string>
+    <string name="pref_credentials_site_code">Site Code</string>
+    <string name="pref_credentials_api_key">API Key</string>
+
+
+    <string name="ready">Ready</string>
+    <string name="checking_credentials">Checking Credentials...</string>
+    <string name="scope">Scope</string>
+    <string name="hotel">Hotel</string>
+    <string name="flight">Flight</string>
+    <string name="car">car</string>
+    <string name="cruise">Cruise</string>
+</resources>

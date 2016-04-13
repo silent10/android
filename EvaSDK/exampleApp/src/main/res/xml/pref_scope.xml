@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="scope_hotel"
+        android:icon="@drawable/ic_menu_hotel"
+        android:title="@string/hotel"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_menu_flight"
+        android:key="scope_flight"
+        android:title="@string/flight"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_menu_car"
+        android:key="scope_car"
+        android:title="@string/car"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_menu_cruise"
+        android:key="scope_cruise"
+        android:title="@string/cruise"/>
+
+</PreferenceScreen>
