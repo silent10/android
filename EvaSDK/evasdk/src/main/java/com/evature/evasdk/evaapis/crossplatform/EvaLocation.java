@@ -199,7 +199,7 @@ public class EvaLocation implements Serializable {
 			if (location.has("Name")) {
 				Name = location.getString("Name");
 				// remove (GID=123454) at the end
-				int ind = Name.indexOf(" (GID=");
+				int ind = Name.indexOf(" (GID");
 				if (ind != -1) {
 					Name = Name.substring(0, ind);
 				}

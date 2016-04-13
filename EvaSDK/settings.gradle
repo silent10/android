@@ -1,1 +1,1 @@
-include ':evasdk', ':exampleAppCruises', ':exampleAppFlights'
+include ':evasdk', ':exampleAppCruises', ':exampleAppFlights', ':exampleapp'

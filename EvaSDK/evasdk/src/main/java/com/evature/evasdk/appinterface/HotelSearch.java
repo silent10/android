@@ -18,38 +18,12 @@ import java.util.HashSet;
  */
 public interface HotelSearch {
 
-    void handleHotelSearch(Context context,
-                           boolean isComplete, EvaLocation location,
-                           Date arriveDateMin, Date arriveDateMax,
-                           Integer durationMin, Integer durationMax,
-                           EvaTravelers travelers,
-                           ArrayList<HotelAttributes.HotelChain> chain,
-
-                           // The hotel board:
-                           Boolean selfCatering,
-                           Boolean bedAndBreakfast,
-                           Boolean halfBoard,
-                           Boolean fullBoard,
-                           Boolean allInclusive,
-                           Boolean drinksInclusive,
-
-                           // The quality of the hotel, measure in Stars
-                           Integer minStars,
-                           Integer maxStars,
-
-                           HashSet<Amenities> amenities,
-                /*
-geo attributes... hmmm...
-
-hotel request with attributes in order of importance to implement:
-HotelChain
-HotelLoyalty
-AccommodationType
-LastMinute
-LowDeposit
-FlexibleDates
-Refundable
-*/
-                                  SortEnum sortBy, SortOrderEnum sortOrder);
+    CallbackResult handleHotelSearch(Context context,
+                                     boolean isComplete, EvaLocation location,
+                                     Date arriveDateMin, Date arriveDateMax,
+                                     Integer durationMin, Integer durationMax,
+                                     EvaTravelers travelers,
+                                     HotelAttributes attributes,
+                                     SortEnum sortBy, SortOrderEnum sortOrder);
 
 }

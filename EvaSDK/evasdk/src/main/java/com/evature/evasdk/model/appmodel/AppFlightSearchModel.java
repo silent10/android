@@ -2,6 +2,7 @@ package com.evature.evasdk.model.appmodel;
 
 import android.content.Context;
 
+import com.evature.evasdk.appinterface.CallbackResult;
 import com.evature.evasdk.appinterface.FlightSearch;
 import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
@@ -86,26 +87,17 @@ public class AppFlightSearchModel extends AppSearchModel {
         this.sortOrder = sortOrder;
     }
 
-    public void triggerSearch(Context context) {
+    public CallbackResult triggerSearch(Context context) {
         if (EvaComponent.evaAppHandler instanceof FlightSearch) {
-            if (oneWay) {
-                ((FlightSearch) EvaComponent.evaAppHandler).handleOneWayFlightSearch(context,  isComplete,
-                        origin,  destination,
-                     departDateMin,  departDateMax,
-                     travelers,
-                     nonstop, seatClass,airlines,
-                     redeye,
-                     food, seatType,sortBy, sortOrder);
-            }
-            else {
-                ((FlightSearch) EvaComponent.evaAppHandler).handleRoundTripFlightSearch(context,  isComplete,  origin,  destination,
-                        departDateMin,  departDateMax,
-                        returnDateMin,  returnDateMax,
-                        travelers,
-                        nonstop, seatClass,airlines,
-                        redeye,
-                        food, seatType,sortBy, sortOrder);
-            }
+            return ((FlightSearch) EvaComponent.evaAppHandler).handleFlightSearch(context,  isComplete,  origin,  destination,
+                    departDateMin,  departDateMax,
+                    returnDateMin,  returnDateMax,
+                    travelers,
+                    nonstop, seatClass,airlines,
+                    redeye,
+                    food, seatType,sortBy, sortOrder);
+
         }
+        return null;
     }
 }

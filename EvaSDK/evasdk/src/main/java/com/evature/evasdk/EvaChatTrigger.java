@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.PermissionChecker;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -152,7 +153,7 @@ public class EvaChatTrigger {
         }
 
         if (missingPermissions.size() > 0) {
-            DLog.i(TAG, "Eva cannot start due to missing permissions: " + missingPermissions.toString());
+            Log.i(TAG, "Eva cannot start due to missing permissions: " + missingPermissions.toString());
             if (EvaComponent.evaAppHandler instanceof PermissionsRequiredHandler) {
                 String[] missingPermissionsArray = missingPermissions.toArray(new String[missingPermissions.size()]);
                 ((PermissionsRequiredHandler)EvaComponent.evaAppHandler).handleMissingPermissions(missingPermissionsArray);

@@ -28,6 +28,8 @@ public class FlowElement implements Serializable {
 		Statement,
 		Service,
 		Reply,
+        Navigate,
+        Data,
 		
 		Other
 	}

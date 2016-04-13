@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -1024,7 +1025,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			}
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
 			boolean editLastUtterance = !preModifiedString.equals("");
-			SpannableString preEditChat = editedChatItem.getChat();
+			Spannable preEditChat = editedChatItem.getChat();
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
 	

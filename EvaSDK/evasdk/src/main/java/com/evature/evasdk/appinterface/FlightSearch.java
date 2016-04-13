@@ -25,6 +25,8 @@ public interface FlightSearch {
      * @param destination - location of landing
      * @param departDateMin - range of dates the user wishes to depart on
      * @param departDateMax   if only a single date is entered the Max date will be equal to the Min date
+     * @param returnDateMin - range of dates the user wishes to return on, null if one-way flight
+     * @param returnDateMax   if only a single date is entered the Max date will be equal to the Min date
      * @param travelers - how many travelers, split into age categories
      * @param nonstop - True if the user requested nonstop, False if the user requested NOT nonstop, and null if the user did not mention this criteria
      * @param seatClass - array of seat classes (eg. economy, business, etc) requested by the user
@@ -35,19 +37,7 @@ public interface FlightSearch {
      * @param sortBy - how should the results be sorted (eg. price, date, etc..), or null if not mentioned
      * @param sortOrder - ascending or descending or null if not mentioned
      */
-    void handleOneWayFlightSearch(Context context,
-                                  boolean isComplete, EvaLocation origin, EvaLocation destination,
-                                  Date departDateMin, Date departDateMax,
-                                  EvaTravelers travelers,
-                                  Boolean nonstop,
-                                  SeatClass[] seatClass,
-                                  String[] airlines,
-                                  Boolean redeye,
-                                  FoodType food,
-                                  SeatType seatType,
-                                  SortEnum sortBy, SortOrderEnum sortOrder);
-
-    void handleRoundTripFlightSearch(Context context,
+    CallbackResult handleFlightSearch(Context context,
                                      boolean isComplete, EvaLocation origin, EvaLocation destination,
                                      Date departDateMin, Date departDateMax,
                                      Date returnDateMin, Date returnDateMax,

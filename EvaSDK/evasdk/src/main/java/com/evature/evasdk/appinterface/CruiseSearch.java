@@ -27,7 +27,7 @@ public interface CruiseSearch {
      * @param attributes
      * @param sortBy
      */
-    void handleCruiseSearch(Context context,
+    CallbackResult handleCruiseSearch(Context context,
                             boolean isComplete,
                             EvaLocation from, EvaLocation to,
                             Date dateFrom, Date dateTo,

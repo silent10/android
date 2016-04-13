@@ -43,6 +43,9 @@ public class Flow  implements Serializable  {
 				else if (flowType.equals( FlowElement.TypeEnum.Statement.name())) {
 					elementsToAdd.add( new StatementElement(jElement, parseErrors, locations));
 				}
+                else if (flowType.equals( FlowElement.TypeEnum.Navigate.name())) {
+                    elementsToAdd.add( new NavigateElement(jElement, parseErrors, locations));
+                }
 				else {
 					elementsToAdd.add( new FlowElement(jElement, parseErrors, locations));
 				}

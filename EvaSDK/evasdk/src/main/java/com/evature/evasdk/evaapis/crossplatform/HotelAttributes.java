@@ -1,6 +1,9 @@
 package com.evature.evasdk.evaapis.crossplatform;
 
+import android.support.v4.util.Pair;
+
 import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,6 +27,10 @@ public class HotelAttributes  implements Serializable {
 		public String simpleName;
 		public String gdsCode;
 		public String evaCode;
+
+        @Override public String toString() {
+            return simpleName;
+        }
 	}
 	public ArrayList<HotelChain> chains;
 
@@ -127,12 +134,88 @@ public class HotelAttributes  implements Serializable {
 	public Boolean parkingFacilities;
 	public Boolean parkingValet;
 	public Boolean parkingFree;
+
+    public static class Room {
+
+
+        public enum RoomType {
+            Unknown,
+            Room,  FamilyRoom, Suite
+        }
+        public RoomType roomType;
+
+        public enum BedType {
+            Unknown,
+            Twin, King, Queen, Single, Double, Triple, Quadruple, Quintuple, Sextuple, Crib
+        }
+        public Pair<BedType, Integer>[] bedTypes; //  A list of pairs, each pair Type of bed and number of beds (int)
+
+        public enum InternetType {
+            Unknown,
+            InternetService,  FreeInternetService, WiFi, FreeWiFi
+        }
+
+        public InternetType internet;
+
+        public int multiple;  // How many of the same rooms (e.g. 3 airconditioned rooms)
+
+        public Boolean airCondition;
+        public Boolean cable; //  Cable TV in the room (boolean, if exists)
+        public Boolean kitchen; // A Kitchen in the room (boolean, if exists)
+        public Boolean miniBar; // Mini-bar in the room (boolean, if exists)
+        public Boolean tub; // A hot tub in the room (boolean, if exists)
+        public Boolean smoking; // Either Smoking (True) or Non Smoking (False) room (boolean, if exists)
+
+        private Room(JSONObject jRoom) {
+            String jRoomType = jRoom.optString("Room Type", null);
+            if (jRoomType != null) {
+                try {
+                    roomType = RoomType.valueOf(jRoomType.replaceAll(" ", ""));
+                } catch (IllegalArgumentException e) {
+                    DLog.w(TAG, "Unexpected RoomType in Flow element", e);
+                    roomType = RoomType.Unknown;
+                }
+            }
+
+            String jInternetType = jRoom.optString("Internet", null);
+            if (jInternetType != null) {
+                try {
+                    internet = InternetType.valueOf(StringUtils.toCamelCase(jInternetType));
+                } catch (IllegalArgumentException e) {
+                    DLog.w(TAG, "Unexpected InternetType in Flow element", e);
+                    internet = InternetType.Unknown;
+                }
+            }
+
+            if (jRoom.has("Air Con")) {
+                airCondition = jRoom.optBoolean("Air Con");
+            }
+            if (jRoom.has("Cable")) {
+                cable = jRoom.optBoolean("Cable");
+            }
+            if (jRoom.has("Kitchen")) {
+                kitchen = jRoom.optBoolean("Kitchen");
+            }
+            if (jRoom.has("Tub")) {
+                tub = jRoom.optBoolean("Tub");
+            }
+            if (jRoom.has("Mini Bar")) {
+                miniBar = jRoom.optBoolean("Mini Bar");
+            }
+            if (jRoom.has("Smoking")) {
+                smoking = jRoom.optBoolean("Smoking");
+            }
+            if (jRoom.has("Multiple")) {
+                multiple = jRoom.optInt("Multiple");
+            }
+        }
+    }
+	public ArrayList<Room> rooms;
 	
-	
-	
-	// TODO: Rooms
 	// TODO: Ski
-	
+
+    public HotelAttributes() {}
+
 	public HotelAttributes(JSONObject jHotelAttributes, List<String> parseErrors) {
 		try {
 			if (jHotelAttributes.has("Chain")) {
@@ -237,5 +320,25 @@ public class HotelAttributes  implements Serializable {
 			DLog.e(TAG, "Parsing JSON", e);
 			parseErrors.add("Exception during parsing hotel attributes: "+e.getMessage());
 		}
+
+        try {
+            if (jHotelAttributes.has("Rooms")) {
+                if (jHotelAttributes.get("Rooms") instanceof JSONArray) {
+                    JSONArray jRooms = jHotelAttributes.getJSONArray("Rooms");
+                    this.rooms = new ArrayList<HotelAttributes.Room>(jRooms.length());
+                    for (int i=0; i<jRooms.length(); i++) {
+                        JSONObject jRoom = jRooms.getJSONObject(i);
+                        Room room = new Room(jRoom);
+                        this.rooms.add(room);
+                    }
+                }
+            }
+            else {
+                this.chains = new ArrayList<HotelAttributes.HotelChain>();
+            }
+        } catch (JSONException e) {
+            DLog.e(TAG, "Parsing JSON", e);
+            parseErrors.add("Exception during parsing hotel attributes: "+e.getMessage());
+        }
 	}
 }

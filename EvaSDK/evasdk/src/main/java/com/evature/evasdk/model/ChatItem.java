@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import android.text.Html;
+import android.text.Spannable;
 import android.text.SpannableString;
 
 import com.evature.evasdk.model.appmodel.AppSearchModel;
@@ -34,7 +35,7 @@ public class ChatItem  implements Serializable {
 		HAS_RESULTS
 	}
 	
-	protected transient SpannableString chat;
+	protected transient Spannable chat;
 	private   String subLabel; // will be shown below the text in muted color
 	private   ChatType chatType;
 	private   Status status;
@@ -63,11 +64,11 @@ public class ChatItem  implements Serializable {
 		setStatus(Status.NONE);
 	}
 
-	public SpannableString getChat() {
+	public Spannable getChat() {
 		return chat;
 	}
 	
-	public void setChat(SpannableString chat) {
+	public void setChat(Spannable chat) {
 		this.chat = chat;
 	}
 	public void setChat(String chat) {

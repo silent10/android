@@ -16,8 +16,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannedString;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -32,14 +34,12 @@ import android.widget.Toast;
 import com.evature.evasdk.appinterface.AppScope;
 import com.evature.evasdk.appinterface.AppSetup;
 import com.evature.evasdk.appinterface.AsyncCountResult;
-import com.evature.evasdk.appinterface.CarCount;
+import com.evature.evasdk.appinterface.CallbackResult;
 import com.evature.evasdk.appinterface.CarSearch;
-import com.evature.evasdk.appinterface.CruiseCount;
 import com.evature.evasdk.appinterface.CruiseSearch;
 import com.evature.evasdk.appinterface.EvaLifeCycleListener;
-import com.evature.evasdk.appinterface.FlightCount;
+import com.evature.evasdk.appinterface.FlightNavigate;
 import com.evature.evasdk.appinterface.FlightSearch;
-import com.evature.evasdk.appinterface.HotelCount;
 import com.evature.evasdk.appinterface.HotelSearch;
 import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.EvaSearchReplyListener;
@@ -54,16 +54,19 @@ import com.evature.evasdk.evaapis.crossplatform.ParsedText;
 import com.evature.evasdk.evaapis.crossplatform.RequestAttributes;
 import com.evature.evasdk.evaapis.crossplatform.ServiceAttributes;
 import com.evature.evasdk.evaapis.crossplatform.flow.FlowElement;
+import com.evature.evasdk.evaapis.crossplatform.flow.NavigateElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.QuestionElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.ReplyElement;
 import com.evature.evasdk.evaapis.crossplatform.flow.StatementElement;
 import com.evature.evasdk.model.ChatItem;
 import com.evature.evasdk.model.appmodel.AppCruiseSearchModel;
+import com.evature.evasdk.model.appmodel.AppFlightNavigateModel;
 import com.evature.evasdk.model.appmodel.AppFlightSearchModel;
 import com.evature.evasdk.model.appmodel.AppHotelSearchModel;
 import com.evature.evasdk.user_interface.ChatAdapter;
 import com.evature.evasdk.user_interface.ErrorSpan;
 import com.evature.evasdk.util.DLog;
+import com.evature.evasdk.util.StringUtils;
 import com.evature.evasdk.util.VolumeUtil;
 
 import java.lang.ref.WeakReference;
@@ -90,7 +93,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
     private static class StoreResultData {
 		ChatItem storeResultInItem;
 		boolean editLastUtterance;
-		SpannableString preEditChat;
+		Spannable preEditChat;
 	}
 	
 	private static class DeleteChatItemsData {
@@ -172,7 +175,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		Bundle bundle = theIntent.getExtras();
 		DLog.i(TAG, "Bundle: " + bundle);
 
-		toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+        try {
+            toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
+        }
+        catch(Exception e) {
+            DLog.e(TAG, "Failed to create tone generator ",e);
+        }
 
 		EvaComponent.EvaConfig config = new EvaComponent.EvaConfig(AppSetup.apiKey, AppSetup.siteCode);
 		// Override Eva's deviceId with ICR deviceId
@@ -314,7 +322,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
         EvaLocation from = null;
         EvaLocation to = null;
-        FlowElement.TypeEnum  searchType = null;
+        FlowElement.TypeEnum  searchType = flow.Type;
         boolean isComplete = false;
         switch (flow.Type) {
             case Cruise:
@@ -325,7 +333,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     chatItem.setSearchModel(null);
                     return;
                 }
-                searchType = flow.Type;
                 from = flow.RelatedLocations[0];
                 to = flow.RelatedLocations[1];
                 isComplete = true;
@@ -337,7 +344,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     chatItem.setSearchModel(null);
                     return;
                 }
-                searchType = flow.Type;
                 from = flow.RelatedLocations[0];
                 isComplete = true;
                 break;
@@ -345,12 +351,20 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             case Question:
                 QuestionElement qe = (QuestionElement)flow;
                 searchType = qe.actionType;
-                // cruises have (for now) only origin and destination
-                if (reply.locations.length > 0) {
-                    from = reply.locations[0];
+                if (qe.RelatedLocations.length > 0) {
+                    from = qe.RelatedLocations[0];
+                    if (qe.RelatedLocations.length > 1) {
+                        to = qe.RelatedLocations[1];
+                    }
                 }
-                if (reply.locations.length > 1) {
-                    to = reply.locations[1];
+                else {
+                    // cruises have (for now) only origin and destination
+                    if (reply.locations.length > 0) {
+                        from = reply.locations[0];
+                    }
+                    if (reply.locations.length > 1) {
+                        to = reply.locations[1];
+                    }
                 }
                 isComplete = false;
                 break;
@@ -360,19 +374,118 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             return;
         }
 
+        CallbackResult result = null;
         switch (searchType) {
 
             case Cruise:
-                findCruiseResults(isComplete, from, to, reply, chatItem);
+                result = findCruiseResults(isComplete, from, to, reply, chatItem);
                 break;
 
             case Flight:
-                findFlightResults(isComplete, from, to, reply, chatItem);
+                result = findFlightResults(isComplete, from, to, reply, chatItem);
                 break;
 
             case Hotel:
-                findHotelResults(isComplete, from, reply, chatItem);
+                result = findHotelResults(isComplete, from, reply, chatItem);
                 break;
+
+            case Navigate:
+                result = navigateTo(((NavigateElement)flow).pagePath, reply, chatItem);
+                break;
+        }
+
+        handleCallbackResult(result, flow, chatItem);
+    }
+
+    private void handleCallbackResult(CallbackResult result, FlowElement flow, ChatItem chatItem) {
+        if (result == null) {
+            result = CallbackResult.defaultHandling();
+        }
+        String sayIt = result.getSayIt();
+        if (sayIt == null) {
+            sayIt = flow.getSayIt();
+        }
+        else {
+            if (result.isAppendToEvaSayIt()) {
+                sayIt = flow.getSayIt() + sayIt;
+            }
+        }
+        Spannable displayIt = result.getDisplayIt();
+        if (displayIt == null) {
+            displayIt = new SpannableString(flow.getSayIt());
+        }
+        else {
+            if (result.isAppendToEvaSayIt()) {
+                displayIt = new SpannableString(TextUtils.concat(flow.getSayIt(), displayIt));
+            }
+        }
+
+        if (sayIt != null && !"".equals(sayIt)) {
+            speak(sayIt);
+        }
+        chatItem.setChat(displayIt);
+        mView.notifyDataChanged();
+            // non-statement flow types are delayed until a search-count is returned or timeout
+            /*if (flow.Type == FlowElement.TypeEnum.Cruise || flow.Type ==  FlowElement.TypeEnum.Question ) {
+                pendingReplySayit.cancel = false;
+                pendingReplySayit.chatItem = chatItem;
+                pendingReplySayit.sayIt = sayIt;
+                pendingReplySayit.chatText = chatItem.getChat();
+                chatItem.setChat("");
+                mView.notifyDataChanged();
+                pendingReplySayit.isQuestion = flow.Type ==  FlowElement.TypeEnum.Question;
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            synchronized (pendingReplySayit) {
+                                pendingReplySayit.wait(1200); // wait some - maybe no results will show and this will be canceled
+                            }
+                            if (pendingReplySayit.cancel == false) {
+                                pendingReplySayit.cancel = true;
+                                pendingReplySayit.chatItem.setChat(pendingReplySayit.chatText);
+                                mView.notifyDataChanged();
+                                if (pendingReplySayit.isQuestion) {
+                                    speak(sayIt, false, new Runnable() {
+                                        public void run() {
+                                            DLog.d(TAG, "Question asked");
+                                            mView.flashSearchButton(3);
+                                            if (eva.getAutoOpenMicrophone()) {
+                                                voiceRecognitionSearch(null, false);
+                                            }
+                                        }
+                                    });
+                                }
+                                else {
+                                    speak(sayIt, false);
+                                }
+                            }
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                });
+                t.start();
+            }
+            else if (flow.Type ==  FlowElement.TypeEnum.Statement && ((StatementElement) flow).StatementType == StatementElement.StatementTypeEnum.Chat &&
+                    reply.chat != null && reply.chat.newSession) {
+                speak(sayIt, false, new Runnable() {
+                    public void run() {
+                        DLog.d(TAG, "New session started");
+                        mView.flashSearchButton(3);
+                        if (eva.getAutoOpenMicrophone()) {
+                            voiceRecognitionSearch(null, false);
+                        }
+                    }
+                });
+            }
+            else {
+                speak(sayIt, false);
+            }
+        }
+        */
+
+        if (result.isCloseChat()) {
+            getActivity().finish();
         }
     }
 
@@ -454,7 +567,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
     }
 
-    private void findFlightResults(final boolean isComplete, final EvaLocation from, final EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
+    private CallbackResult findFlightResults(final boolean isComplete, final EvaLocation from, final EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
 
         // TODO: we default to round trip - maybe should use AppSetup to decide if default to round trip or one way?
         boolean oneWay = reply.flightAttributes != null && reply.flightAttributes.oneWay != null && reply.flightAttributes.oneWay.booleanValue() == true;
@@ -545,7 +658,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 
 
-        if (EvaComponent.evaAppHandler instanceof FlightCount) {
+        /*if (EvaComponent.evaAppHandler instanceof FlightCount) {
             chatItem.setStatus(ChatItem.Status.SEARCHING);
             chatItem.setSubLabel("Searching...");
             mView.notifyDataChanged();
@@ -570,19 +683,19 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                         flightCountHandler);
             }
         }
-        else {
+        else {*/
             // count is not supported - trigger search
             if (EvaComponent.evaAppHandler instanceof FlightSearch) {
-                chatItem.getSearchModel().triggerSearch(context);
-            } else {
-                // TODO: insert new chat item saying the app doesn't support flight search?
-                Log.e(TAG, "App reached flight search, but has no matching handler");
+                return chatItem.getSearchModel().triggerSearch(context);
             }
-        }
+            // TODO: insert new chat item saying the app doesn't support flight search?
+            Log.e(TAG, "App reached flight search, but has no matching handler");
+            return null;
+        //}
     }
 
 
-    private void findHotelResults(boolean isComplete, EvaLocation location, EvaApiReply reply, ChatItem chatItem) {
+    private CallbackResult findHotelResults(boolean isComplete, EvaLocation location, EvaApiReply reply, ChatItem chatItem) {
 
         Date arriveDateMin = null;
         Date arriveDateMax = null;
@@ -624,88 +737,77 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             sortOrder = reply.requestAttributes.sortOrder;
         }
 
-        ArrayList<HotelAttributes.HotelChain> chains = new ArrayList<>();
-        // The hotel board:
-        Boolean selfCatering = null;
-        Boolean bedAndBreakfast = null;
-        Boolean halfBoard = null;
-        Boolean fullBoard = null;
-        Boolean allInclusive = null;
-        Boolean drinksInclusive = null;
-
-        // The quality of the hotel, measure in Stars
-        Integer minStars = null;
-        Integer maxStars = null;
-
-        HashSet<HotelAttributes.Amenities> amenities = new HashSet<>();
-
+        // merge hotel attributes from location and reply
+        HotelAttributes merged = new HotelAttributes();
+        ArrayList<HotelAttributes> attributesArray =  new ArrayList<>();
         if (reply.hotelAttributes != null) {
-            HotelAttributes ha = reply.hotelAttributes;
-            selfCatering = ha.selfCatering;
-            bedAndBreakfast = ha.bedAndBreakfast;
-            halfBoard = ha.halfBoard;
-            fullBoard = ha.fullBoard;
-            allInclusive = ha.allInclusive;
-            drinksInclusive = ha.drinksInclusive;
-
-            chains = ha.chains;
-            minStars = ha.minStars;
-            maxStars = ha.maxStars;
-            amenities = ha.amenities;
+            attributesArray.add(reply.hotelAttributes);
         }
-
         if (location.hotelAttributes != null) {
-            HotelAttributes ha = location.hotelAttributes;
+            attributesArray.add(location.hotelAttributes);
+        }
+        for (HotelAttributes ha : attributesArray) {
+
             if (ha.selfCatering != null) {
-                selfCatering = ha.selfCatering;
+                merged.selfCatering = ha.selfCatering;
             }
             if (ha.bedAndBreakfast != null) {
-                bedAndBreakfast = ha.bedAndBreakfast;
+                merged.bedAndBreakfast = ha.bedAndBreakfast;
             }
             if (ha.halfBoard != null) {
-                halfBoard = ha.halfBoard;
+                merged.halfBoard = ha.halfBoard;
             }
             if (ha.fullBoard != null) {
-                fullBoard = ha.fullBoard;
-            }
-            if (ha.allInclusive != null) {
-                allInclusive = ha.allInclusive;
+                merged.fullBoard = ha.fullBoard;
             }
             if (ha.drinksInclusive != null) {
-                drinksInclusive = ha.drinksInclusive;
+                merged.drinksInclusive = ha.drinksInclusive;
             }
-            if (ha.chains != null) {
-                chains = ha.chains;
+            if (ha.allInclusive != null) {
+                merged.allInclusive = ha.allInclusive;
             }
-            if (ha.minStars != null) {
-                minStars = ha.minStars;
+            if (ha.amenities.size() > 0) {
+                merged.amenities = ha.amenities;
             }
-            if (ha.maxStars != null) {
-                maxStars = ha.maxStars;
+            if (ha.parkingFacilities != null) {
+                merged.parkingFacilities = ha.parkingFacilities;
             }
-            if (ha.amenities != null) {
-                amenities = ha.amenities;
+            if (ha.parkingFree != null) {
+                merged.parkingFree = ha.parkingFree;
+            }
+            if (ha.parkingValet != null) {
+                merged.parkingValet = ha.parkingValet;
             }
 
+            if (ha.pool != null) {
+                merged.pool = ha.pool;
+            }
+//            if (ha.accommodation != EVHotelAttributesAccommodationTypeUnknown) {
+//                merged.accommodationType = ha.accommodationType;
+//            }
+
+            if (ha.minStars != null) {
+                merged.minStars = ha.minStars;
+            }
+            if (ha.maxStars != null) {
+                merged.maxStars = ha.maxStars;
+            }
+            if (ha.chains.size() > 0) {
+                merged.chains = ha.chains;
+            }
         }
+
+
 
         chatItem.setSearchModel(new AppHotelSearchModel(isComplete, location,
                 arriveDateMin, arriveDateMax,
                 durationMin, durationMax,
                 reply.travelers,
-                chains,
-
-                // The hotel board:
-                selfCatering, bedAndBreakfast, halfBoard, fullBoard, allInclusive, drinksInclusive,
-
-                // The quality of the hotel, measure in Stars
-                minStars, maxStars,
-
-                amenities,
+                merged,
                 sortBy, sortOrder));
 
 
-
+/*
         if (EvaComponent.evaAppHandler instanceof HotelCount) {
             chatItem.setStatus(ChatItem.Status.SEARCHING);
             chatItem.setSubLabel("Searching...");
@@ -736,18 +838,45 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
         }
         else {
+        */
             // count is not supported - trigger search
             if (EvaComponent.evaAppHandler instanceof HotelSearch) {
-                chatItem.getSearchModel().triggerSearch(context);
+                return chatItem.getSearchModel().triggerSearch(context);
             }
-            else {
-                // TODO: insert new chat item saying the app doesn't support search?
-                Log.e(TAG, "App reached hotel search, but has no matching handler");
-            }
-        }
+            // TODO: insert new chat item saying the app doesn't support search?
+            Log.e(TAG, "App reached hotel search, but has no matching handler");
+        //}
+        return null;
     }
 
-    private void findCruiseResults(boolean isComplete, EvaLocation from, EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
+
+    private CallbackResult navigateTo(String pagePath, EvaApiReply reply, ChatItem chatItem) {
+        String[] tokens = pagePath.split("/");
+        if (tokens[0].equals("trip")) {
+            FlightNavigate.FlightPageType page;
+            try {
+                page = FlightNavigate.FlightPageType.valueOf(StringUtils.toCamelCase(tokens[1]));
+
+            }
+            catch(IllegalArgumentException e) {
+                DLog.w(TAG, "Unknown page type "+pagePath);
+                page = FlightNavigate.FlightPageType.Unknown;
+            }
+            chatItem.setSearchModel(new AppFlightNavigateModel(page));
+            if (EvaComponent.evaAppHandler instanceof FlightNavigate) {
+                return chatItem.getSearchModel().triggerSearch(activity);
+            }
+            // TODO: insert new chat item saying the app doesn't support search?
+            Log.e(TAG, "App reached flight navigate, but has no matching handler");
+        }
+        else {
+            DLog.w(TAG, "Unexpected navigate pagePath "+pagePath);
+        }
+        return null;
+    }
+
+
+    private CallbackResult findCruiseResults(boolean isComplete, EvaLocation from, EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
         Date dateFrom = null, dateTo = null;
         Integer durationFrom = null, durationTo = null;
 
@@ -795,7 +924,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
 
         chatItem.setSearchModel(new AppCruiseSearchModel(isComplete, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes, sortBy, sortOrder));
-        chatItem.setStatus(ChatItem.Status.SEARCHING);
+/*        chatItem.setStatus(ChatItem.Status.SEARCHING);
         chatItem.setSubLabel("Searching...");
         mView.notifyDataChanged();
 
@@ -815,14 +944,14 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
         else {
             // count is not supported - trigger search
-            if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
-                chatItem.getSearchModel().triggerSearch(activity);
-            }
-            else {
-                // TODO: insert new chat item saying the app doesn't support search?
-                Log.e(TAG, "App reached hotel search, but has no matching handler");
-            }
+            */
+        if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
+            return chatItem.getSearchModel().triggerSearch(activity);
         }
+        // TODO: insert new chat item saying the app doesn't support search?
+        Log.e(TAG, "App reached cruise search, but has no matching handler");
+        return null;
+        //}
 
     }
 
@@ -986,9 +1115,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 				@Override
 				public void run() {
 					try {
-						toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
-						Thread.sleep(120);
-						toneGenerator.startTone(ToneGenerator.TONE_PROP_NACK, 25);
+                        if (toneGenerator != null) {
+                            toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
+                            Thread.sleep(120);
+                            toneGenerator.startTone(ToneGenerator.TONE_PROP_NACK, 25);
+                        }
 					} catch (InterruptedException e) {
 					}
 					finally {
@@ -1011,9 +1142,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 				@Override
 				public void run() {
 					try {
-						toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
-						Thread.sleep(120); // small delay
-						toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 25);
+                        if (toneGenerator != null) {
+                            toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
+                            Thread.sleep(120); // small delay
+                            toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 25);
+                        }
 					} catch (InterruptedException e) {
 					}
 					finally {
@@ -1061,17 +1194,18 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					return;
 				}
 				eva.stopSpeak();// stop the speech if there is one going
-				
-		        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
-		        try {
-					Thread.sleep(120); // small delay
-				} catch (InterruptedException e) {
-				}
-		        toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
-		        try {
-					Thread.sleep(25); // wait for beep to end - do NOT record the beep
-				} catch (InterruptedException e) {
-				}
+                if (toneGenerator != null) {
+                    toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
+                    try {
+                        Thread.sleep(120); // small delay
+                    } catch (InterruptedException e) {
+                    }
+                    toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
+                    try {
+                        Thread.sleep(25); // wait for beep to end - do NOT record the beep
+                    } catch (InterruptedException e) {
+                    }
+                }
                 activity.runOnUiThread(new Runnable() {
 
                     @Override
@@ -1233,7 +1367,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	
 
 	@SuppressWarnings("nls")
-	public void onEventChatItemModified(ChatItem chatItem, SpannableString preEditChat, boolean startRecord, boolean editLastUtterance) {
+	public void onEventChatItemModified(ChatItem chatItem, Spannable preEditChat, boolean startRecord, boolean editLastUtterance) {
 		if (startRecord) {
 			if (chatItem == null) {
 				DLog.e(TAG, "Unexpected chatItem=null startRecord");
@@ -1535,65 +1669,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	@SuppressWarnings("nls")
 	private void executeFlowElement(EvaApiReply reply, FlowElement flow, ChatItem chatItem) {
 		// chatItem.setActivated(true);
-		final String sayIt = flow.getSayIt();
-		if (sayIt != null && !"".equals(sayIt)) {
-			// non-statement flow types are delayed until a search-count is returned or timeout
-			if (flow.Type == FlowElement.TypeEnum.Cruise || flow.Type ==  FlowElement.TypeEnum.Question ) {
-				pendingReplySayit.cancel = false;
-				pendingReplySayit.chatItem = chatItem;
-				pendingReplySayit.sayIt = sayIt;
-				pendingReplySayit.chatText = chatItem.getChat();
-				chatItem.setChat("");
-				mView.notifyDataChanged();
-				pendingReplySayit.isQuestion = flow.Type ==  FlowElement.TypeEnum.Question;
-				Thread t = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							synchronized (pendingReplySayit) {
-							    pendingReplySayit.wait(1200); // wait some - maybe no results will show and this will be canceled
-							}
-							if (pendingReplySayit.cancel == false) {
-								pendingReplySayit.cancel = true;
-								pendingReplySayit.chatItem.setChat(pendingReplySayit.chatText);
-								mView.notifyDataChanged();
-								if (pendingReplySayit.isQuestion) {
-									speak(sayIt, false, new Runnable() {
-										public void run() {
-											DLog.d(TAG, "Question asked");
-											mView.flashSearchButton(3);
-											if (eva.getAutoOpenMicrophone()) {
-												voiceRecognitionSearch(null, false);
-											}
-										}
-									});
-								}
-								else {
-									speak(sayIt, false);
-								}
-							}
-						} catch (InterruptedException e) {
-						}
-					}
-				});
-				t.start();
-			}
-			else if (flow.Type ==  FlowElement.TypeEnum.Statement && ((StatementElement) flow).StatementType == StatementElement.StatementTypeEnum.Chat &&
-					reply.chat != null && reply.chat.newSession) {
-				speak(sayIt, false, new Runnable() {
-					public void run() {
-						DLog.d(TAG, "New session started");
-						mView.flashSearchButton(3);
-						if (eva.getAutoOpenMicrophone()) {
-							voiceRecognitionSearch(null, false);
-						}
-					}
-				});
-			}
-			else {
-				speak(sayIt, false);
-			}
-		}
 
 		switch (flow.Type) {
 			case Reply:
@@ -1603,6 +1678,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					Toast.makeText(activity, "Phoning Call Support", Toast.LENGTH_LONG).show();
 				}
 				break;
+            case Navigate:
 			case Flight:
 			case Car:
 			case Hotel:
@@ -1674,16 +1750,16 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
     private String inferScopeFromHandler() {
         StringBuilder builder = new StringBuilder();
-        if ((EvaComponent.evaAppHandler instanceof CarSearch) || (EvaComponent.evaAppHandler instanceof CarCount)) {
+        if (EvaComponent.evaAppHandler instanceof CarSearch) {
             builder.append(AppScope.Car.toString());
         }
-        if ((EvaComponent.evaAppHandler instanceof CruiseSearch) || (EvaComponent.evaAppHandler instanceof CruiseCount)) {
+        if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
             builder.append(AppScope.Cruise.toString());
         }
-        if ((EvaComponent.evaAppHandler instanceof FlightSearch) || (EvaComponent.evaAppHandler instanceof FlightCount)) {
+        if (EvaComponent.evaAppHandler instanceof FlightSearch) {
             builder.append(AppScope.Flight.toString());
         }
-        if ((EvaComponent.evaAppHandler instanceof HotelSearch) || (EvaComponent.evaAppHandler instanceof HotelCount)) {
+        if (EvaComponent.evaAppHandler instanceof HotelSearch) {
             builder.append(AppScope.Hotel.toString());
         }
         return builder.toString();
