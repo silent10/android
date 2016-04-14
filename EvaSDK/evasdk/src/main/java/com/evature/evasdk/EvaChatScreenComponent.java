@@ -76,10 +76,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUtil.VolumeListener {
@@ -369,35 +373,32 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 isComplete = false;
                 break;
         }
-
-        if (searchType == null) {
-            return;
-        }
-
         CallbackResult result = null;
-        switch (searchType) {
 
-            case Cruise:
-                result = findCruiseResults(isComplete, from, to, reply, chatItem);
-                break;
+        if (searchType != null) {
+            switch (searchType) {
+                case Cruise:
+                    result = findCruiseResults(isComplete, from, to, reply, chatItem);
+                    break;
 
-            case Flight:
-                result = findFlightResults(isComplete, from, to, reply, chatItem);
-                break;
+                case Flight:
+                    result = findFlightResults(isComplete, from, to, reply, chatItem);
+                    break;
 
-            case Hotel:
-                result = findHotelResults(isComplete, from, reply, chatItem);
-                break;
+                case Hotel:
+                    result = findHotelResults(isComplete, from, reply, chatItem);
+                    break;
 
-            case Navigate:
-                result = navigateTo(((NavigateElement)flow).pagePath, reply, chatItem);
-                break;
+                case Navigate:
+                    result = navigateTo(((NavigateElement) flow).pagePath, reply, chatItem);
+                    break;
+            }
         }
 
         handleCallbackResult(result, flow, chatItem);
     }
 
-    private void handleCallbackResult(CallbackResult result, FlowElement flow, ChatItem chatItem) {
+    private void handleCallbackResult(CallbackResult result, FlowElement flow, final ChatItem chatItem) {
         if (result == null) {
             result = CallbackResult.defaultHandling();
         }
@@ -406,7 +407,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             sayIt = flow.getSayIt();
         }
         else {
-            if (result.isAppendToEvaSayIt()) {
+            if (result.isAppendToExistingText()) {
                 sayIt = flow.getSayIt() + sayIt;
             }
         }
@@ -415,7 +416,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             displayIt = new SpannableString(flow.getSayIt());
         }
         else {
-            if (result.isAppendToEvaSayIt()) {
+            if (result.isAppendToExistingText()) {
                 displayIt = new SpannableString(TextUtils.concat(flow.getSayIt(), displayIt));
             }
         }
@@ -425,6 +426,48 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
         chatItem.setChat(displayIt);
         mView.notifyDataChanged();
+
+
+        if (result.isCloseChat()) {
+            getActivity().finish();
+        }
+
+        final Future<CallbackResult> future = result.getDeferredResult();
+        if (future != null) {
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    CallbackResult result2 = null;
+                    try {
+                        result2 = future.get(4000, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        DLog.w(TAG, "Interrupted waiting for deferred result", e);
+                    } catch (ExecutionException e) {
+                        DLog.w(TAG, "Exception waiting for deferred result", e);
+                    } catch (TimeoutException e) {
+                        DLog.w(TAG, "Timeout waiting for deferred result", e);
+                    }
+                    if (result2 != null) {
+                        if (result2.getSayIt() != null && !"".equals(result2.getSayIt())) {
+                            speak(result2.getSayIt(), false);
+                        }
+                        if (result2.getDisplayIt() != null && !"".equals(result2.getDisplayIt().toString())) {
+                            Spannable displayIt2;
+                            if (result2.isAppendToExistingText()) {
+                                Spannable existing = chatItem.getChat();
+                                displayIt2 = new SpannableString(TextUtils.concat(existing, result2.getDisplayIt()));
+                            }
+                            else {
+                                displayIt2 = result2.getDisplayIt();
+                            }
+                            chatItem.setChat(displayIt2);
+                            mView.notifyDataChanged();
+                        }
+                    }
+                }
+            });
+            thread.start();
+        }
             // non-statement flow types are delayed until a search-count is returned or timeout
             /*if (flow.Type == FlowElement.TypeEnum.Cruise || flow.Type ==  FlowElement.TypeEnum.Question ) {
                 pendingReplySayit.cancel = false;
@@ -484,9 +527,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
         */
 
-        if (result.isCloseChat()) {
-            getActivity().finish();
-        }
     }
 
     class ResultsCountHandler implements AsyncCountResult {

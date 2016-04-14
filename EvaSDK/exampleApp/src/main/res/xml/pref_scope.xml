@@ -25,4 +25,8 @@
         android:key="scope_cruise"
         android:title="@string/cruise"/>
 
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="scope_explore"
+        android:title="explore"/>
 </PreferenceScreen>

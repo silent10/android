@@ -5,8 +5,6 @@ import android.text.SpannableString;
 
 import java.util.concurrent.Future;
 
-import javax.security.auth.callback.Callback;
-
 /**
  * Created by iftah on 07/04/2016.
  */
@@ -14,10 +12,11 @@ public class CallbackResult {
     private String sayIt;
     private Spannable displayIt;
     private Future<CallbackResult> deferredResult;
-    private boolean appendToEvaSayIt; // append the display/say strings to the Eva reply
+    private boolean appendToExistingText; // append the display/say strings to the Eva reply
     private boolean closeChat;  // set to true to close the chat screen immediately after the result handling is complete
-    private boolean startRecordAfterSpeak;
-    private int countResults;
+    private int countResults;   // special handling for callbacks that trigger search - return the number of results
+                                // Eva will alter the default reply if the results is 0  ("no such elements found")
+                                // or if the results is 1
     private Future<Integer> deferredCountResults;
 
     private CallbackResult(String sayIt, Spannable displayIt, Future<CallbackResult> deferredResult) {
@@ -79,12 +78,12 @@ public class CallbackResult {
         return result;
     }
 
-    public boolean isAppendToEvaSayIt() {
-        return appendToEvaSayIt;
+    public boolean isAppendToExistingText() {
+        return appendToExistingText;
     }
 
-    public void setAppendToEvaSayIt(boolean appendToEvaSayIt) {
-        this.appendToEvaSayIt = appendToEvaSayIt;
+    public void setAppendToExistingText(boolean appendToExistingText) {
+        this.appendToExistingText = appendToExistingText;
     }
 
     public boolean isCloseChat() {
@@ -93,14 +92,6 @@ public class CallbackResult {
 
     public void setCloseChat(boolean closeChat) {
         this.closeChat = closeChat;
-    }
-
-    public boolean isStartRecordAfterSpeak() {
-        return startRecordAfterSpeak;
-    }
-
-    public void setStartRecordAfterSpeak(boolean startRecordAfterSpeak) {
-        this.startRecordAfterSpeak = startRecordAfterSpeak;
     }
 
     public int getCountResult() {
