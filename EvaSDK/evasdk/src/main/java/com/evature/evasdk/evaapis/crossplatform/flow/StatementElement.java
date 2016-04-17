@@ -11,8 +11,9 @@ import com.evature.evasdk.util.DLog;
 
 public class StatementElement extends FlowElement  implements Serializable {
 	private static final String TAG = "StatementElement";
+    public boolean newSession;
 
-	public enum StatementTypeEnum {
+    public enum StatementTypeEnum {
 		Understanding, Chat, Unsupported, Unknown_Expression,
 		Other
 	}

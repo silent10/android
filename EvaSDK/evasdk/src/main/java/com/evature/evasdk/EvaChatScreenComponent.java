@@ -80,7 +80,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -93,6 +92,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
     public static final String INTENT_EVA_CONTEXT = "evature_context";
 
+    final int TIMEOUT_WAITING_FOR_RESULT = 4000;
+    final int TIMEOUT_WAITING_FOR_COUNT = 4000;
+    final int DELAY_SPEAK_WHEN_WAITING_FOR_COUNT = 1200;  // speak will be delayed slightly to give chance for async count to cancel/change text
 
     private static class StoreResultData {
 		ChatItem storeResultInItem;
@@ -140,7 +142,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		public String sayIt;
 		public boolean cancel;
 		public boolean isQuestion;
-		public SpannableString chatText;
+		public Spannable chatText;
 	}
 	private PendingSayIt pendingReplySayit = new PendingSayIt();
 
@@ -355,19 +357,21 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             case Question:
                 QuestionElement qe = (QuestionElement)flow;
                 searchType = qe.actionType;
-                if (qe.RelatedLocations.length > 0) {
+                if (qe.RelatedLocations != null && qe.RelatedLocations.length > 0) {
                     from = qe.RelatedLocations[0];
                     if (qe.RelatedLocations.length > 1) {
                         to = qe.RelatedLocations[1];
                     }
                 }
                 else {
-                    // cruises have (for now) only origin and destination
-                    if (reply.locations.length > 0) {
-                        from = reply.locations[0];
-                    }
-                    if (reply.locations.length > 1) {
-                        to = reply.locations[1];
+                    if (reply.locations != null) {
+                        // cruises have (for now) only origin and destination
+                        if (reply.locations.length > 0) {
+                            from = reply.locations[0];
+                        }
+                        if (reply.locations.length > 1) {
+                            to = reply.locations[1];
+                        }
                     }
                 }
                 isComplete = false;
@@ -398,35 +402,241 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         handleCallbackResult(result, flow, chatItem);
     }
 
-    private void handleCallbackResult(CallbackResult result, FlowElement flow, final ChatItem chatItem) {
+    void handleCallbackResult(CallbackResult result, FlowElement flow, final ChatItem chatItem) {
+        handleCallbackResult(result, flow, chatItem, true);
+    }
+
+    private String resultsFoundText(FlowElement flow, int count) {
+        if (flow == null) {
+            DLog.e(TAG, "unexpected showing results found without flow type");
+            return count +" results found.";
+        }
+        FlowElement.TypeEnum type = flow.Type;
+        if (flow.Type == FlowElement.TypeEnum.Question) {
+            type = ((QuestionElement) flow).actionType;
+        }
+        if (count == 1) {
+            return "One " + type.toString().toLowerCase() + " found.";
+        }
+        else {
+            return count + " " + type.toString().toLowerCase() + "s found.";
+        }
+    }
+
+    private void handleCallbackResult(CallbackResult result, final FlowElement flow, final ChatItem chatItem, final boolean firstResult) {
         if (result == null) {
             result = CallbackResult.defaultHandling();
         }
         String sayIt = result.getSayIt();
+        Spannable displayIt = result.getDisplayIt();
+
+        // handle synchronous count - if exists
+        // show results count in sub-label, special handling for zero results and one result
+        int count = result.getCountResult();
+        if (count == 0) {  // no matching results found
+            String noResultsFound = activity.getString(R.string.evature_zero_count);
+            sayIt = noResultsFound; // override the sayit displayIt
+            displayIt = new SpannableString(noResultsFound);
+            chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+            chatItem.setSubLabel(null);
+            chatItem.setStatus(ChatItem.Status.NONE);
+            mView.notifyDataChanged();
+        }
+        else if (count > 0) {
+            if (flow != null) {
+                if (count == 1) { // exactly one found
+                    sayIt = resultsFoundText(flow, count);
+                    displayIt = new SpannableString(sayIt + "\nTap here to see it.");
+                    chatItem.setSubLabel(null);
+                    // only one result - no need to ask more questions - go ahead and show the search result
+                    if (!chatItem.getSearchModel().getIsComplete()) {
+                        chatItem.getSearchModel().setIsComplete(true);
+                        // TODO: trigger search here?
+                        //CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
+                        //handleCallbackResult(result2, null, chatItem, false);
+                        //return;
+                    }
+                } else { // more than 1
+                    chatItem.setSubLabel(resultsFoundText(flow, count) + "\nTap here to see them.");
+                }
+            }
+        }
+
+
+        // handle async count - if exists
+        final Future<Integer> asyncCount = result.getDeferredCountResults();
+
         if (sayIt == null) {
-            sayIt = flow.getSayIt();
+            if (flow != null) {
+                sayIt = flow.getSayIt();
+            }
         }
         else {
-            if (result.isAppendToExistingText()) {
+            if (result.isAppendToExistingText() && flow != null) {
                 sayIt = flow.getSayIt() + sayIt;
             }
         }
-        Spannable displayIt = result.getDisplayIt();
         if (displayIt == null) {
-            displayIt = new SpannableString(flow.getSayIt());
+            if (flow != null) {
+                displayIt = new SpannableString(flow.getSayIt());
+            }
         }
         else {
             if (result.isAppendToExistingText()) {
-                displayIt = new SpannableString(TextUtils.concat(flow.getSayIt(), displayIt));
+                if (flow != null) {
+                    displayIt = new SpannableString(TextUtils.concat(flow.getSayIt(), displayIt));
+                }
+                else {
+                    displayIt = new SpannableString(TextUtils.concat(chatItem.getChat(), displayIt));
+                }
             }
         }
 
         if (sayIt != null && !"".equals(sayIt)) {
-            speak(sayIt);
-        }
-        chatItem.setChat(displayIt);
-        mView.notifyDataChanged();
+            if (asyncCount == null) {  // not waiting for count - speak immediately
+                if (flow != null && flow.Type ==  FlowElement.TypeEnum.Statement && ((StatementElement) flow).StatementType == StatementElement.StatementTypeEnum.Chat &&
+                        ((StatementElement) flow).newSession) {
+                    speak(sayIt, false, new Runnable() {
+                        public void run() {
+                            DLog.d(TAG, "New session started");
+                            mView.flashSearchButton(3);
+                            if (eva.getAutoOpenMicrophone()) {
+                                voiceRecognitionSearch(null, false);
+                            }
+                        }
+                    });
+                }
+                else {
+                    speak(sayIt, firstResult);  // flush the speak queue only if this is the first handleResult in a chain
+                }
 
+            }
+            else {
+                pendingReplySayit.cancel = false;
+                pendingReplySayit.chatItem = chatItem;
+                pendingReplySayit.sayIt = sayIt;
+                pendingReplySayit.chatText = displayIt;
+                chatItem.setChat("");
+                mView.notifyDataChanged();
+
+
+                Thread speakThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            synchronized (pendingReplySayit) {
+                                pendingReplySayit.wait(DELAY_SPEAK_WHEN_WAITING_FOR_COUNT); // wait some for async count
+                                                                                            // - maybe no results will show and this will be canceled
+                            }
+                            if (pendingReplySayit.cancel == false) {
+                                // not canceled by async count - can go ahead and ask questions, etc...
+                                pendingReplySayit.cancel = true;
+                                pendingReplySayit.chatItem.setChat(pendingReplySayit.chatText);
+                                mView.notifyDataChanged();
+                                if (pendingReplySayit.isQuestion) {
+                                    speak(pendingReplySayit.sayIt, false, new Runnable() {
+                                        public void run() {
+                                            DLog.d(TAG, "Question asked");
+                                            mView.flashSearchButton(3);
+                                            if (eva.getAutoOpenMicrophone()) {
+                                                voiceRecognitionSearch(null, false);
+                                            }
+                                        }
+                                    });
+                                }
+                                else {
+                                    speak(pendingReplySayit.sayIt, false);
+                                }
+                            }
+
+                        }catch (InterruptedException e) {
+
+                        }
+                    }
+                });
+                speakThread.run();
+            }
+        }
+        if (asyncCount != null) {
+            // wait for async count
+            chatItem.setStatus(ChatItem.Status.SEARCHING);
+            chatItem.setSubLabel("Searching...");
+            mView.notifyDataChanged();
+            pendingReplySayit.isQuestion = flow != null && flow.Type ==  FlowElement.TypeEnum.Question;
+            Thread waitForCount = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int count = -1;
+                    try {
+                        Integer countResult = asyncCount.get(TIMEOUT_WAITING_FOR_COUNT, TimeUnit.MILLISECONDS);
+                        if (countResult != null) {
+                            count = countResult.intValue();
+                        }
+                    } catch (InterruptedException|ExecutionException e) {
+                        DLog.w(TAG, "interrupted while waiting for async count");
+                    } catch (TimeoutException e) {
+                        DLog.i(TAG, "timeout while waiting for async count");
+                    }
+
+                    if (count < 0) {
+                        DLog.w(TAG, "No count response");
+                        chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+                        chatItem.setSubLabel(null);
+                        chatItem.setStatus(ChatItem.Status.NONE);
+                        mView.notifyDataChanged();
+                        return;
+                    }
+
+                    DLog.d(TAG, "Count result: " + count);
+                    if (count == 0) {
+                        boolean alreadySpoken = pendingReplySayit.cancel == true;
+
+                        // attempt to cancel the pending sayit - no need to ask question or say the cruise if there are no results
+                        pendingReplySayit.cancel = true;
+                        synchronized (pendingReplySayit) {
+                            pendingReplySayit.notifyAll();
+                        }
+
+                        // hide the searching sublabel
+                        chatItem.setSubLabel(null);
+                        chatItem.setStatus(ChatItem.Status.NONE);
+                        String noResultsFound = activity.getString(R.string.evature_zero_count);
+                        if (alreadySpoken) {
+                            // already spoken - add a new chat item
+                            ChatItem noResults = new ChatItem(noResultsFound, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
+                            mView.addChatItem(noResults);
+                        } else {
+                            // not spoken yet - modify the existing chat item
+                            chatItem.setChat(noResultsFound);
+                            chatItem.setSearchModel(null); // don't allow tapping to see empty search results
+                            mView.notifyDataChanged();
+                        }
+                        speak(noResultsFound, false);
+                    } else {
+                        // there are results - can go ahead and say the pending sayIt
+                        synchronized (pendingReplySayit) {
+                            pendingReplySayit.notifyAll();
+                        }
+                        chatItem.setSubLabel(resultsFoundText(flow, count));
+                        chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
+                        if (!chatItem.getSearchModel().getIsComplete() && count == 1) {
+                            // there is only one result found - no need to ask more questions
+                            chatItem.getSearchModel().setIsComplete(true);
+                            // TODO: trigger search here?
+                            //CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
+                            //handleCallbackResult(result2, null, chatItem, false);
+                            //return;
+                        }
+                    }
+                    mView.notifyDataChanged();
+                }
+            });
+            waitForCount.start();
+        }
+        else {
+            chatItem.setChat(displayIt);
+            mView.notifyDataChanged();
+        }
 
         if (result.isCloseChat()) {
             getActivity().finish();
@@ -439,7 +649,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 public void run() {
                     CallbackResult result2 = null;
                     try {
-                        result2 = future.get(4000, TimeUnit.MILLISECONDS);
+                        result2 = future.get(TIMEOUT_WAITING_FOR_RESULT, TimeUnit.MILLISECONDS);
+                        handleCallbackResult(result2, null, chatItem, false);
                     } catch (InterruptedException e) {
                         DLog.w(TAG, "Interrupted waiting for deferred result", e);
                     } catch (ExecutionException e) {
@@ -447,165 +658,13 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     } catch (TimeoutException e) {
                         DLog.w(TAG, "Timeout waiting for deferred result", e);
                     }
-                    if (result2 != null) {
-                        if (result2.getSayIt() != null && !"".equals(result2.getSayIt())) {
-                            speak(result2.getSayIt(), false);
-                        }
-                        if (result2.getDisplayIt() != null && !"".equals(result2.getDisplayIt().toString())) {
-                            Spannable displayIt2;
-                            if (result2.isAppendToExistingText()) {
-                                Spannable existing = chatItem.getChat();
-                                displayIt2 = new SpannableString(TextUtils.concat(existing, result2.getDisplayIt()));
-                            }
-                            else {
-                                displayIt2 = result2.getDisplayIt();
-                            }
-                            chatItem.setChat(displayIt2);
-                            mView.notifyDataChanged();
-                        }
-                    }
                 }
             });
             thread.start();
         }
-            // non-statement flow types are delayed until a search-count is returned or timeout
-            /*if (flow.Type == FlowElement.TypeEnum.Cruise || flow.Type ==  FlowElement.TypeEnum.Question ) {
-                pendingReplySayit.cancel = false;
-                pendingReplySayit.chatItem = chatItem;
-                pendingReplySayit.sayIt = sayIt;
-                pendingReplySayit.chatText = chatItem.getChat();
-                chatItem.setChat("");
-                mView.notifyDataChanged();
-                pendingReplySayit.isQuestion = flow.Type ==  FlowElement.TypeEnum.Question;
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            synchronized (pendingReplySayit) {
-                                pendingReplySayit.wait(1200); // wait some - maybe no results will show and this will be canceled
-                            }
-                            if (pendingReplySayit.cancel == false) {
-                                pendingReplySayit.cancel = true;
-                                pendingReplySayit.chatItem.setChat(pendingReplySayit.chatText);
-                                mView.notifyDataChanged();
-                                if (pendingReplySayit.isQuestion) {
-                                    speak(sayIt, false, new Runnable() {
-                                        public void run() {
-                                            DLog.d(TAG, "Question asked");
-                                            mView.flashSearchButton(3);
-                                            if (eva.getAutoOpenMicrophone()) {
-                                                voiceRecognitionSearch(null, false);
-                                            }
-                                        }
-                                    });
-                                }
-                                else {
-                                    speak(sayIt, false);
-                                }
-                            }
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                });
-                t.start();
-            }
-            else if (flow.Type ==  FlowElement.TypeEnum.Statement && ((StatementElement) flow).StatementType == StatementElement.StatementTypeEnum.Chat &&
-                    reply.chat != null && reply.chat.newSession) {
-                speak(sayIt, false, new Runnable() {
-                    public void run() {
-                        DLog.d(TAG, "New session started");
-                        mView.flashSearchButton(3);
-                        if (eva.getAutoOpenMicrophone()) {
-                            voiceRecognitionSearch(null, false);
-                        }
-                    }
-                });
-            }
-            else {
-                speak(sayIt, false);
-            }
-        }
-        */
 
     }
 
-    class ResultsCountHandler implements AsyncCountResult {
-        private final String oneResultFound;
-        private final String manyResultsFound;
-        private final String noResultsFound;
-        private final ChatItem chatItem;
-        private final boolean isComplete;
-        private final Context context;
-
-        ResultsCountHandler(Context context, String oneResultFound, String manyResultsFound, String noResultsFound, boolean isComplete, ChatItem chatItem) {
-            this.oneResultFound = oneResultFound;
-            this.manyResultsFound = manyResultsFound;
-            this.noResultsFound = noResultsFound;
-            this.chatItem = chatItem;
-            this.isComplete = isComplete;
-            this.context = context;
-        }
-
-        @Override
-        public void handleCountResult(final int count) {
-            if (count < 0) {
-                DLog.w(TAG, "No count response");
-                chatItem.setSearchModel(null); // don't allow tapping to see empty search results
-                chatItem.setSubLabel(null);
-                chatItem.setStatus(ChatItem.Status.NONE);
-                mView.notifyDataChanged();
-            }
-            else {
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        DLog.d(TAG, "Count result: " + count);
-                        if (count == 0) {
-                            boolean alreadySpoken = pendingReplySayit.cancel == true;
-
-                            // attempt to cancel the pending sayit - no need to ask question or say the cruise if there are no results
-                            pendingReplySayit.cancel = true;
-                            synchronized (pendingReplySayit) {
-                                pendingReplySayit.notifyAll();
-                            }
-
-                            // hide the searching sublabel
-                            chatItem.setSubLabel(null);
-                            chatItem.setStatus(ChatItem.Status.NONE);
-                            if (alreadySpoken) {
-                                ChatItem noResults = new ChatItem(noResultsFound, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
-                                mView.addChatItem(noResults);
-                            } else {
-                                chatItem.setChat(noResultsFound);
-                                chatItem.setSearchModel(null); // don't allow tapping to see empty search results
-                                mView.notifyDataChanged();
-                            }
-                            speak(noResultsFound, false);
-                        } else {
-                            // there are results - can go ahead and say the pending sayIt
-                            synchronized (pendingReplySayit) {
-                                pendingReplySayit.notifyAll();
-                            }
-                            if (count == 1) {
-                                chatItem.setSubLabel(oneResultFound);
-                            } else {
-                                chatItem.setSubLabel(count + manyResultsFound);
-                            }
-                            chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
-                            if (isComplete || count == 1) {
-                                // this is a final flow element, not a question, so trigger search
-                                // alternatively, there is only one left - no need to ask more questions
-                                chatItem.getSearchModel().setIsComplete(true);
-                                chatItem.getSearchModel().triggerSearch(context);
-                            }
-                        }
-                        mView.notifyDataChanged();
-                    }
-                });
-                t.start();
-            }
-        }
-    }
 
     private CallbackResult findFlightResults(final boolean isComplete, final EvaLocation from, final EvaLocation to, final EvaApiReply reply, final ChatItem chatItem) {
 
@@ -698,40 +757,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 
 
-        /*if (EvaComponent.evaAppHandler instanceof FlightCount) {
-            chatItem.setStatus(ChatItem.Status.SEARCHING);
-            chatItem.setSubLabel("Searching...");
-            mView.notifyDataChanged();
-
-            AsyncCountResult flightCountHandler = new ResultsCountHandler(context, "One flight found.\nTap here to see it.",
-                    " flights found.\nTap here to see them.",
-                    activity.getString(R.string.evature_zero_count),
-                    isComplete,
-                    chatItem
-                    );
-
-            if (oneWay) {
-                ((FlightCount) EvaComponent.evaAppHandler).getOneWayFlightCount(context, isComplete, from, to,
-                        departDateMin, departDateMax, returnDateMin, returnDateMax, reply.travelers,
-                        nonstop, seatClass, airlines, redeye, food, seatType,
-                        flightCountHandler);
-            }
-            else {
-                ((FlightCount) EvaComponent.evaAppHandler).getRoundTripFlightCount(context, isComplete, from, to,
-                        departDateMin, departDateMax, returnDateMin, returnDateMax, reply.travelers,
-                        nonstop, seatClass, airlines, redeye, food, seatType,
-                        flightCountHandler);
-            }
+        if (EvaComponent.evaAppHandler instanceof FlightSearch) {
+            return chatItem.getSearchModel().triggerSearch(context);
         }
-        else {*/
-            // count is not supported - trigger search
-            if (EvaComponent.evaAppHandler instanceof FlightSearch) {
-                return chatItem.getSearchModel().triggerSearch(context);
-            }
-            // TODO: insert new chat item saying the app doesn't support flight search?
-            Log.e(TAG, "App reached flight search, but has no matching handler");
-            return null;
-        //}
+        // TODO: insert new chat item saying the app doesn't support flight search?
+        Log.e(TAG, "App reached flight search, but has no matching handler");
+        return null;
     }
 
 
@@ -847,45 +878,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 sortBy, sortOrder));
 
 
-/*
-        if (EvaComponent.evaAppHandler instanceof HotelCount) {
-            chatItem.setStatus(ChatItem.Status.SEARCHING);
-            chatItem.setSubLabel("Searching...");
-            mView.notifyDataChanged();
-
-            AsyncCountResult hotelCountHandler = new ResultsCountHandler(context, "One hotel found.\nTap here to see it.",
-                    " hotels found.\nTap here to see them.",
-                    activity.getString(R.string.evature_zero_count),
-                    isComplete,
-                    chatItem
-            );
-
-
-            ((HotelCount) EvaComponent.evaAppHandler).getHotelCount(context, isComplete, location,
-                    arriveDateMin, arriveDateMax,
-                    durationMin, durationMax,
-                    reply.travelers,
-                    chains,
-
-                    // The hotel board:
-                    selfCatering, bedAndBreakfast, halfBoard, fullBoard, allInclusive, drinksInclusive,
-
-                    // The quality of the hotel, measure in Stars
-                    minStars, maxStars,
-
-                    amenities,
-                    hotelCountHandler);
-
+        if (EvaComponent.evaAppHandler instanceof HotelSearch) {
+            return chatItem.getSearchModel().triggerSearch(context);
         }
-        else {
-        */
-            // count is not supported - trigger search
-            if (EvaComponent.evaAppHandler instanceof HotelSearch) {
-                return chatItem.getSearchModel().triggerSearch(context);
-            }
-            // TODO: insert new chat item saying the app doesn't support search?
-            Log.e(TAG, "App reached hotel search, but has no matching handler");
-        //}
+        // TODO: insert new chat item saying the app doesn't support search?
+        Log.e(TAG, "App reached hotel search, but has no matching handler");
         return null;
     }
 
@@ -964,35 +961,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
 
         chatItem.setSearchModel(new AppCruiseSearchModel(isComplete, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes, sortBy, sortOrder));
-/*        chatItem.setStatus(ChatItem.Status.SEARCHING);
-        chatItem.setSubLabel("Searching...");
-        mView.notifyDataChanged();
-
-
-        if (EvaComponent.evaAppHandler instanceof CruiseCount) {
-
-            AsyncCountResult cruiseCountHandler = new ResultsCountHandler(activity, "One cruise found.\nTap here to see it.",
-                    " cruises found.\nTap here to see them.",
-                    activity.getString(R.string.evature_zero_count),
-                    isComplete,
-                    chatItem
-            );
-
-            // count the results and update the chat item,  if there is only one result then activate search right away
-            ((CruiseCount) EvaComponent.evaAppHandler).getCruiseCount(activity, from, to, dateFrom, dateTo, durationFrom, durationTo, reply.cruiseAttributes,
-                    cruiseCountHandler);
-        }
-        else {
-            // count is not supported - trigger search
-            */
         if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
             return chatItem.getSearchModel().triggerSearch(activity);
         }
         // TODO: insert new chat item saying the app doesn't support search?
         Log.e(TAG, "App reached cruise search, but has no matching handler");
         return null;
-        //}
-
     }
 
 

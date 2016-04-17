@@ -50,8 +50,10 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.evature.evasdk.appinterface.AppSetup;
+import com.evature.evasdk.appinterface.CallbackResult;
 import com.evature.evasdk.evaapis.EvaException;
 import com.evature.evasdk.evaapis.EvaSpeechRecogComponent;
+import com.evature.evasdk.model.appmodel.AppSearchModel;
 import com.evature.evasdk.user_interface.SoundLevelView;
 import com.evature.evasdk.evaapis.SpeechAudioStreamer;
 import com.evature.evasdk.model.ChatItem;
@@ -806,10 +808,17 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			
 		case MultiChoiceQuestion:
 		case Eva:
-			if (item.getSearchModel() != null) {
-                item.getSearchModel().triggerSearch(mEvaChatScreen.getActivity());
-				return;
-			}
+            if (item.getSearchModel() != null) {
+                AppSearchModel model = item.getSearchModel();
+                if (AppSetup.tapChatToActivate) {
+                    model.setIsComplete(true);
+                }
+                if (model.getIsComplete()) {
+                    CallbackResult result = model.triggerSearch(mEvaChatScreen.getActivity());
+                    //mEvaChatScreen.handleCallbackResult(result, null, item);
+                    return;
+                }
+            }
 			editEvaChat(item, position);
 			break;
 			

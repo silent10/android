@@ -132,7 +132,7 @@ public class EvaChatTrigger {
         return (ViewGroup) rootView;
     }
 
-    private static boolean checkPermissions(FragmentActivity activity) {
+    private static boolean checkPermissions(Context context) {
         String[] permissionsToCheck;
         if (AppSetup.locationTracking) {
             permissionsToCheck = new String[] {
@@ -147,7 +147,7 @@ public class EvaChatTrigger {
         }
         ArrayList<String> missingPermissions = new ArrayList<String>();
         for (String perm : permissionsToCheck) {
-            if (PackageManager.PERMISSION_GRANTED != PermissionChecker.checkSelfPermission(activity, perm)) {
+            if (PackageManager.PERMISSION_GRANTED != PermissionChecker.checkSelfPermission(context, perm)) {
                 missingPermissions.add(perm);
             }
         }
@@ -224,6 +224,10 @@ public class EvaChatTrigger {
             activity.startActivity(intent, options.toBundle());
         }
         else {*/
+        boolean hasPermissions = checkPermissions(activity);
+        if (!hasPermissions) {
+            return;
+        }
 
             Intent intent = new Intent(activity, EvaChatScreenActivity.class);
             if (evaContext != null) {

@@ -1,6 +1,8 @@
 package com.evature.evasdk.evaapis.crossplatform;
 
 import com.evature.evasdk.evaapis.crossplatform.flow.Flow;
+import com.evature.evasdk.evaapis.crossplatform.flow.FlowElement;
+import com.evature.evasdk.evaapis.crossplatform.flow.StatementElement;
 import com.evature.evasdk.util.DLog;
 
 import org.json.JSONArray;
@@ -119,9 +121,6 @@ public class EvaApiReply implements Serializable {
 				if (jApiReply.has("Last Utterance Parsed Text")) {
 					parsedText = new ParsedText(jApiReply.getJSONObject("Last Utterance Parsed Text"), parseErrors);
 				}
-				if (jApiReply.has("Chat")) {
-					chat = new EvaChat(jApiReply.getJSONObject("Chat"), parseErrors);
-				}
 				if (jApiReply.has("Dialog")) {
 					dialog  = new EvaDialog(jApiReply.getJSONObject("Dialog"), parseErrors);
 				}
@@ -201,6 +200,19 @@ public class EvaApiReply implements Serializable {
 				if (jApiReply.has("Flow")) {
 					flow = new Flow(jApiReply.getJSONArray("Flow"), parseErrors, locations);
 				}
+
+                if (jApiReply.has("Chat")) {
+                    chat = new EvaChat(jApiReply.getJSONObject("Chat"), parseErrors);
+                    if (chat.newSession) {
+                        // search for Statement flow action and mark it as new session
+                        for (FlowElement fe : flow.Elements) {
+                            if (fe.Type == FlowElement.TypeEnum.Statement && ((StatementElement)fe).StatementType == StatementElement.StatementTypeEnum.Chat) {
+                                ((StatementElement)fe).newSession = true;
+                            }
+                        }
+                    }
+                }
+
 
                 if (jApiReply.has("SessionText")) {
                     JSONArray jArray = jApiReply.getJSONArray("SessionText");

@@ -3,7 +3,9 @@ package com.evature.evasdk.appinterface;
 import android.text.Spannable;
 import android.text.SpannableString;
 
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * Created by iftah on 07/04/2016.
@@ -13,10 +15,10 @@ public class CallbackResult {
     private Spannable displayIt;
     private Future<CallbackResult> deferredResult;
     private boolean appendToExistingText; // append the display/say strings to the Eva reply
-    private boolean closeChat;  // set to true to close the chat screen immediately after the result handling is complete
-    private int countResults;   // special handling for callbacks that trigger search - return the number of results
-                                // Eva will alter the default reply if the results is 0  ("no such elements found")
-                                // or if the results is 1
+    private boolean closeChat;      // set to true to close the chat screen immediately after the result handling is complete
+    private int countResults = -1;  // special handling for callbacks that trigger search - return the number of results
+                                    // Eva will alter the default reply if the results is 0  ("no such elements found")
+                                    // or if the results is 1
     private Future<Integer> deferredCountResults;
 
     private CallbackResult(String sayIt, Spannable displayIt, Future<CallbackResult> deferredResult) {
@@ -58,22 +60,28 @@ public class CallbackResult {
     }
 
     // the future will resolve to a EVCallbackResult, nothing will be spoken/displayed until then
-    public static CallbackResult delayedResult(Future<CallbackResult> future) {
+    public static CallbackResult delayedResult(FutureTask<CallbackResult> future) {
+        Executors.newSingleThreadExecutor().execute(future);
         return new CallbackResult("", new SpannableString(""), future);
     }
 
     // handle the immediate result (eg. say/display) and then replace it with the result which will be resolved by the promise
-    public static CallbackResult delayedResult(CallbackResult immediateResult, Future<CallbackResult> futureResult) {
+    // side affect: executes the futureResult in a thread
+    public static CallbackResult delayedResult(CallbackResult immediateResult, FutureTask<CallbackResult> futureResult) {
+        Executors.newSingleThreadExecutor().execute(futureResult);
         return new CallbackResult(immediateResult.sayIt, immediateResult.displayIt, futureResult);
     }
 
     public static CallbackResult countResult(int count) {
-        CallbackResult result = CallbackResult.doNothing();
+        CallbackResult result = CallbackResult.defaultHandling();
         result.countResults = count;
         return result;
     }
-    public static CallbackResult countResult(Future<Integer> deferredCount) {
-        CallbackResult result = CallbackResult.doNothing();
+
+    // side affect: executes the deferredCount in a thread
+    public static CallbackResult countResult(FutureTask<Integer> deferredCount) {
+        CallbackResult result = CallbackResult.defaultHandling();
+        Executors.newSingleThreadExecutor().execute(deferredCount);
         result.deferredCountResults = deferredCount;
         return result;
     }
@@ -115,4 +123,11 @@ public class CallbackResult {
     }
 
 
+    public Future<Integer> getDeferredCountResults() {
+        return deferredCountResults;
+    }
+
+    public void setDeferredCountResults(Future<Integer> deferredCountResults) {
+        this.deferredCountResults = deferredCountResults;
+    }
 }
