@@ -446,18 +446,18 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             if (flow != null) {
                 if (count == 1) { // exactly one found
                     sayIt = resultsFoundText(flow, count);
-                    displayIt = new SpannableString(sayIt + "\nTap here to see it.");
+                    displayIt = new SpannableString(sayIt);
                     chatItem.setSubLabel(null);
                     // only one result - no need to ask more questions - go ahead and show the search result
                     if (!chatItem.getSearchModel().getIsComplete()) {
                         chatItem.getSearchModel().setIsComplete(true);
                         // TODO: trigger search here?
-                        //CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
-                        //handleCallbackResult(result2, null, chatItem, false);
-                        //return;
+                        CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
+                        handleCallbackResult(result2, null, chatItem, false);
+                        return;
                     }
                 } else { // more than 1
-                    chatItem.setSubLabel(resultsFoundText(flow, count) + "\nTap here to see them.");
+                    chatItem.setSubLabel(resultsFoundText(flow, count) + (AppSetup.tapChatToActivate ? "\nTap here to see them.": ""));
                 }
             }
         }
@@ -548,6 +548,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                                     speak(pendingReplySayit.sayIt, false);
                                 }
                             }
+                            else {
+                                DLog.d(TAG, "Not speaking because canceled by asysnc count");
+                            }
 
                         }catch (InterruptedException e) {
 
@@ -617,15 +620,20 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                         synchronized (pendingReplySayit) {
                             pendingReplySayit.notifyAll();
                         }
-                        chatItem.setSubLabel(resultsFoundText(flow, count));
+                        if (count == 1) {
+                            chatItem.setSubLabel(resultsFoundText(flow, count));
+                        }
+                        else { // > 1
+                            chatItem.setSubLabel(resultsFoundText(flow, count) + (AppSetup.tapChatToActivate ? "\nTap here to see them.": ""));
+                        }
                         chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
                         if (!chatItem.getSearchModel().getIsComplete() && count == 1) {
                             // there is only one result found - no need to ask more questions
                             chatItem.getSearchModel().setIsComplete(true);
                             // TODO: trigger search here?
-                            //CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
-                            //handleCallbackResult(result2, null, chatItem, false);
-                            //return;
+                            CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
+                            handleCallbackResult(result2, null, chatItem, false);
+                            return;
                         }
                     }
                     mView.notifyDataChanged();
@@ -639,17 +647,23 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         }
 
         if (result.isCloseChat()) {
-            getActivity().finish();
+            EvaChatTrigger.closeChatScreen(getActivity());
         }
 
         final Future<CallbackResult> future = result.getDeferredResult();
         if (future != null) {
+            chatItem.setStatus(ChatItem.Status.SEARCHING);
+            chatItem.setSubLabel("Searching...");
+            mView.notifyDataChanged();
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     CallbackResult result2 = null;
                     try {
                         result2 = future.get(TIMEOUT_WAITING_FOR_RESULT, TimeUnit.MILLISECONDS);
+                        chatItem.setStatus(ChatItem.Status.NONE);
+                        chatItem.setSubLabel(null);
+                        mView.notifyDataChanged();
                         handleCallbackResult(result2, null, chatItem, false);
                     } catch (InterruptedException e) {
                         DLog.w(TAG, "Interrupted waiting for deferred result", e);
@@ -726,35 +740,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             sortOrder = reply.requestAttributes.sortOrder;
         }
 
-        final Boolean nonstop;
-        final Boolean redeye;
-        final String[] airlines;
-        final FlightAttributes.FoodType food;
-        final FlightAttributes.SeatType seatType;
-        final FlightAttributes.SeatClass[] seatClass;
-
-        if (reply.flightAttributes == null) {
-            nonstop = null;
-            redeye = null;
-            airlines = null;
-            food = null;
-            seatType = null;
-            seatClass = null;
-        }
-        else {
-            FlightAttributes fa = reply.flightAttributes;
-            nonstop = fa.nonstop;
-            redeye = fa.redeye;
-            airlines = fa.airlines;
-            food = fa.food;
-            seatType = fa.seatType;
-            seatClass = fa.seatClass;
-        }
-
         chatItem.setSearchModel(new AppFlightSearchModel(isComplete, from, to, departDateMin, departDateMax, returnDateMin, returnDateMax, reply.travelers,
-                oneWay, nonstop, seatClass, airlines, redeye, food, seatType,
-                sortBy, sortOrder));
-
+                reply.flightAttributes, sortBy, sortOrder));
 
 
         if (EvaComponent.evaAppHandler instanceof FlightSearch) {

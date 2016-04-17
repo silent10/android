@@ -26,14 +26,7 @@ public class AppFlightSearchModel extends AppSearchModel {
     private final Date returnDateMin;
     private final Date returnDateMax;
     private final EvaTravelers travelers;
-
-    private final Boolean nonstop; // A Non stop flight - Boolean attribute; null= not specified, false = explicitly request NOT nonstop, true = explicitly requested nonstop flight
-    private final Boolean redeye; // A Red eye flight - Boolean attribute; null= not specified, false = explicitly request NOT red eye, true = explicitly requested red eye flight
-    private final boolean oneWay;
-    private final String[] airlines;
-    private final FlightAttributes.FoodType food;
-    private final FlightAttributes.SeatType seatType;
-    private final FlightAttributes.SeatClass[] seatClass;
+    private final FlightAttributes attributes;
     private final RequestAttributes.SortOrderEnum sortOrder;
 
     /***
@@ -46,26 +39,14 @@ public class AppFlightSearchModel extends AppSearchModel {
      * @param returnDateMin
      * @param returnDateMax
      * @param travelers
-     * @param nonstop - A Non stop flight - Boolean attribute; null= not specified, false = explicitly request NOT nonstop, true = explicitly requested nonstop flight
-     * @param redeye - A Red eye flight - Boolean attribute; null= not specified, false = explicitly request NOT red eye, true = explicitly requested red eye flight
-     * @param oneWay
-     * @param airlines
-     * @param food
-     * @param seatType
-     * @param seatClass
+     * @param attributes
      * @param sortBy
      */
     public AppFlightSearchModel(boolean isComplete, EvaLocation origin, EvaLocation destination,
                                 Date departDateMin, Date departDateMax,
                                 Date returnDateMin, Date returnDateMax,
                                 EvaTravelers travelers,
-                                boolean oneWay,
-                                Boolean nonstop,
-                                FlightAttributes.SeatClass[] seatClass,
-                                String[] airlines,
-                                Boolean redeye,
-                                FlightAttributes.FoodType food,
-                                FlightAttributes.SeatType seatType,
+                                FlightAttributes attributes,
                                 RequestAttributes.SortEnum sortBy,
                                 RequestAttributes.SortOrderEnum sortOrder) {
         super(isComplete);
@@ -77,13 +58,7 @@ public class AppFlightSearchModel extends AppSearchModel {
         this.returnDateMin = returnDateMin;
         this.returnDateMax = returnDateMax;
         this.travelers = travelers;
-        this.nonstop = nonstop;
-        this.redeye = redeye;
-        this.oneWay = oneWay;
-        this.airlines = airlines;
-        this.food = food;
-        this.seatType = seatType;
-        this.seatClass = seatClass;
+        this.attributes = attributes;
         this.sortOrder = sortOrder;
     }
 
@@ -93,9 +68,7 @@ public class AppFlightSearchModel extends AppSearchModel {
                     departDateMin,  departDateMax,
                     returnDateMin,  returnDateMax,
                     travelers,
-                    nonstop, seatClass,airlines,
-                    redeye,
-                    food, seatType,sortBy, sortOrder);
+                    attributes, sortBy, sortOrder);
 
         }
         return null;

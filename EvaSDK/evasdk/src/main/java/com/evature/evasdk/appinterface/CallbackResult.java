@@ -3,6 +3,7 @@ package com.evature.evasdk.appinterface;
 import android.text.Spannable;
 import android.text.SpannableString;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -11,6 +12,7 @@ import java.util.concurrent.FutureTask;
  * Created by iftah on 07/04/2016.
  */
 public class CallbackResult {
+    private static final Executor executor = Executors.newCachedThreadPool();
     private String sayIt;
     private Spannable displayIt;
     private Future<CallbackResult> deferredResult;
@@ -61,14 +63,14 @@ public class CallbackResult {
 
     // the future will resolve to a EVCallbackResult, nothing will be spoken/displayed until then
     public static CallbackResult delayedResult(FutureTask<CallbackResult> future) {
-        Executors.newSingleThreadExecutor().execute(future);
+        executor.execute(future);
         return new CallbackResult("", new SpannableString(""), future);
     }
 
     // handle the immediate result (eg. say/display) and then replace it with the result which will be resolved by the promise
     // side affect: executes the futureResult in a thread
     public static CallbackResult delayedResult(CallbackResult immediateResult, FutureTask<CallbackResult> futureResult) {
-        Executors.newSingleThreadExecutor().execute(futureResult);
+        executor.execute(futureResult);
         return new CallbackResult(immediateResult.sayIt, immediateResult.displayIt, futureResult);
     }
 
@@ -81,7 +83,7 @@ public class CallbackResult {
     // side affect: executes the deferredCount in a thread
     public static CallbackResult countResult(FutureTask<Integer> deferredCount) {
         CallbackResult result = CallbackResult.defaultHandling();
-        Executors.newSingleThreadExecutor().execute(deferredCount);
+        executor.execute(deferredCount);
         result.deferredCountResults = deferredCount;
         return result;
     }

@@ -815,7 +815,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
                 }
                 if (model.getIsComplete()) {
                     CallbackResult result = model.triggerSearch(mEvaChatScreen.getActivity());
-                    //mEvaChatScreen.handleCallbackResult(result, null, item);
+                    mEvaChatScreen.handleCallbackResult(result, null, item);
                     return;
                 }
             }
