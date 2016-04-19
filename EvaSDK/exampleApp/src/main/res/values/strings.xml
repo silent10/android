@@ -16,9 +16,12 @@
     <string name="pref_credentials_site_code">Site Code</string>
     <string name="pref_credentials_api_key">API Key</string>
 
+    <!-- override Eva string -->
+    <string name="evature_zero_count">Sorry! No matching results found!\nDrag the microphone button to the left to undo.</string>
+
 
     <string name="ready">Ready</string>
-    <string name="checking_credentials">Checking Credentials...</string>
+    <string name="checking_credentials">Checking Credentials…</string>
     <string name="scope">Scope</string>
     <string name="hotel">Hotel</string>
     <string name="flight">Flight</string>

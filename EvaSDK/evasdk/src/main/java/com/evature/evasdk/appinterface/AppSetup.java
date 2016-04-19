@@ -60,6 +60,11 @@ public class AppSetup {
 
     public static HashMap<String, String> extraParams = new HashMap<String,String>();
 
+    public static int timeoutWaitingForResult = 4000;     // time (ms) waiting for async callback result before giving up
+    public static int timeoutWaitingForCount = 4000;      // time (ms) waiting for async count before giving up
+    public static int delaySpeakWhenWaitingForCount = 1200; // speak will be delayed slightly to give chance for async count to modify the default text (eg. if zero results or just one result)
+
+
     public static void setScope(AppScope... args) {
         StringBuilder builder = new StringBuilder();
         for (AppScope s : args) {

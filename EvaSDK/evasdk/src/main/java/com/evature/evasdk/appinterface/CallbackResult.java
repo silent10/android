@@ -37,6 +37,12 @@ public class CallbackResult {
     public static CallbackResult defaultHandling() {
         return new CallbackResult(null, null);
     }
+    // default handling - say+display Eva's text  - same as returning null from the callback
+    public static CallbackResult defaultHandling(boolean closeChat) {
+        CallbackResult result = new CallbackResult(null, null);
+        result.setCloseChat(closeChat);
+        return result;
+    }
 
     // do nothing (no say nor display)
     public static CallbackResult doNothing() {

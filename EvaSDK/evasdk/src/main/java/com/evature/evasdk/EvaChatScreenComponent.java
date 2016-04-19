@@ -80,7 +80,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -91,10 +94,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	private static final String TAG = "EvaChatScreenComponent";
 
     public static final String INTENT_EVA_CONTEXT = "evature_context";
-
-    final int TIMEOUT_WAITING_FOR_RESULT = 4000;
-    final int TIMEOUT_WAITING_FOR_COUNT = 4000;
-    final int DELAY_SPEAK_WHEN_WAITING_FOR_COUNT = 1200;  // speak will be delayed slightly to give chance for async count to cancel/change text
 
     private static class StoreResultData {
 		ChatItem storeResultInItem;
@@ -141,6 +140,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		public ChatItem chatItem;
 		public String sayIt;
 		public boolean cancel;
+        public boolean alreadySpoken;
 		public boolean isQuestion;
 		public Spannable chatText;
 	}
@@ -152,7 +152,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
     public Activity getActivity() {
         return activity;
     }
-
+    private final Executor executor = Executors.newCachedThreadPool();
 
 
     public EvaChatScreenComponent(Activity hostActivity,
@@ -445,7 +445,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         else if (count > 0) {
             if (flow != null) {
                 if (count == 1) { // exactly one found
-                    sayIt = resultsFoundText(flow, count);
+                    sayIt = activity.getString(R.string.evature_one_count);
                     displayIt = new SpannableString(sayIt);
                     chatItem.setSubLabel(null);
                     // only one result - no need to ask more questions - go ahead and show the search result
@@ -512,6 +512,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
             }
             else {
+                pendingReplySayit.alreadySpoken = false;
                 pendingReplySayit.cancel = false;
                 pendingReplySayit.chatItem = chatItem;
                 pendingReplySayit.sayIt = sayIt;
@@ -519,18 +520,21 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 chatItem.setChat("");
                 mView.notifyDataChanged();
 
-
-                Thread speakThread = new Thread(new Runnable() {
+                // delay speak in another thread - give async count a chance to override the speak
+                executor.execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
+                            DLog.d(TAG, "Delaying speak to give async count time");
                             synchronized (pendingReplySayit) {
-                                pendingReplySayit.wait(DELAY_SPEAK_WHEN_WAITING_FOR_COUNT); // wait some for async count
-                                                                                            // - maybe no results will show and this will be canceled
+                                pendingReplySayit.wait(AppSetup.delaySpeakWhenWaitingForCount); // wait some for async count
+                                // - maybe no results will show and this will be canceled
                             }
                             if (pendingReplySayit.cancel == false) {
+                                DLog.d(TAG, "Done - speaking now the pending chat");
                                 // not canceled by async count - can go ahead and ask questions, etc...
                                 pendingReplySayit.cancel = true;
+                                pendingReplySayit.alreadySpoken = true;
                                 pendingReplySayit.chatItem.setChat(pendingReplySayit.chatText);
                                 mView.notifyDataChanged();
                                 if (pendingReplySayit.isQuestion) {
@@ -543,21 +547,19 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                                             }
                                         }
                                     });
-                                }
-                                else {
+                                } else {
                                     speak(pendingReplySayit.sayIt, false);
                                 }
-                            }
-                            else {
-                                DLog.d(TAG, "Not speaking because canceled by asysnc count");
+                            } else {
+                                DLog.d(TAG, "Not speaking because canceled by async count");
                             }
 
-                        }catch (InterruptedException e) {
+                        } catch (InterruptedException e) {
 
                         }
                     }
                 });
-                speakThread.run();
+
             }
         }
         if (asyncCount != null) {
@@ -566,12 +568,13 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             chatItem.setSubLabel("Searching...");
             mView.notifyDataChanged();
             pendingReplySayit.isQuestion = flow != null && flow.Type ==  FlowElement.TypeEnum.Question;
-            Thread waitForCount = new Thread(new Runnable() {
+            // wait for async count
+            executor.execute(new Runnable() {
                 @Override
                 public void run() {
                     int count = -1;
                     try {
-                        Integer countResult = asyncCount.get(TIMEOUT_WAITING_FOR_COUNT, TimeUnit.MILLISECONDS);
+                        Integer countResult = asyncCount.get(AppSetup.timeoutWaitingForCount, TimeUnit.MILLISECONDS);
                         if (countResult != null) {
                             count = countResult.intValue();
                         }
@@ -592,8 +595,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
                     DLog.d(TAG, "Count result: " + count);
                     if (count == 0) {
-                        boolean alreadySpoken = pendingReplySayit.cancel == true;
-
                         // attempt to cancel the pending sayit - no need to ask question or say the cruise if there are no results
                         pendingReplySayit.cancel = true;
                         synchronized (pendingReplySayit) {
@@ -604,7 +605,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                         chatItem.setSubLabel(null);
                         chatItem.setStatus(ChatItem.Status.NONE);
                         String noResultsFound = activity.getString(R.string.evature_zero_count);
-                        if (alreadySpoken) {
+                        if (pendingReplySayit.alreadySpoken) {
                             // already spoken - add a new chat item
                             ChatItem noResults = new ChatItem(noResultsFound, chatItem.getEvaReplyId(), ChatItem.ChatType.Eva);
                             mView.addChatItem(noResults);
@@ -612,38 +613,53 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                             // not spoken yet - modify the existing chat item
                             chatItem.setChat(noResultsFound);
                             chatItem.setSearchModel(null); // don't allow tapping to see empty search results
-                            mView.notifyDataChanged();
                         }
                         speak(noResultsFound, false);
                     } else {
-                        // there are results - can go ahead and say the pending sayIt
-                        synchronized (pendingReplySayit) {
-                            pendingReplySayit.notifyAll();
-                        }
+
                         if (count == 1) {
-                            chatItem.setSubLabel(resultsFoundText(flow, count));
+                            pendingReplySayit.cancel = true;
+                            synchronized (pendingReplySayit) {
+                                pendingReplySayit.notifyAll();
+                            }
+
+                            if (pendingReplySayit.alreadySpoken) {
+                                chatItem.setSubLabel(resultsFoundText(flow, count));
+                            }
+                            else {
+                                // cancel the pending chat - instead say the "one result" text
+                                String oneResultFound = activity.getString(R.string.evature_one_count);
+                                chatItem.setChat(oneResultFound);
+                                chatItem.setSubLabel(null);
+                                speak(oneResultFound, false);
+                            }
                         }
                         else { // > 1
+                            // there are results - can go ahead and say the pending sayIt
+                            synchronized (pendingReplySayit) {
+                                pendingReplySayit.notifyAll();
+                            }
                             chatItem.setSubLabel(resultsFoundText(flow, count) + (AppSetup.tapChatToActivate ? "\nTap here to see them.": ""));
                         }
                         chatItem.setStatus(ChatItem.Status.HAS_RESULTS);
-                        if (!chatItem.getSearchModel().getIsComplete() && count == 1) {
+
+                        if (!pendingReplySayit.alreadySpoken && !chatItem.getSearchModel().getIsComplete() && count == 1) {
                             // there is only one result found - no need to ask more questions
                             chatItem.getSearchModel().setIsComplete(true);
                             // TODO: trigger search here?
                             CallbackResult result2 = chatItem.getSearchModel().triggerSearch(getActivity());
                             handleCallbackResult(result2, null, chatItem, false);
-                            return;
                         }
                     }
                     mView.notifyDataChanged();
                 }
             });
-            waitForCount.start();
         }
         else {
-            chatItem.setChat(displayIt);
-            mView.notifyDataChanged();
+            if (displayIt != null) {
+                chatItem.setChat(displayIt);
+                mView.notifyDataChanged();
+            }
         }
 
         if (result.isCloseChat()) {
@@ -655,26 +671,29 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             chatItem.setStatus(ChatItem.Status.SEARCHING);
             chatItem.setSubLabel("Searching...");
             mView.notifyDataChanged();
-            Thread thread = new Thread(new Runnable() {
+            executor.execute(new Runnable() {
                 @Override
                 public void run() {
                     CallbackResult result2 = null;
                     try {
-                        result2 = future.get(TIMEOUT_WAITING_FOR_RESULT, TimeUnit.MILLISECONDS);
+                        result2 = future.get(AppSetup.timeoutWaitingForResult, TimeUnit.MILLISECONDS);
                         chatItem.setStatus(ChatItem.Status.NONE);
                         chatItem.setSubLabel(null);
                         mView.notifyDataChanged();
                         handleCallbackResult(result2, null, chatItem, false);
+                        return;
                     } catch (InterruptedException e) {
-                        DLog.w(TAG, "Interrupted waiting for deferred result", e);
+                        DLog.e(TAG, "Interrupted waiting for deferred result", e);
                     } catch (ExecutionException e) {
-                        DLog.w(TAG, "Exception waiting for deferred result", e);
+                        DLog.e(TAG, "Exception waiting for deferred result", e);
                     } catch (TimeoutException e) {
-                        DLog.w(TAG, "Timeout waiting for deferred result", e);
+                        DLog.e(TAG, "Timeout waiting for deferred result", e);
                     }
+                    chatItem.setStatus(ChatItem.Status.NONE);
+                    chatItem.setSubLabel(null);
+                    mView.notifyDataChanged();
                 }
             });
-            thread.start();
         }
 
     }
@@ -1112,7 +1131,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 mView.addChatItem(myChat);
             }
 			mView.hideSpeechWave();
-			Thread t = new Thread(new Runnable() {
+			executor.execute(new Runnable() {
 				@Override
 				public void run() {
 					try {
@@ -1132,14 +1151,13 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					}
 				}
 			});
-			t.start();
 		}
 
 		@Override
 		public void speechResultOK(final String evaJson, final Bundle debugData, final Object cookie) {
 			DLog.d(TAG, "Speech recognition ok");
 			mView.hideSpeechWave();
-			Thread t = new Thread(new Runnable() {
+			executor.execute(new Runnable() {
 				@Override
 				public void run() {
 					try {
@@ -1161,7 +1179,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					}
 				}
 			});
-			t.start();
 			
 		}
 	};
@@ -1182,7 +1199,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		VOICE_COOKIE.storeResultInItem = chatItem;
 		VOICE_COOKIE.editLastUtterance = editLastUtterance;
 		
-		Thread t = new Thread(new Runnable() {
+		executor.execute(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -1219,7 +1236,6 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 });
 			}
 		});
-		t.start();
 	}
 
 	
@@ -1676,8 +1692,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 				ReplyElement replyElement = (ReplyElement) flow;
 				if (ServiceAttributes.CALL_SUPPORT.equals(replyElement.AttributeKey)) {
 					// TODO: trigger call support
-					Toast.makeText(activity, "Phoning Call Support", Toast.LENGTH_LONG).show();
+					//Toast.makeText(activity, "Phoning Call Support", Toast.LENGTH_LONG).show();
 				}
+                handleCallbackResult(null, flow, chatItem);
 				break;
             case Navigate:
 			case Flight:
@@ -1705,6 +1722,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                         }
                         break;
 				}
+                handleCallbackResult(null, flow, chatItem);
 				break;
 
             default:
