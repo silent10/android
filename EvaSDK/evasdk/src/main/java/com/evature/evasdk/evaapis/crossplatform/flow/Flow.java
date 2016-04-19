@@ -18,7 +18,7 @@ public class Flow  implements Serializable  {
 	private static final String TAG = "Flow";
 	public FlowElement[]  Elements;
 	
-	public Flow(JSONArray jFlow, List<String> parseErrors, EvaLocation[] locations) {
+	public Flow(JSONArray jFlow, List<String> parseErrors, EvaLocation[] locations, JSONObject jApiReply) {
 		
 		ArrayList<FlowElement>  elementsToAdd = new ArrayList<FlowElement>();
 		HashSet<Integer> indexesToSkip = new HashSet<Integer>();
@@ -38,10 +38,10 @@ public class Flow  implements Serializable  {
 					indexesToSkip.add( Integer.valueOf(flightFlowElement.ActionIndex));
 				}
 				else if (flowType.equals( FlowElement.TypeEnum.Reply.name())) {
-					elementsToAdd.add( new ReplyElement(jElement, parseErrors, locations));
+					elementsToAdd.add( new ReplyElement(jElement, parseErrors, locations, jApiReply));
 				}
 				else if (flowType.equals( FlowElement.TypeEnum.Statement.name())) {
-					elementsToAdd.add( new StatementElement(jElement, parseErrors, locations));
+					elementsToAdd.add( new StatementElement(jElement, parseErrors, locations, jApiReply));
 				}
                 else if (flowType.equals( FlowElement.TypeEnum.Navigate.name())) {
                     elementsToAdd.add( new NavigateElement(jElement, parseErrors, locations));

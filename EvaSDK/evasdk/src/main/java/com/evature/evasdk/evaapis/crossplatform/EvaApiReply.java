@@ -198,19 +198,11 @@ public class EvaApiReply implements Serializable {
 				}
 				
 				if (jApiReply.has("Flow")) {
-					flow = new Flow(jApiReply.getJSONArray("Flow"), parseErrors, locations);
+					flow = new Flow(jApiReply.getJSONArray("Flow"), parseErrors, locations, jApiReply);
 				}
 
                 if (jApiReply.has("Chat")) {
                     chat = new EvaChat(jApiReply.getJSONObject("Chat"), parseErrors);
-                    if (chat.newSession) {
-                        // search for Statement flow action and mark it as new session
-                        for (FlowElement fe : flow.Elements) {
-                            if (fe.Type == FlowElement.TypeEnum.Statement && ((StatementElement)fe).StatementType == StatementElement.StatementTypeEnum.Chat) {
-                                ((StatementElement)fe).newSession = true;
-                            }
-                        }
-                    }
                 }
 
 

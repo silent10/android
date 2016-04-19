@@ -29,11 +29,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.evature.evasdk.appinterface.AppScope;
 import com.evature.evasdk.appinterface.AppSetup;
-import com.evature.evasdk.appinterface.AsyncCountResult;
 import com.evature.evasdk.appinterface.CallbackResult;
 import com.evature.evasdk.appinterface.CarSearch;
 import com.evature.evasdk.appinterface.CruiseSearch;
@@ -41,6 +39,7 @@ import com.evature.evasdk.appinterface.EvaLifeCycleListener;
 import com.evature.evasdk.appinterface.FlightNavigate;
 import com.evature.evasdk.appinterface.FlightSearch;
 import com.evature.evasdk.appinterface.HotelSearch;
+import com.evature.evasdk.appinterface.ReservationHandler;
 import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.EvaSearchReplyListener;
 import com.evature.evasdk.evaapis.EvaSpeechRecogComponent;
@@ -1689,12 +1688,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 		switch (flow.Type) {
 			case Reply:
-				ReplyElement replyElement = (ReplyElement) flow;
-				if (ServiceAttributes.CALL_SUPPORT.equals(replyElement.AttributeKey)) {
-					// TODO: trigger call support
-					//Toast.makeText(activity, "Phoning Call Support", Toast.LENGTH_LONG).show();
-				}
-                handleCallbackResult(null, flow, chatItem);
+                handleReplyFlow(reply, (ReplyElement) flow, chatItem);
 				break;
             case Navigate:
 			case Flight:
@@ -1731,6 +1725,29 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 		}
 	}
+
+
+    private void handleReplyFlow(EvaApiReply reply, ReplyElement flow, ChatItem chatItem) {
+        CallbackResult result = null;
+        switch (flow.attributeKey) {
+            case CallSupport:
+            case Baggage:
+            case MultiSegment:
+                // TODO: make applicative callbacks for these
+                break;
+            case ReservationID:
+                if (EvaComponent.evaAppHandler instanceof ReservationHandler) {
+                    result = ((ReservationHandler)EvaComponent.evaAppHandler).showReservation();
+                }
+                break;
+            case Cancellation:
+                if (EvaComponent.evaAppHandler instanceof ReservationHandler) {
+                    result = ((ReservationHandler)EvaComponent.evaAppHandler).cancelReservation();
+                }
+                break;
+        }
+        handleCallbackResult(result, flow, chatItem);
+    }
 
 	public void onEvaError(String message, EvaApiReply reply, boolean isServerError, Object cookie) {
 		mView.flashBadSearchButton(2);
