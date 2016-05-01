@@ -10,11 +10,12 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
-import android.text.SpannableString;
+import android.text.Spannable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -24,7 +25,7 @@ import android.widget.TextView;
 
 import com.evature.evasdk.EvatureMainView;
 import com.evature.evasdk.R;
-import com.evature.evasdk.appinterface.AppSetup;
+import com.evature.evasdk.appinterface.EvaAppSetup;
 import com.evature.evasdk.model.ChatItem;
 
 
@@ -166,7 +167,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			return row;
 		}
 		else {
-			SpannableString chatText = chatItem.getChat();
+			Spannable chatText = chatItem.getChat();
 			if (chatText == null || "".equals(chatText.toString())) {
 				label.setVisibility(View.GONE);
 			}
@@ -236,14 +237,14 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 				userHolder.editText.setText(chatItem.getChat().toString());
 				label.setVisibility(View.GONE);
 				userHolder.inEdit.setVisibility(View.VISIBLE);
-                if (AppSetup.tapToEditChat) {
+                if (EvaAppSetup.tapToEditChat) {
                     ChatAdapter.currentEditBox = new WeakReference(userHolder.editText);
                 }
 			}
 			else {
 				label.setVisibility(View.VISIBLE);
 				userHolder.inEdit.setVisibility(View.GONE);
-                if (AppSetup.tapToEditChat) {
+                if (EvaAppSetup.tapToEditChat) {
                     if (ChatAdapter.currentEditBox != null &&
                             userHolder.editText == ChatAdapter.currentEditBox.get()) {
                         ChatAdapter.currentEditBox = null;
@@ -322,9 +323,9 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		}
 		else { 
 			float from = 1f;
-			float to = 0.01f;
+			float to = 0.0001f;
 			if (step == DismissStep.ANIMATE_RESTORE) {
-				from = 0.01f;
+				from = 0.0001f;
 				to = 1f;
 			}
 			for (ChatItem item: itemsToDismiss) {
@@ -333,6 +334,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 					ScaleAnimation animation = new ScaleAnimation(1f, 1f, from, to, ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
 					animation.setDuration(400);
 					animation.setFillAfter(true);
+                    animation.setInterpolator(new AccelerateInterpolator());
 					view.clearAnimation();
 					view.startAnimation(animation);
 				}

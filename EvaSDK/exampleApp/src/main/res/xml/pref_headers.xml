@@ -1,0 +1,20 @@
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- These settings headers are only used on tablets. -->
+
+    <header
+        android:fragment="com.evature.exampleapp.SettingsActivity$CredentialsPreferenceFragment"
+        android:icon="@drawable/ic_credentials_black_24dp"
+        android:title="@string/pref_header_credentials"/>
+
+    <header
+        android:fragment="com.evature.exampleapp.SettingsActivity$ScopePreferenceFragment"
+        android:icon="@drawable/ic_scope_black_24dp"
+        android:title="@string/scope"/>
+
+    <!--<header-->
+        <!--android:fragment="com.evature.exampleapp.SettingsActivity$DataSyncPreferenceFragment"-->
+        <!--android:icon="@drawable/ic_sync_black_24dp"-->
+        <!--android:title="@string/pref_header_data_sync"/>-->
+
+</preference-headers>

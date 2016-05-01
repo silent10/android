@@ -1,6 +1,7 @@
 package com.evature.evasdk.evaapis.crossplatform.flow;
 
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
+import com.evature.evasdk.util.DLog;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,15 +11,37 @@ import org.json.JSONObject;
 
 
 public class ReplyElement extends FlowElement   implements Serializable {
-	public String AttributeKey;
-	public String AttributeType;
+    private static final String TAG = "ReplyElement";
+    public String attributeType;
+    public Object attributeValue;
 
-	public ReplyElement(JSONObject jFlowElement, List<String> parseErrors, EvaLocation[] locations) {
+    public enum ReplyAttribute {
+        Unknown,
+        CallSupport,
+        ReservationID,
+        Cancellation,
+        Baggage,
+        MultiSegment
+    };
+
+    public ReplyAttribute attributeKey;
+
+	public ReplyElement(JSONObject jFlowElement, List<String> parseErrors, EvaLocation[] locations, JSONObject jApiReply) {
 		super(jFlowElement, parseErrors, locations);
 		
 		try {
-			AttributeKey = jFlowElement.getString("AttributeKey");
-			AttributeType = jFlowElement.getString("AttributeType");
+			String jAttributeKey = jFlowElement.getString("AttributeKey");
+			attributeType = jFlowElement.getString("AttributeType");
+            if (jApiReply.has(attributeType)) {
+                attributeValue = jApiReply.getJSONObject(attributeType).opt(jAttributeKey);
+            }
+            try {
+                attributeKey = ReplyAttribute.valueOf(jAttributeKey.replace(" ","").replace("-",""));
+            }
+            catch(IllegalArgumentException e) {
+                DLog.w(TAG, "Unexpected ReplyAttribute in Flow element", e);
+                attributeKey = ReplyAttribute.Unknown;
+            }
 		}
 		catch(JSONException e) {
 			parseErrors.add("Exception during parsing Reply element: "+e.getMessage());	

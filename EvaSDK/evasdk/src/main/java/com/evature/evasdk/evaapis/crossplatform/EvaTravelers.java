@@ -5,16 +5,19 @@ import com.evature.evasdk.util.DLog;
 import java.io.Serializable;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
 public class EvaTravelers  implements Serializable{
 	private final static String TAG = "EvaTravellers";
-	private Integer adult = null;        // null means it wasn't specified by the user,  0 means it was explicitly specified to zero by the user
-	private Integer child = null;
-	private Integer infant = null;
-	private Integer elderly = null;
+	private Integer adult;        // null means it wasn't specified by the user,  0 means it was explicitly specified to zero by the user
+	private Integer child;
+	private Integer infant;
+	private Integer elderly;
+
+    public int[] childAges;
 
     public EvaTravelers() {
 
@@ -34,6 +37,13 @@ public class EvaTravelers  implements Serializable{
 			if (jTravelers.has("Elderly")) {
 				elderly = jTravelers.getInt("Elderly");
 			}
+            if (jTravelers.has("child_ages")) {
+                JSONArray jAges = jTravelers.getJSONArray("child_ages");
+                childAges = new int[jAges.length()];
+                for (int i=0; i<jAges.length(); i++) {
+                    childAges[i] = jAges.getInt(i);
+                }
+            }
 		} catch (JSONException e) {
 			parseErrors.add("Error during parsing Travelers: "+e.getMessage());
 			DLog.e(TAG, "Travelers Parse error ", e);

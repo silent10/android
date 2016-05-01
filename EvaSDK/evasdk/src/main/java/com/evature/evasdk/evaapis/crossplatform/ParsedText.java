@@ -39,7 +39,9 @@ public class ParsedText implements Serializable {
 					time.text = jTime.optString("Text");
 					time.position = jTime.optInt("Position", -1);
 					time.type = jTime.optString("Type");
-					times.add(time);
+                    if (time.position != -1 && !"".equals(time.text)) {
+                        times.add(time);
+                    }
 				}
 			} catch (JSONException e) {
 				DLog.e("ParsedText", "Error parsing JSON", e);
@@ -56,7 +58,9 @@ public class ParsedText implements Serializable {
 					LocationMarkup location = new LocationMarkup();
 					location.text = jLocation.optString("Text");
 					location.position = jLocation.optInt("Position", -1);
-					locations.add(location);
+                    if (location.position != -1 && !"".equals(location.text)) {
+                        locations.add(location);
+                    }
 				}
 			} catch (JSONException e) {
 				DLog.e("ParsedText", "Error parsing JSON",e);

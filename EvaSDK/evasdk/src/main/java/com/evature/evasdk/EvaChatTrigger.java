@@ -17,9 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
-import com.evature.evasdk.appinterface.AppScope;
-import com.evature.evasdk.appinterface.AppSetup;
-import com.evature.evasdk.appinterface.PermissionsRequiredHandler;
+import com.evature.evasdk.appinterface.EvaAppScope;
+import com.evature.evasdk.appinterface.EvaAppSetup;
+import com.evature.evasdk.appinterface.EvaPermissionsRequiredHandler;
 import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.EvaSpeak;
 import com.evature.evasdk.util.DLog;
@@ -65,7 +65,7 @@ public class EvaChatTrigger {
     }
 
 
-    public static void addDefaultButton(FragmentActivity activity, final AppScope evaContext) {
+    public static void addDefaultButton(FragmentActivity activity, final EvaAppScope evaContext) {
         // initialize TTS
         EvaSpeak.getOrCreateInstance(activity.getApplicationContext());
 
@@ -77,7 +77,7 @@ public class EvaChatTrigger {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (AppSetup.startEvaAsActivity) {
+                if (EvaAppSetup.startEvaAsActivity) {
                     startSearchByVoiceActivity(fActivity, evaContext);
                 }
                 else {
@@ -134,7 +134,7 @@ public class EvaChatTrigger {
 
     private static boolean checkPermissions(Context context) {
         String[] permissionsToCheck;
-        if (AppSetup.locationTracking) {
+        if (EvaAppSetup.locationTracking) {
             permissionsToCheck = new String[] {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.RECORD_AUDIO
@@ -154,9 +154,9 @@ public class EvaChatTrigger {
 
         if (missingPermissions.size() > 0) {
             Log.i(TAG, "Eva cannot start due to missing permissions: " + missingPermissions.toString());
-            if (EvaComponent.evaAppHandler instanceof PermissionsRequiredHandler) {
+            if (EvaComponent.evaAppHandler instanceof EvaPermissionsRequiredHandler) {
                 String[] missingPermissionsArray = missingPermissions.toArray(new String[missingPermissions.size()]);
-                ((PermissionsRequiredHandler)EvaComponent.evaAppHandler).handleMissingPermissions(missingPermissionsArray);
+                ((EvaPermissionsRequiredHandler)EvaComponent.evaAppHandler).handleMissingPermissions(missingPermissionsArray);
             }
             return false;
         }
@@ -167,7 +167,7 @@ public class EvaChatTrigger {
     public static void startSearchByVoice(FragmentActivity activity) {
         startSearchByVoice(activity, null);
     }
-    public static void startSearchByVoice(FragmentActivity activity, AppScope evaContext) {
+    public static void startSearchByVoice(FragmentActivity activity, EvaAppScope evaContext) {
         final FragmentManager manager = activity.getSupportFragmentManager();
 
         getOrCreateRootView(activity);
@@ -213,12 +213,11 @@ public class EvaChatTrigger {
         }
     }
 
-    public static void startSearchByVoiceActivity( Context activity, AppScope evaContext) {
+    public static void startSearchByVoiceActivity( Context activity, EvaAppScope evaContext) {
         boolean hasPermissions = checkPermissions(activity);
         if (!hasPermissions) {
             return;
         }
-
         Intent intent = new Intent(activity, EvaChatScreenActivity.class);
         if (evaContext != null) {
             intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());

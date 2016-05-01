@@ -29,7 +29,7 @@ public class EvaLocation implements Serializable {
 									// e.g. San Francisco, New York, etc.
 	public List<String> airports = null; // If a location is not an airport, this key provides 5 recommended airports
 											// for this location. Airports are named by their IATA code.
-	public String Geoid; // A global identifier for the location. IATA code for airports and Geoname ID for other
+	public String geoid; // A global identifier for the location. IATA code for airports and Geoname ID for other
 							// locations. Note: if Geoname ID is not defined for a location, a string representing the
 							// name of the location will be given in as value instead. The format of this name is
 							// currently not set and MAY CHANGE. If you plan to use this field, please contact us.
@@ -40,8 +40,8 @@ public class EvaLocation implements Serializable {
 														// entire request and not just some portion of it. Examples:
 														// "last minute deals" and "Low deposits".
 
-	public double Latitude;
-	public double Longitude;
+	public double latitude;
+	public double longitude;
 	public enum TypeEnum {
 		Unknown,
 		Continent, City, Airport, Country, Area, State, Property, Company, Chain, Postal_Code, Address, Island, Landmark, Generic_Location, Sea,
@@ -142,18 +142,18 @@ public class EvaLocation implements Serializable {
 	    Wall,  
 	    Zoo		
 	};
-	public TypeEnum Type;
-	public String Name;
-	public EvaTime Departure; // Complex Eva Time object
-	public EvaTime Arrival; 
-	public EvaTime Stay;
+	public TypeEnum type;
+	public String name;
+	public EvaTime departure; // Complex Eva Time object
+	public EvaTime arrival;
+	public EvaTime stay;
 	public HashSet<String> purpose;
 	public String derivedFrom = "";
 	public HotelAttributes hotelAttributes;
 	
 	public FlightAttributes flightAttributes;
 	
-	public HashMap<String, String> Keys;
+	public HashMap<String, String> keys;
 	
 	public EvaLocation nearestCustomerLocation;  // for example, asking a cruise to Las Vegas will search a cruise to nearest port
 	
@@ -169,9 +169,9 @@ public class EvaLocation implements Serializable {
 				allAirportCode = location.getString("All Airports Code");
 			if (location.has("Geoid")) {
 				try {
-					Geoid = location.getString("Geoid");
+					geoid = location.getString("Geoid");
 				} catch (JSONException e) {
-					Geoid = String.valueOf(location.getInt("Geoid"));
+					geoid = String.valueOf(location.getInt("Geoid"));
 				}
 			}
 			if (location.has("Actions")) {
@@ -188,37 +188,37 @@ public class EvaLocation implements Serializable {
 				requestAttributes = new RequestAttributes(location.getJSONObject("Request Attributes"), parseErrors);
 			}
 			if (location.has("Departure")) {
-				Departure = new EvaTime(location.getJSONObject("Departure"), parseErrors);
+				departure = new EvaTime(location.getJSONObject("Departure"), parseErrors);
 			}
 			if (location.has("Arrival")) {
-				Arrival = new EvaTime(location.getJSONObject("Arrival"), parseErrors);
+				arrival = new EvaTime(location.getJSONObject("Arrival"), parseErrors);
 			}
 			if (location.has("Stay")) {
-				Stay = new EvaTime(location.getJSONObject("Stay"), parseErrors);
+				stay = new EvaTime(location.getJSONObject("Stay"), parseErrors);
 			}
 			if (location.has("Name")) {
-				Name = location.getString("Name");
+				name = location.getString("Name");
 				// remove (GID=123454) at the end
-				int ind = Name.indexOf(" (GID=");
+				int ind = name.indexOf(" (GID");
 				if (ind != -1) {
-					Name = Name.substring(0, ind);
+					name = name.substring(0, ind);
 				}
 			}
 			if (location.has("Type")) {
 				try {
-					Type = TypeEnum.valueOf(location.getString("Type").replace(' ', '_'));
+					type = TypeEnum.valueOf(location.getString("Type").replace(' ', '_'));
 				}
 				catch(IllegalArgumentException e) {
 					parseErrors.add( "Unexpected Location Type"+location.optString("Type"));
 					DLog.w(TAG, "Unexpected Location Type", e);
-					Type = TypeEnum.Unknown;
+					type = TypeEnum.Unknown;
 				}
 			}
 			if (location.has("Longitude")) {
-				Longitude = location.getDouble("Longitude");
+				longitude = location.getDouble("Longitude");
 			}
 			if (location.has("Latitude")) {
-				Latitude = location.getDouble("Latitude"); 
+				latitude = location.getDouble("Latitude");
 			}
 			
 			if (location.has("Airports")) {
@@ -245,13 +245,13 @@ public class EvaLocation implements Serializable {
 			
 			if (location.has("Keys")) {
 				JSONObject jKeys = location.getJSONObject("Keys");
-				Keys = new HashMap<String, String>(jKeys.length());
+				keys = new HashMap<String, String>(jKeys.length());
 				Iterator<String> keys = jKeys.keys();
 
 		        while( keys.hasNext() ){
 		            String key = (String)keys.next();
 		            if( jKeys.get(key) instanceof String ){
-		            	Keys.put(key, (String)jKeys.get(key));
+		            	this.keys.put(key, (String)jKeys.get(key));
 		            }
 		        }
 			}

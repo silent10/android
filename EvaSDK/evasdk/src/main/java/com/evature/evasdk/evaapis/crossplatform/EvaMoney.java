@@ -12,8 +12,8 @@ import org.json.JSONObject;
 public class EvaMoney  implements Serializable {
 	private final static String TAG = "EvaMoney";
 
-	public String Amount; 		// the amount of money.
-	public String Currency;		// the currency used, per ISO 4217 codes
+	public String amount; 		// the amount of money.
+	public String currency;		// the currency used, per ISO 4217 codes
 	public enum RestrictionType {
 		Unknown, 
 		Less,
@@ -22,33 +22,33 @@ public class EvaMoney  implements Serializable {
 		Most,
 		Medium
 	}
-	public RestrictionType Restriction;	// restrictions can have the following values: ?Less?, ?More?, ?Least?, ?Most?, ?Medium?
-	public Boolean PerPerson;	// boolean to indicate whether or not the price is per-person.
-	public String EndOfRange;
+	public RestrictionType restriction;	// restrictions can have the following values: ?Less?, ?More?, ?Least?, ?Most?, ?Medium?
+	public Boolean perPerson;	// boolean to indicate whether or not the price is per-person.
+	public String endOfRange;
 	
 	public EvaMoney(JSONObject jMoney, List<String> parseErrors) {
 		try {
 			if (jMoney.has("Amount")) {
-				Amount = jMoney.getString("Amount");
+				amount = jMoney.getString("Amount");
 			}
 			if (jMoney.has("Currency")) {
-				Currency = jMoney.getString("Currency");
+				currency = jMoney.getString("Currency");
 			}
 			if (jMoney.has("Restriction")) {
 				try {
-					Restriction = RestrictionType.valueOf( jMoney.getString("Restriction"));
+					restriction = RestrictionType.valueOf( jMoney.getString("Restriction"));
 				}
 				catch(IllegalArgumentException e) {
 					parseErrors.add( "Unexpected Restriction"+jMoney.optString("Restriction"));
 					DLog.w(TAG, "Unexpected Restriction", e);
-					Restriction = RestrictionType.Unknown;
+					restriction = RestrictionType.Unknown;
 				}
 			}
 			if (jMoney.has("Per Person")) {
-				PerPerson = jMoney.getBoolean("Per Person");
+				perPerson = jMoney.getBoolean("Per Person");
 			}
 			if (jMoney.has("End Of Range")) {
-				EndOfRange = jMoney.getString("End Of Range");
+				endOfRange = jMoney.getString("End Of Range");
 			}
 		} catch (JSONException e) {
 			parseErrors.add("Error during parsing Money: "+e.getMessage());

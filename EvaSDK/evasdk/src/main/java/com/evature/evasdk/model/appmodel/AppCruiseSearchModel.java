@@ -2,7 +2,8 @@ package com.evature.evasdk.model.appmodel;
 
 import android.content.Context;
 
-import com.evature.evasdk.appinterface.CruiseSearch;
+import com.evature.evasdk.appinterface.EvaResult;
+import com.evature.evasdk.appinterface.EvaCruiseSearch;
 import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.crossplatform.CruiseAttributes;
 import com.evature.evasdk.evaapis.crossplatform.EvaLocation;
@@ -47,10 +48,11 @@ public class AppCruiseSearchModel extends AppSearchModel {
         this.sortOrder = sortOrder;
     }
 
-    public void triggerSearch(Context context) {
-        if (EvaComponent.evaAppHandler instanceof CruiseSearch) {
-            ((CruiseSearch)EvaComponent.evaAppHandler).handleCruiseSearch(context, isComplete, from, to, dateFrom, dateTo, durationMin, durationMax, attributes, sortBy, sortOrder);
+    public EvaResult triggerSearch(Context context) {
+        if (EvaComponent.evaAppHandler instanceof EvaCruiseSearch) {
+            return ((EvaCruiseSearch)EvaComponent.evaAppHandler).handleCruiseSearch(context, isComplete, from, to, dateFrom, dateTo, durationMin, durationMax, attributes, sortBy, sortOrder);
         }
+        return null;
     }
 
 }

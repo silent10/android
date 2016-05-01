@@ -13,8 +13,10 @@ public class ServiceAttributes  implements Serializable {
 	private static final String TAG = "ServiceAttributes";
 
 	public static final String CALL_SUPPORT = "Call Support";
-	
+    public static final String RESERVATION_ID = "Reservation ID";
+
 	public boolean callSupportRequested;
+
 
 	
 	public ServiceAttributes(JSONObject jService, List<String> parseErrors) {

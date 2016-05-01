@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -48,9 +49,11 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.evature.evasdk.appinterface.AppSetup;
+import com.evature.evasdk.appinterface.EvaAppSetup;
+import com.evature.evasdk.appinterface.EvaResult;
 import com.evature.evasdk.evaapis.EvaException;
 import com.evature.evasdk.evaapis.EvaSpeechRecogComponent;
+import com.evature.evasdk.model.appmodel.AppSearchModel;
 import com.evature.evasdk.user_interface.SoundLevelView;
 import com.evature.evasdk.evaapis.SpeechAudioStreamer;
 import com.evature.evasdk.model.ChatItem;
@@ -805,10 +808,17 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			
 		case MultiChoiceQuestion:
 		case Eva:
-			if (item.getSearchModel() != null) {
-                item.getSearchModel().triggerSearch(mEvaChatScreen.getActivity());
-				return;
-			}
+            if (item.getSearchModel() != null) {
+                AppSearchModel model = item.getSearchModel();
+                if (EvaAppSetup.tapChatToActivate) {
+                    model.setIsComplete(true);
+                }
+                if (model.getIsComplete()) {
+                    EvaResult result = model.triggerSearch(mEvaChatScreen.getActivity());
+                    mEvaChatScreen.handleCallbackResult(result, null, item);
+                    return;
+                }
+            }
 			editEvaChat(item, position);
 			break;
 			
@@ -884,7 +894,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 
 	
 	private void editEvaChat(ChatItem item, int position) {
-        if (AppSetup.tapToEditChat == false) {
+        if (EvaAppSetup.tapToEditChat == false) {
             return;
         }
 		if (mEditedChatItemIndex != -1) {
@@ -920,7 +930,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 	}
 
 	private void editMeChat(ChatItem current, int position) {
-        if (AppSetup.tapToEditChat == false) {
+        if (EvaAppSetup.tapToEditChat == false) {
             return;
         }
 		if (mEditedChatItemIndex != -1) {
@@ -1024,7 +1034,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			}
 			// if the pre-edit text is empty - this is a new chat to be added - not existing chat to edit
 			boolean editLastUtterance = !preModifiedString.equals("");
-			SpannableString preEditChat = editedChatItem.getChat();
+			Spannable preEditChat = editedChatItem.getChat();
 			String newText = editText.getText().toString();
 			editedChatItem.setChat(newText);
 	

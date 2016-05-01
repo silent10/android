@@ -72,8 +72,8 @@ public class FlightAttributes  implements Serializable {
                     food = FoodType.valueOf(jFlightAttributes.getString("Food").replace(" ","").replace("-",""));
                 }
                 catch(IllegalArgumentException e) {
-                    parseErrors.add("Unexpected SeatType " + jFlightAttributes.optString("Seat"));
-                    DLog.w(TAG, "Unexpected SeatType", e);
+                    parseErrors.add("Unexpected FoodType " + jFlightAttributes.optString("Food"));
+                    DLog.w(TAG, "Unexpected FoodType", e);
                     food = FoodType.Unknown;
                 }
 			}

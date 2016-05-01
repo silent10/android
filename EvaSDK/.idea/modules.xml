@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/evasdk/evasdk.iml" filepath="$PROJECT_DIR$/evasdk/evasdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/exampleAppCruises/exampleAppCruises.iml" filepath="$PROJECT_DIR$/exampleAppCruises/exampleAppCruises.iml" />
       <module fileurl="file://$PROJECT_DIR$/exampleAppFlights/exampleAppFlights.iml" filepath="$PROJECT_DIR$/exampleAppFlights/exampleAppFlights.iml" />
+      <module fileurl="file://$PROJECT_DIR$/exampleApp/exampleapp.iml" filepath="$PROJECT_DIR$/exampleApp/exampleapp.iml" />
     </modules>
   </component>
 </project>

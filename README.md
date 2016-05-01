@@ -19,7 +19,6 @@ Version 2.0
   - [Applicative Search interfaces](#applicative-search-interfaces)
     - [Note:  null values of parameters](#note--null-values-of-parameters)
     - [The IsComplete argument](#the-iscomplete-argument)
-  - [Applicative Count interfaces](#applicative-count-interfaces)
 - [Advanced Integration](#advanced-integration)
   - [Look & Feel Customizations](#look-&-feel-customizations)
   - [Google Now Integration](#google-now-integration)
@@ -105,8 +104,8 @@ public class MyTravelApp extends Application {
    @Override
    public void onCreate() {
        super.onCreate();
-       AppSetup.evaLogs(BuildConfig.DEBUG);  // enable Eva logs on Debug builds
-       AppSetup.initEva(API_KEY, SITE_CODE, new MyTravelAppHandler());
+       EvaAppSetup.evaLogs(BuildConfig.DEBUG);  // enable Eva logs on Debug builds
+       EvaAppSetup.initEva(API_KEY, SITE_CODE, new MyTravelAppHandler());
    }
 }
 ```
@@ -186,29 +185,36 @@ At this point Speech Recognition, Natural Language Understanding and Dialog Mana
 
 Remember the "MyTravelAppHandler" which we passed to *initEva* in step two? This object should implement interfaces from the com.evature.evasdk.appinterface namespace.
 
-These interfaces include:
+These interfaces include Search interfaces:
 
-* FlightSearch - trigger an applicative search for flights per the end-user’s request
+* *EvaFlightSearch* - trigger an applicative search for flights per the end-user’s request
 
-* HotelSearch - trigger an applicative search for Hotels
+* *EvaHotelSearch* - trigger an applicative search for Hotels
 
-* CarSearch - trigger an applicative search for Car Rentals
+* *EvaCarSearch* - trigger an applicative search for Car Rentals
 
-* CruiseSearch - trigger an applicative search for Cruises
+* *EvaCruiseSearch* - trigger an applicative search for Cruises
 
-* HotelCount, FlightCount, etc.. - count the number of relevant search results
+And others:
 
-There are several more interfaces for you to integrate with and we are adding more interfaces  all the time, so stay tuned!
+* *EvaFlightNavigate* - show data related to flights (eg. boarding pass, departure time, etc...)
 
-Of course, you don’t have to implement all of the above interfaces, only the ones that are functionally supported by your application.
+* *EvaReservationHandler* - handle queries regarding reservations (show reservation, cancel reservation)
+
+* *EvaInitHandler* - handle Eva init result, you may wish to show the record button only after successful initialization.
+
+* *EvaPermissionsRequiredHandler* - If your app handler implements this interface it will be called when Eva is activated and there are missing runtime permissions.
+                                  In this callback you can explain to the user why the permissions are necessary, request the permissions and call startSearchByVoice again if granted.
+                                  Optionally, if the user accepts the Record permission but refuses the Location permission, you can start Eva with the GPS disabled (see more EvaAppSetup parameters below).
+
+We are adding more interfaces  all the time, so stay tuned!
+
+Of course, these interfaces are **optional**. You don’t have to implement all of the above interfaces, only the ones that are functionally supported by your application.
 
 Eva will automatically infer which features should be enabled based on which interfaces your app handler implements. 
 
 For example, if your app only supports searching for flights then you only need to implement one interface:  **_FlightSearch_**.
 
-As you can tell from the above list, the current interfaces are pairs of **Search* and **Count*, see below their different meaning.  
-
-Normally you should implement the \**Search* interface, while the \**Count* interface is optional but highly recommended.  
 
 ### Applicative Search interfaces
 
@@ -222,59 +228,72 @@ For example, this is a FlightSearch method:
 
 ``` java
     /***
-     * handleOneWayFlightSearch - callback when Eva collects criteria to search for one way flights
+     * handleFlightSearch - callback when Eva collects criteria to search for flights
      * @param context - Android context
      * @param isComplete - true if Eva considers the search flow "complete", ie. all the mandatory criteria have been requested by the user
      * @param origin - location of take-off
      * @param destination - location of landing
      * @param departDateMin - range of dates the user wishes to depart on
      * @param departDateMax   if only a single date is entered the Max date will be equal to the Min date
+     * @param returnDateMin - range of dates the user wishes to return on, null if one-way flight
+     * @param returnDateMax   if only a single date is entered the Max date will be equal to the Min date
      * @param travelers - how many travelers, split into age categories
-     * @param nonstop - True if the user requested nonstop, False if the user requested NOT nonstop, and null if the user did not mention this criteria
-     * @param seatClass - array of seat classes (eg. economy, business, etc) requested by the user
-     * @param airlines - array of airline codes requested by the user
-     * @param redeye - True if the user requested Red Eye flight, False if the user requested NOT Red Eye flight, and null if the user did not mention this criteria
-     * @param food - enum describing food in flight as requested by the user, null if not mentioned
-     * @param seatType - window/aisle seats, or null if not mentioned
+     * @param attributes - different flight related attributes - airline, nonstop, seat type, etc...
      * @param sortBy - how should the results be sorted (eg. price, date, etc..), or null if not mentioned
      * @param sortOrder - ascending or descending or null if not mentioned
      */
-    void handleOneWayFlightSearch(Context context,
-                                  boolean isComplete, 
-                                  EvaLocation origin, EvaLocation destination,
-                                  Date departDateMin, Date departDateMax,
-                                  EvaTravelers travelers,
-                                  Boolean nonstop,
-                                  SeatClass[] seatClass,
-                                  String[] airlines,
-                                  Boolean redeye,
-                                  FoodType food,
-                                  SeatType seatType,
-                                  SortEnum sortBy, SortOrderEnum sortOrder);
+     EvaResult handleFlightSearch(Context context,
+                                     boolean isComplete, EvaLocation origin, EvaLocation destination,
+                                     Date departDateMin, Date departDateMax,
+                                     Date returnDateMin, Date returnDateMax,
+                                     EvaTravelers travelers,
+                                     FlightAttributes attributes,
+                                     SortEnum sortBy, SortOrderEnum sortOrder);
 ```
 
 #### Note:  null values of parameters
 
 If the user did not request a certain search criteria, it will be passed as "null", so please remember to check that each argument isn’t null before you use it.
-For example the “nonStop” parameter will be *True* if the user requested non-stop flights, *False* if the user specifically requested NOT non-stop flights, and *null* if the user did not mention this criteria at all.
+For example the “attributes.nonStop” parameter will be *True* if the user requested non-stop flights, *False* if the user specifically requested NOT non-stop flights, and *null* if the user did not mention this criteria at all.
 
 #### The IsComplete argument
 
 One of the search methods’ parameters is called "*isComplete*". Unlike the other parameters, this is not a search criteria requested by the user but instead it is Eva’s dialog state. 
-While the user has not entered all the **mandatory** search parameters Eva will continue asking the user for more information. After each utterance and question Eva will trigger the relevant search function with the parameters entered so far and *isComplete=False*.  After the user has entered **all **the mandatory search parameters Eva will trigger a search with *isComplete=True*, and Eva will end the dialog by saying “searching for <*text describing the search*>”.
+While the user has not entered all the **mandatory** search parameters Eva will continue asking the user for more information. After each utterance and question Eva will trigger the relevant search function with the parameters entered so far and *isComplete=False*.  After the user has entered **all** the mandatory search parameters Eva will trigger a search with *isComplete=True*, and Eva will end the dialog by saying “Searching for <*text describing the search*>”.
 
 The most common use case would be ignoring calls with *isComplete=False*, and triggering an actual search only when *isComplete=True*, and that search would open a new screen (ie. new activity or fragment) showing the search results.
 
 *isComplete=False is mostly used to update the traditional form-search display with the partial information received thus far.*
 
-### Applicative Count interfaces
+If your app supports counting number of results, you can return `EvaResult` with results count - see description below.
 
-If you app supports counting how many search results will be for a partial search (ie. isComplete=False), it is highly recommended that you implement the matching **Count* interface.
+#### EvaResult
+The different applicative callbacks return EvaResult class. Normally you can simply return `null` which will trigger the default handling, ie. Eva will ask a question if some mandatory field is missing (ie. when `isComplete` is false), or will describe the triggered search (ie. when `isComplete` is true).
 
-The **Count* interfaces (eg. HotelCount, FlightCount, etc..) receive a the same set of arguments as their matching **Search* interfaces, except that instead of the "*sortBy*" and “*sortOrder*” arguments they receive a callback of the type AsyncCountResult. 
-Simply activate your counting logic (it can be easily an async function, eg. a request to server or database query) and call the *handleCountResult* method of the callback with your count results.
+It is also possible to override Eva's default behaviour by returning custom EvaResult, or integrate results count into Eva's response.
 
+##### Customize Eva response text
+You can return a different EvaResult to customize the text Eva says and displays.
+
+This is in particular useful for the non-search interfaces, eg. if the user asks "What is my departure time?" you can return `EvaResult.textResult("Your departure time is 5:23pm");`.
+
+EvaResult allows returning different texts to be spoken and displayed, and the display text can be Spannable  (so for example, the actual answer can be highlighted).
+
+The results can be a `FutureTask` (aka "promise") to allow for async tasks, eg. querying a server or database.
+Or it can be a combination of immediate part and async result, eg. display "Searching..." immediately and replace it with the answer when the async operation completes.
+Eva will wait for an async result for a duration of `EvaAppSetup.timeoutWaitingForResult` (default 4 seconds) before giving up and following the default behaviour.
+
+Also you can set `closeChat` to true and Eva will close the chat overlay after the callback result is handled.
+
+For examples of different callbacks see the implementation of EvaFlightNavigate and EvaReservationHandler in ExampleApp's MainActivity class.
+
+##### Integration with search results count
 When implemented, Eva will use these count results to display the number of results below Eva’s text while the user chats, and will have special handling for one result (no more questions required) and zero results (urge the user to change some of the requested criteria).
+Same as the text modifying result, this result can be a `FutureTask` for fetching async results.
+
+While waiting for async count results, Eva will delay the default text for a duration of `EvaAppSetup.delaySpeakWhenWaitingForCount` (default 1.2 sec). This is to avoid asking a question if there are one or zero results.
+
+For examples of count results see the implementation of the search interfaces in ExampleApp's MainActivity class.
 
 ## Advanced Integration
 

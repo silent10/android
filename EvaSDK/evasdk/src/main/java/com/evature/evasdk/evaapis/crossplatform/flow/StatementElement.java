@@ -11,8 +11,9 @@ import com.evature.evasdk.util.DLog;
 
 public class StatementElement extends FlowElement  implements Serializable {
 	private static final String TAG = "StatementElement";
+    public boolean newSession;
 
-	public enum StatementTypeEnum {
+    public enum StatementTypeEnum {
 		Understanding, Chat, Unsupported, Unknown_Expression,
 		Other
 	}
@@ -20,11 +21,16 @@ public class StatementElement extends FlowElement  implements Serializable {
 	
 	public StatementTypeEnum StatementType;
 
-	public StatementElement(JSONObject jFlowElement, List<String> parseErrors, EvaLocation[] locations) {
+	public StatementElement(JSONObject jFlowElement, List<String> parseErrors, EvaLocation[] locations, JSONObject jApiReply) {
 		super(jFlowElement, parseErrors, locations);
 		
 		try {
 			StatementType = StatementTypeEnum.valueOf(jFlowElement.getString("StatementType").replace(" ", "_"));
+            if (StatementType == StatementTypeEnum.Chat) {
+                if (jApiReply.has("Chat")) {
+                    newSession = jApiReply.getJSONObject("Chat").optBoolean("New Session");
+                }
+            }
 		}
 		catch(IllegalArgumentException e) {
 			DLog.w(TAG, "Unexpected StatementType in Flow element", e);

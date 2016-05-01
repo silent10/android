@@ -15,31 +15,31 @@ public class EvaDialog  implements Serializable {
 	private static final String TAG = "EvaDialog";
 
 	public static class DialogElement {
-		public String Content;
-		public String Type;
-		public String RelatedLocation;
-		public String SubType;
-		public String[] Choices;
+		public String content;
+		public String type;
+		public String relatedLocation;
+		public String subType;
+		public String[] choices;
 
 		public DialogElement(JSONObject jElement, List<String> parseErrors) {
 			try {
 				if (jElement.has("Content")) {
-					Content = jElement.getString("Content");
+					content = jElement.getString("Content");
 				}
 				if (jElement.has("Type")) {
-					Type = jElement.getString("Type");
+					type = jElement.getString("Type");
 				}
 				if (jElement.has("RelatedLocation")) {
-					RelatedLocation = jElement.getString("RelatedLocation");
+					relatedLocation = jElement.getString("RelatedLocation");
 				}
 				if (jElement.has("SubType")) {
-					SubType = jElement.getString("SubType");
+					subType = jElement.getString("SubType");
 				}
 				if (jElement.has("Choices")) {
 					JSONArray jChoices = jElement.getJSONArray("Choices");
-					Choices = new String[jChoices.length()];
+					choices = new String[jChoices.length()];
 					for (int index=0; index < jChoices.length(); index++) {
-						Choices[index] = jChoices.getString(index);
+						choices[index] = jChoices.getString(index);
 					}
 				}
 			}
