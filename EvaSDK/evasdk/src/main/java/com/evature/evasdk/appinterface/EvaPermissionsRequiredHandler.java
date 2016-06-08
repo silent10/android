@@ -1,6 +1,6 @@
 package com.evature.evasdk.appinterface;
 
-import java.util.ArrayList;
+import android.app.Activity;
 
 /**
  * Created by iftah on 21/02/2016.
@@ -12,5 +12,5 @@ public interface EvaPermissionsRequiredHandler {
      * Your app is expected to request the user for the permissions and then call EvaTrigger.startSearchByVoice when permissions are granted
      * @param missingPermissions - a array of the missing permissions
      */
-    void handleMissingPermissions(String[] missingPermissions);
+    void handleMissingPermissions(Activity activity, String[] missingPermissions);
 }

@@ -1,6 +1,7 @@
 package com.evature.evasdk;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -132,7 +133,7 @@ public class EvaChatTrigger {
         return (ViewGroup) rootView;
     }
 
-    private static boolean checkPermissions(Context context) {
+    private static boolean checkPermissions(Activity context) {
         String[] permissionsToCheck;
         if (EvaAppSetup.locationTracking) {
             permissionsToCheck = new String[] {
@@ -156,7 +157,7 @@ public class EvaChatTrigger {
             Log.i(TAG, "Eva cannot start due to missing permissions: " + missingPermissions.toString());
             if (EvaComponent.evaAppHandler instanceof EvaPermissionsRequiredHandler) {
                 String[] missingPermissionsArray = missingPermissions.toArray(new String[missingPermissions.size()]);
-                ((EvaPermissionsRequiredHandler)EvaComponent.evaAppHandler).handleMissingPermissions(missingPermissionsArray);
+                ((EvaPermissionsRequiredHandler)EvaComponent.evaAppHandler).handleMissingPermissions(context, missingPermissionsArray);
             }
             return false;
         }
@@ -213,7 +214,7 @@ public class EvaChatTrigger {
         }
     }
 
-    public static void startSearchByVoiceActivity( Context activity, EvaAppScope evaContext) {
+    public static void startSearchByVoiceActivity( Activity activity, EvaAppScope evaContext) {
         boolean hasPermissions = checkPermissions(activity);
         if (!hasPermissions) {
             return;
