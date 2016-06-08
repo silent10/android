@@ -29,7 +29,10 @@
     <declare-styleable name="EvatureChatBalloonLP">
 	    <attr name="android:layout_gravity" />
 	</declare-styleable>
-	
 
+    <dimen name="evature_chat_layout_padding_top">24dip</dimen>
+    <dimen name="evature_chat_layout_padding_bottom">0dip</dimen>
+
+    <dimen name="evature_main_button_diameter">76dip</dimen>
 </resources>
 

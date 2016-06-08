@@ -3,7 +3,8 @@
     xmlns:ProgressWheel="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="22dp"
+    android:paddingTop="@dimen/evature_chat_layout_padding_top"
+    android:paddingBottom="@dimen/evature_chat_layout_padding_bottom"
     android:background="@color/evature_chat_background"
     android:orientation="vertical" >
 
@@ -51,8 +52,8 @@
         
      <ImageButton
         android:id="@+id/voice_search_button"
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+        android:layout_width="@dimen/evature_main_button_diameter"
+        android:layout_height="@dimen/evature_main_button_diameter"
         android:layout_gravity="center"
         android:padding="0dp"
         android:adjustViewBounds="false"
@@ -75,8 +76,8 @@
 
     <com.evature.evasdk.user_interface.ProgressWheel
 		        android:id="@+id/progressBarEvaProcessing"
-		        android:layout_width="76dp"
-		        android:layout_height="76dp"
+		        android:layout_width="@dimen/evature_main_button_diameter"
+		        android:layout_height="@dimen/evature_main_button_diameter"
 		        ProgressWheel:textSize="14sp"
 		        ProgressWheel:pwBarLength="8dp"
 		        ProgressWheel:barColor="#ffffff"
@@ -103,8 +104,8 @@
 
 
     <FrameLayout
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+        android:layout_width="@dimen/evature_main_button_diameter"
+        android:layout_height="@dimen/evature_main_button_diameter"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="22dp"
@@ -113,8 +114,8 @@
         android:layout_centerVertical="true"
         >
         <ImageView
-            android:layout_width="76dp"
-            android:layout_height="76dp"
+            android:layout_width="@dimen/evature_main_button_diameter"
+            android:layout_height="@dimen/evature_main_button_diameter"
             android:elevation="5dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
@@ -128,8 +129,8 @@
      <ImageButton
          android:id="@+id/restart_button"
          style="?android:attr/buttonStyleSmall"
-         android:layout_width="76dp"
-         android:layout_height="76dp"
+         android:layout_width="@dimen/evature_main_button_diameter"
+         android:layout_height="@dimen/evature_main_button_diameter"
          android:adjustViewBounds="true"
          android:scaleType="fitCenter"
          android:scaleX="0.64"
@@ -145,8 +146,8 @@
 
 
     <FrameLayout
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+        android:layout_width="@dimen/evature_main_button_diameter"
+        android:layout_height="@dimen/evature_main_button_diameter"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_marginBottom="22dp"
@@ -155,8 +156,8 @@
         android:layout_centerVertical="true"
         >
         <ImageView
-            android:layout_width="76dp"
-            android:layout_height="76dp"
+            android:layout_width="@dimen/evature_main_button_diameter"
+            android:layout_height="@dimen/evature_main_button_diameter"
             android:elevation="5dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
@@ -168,8 +169,8 @@
         <ImageButton
              android:id="@+id/undo_button"
              style="?android:attr/buttonStyleSmall"
-             android:layout_width="76dp"
-             android:layout_height="76dp"
+             android:layout_width="@dimen/evature_main_button_diameter"
+             android:layout_height="@dimen/evature_main_button_diameter"
              android:adjustViewBounds="true"
              android:scaleType="fitCenter"
              android:scaleX="0.64"
