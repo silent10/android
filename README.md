@@ -57,8 +57,12 @@ The SDK is open source. Fork us [on Github](https://github.com/evature/android)!
 1. Modify your project's top level build.grade, add jitpack.io to the repositories configuration:
 
   ``` gradle
-    // to your repositories add:
-    maven { url "https://jitpack.io" }
+    allprojects {
+	  	repositories {
+		  	...
+			  maven { url "https://jitpack.io" }
+		  }
+	  }
   ```
   
 2. Modify your app's build.gradle and add to your depedencies:
