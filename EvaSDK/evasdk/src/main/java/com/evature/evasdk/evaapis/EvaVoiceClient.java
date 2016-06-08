@@ -139,7 +139,7 @@ public class EvaVoiceClient {
         //evatureUrl += ("&language=" + mLanguage);
         evatureUrl += ("&session_id=" + mEva.getSessionId());
         evatureUrl += ("&sdk_version="+EvaComponent.SDK_VERSION);
-        evatureUrl += "&ffi_chains=true&ffi_statement=true";
+        evatureUrl += "&ffi_chains=1&ffi_statement=1&ffi_airports_are_a_list=1&ffi_breakdown_location_name=1";
         String language = mEva.getPreferedLanguage();
         if (language != null && !"".equals(language)) {
             evatureUrl += "&language="+language.replaceAll("-.*$", "");
@@ -201,7 +201,6 @@ public class EvaVoiceClient {
         } catch (UnsupportedEncodingException e) {
             DLog.e(TAG, "UnsupportedEncodingException", e);
         }
-
 
 		
 		if (config.vrService != null && !"none".equals(config.vrService)) {

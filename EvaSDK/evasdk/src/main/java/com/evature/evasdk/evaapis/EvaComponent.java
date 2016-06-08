@@ -57,7 +57,7 @@ public class EvaComponent implements
 
 	private static final String DefaultVProxyHost = "https://vproxy.evaws.com";
 	private static final String DefaultEvaWSHost = "http://apiuseh.evaws.com";
-	private static final String DefaultApiVersion = "v1.0";
+	private static final String DefaultApiVersion = "v1.1";
 	public static final String SDK_VERSION = "android_"+ BuildConfig.VERSION_NAME;
 	
 	private EvaTextClient mEvaTextClient;
