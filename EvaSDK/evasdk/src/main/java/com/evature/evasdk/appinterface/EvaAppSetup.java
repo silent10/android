@@ -58,6 +58,7 @@ public class EvaAppSetup {
     public static int timeoutWaitingForCount = 4000;      // time (ms) waiting for async count before giving up
     public static int delaySpeakWhenWaitingForCount = 1200; // speak will be delayed slightly to give chance for async count to modify the default text (eg. if zero results or just one result)
 
+    public static boolean showCountResultsIcon = false;
 
     public static void setScope(EvaAppScope... args) {
         StringBuilder builder = new StringBuilder();

@@ -40,12 +40,12 @@
 	            android:layout_alignParentLeft="true"
 	            android:layout_alignParentBottom="true"
                 >
-				<!--<ImageView-->
-				    <!--android:id="@+id/cruises_found_icon"-->
-		            <!--android:layout_width="wrap_content"-->
-		            <!--android:layout_height="wrap_content"-->
-		            <!--android:src="@drawable/deck_icon"-->
-		            <!--/>-->
+				<ImageView
+				    android:id="@+id/results_found_icon"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:src="@drawable/evature_results_found_icon"
+		            />
 		    	<ProgressBar
 		            android:id="@+id/progressBar_search"
 		            android:layout_width="wrap_content"

@@ -19,6 +19,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -129,7 +130,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			case EvaWelcome:
 				row = mInflater.inflate(R.layout.evature_row_eva_chat, parent, false);
 				EvaRowHolder evaHolder = new EvaRowHolder();
-				//evaHolder.cruisesFoundIcon = (ImageView) row.findViewById(R.id.cruises_found_icon); // TODO
+				evaHolder.resultsFoundIcon = (ImageView) row.findViewById(R.id.results_found_icon);
 				evaHolder.searchingProgress = (ProgressBar) row.findViewById(R.id.progressBar_search);
 				evaHolder.subLabel = (TextView) row.findViewById(R.id.sub_label);
 				evaHolder.label = (TextView) row.findViewById(R.id.label);
@@ -260,13 +261,13 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			if (chatItem.getSubLabel() == null) {
 				evaHolder.subLabel.setVisibility(View.GONE);
 				evaHolder.searchingProgress.setVisibility(View.GONE);
-//				evaHolder.cruisesFoundIcon.setVisibility(View.GONE);
+				evaHolder.resultsFoundIcon.setVisibility(View.GONE);
 			}
 			else {
 				evaHolder.subLabel.setText(chatItem.getSubLabel());
 				evaHolder.subLabel.setVisibility(View.VISIBLE);
 				evaHolder.searchingProgress.setVisibility(chatItem.getStatus() == ChatItem.Status.SEARCHING ? View.VISIBLE : View.GONE);
-//				evaHolder.cruisesFoundIcon.setVisibility(chatItem.getStatus() == ChatItem.Status.HAS_RESULTS ? View.VISIBLE :View.GONE);
+				evaHolder.resultsFoundIcon.setVisibility((EvaAppSetup.showCountResultsIcon && chatItem.getStatus() == ChatItem.Status.HAS_RESULTS) ? View.VISIBLE :View.GONE);
 			}
 		}
 		row.setTag(chatItem);
@@ -284,7 +285,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	}
 	
 	private static class EvaRowHolder extends RowHolder {
-//		public ImageView cruisesFoundIcon;
+		public ImageView resultsFoundIcon;
 		public ProgressBar searchingProgress;
 		public TextView subLabel;
 	}
