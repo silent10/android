@@ -82,7 +82,7 @@ public class EvaChatTrigger {
                     startSearchByVoiceActivity(fActivity, evaContext);
                 }
                 else {
-                    startSearchByVoice(fActivity, evaContext);
+                    startSearchByVoice(fActivity, evaContext, true);
                 }
             }
         });
@@ -165,10 +165,11 @@ public class EvaChatTrigger {
         return true;
     }
 
-    public static void startSearchByVoice(FragmentActivity activity) {
-        startSearchByVoice(activity, null);
+    public static boolean startSearchByVoice(FragmentActivity activity) {
+        return startSearchByVoice(activity, null, true);
     }
-    public static void startSearchByVoice(FragmentActivity activity, EvaAppScope evaContext) {
+
+    public static boolean startSearchByVoice(FragmentActivity activity, EvaAppScope evaContext, boolean addToBackStack) {
         final FragmentManager manager = activity.getSupportFragmentManager();
 
         getOrCreateRootView(activity);
@@ -180,7 +181,7 @@ public class EvaChatTrigger {
 
         boolean hasPermissions = checkPermissions(activity);
         if (!hasPermissions) {
-            return;
+            return false;
         }
 
 
@@ -188,8 +189,11 @@ public class EvaChatTrigger {
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.add(R.id.evature_root_view, newFragment, EvaChatScreenFragment.TAG);
-        transaction.addToBackStack(null);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
         transaction.commitAllowingStateLoss();
+        return true;
     }
 
 
