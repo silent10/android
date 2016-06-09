@@ -353,7 +353,10 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             case Question:
                 QuestionElement qe = (QuestionElement)flow;
                 searchType = qe.actionType;
-                if (reply.locations != null) {
+                if (searchType == FlowElement.TypeEnum.Hotel && flow.RelatedLocations != null) {
+                    from = flow.RelatedLocations[0];
+                }
+                else if (reply.locations != null) {
                     // assuming only origin and destination...
                     if (reply.locations.length > 0) {
                         from = reply.locations[0];

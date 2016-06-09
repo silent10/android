@@ -156,6 +156,10 @@ public class EvaLocation implements Serializable {
 	public HashMap<String, String> keys;
 	
 	public EvaLocation nearestCustomerLocation;  // for example, asking a cruise to Las Vegas will search a cruise to nearest port
+
+    public String countryName;
+    public String countryCode;
+    public String state;
 	
 
 	public EvaLocation(JSONObject location, List<String> parseErrors) {
@@ -204,6 +208,10 @@ public class EvaLocation implements Serializable {
 					name = name.substring(0, ind);
 				}
 			}
+            countryName = location.optString("countryName");
+            countryCode = location.optString("Country");
+            state = location.optString("stateName");
+
 			if (location.has("Type")) {
 				try {
 					type = TypeEnum.valueOf(location.getString("Type").replace(' ', '_'));
@@ -223,10 +231,18 @@ public class EvaLocation implements Serializable {
 			
 			if (location.has("Airports")) {
 				airports = new ArrayList<String>();
-				String[] temp = location.getString("Airports").split(",");
-				for (int i = 0; i < temp.length; i++) {
-					airports.add(temp[i]);
-				}
+                if (location.get("Airports") instanceof String) {
+                    String[] temp = location.getString("Airports").split(",");
+                    for (int i = 0; i < temp.length; i++) {
+                        airports.add(temp[i]);
+                    }
+                }
+                else {
+                    JSONArray jAirports = location.getJSONArray("Airports");
+                    for (int i=0; i<jAirports.length(); i++) {
+                        airports.add(jAirports.getString(i));
+                    }
+                }
 			}
 			
 			if (location.has("Flight Attributes")) {
