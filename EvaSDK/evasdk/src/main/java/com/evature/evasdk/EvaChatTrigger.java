@@ -133,7 +133,7 @@ public class EvaChatTrigger {
         return (ViewGroup) rootView;
     }
 
-    private static boolean checkPermissions(Activity context) {
+    public static boolean checkPermissions(Activity context) {
         String[] permissionsToCheck;
         if (EvaAppSetup.locationTracking) {
             permissionsToCheck = new String[] {
@@ -202,6 +202,13 @@ public class EvaChatTrigger {
             return evaChatScreenFragment;
         }
         return null;
+    }
+
+    public static void resetSession(Context activity) {
+        EvaChatScreenFragment fragment = getEvaChatFragment(activity);
+        if (fragment != null) {
+            fragment.chatScreen.resetSession();
+        }
     }
 
     public static void closeChatScreen(Context activity) {

@@ -1229,7 +1229,9 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		});
 	}
 
-	
+	public void resetSession() {
+        eva.resetSession();
+    }
 	
 
 	@SuppressWarnings("nls")
