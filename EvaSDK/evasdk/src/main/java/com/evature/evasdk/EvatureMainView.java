@@ -44,6 +44,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -69,7 +70,9 @@ import com.evature.evasdk.util.VolumeUtil;
 public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 
 	private static final String TAG = "EvatureMainView";
-	private ImageButton mSearchButton;
+    private final ImageView mUndoIcon;
+    private final ImageView mTrashIcon;
+    private ImageButton mSearchButton;
 	private SoundLevelView mSoundView;
 	private ImageButton mUndoButton;
 	private ImageButton mResetButton;
@@ -112,7 +115,8 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 		mResetButton = (ImageButton)view.findViewById(R.id.restart_button);
 		mSearchButtonCont = view.findViewById(R.id.voice_search_container);
 		mProgressBar = (ProgressWheel)view.findViewById(R.id.progressBarEvaProcessing);
-
+        mUndoIcon = (ImageView)view.findViewById(R.id.undo_icon);
+        mTrashIcon = (ImageView)view.findViewById(R.id.trash_icon);
 
         View.OnClickListener clickHandler = new View.OnClickListener() {
             @Override
@@ -123,7 +127,8 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
         mUndoButton.setOnClickListener(clickHandler);
         mResetButton.setOnClickListener(clickHandler);
         mSearchButton.setOnClickListener(clickHandler);
-		
+
+
 		//mVolumeButton = (ImageButton) mainActivity.findViewById(R.id.volume_button);
 		
 		mChatListView = (ListView) view.findViewById(R.id.chat_list);
@@ -207,6 +212,8 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 		// use animation to show/hide buttons
 		int animDuration = 400;
 		if (show) {
+            mTrashIcon.setVisibility(View.INVISIBLE);
+            mUndoIcon.setVisibility(View.INVISIBLE);
 			// turn search button to shadow
 			showMicButton(SearchButtonIcon.FLAT);
 			animateButton(mSearchButton, "alpha", animDuration/2, 1.0f, 0.7f);
@@ -216,6 +223,8 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			scaleButton(mResetButton, animDuration, 0f, INITIAL_SCALE_SIDE_BUTTON);
 		}
 		else {
+            mTrashIcon.setVisibility(View.VISIBLE);
+            mUndoIcon.setVisibility(View.VISIBLE);
 			// show search button
 			showMicButton(SearchButtonIcon.MICROPHONE);
 			animateButton(mSearchButton, "alpha", animDuration, 0.7f, 1.0f);
@@ -243,8 +252,45 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 	private void setupSearchButtonDrag() {
 		Resources r = mEvaChatScreen.getActivity().getResources();
         final int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
-		
-		mSearchButton.setOnTouchListener(new View.OnTouchListener() {
+
+
+        View.OnTouchListener touchListener = new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                /*if (event.getAction() ==  MotionEvent.ACTION_MOVE) {
+                    int searchRight = mSearchButtonCont.getLeft() + mSearchButton.getRight();
+                    int searchLeft = mSearchButtonCont.getLeft() + mSearchButton.getLeft();
+                    float x = event.getRawX();
+                    int searchCenter = (searchRight + searchLeft) / 2;
+                    float delta = x - searchCenter;
+                    if (delta > 0) {
+                        delta = Math.max(1, delta / 5);
+                    } else if (delta < 0) {
+                        delta = Math.min(-1, delta / 5);
+                    }
+                    MotionEvent event2 = MotionEvent.obtain(
+                            event.getDownTime(),
+                            event.getEventTime(),
+                            MotionEvent.ACTION_MOVE,
+                            searchCenter + delta,
+                            event.getRawY(),
+                            event.getMetaState()
+                    );
+                    mSearchButton.dispatchTouchEvent(event2);
+                }
+                else {*/
+                    mSearchButton.dispatchTouchEvent(event);
+                /*}*/
+                return true;
+            }
+        };
+
+        mUndoIcon.setOnTouchListener(touchListener);
+        mTrashIcon.setOnTouchListener(touchListener);
+
+
+        mSearchButton.setOnTouchListener(new View.OnTouchListener() {
 			boolean hoveringReset = false;
 			boolean hoveringUndo = false;
 			

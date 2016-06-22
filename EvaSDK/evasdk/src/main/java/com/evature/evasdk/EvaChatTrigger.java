@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -82,7 +83,7 @@ public class EvaChatTrigger {
                     startSearchByVoiceActivity(fActivity, evaContext);
                 }
                 else {
-                    startSearchByVoice(fActivity, evaContext, true);
+                    startSearchByVoice(fActivity, evaContext, true, false);
                 }
             }
         });
@@ -166,10 +167,10 @@ public class EvaChatTrigger {
     }
 
     public static boolean startSearchByVoice(FragmentActivity activity) {
-        return startSearchByVoice(activity, null, true);
+        return startSearchByVoice(activity, null, true, false);
     }
 
-    public static boolean startSearchByVoice(FragmentActivity activity, EvaAppScope evaContext, boolean addToBackStack) {
+    public static boolean startSearchByVoice(FragmentActivity activity, EvaAppScope evaContext, boolean addToBackStack, boolean resetSession) {
         final FragmentManager manager = activity.getSupportFragmentManager();
 
         getOrCreateRootView(activity);
@@ -185,7 +186,10 @@ public class EvaChatTrigger {
         }
 
 
-        Fragment newFragment = new EvaChatScreenFragment();
+        EvaChatScreenFragment newFragment = new EvaChatScreenFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("resetSession", resetSession);
+        newFragment.setArguments(bundle);
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.add(R.id.evature_root_view, newFragment, EvaChatScreenFragment.TAG);

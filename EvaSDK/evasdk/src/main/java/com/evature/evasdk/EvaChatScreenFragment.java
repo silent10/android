@@ -21,10 +21,12 @@ public class EvaChatScreenFragment extends Fragment {
     EvaChatScreenComponent chatScreen;
 
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        chatScreen = new EvaChatScreenComponent(getActivity(), true);
+        boolean reset = getArguments().getBoolean("resetSession", false);
+        chatScreen = new EvaChatScreenComponent(getActivity(), true, reset);
         chatScreen.onCreate(savedInstanceState);
     }
 

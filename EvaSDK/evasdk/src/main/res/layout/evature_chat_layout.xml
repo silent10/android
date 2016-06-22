@@ -114,6 +114,7 @@
         android:layout_centerVertical="true"
         >
         <ImageView
+            android:id="@+id/trash_icon"
             android:layout_width="@dimen/evature_main_button_diameter"
             android:layout_height="@dimen/evature_main_button_diameter"
             android:elevation="5dp"
@@ -156,6 +157,7 @@
         android:layout_centerVertical="true"
         >
         <ImageView
+            android:id="@+id/undo_icon"
             android:layout_width="@dimen/evature_main_button_diameter"
             android:layout_height="@dimen/evature_main_button_diameter"
             android:elevation="5dp"

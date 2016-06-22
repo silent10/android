@@ -24,6 +24,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -90,6 +91,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	private static final String TAG = "EvaChatScreenComponent";
 
     public static final String INTENT_EVA_CONTEXT = "evature_context";
+    private final boolean resetSessionOnLoad;
 
     private static class StoreResultData {
 		ChatItem storeResultInItem;
@@ -152,13 +154,15 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 
     public EvaChatScreenComponent(Activity hostActivity,
-                                  boolean useExtraFragmentForBackHack
+                                  boolean useExtraFragmentForBackHack,
+                                  boolean resetSession
                                   ) {
         this.activity = hostActivity;
+        this.resetSessionOnLoad = resetSession;
         this.mUseExtraFragmentForBackHack = useExtraFragmentForBackHack;
     }
     public EvaChatScreenComponent(Activity hostActivity) {
-        this(hostActivity, false);
+        this(hostActivity, false, false);
     }
 
 	@SuppressLint("NewApi")
@@ -265,7 +269,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
     public View createMainView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         DLog.d(TAG, "createMainView");
         rootView = inflater.inflate(R.layout.evature_chat_layout, container, false);
-        if (savedInstanceState != null) {
+        if (resetSessionOnLoad) {
+            evaSessionId = "1";
+            eva.setSessionId(evaSessionId);
+        }
+        else if (savedInstanceState != null) {
             chatItems = (ArrayList<ChatItem>) savedInstanceState.getSerializable(EVATURE_CHAT_LIST);
             evaSessionId = savedInstanceState.getString(EVATURE_SESSION_ID);
             eva.setSessionId(evaSessionId);
