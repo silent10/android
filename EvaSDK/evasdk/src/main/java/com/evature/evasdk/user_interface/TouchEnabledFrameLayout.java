@@ -33,7 +33,7 @@ public class TouchEnabledFrameLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        DLog.i("TouchEnabledFrameLayout", ">>>> Touch event "+ev);
+//        DLog.i("TouchEnabledFrameLayout", ">>>> Touch event "+ev);
         return true;
     }
 }

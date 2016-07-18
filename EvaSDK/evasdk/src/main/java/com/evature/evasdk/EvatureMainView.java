@@ -283,7 +283,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
                     x = centerScreen - mSearchButton.getWidth()/2 - touchMargin - 1;
                 }
             }
-            DLog.i(TAG, ">>>> Faking event "+targetMotionEvent.getAction() + " from  "+targetMotionEvent.getRawX()+"  to " + x +"  button now at "+center);
+            //DLog.i(TAG, ">>>> Faking event "+targetMotionEvent.getAction() + " from  "+targetMotionEvent.getRawX()+"  to " + x +"  button now at "+center);
             MotionEvent event1 = MotionEvent.obtain(
                     targetMotionEvent.getDownTime(),
                     targetMotionEvent.getEventTime(),
@@ -314,8 +314,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
                         targetMotionEvent.getMetaState()
                 );
                 targetMotionEvent = event2;
-                DLog.i(TAG, ">> Faking move to "+targetMotionEvent.getRawX());
-                //handleSearchButtonMotionEvent(event2, true);
+                //DLog.i(TAG, ">> Faking move to "+targetMotionEvent.getRawX());
             }
 
             if (targetMotionEvent.getAction() == MotionEvent.ACTION_UP) {
@@ -368,7 +367,6 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
     boolean hoveringUndo = false;
 
     private boolean handleSearchButtonMotionEvent(MotionEvent event, boolean isFake) {
-        DLog.i(TAG, ">>>> Event "+isFake+" search button  " + event.getAction()+ "   at x="+event.getRawX());
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
