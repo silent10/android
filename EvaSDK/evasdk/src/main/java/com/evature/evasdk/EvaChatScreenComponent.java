@@ -1590,7 +1590,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             FragmentManager manager = fa.getSupportFragmentManager();
             Fragment fragment = manager.findFragmentByTag(EMPTY_FRAGMENT_TAG);
             if (fragment == null) {
-                DLog.e(TAG, "Unexpected fragment stack state - missing empty fragment");
+                DLog.i(TAG, "Unexpected fragment stack state - missing empty fragment");
                 return;
             }
             EmptyFragment emptyFragment = (EmptyFragment) fragment;

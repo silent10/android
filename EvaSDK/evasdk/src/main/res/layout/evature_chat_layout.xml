@@ -103,9 +103,9 @@
     </FrameLayout>
 
 
-    <FrameLayout
-        android:layout_width="@dimen/evature_main_button_diameter"
-        android:layout_height="@dimen/evature_main_button_diameter"
+    <com.evature.evasdk.user_interface.TouchEnabledFrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="22dp"
@@ -114,7 +114,7 @@
         android:layout_centerVertical="true"
         >
         <ImageView
-            android:id="@+id/trash_icon"
+            android:id="@+id/reset_icon"
             android:layout_width="@dimen/evature_main_button_diameter"
             android:layout_height="@dimen/evature_main_button_diameter"
             android:elevation="5dp"
@@ -127,28 +127,28 @@
             />
 
 
-     <ImageButton
-         android:id="@+id/restart_button"
-         style="?android:attr/buttonStyleSmall"
-         android:layout_width="@dimen/evature_main_button_diameter"
-         android:layout_height="@dimen/evature_main_button_diameter"
-         android:adjustViewBounds="true"
-         android:scaleType="fitCenter"
-         android:scaleX="0.64"
-         android:scaleY="0.64"
-         android:background="@drawable/evature_custom_button"
-         android:contentDescription="Restart"
-         android:src="@drawable/evature_trash"
-         android:padding="12dp"
-         android:elevation="6dp"
-         android:visibility="invisible"
-           />
-    </FrameLayout>
+         <ImageButton
+             android:id="@+id/restart_button"
+             style="?android:attr/buttonStyleSmall"
+             android:layout_width="@dimen/evature_main_button_diameter"
+             android:layout_height="@dimen/evature_main_button_diameter"
+             android:adjustViewBounds="true"
+             android:scaleType="fitCenter"
+             android:scaleX="0.64"
+             android:scaleY="0.64"
+             android:background="@drawable/evature_custom_button"
+             android:contentDescription="Restart"
+             android:src="@drawable/evature_trash"
+             android:padding="12dp"
+             android:elevation="6dp"
+             android:visibility="invisible"
+               />
+    </com.evature.evasdk.user_interface.TouchEnabledFrameLayout>
 
 
-    <FrameLayout
-        android:layout_width="@dimen/evature_main_button_diameter"
-        android:layout_height="@dimen/evature_main_button_diameter"
+    <com.evature.evasdk.user_interface.TouchEnabledFrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_marginBottom="22dp"
@@ -184,7 +184,7 @@
              android:elevation="6dp"
              android:visibility="invisible"
                />
-    </FrameLayout>
+    </com.evature.evasdk.user_interface.TouchEnabledFrameLayout>
     
   
 </RelativeLayout>

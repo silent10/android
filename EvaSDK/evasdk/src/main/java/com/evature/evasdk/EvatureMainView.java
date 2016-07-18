@@ -19,7 +19,9 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -71,7 +73,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 
 	private static final String TAG = "EvatureMainView";
     private final ImageView mUndoIcon;
-    private final ImageView mTrashIcon;
+    private final ImageView mResetIcon;
     private ImageButton mSearchButton;
 	private SoundLevelView mSoundView;
 	private ImageButton mUndoButton;
@@ -116,7 +118,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 		mSearchButtonCont = view.findViewById(R.id.voice_search_container);
 		mProgressBar = (ProgressWheel)view.findViewById(R.id.progressBarEvaProcessing);
         mUndoIcon = (ImageView)view.findViewById(R.id.undo_icon);
-        mTrashIcon = (ImageView)view.findViewById(R.id.trash_icon);
+        mResetIcon = (ImageView)view.findViewById(R.id.reset_icon);
 
         View.OnClickListener clickHandler = new View.OnClickListener() {
             @Override
@@ -206,13 +208,14 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 	@SuppressLint("NewApi")
 	private void toggleSideButtons(boolean show) {
 		if (mSideButtonsVisible == show) {
+            DLog.d(TAG, "Not toggling side buttons because already "+show);
 			return;
 		}
 		mSideButtonsVisible = show;
 		// use animation to show/hide buttons
 		int animDuration = 400;
 		if (show) {
-            mTrashIcon.setVisibility(View.INVISIBLE);
+            mResetIcon.setVisibility(View.INVISIBLE);
             mUndoIcon.setVisibility(View.INVISIBLE);
 			// turn search button to shadow
 			showMicButton(SearchButtonIcon.FLAT);
@@ -223,7 +226,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			scaleButton(mResetButton, animDuration, 0f, INITIAL_SCALE_SIDE_BUTTON);
 		}
 		else {
-            mTrashIcon.setVisibility(View.VISIBLE);
+            mResetIcon.setVisibility(View.VISIBLE);
             mUndoIcon.setVisibility(View.VISIBLE);
 			// show search button
 			showMicButton(SearchButtonIcon.MICROPHONE);
@@ -248,110 +251,180 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 	        view.startAnimation(anim);
 	    }
 	}
-	
-	private void setupSearchButtonDrag() {
-		Resources r = mEvaChatScreen.getActivity().getResources();
-        final int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
 
+    Handler touchAnimTimerHandler = new Handler();
+    MotionEvent targetMotionEvent = null;
+    Runnable touchAnimTimerRunnable = new Runnable() {
 
+        @Override
+        public void run() {
+            if (targetMotionEvent == null) {
+                return;
+            }
+            int[] searchButtonLocation = {0,0};
+            mSearchButton.getLocationOnScreen(searchButtonLocation);
+            float origX = targetMotionEvent.getRawX();
+            float x = origX;
+            float center = searchButtonLocation[0]+mSearchButton.getWidth()/2;
+            int centerScreen = (((View)mResetButton.getParent()).getRight() + ((View)mUndoButton.getParent()).getLeft())/2;
+
+            if (x > center) {
+                x = center + Math.max(4, (x-center)/9);
+            }
+            else if (x < center) {
+                x = center - Math.max(4, (center-x)/9);
+            }
+            // on initial touch-down move far enogh by touchMargin
+            if (targetMotionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                if (x > center && x <= centerScreen + mSearchButton.getWidth()/2 + touchMargin) {
+                    x = centerScreen + mSearchButton.getWidth()/2 + touchMargin + 1;
+                }
+                else if (x < center && x >= centerScreen - mSearchButton.getWidth()/2 - touchMargin) {
+                    x = centerScreen - mSearchButton.getWidth()/2 - touchMargin - 1;
+                }
+            }
+            DLog.i(TAG, ">>>> Faking event "+targetMotionEvent.getAction() + " from  "+targetMotionEvent.getRawX()+"  to " + x +"  button now at "+center);
+            MotionEvent event1 = MotionEvent.obtain(
+                    targetMotionEvent.getDownTime(),
+                    targetMotionEvent.getEventTime(),
+                    targetMotionEvent.getAction(),
+                    x,
+                    targetMotionEvent.getRawY(),
+                    targetMotionEvent.getMetaState()
+            );
+            handleSearchButtonMotionEvent(event1, true);
+
+            if (targetMotionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                event1 = MotionEvent.obtain(
+                        event1.getDownTime(),
+                        event1.getEventTime(),
+                        MotionEvent.ACTION_MOVE,
+                        event1.getRawX(),
+                        event1.getRawY(),
+                        event1.getMetaState()
+                );
+                handleSearchButtonMotionEvent(event1, true);
+
+                MotionEvent event2 = MotionEvent.obtain(
+                        targetMotionEvent.getDownTime(),
+                        targetMotionEvent.getEventTime(),
+                        MotionEvent.ACTION_MOVE,
+                        origX,
+                        targetMotionEvent.getRawY(),
+                        targetMotionEvent.getMetaState()
+                );
+                targetMotionEvent = event2;
+                DLog.i(TAG, ">> Faking move to "+targetMotionEvent.getRawX());
+                //handleSearchButtonMotionEvent(event2, true);
+            }
+
+            if (targetMotionEvent.getAction() == MotionEvent.ACTION_UP) {
+                targetMotionEvent = null;
+            }
+            else {
+                touchAnimTimerHandler.postDelayed(this, 16);
+            }
+        }
+    };
+
+    private View.OnTouchListener getTouchListener(final String txt){
         View.OnTouchListener touchListener = new View.OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                /*if (event.getAction() ==  MotionEvent.ACTION_MOVE) {
-                    int searchRight = mSearchButtonCont.getLeft() + mSearchButton.getRight();
-                    int searchLeft = mSearchButtonCont.getLeft() + mSearchButton.getLeft();
-                    float x = event.getRawX();
-                    int searchCenter = (searchRight + searchLeft) / 2;
-                    float delta = x - searchCenter;
-                    if (delta > 0) {
-                        delta = Math.max(1, delta / 5);
-                    } else if (delta < 0) {
-                        delta = Math.min(-1, delta / 5);
-                    }
-                    MotionEvent event2 = MotionEvent.obtain(
-                            event.getDownTime(),
-                            event.getEventTime(),
-                            MotionEvent.ACTION_MOVE,
-                            searchCenter + delta,
-                            event.getRawY(),
-                            event.getMetaState()
-                    );
-                    mSearchButton.dispatchTouchEvent(event2);
-                }
-                else {*/
-                    mSearchButton.dispatchTouchEvent(event);
-                /*}*/
+                targetMotionEvent = MotionEvent.obtain(event);
+                touchAnimTimerHandler.removeCallbacks(touchAnimTimerRunnable);
+                touchAnimTimerRunnable.run();
                 return true;
             }
         };
+        return touchListener;
+    }
 
-        mUndoIcon.setOnTouchListener(touchListener);
-        mTrashIcon.setOnTouchListener(touchListener);
+
+    int touchMargin = -1;
+    private void setupSearchButtonDrag() {
+        Resources r = mEvaChatScreen.getActivity().getResources();
+        touchMargin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, r.getDisplayMetrics());
+
+
+        ((View)mUndoIcon.getParent()).setOnTouchListener(getTouchListener("parent undo"));
+        ((View) mResetIcon.getParent()).setOnTouchListener(getTouchListener("parent reset"));
+//        mUndoButton.setOnTouchListener(getTouchListener("undo button"));
+//        mResetButton.setOnTouchListener(getTouchListener("reset button"));
 
 
         mSearchButton.setOnTouchListener(new View.OnTouchListener() {
-			boolean hoveringReset = false;
-			boolean hoveringUndo = false;
-			
 			@SuppressLint("NewApi")
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				
-				switch (event.getAction()) {
-				case MotionEvent.ACTION_UP:
-				case MotionEvent.ACTION_CANCEL:
-					toggleSideButtons(false);
-					if (event.getEventTime() - event.getDownTime() <= 500) {
-						float x = event.getRawX() - mSearchButtonCont.getLeft();
-				        float y = event.getRawY() - mSearchButtonCont.getTop();
-				        if (y > mSearchButton.getTop()- margin && 
-				        		x < mSearchButton.getRight() + margin && x > mSearchButton.getLeft() - margin ) {
-				        	// mSearchButtonCont.performClick(); for some reason this doesn't work when the searchButton is embedded inside FrameLayout
-				        	mEvaChatScreen.buttonClickHandler(mSearchButton);
-				        }
-					}
-					if (hoveringUndo) {
-						mUndoButton.performClick();
-						mUndoButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-					}
-					if (hoveringReset) {
-						mResetButton.performClick();
-						mResetButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-					}
-					hoveringUndo = hoveringReset = false;
-					break;
-					
-				case MotionEvent.ACTION_DOWN:
-					hoveringUndo = false;
-					hoveringReset = false;
-					mSideButtonsVisible = false;
-					break;
-				
-				case MotionEvent.ACTION_MOVE:
-					float x = event.getRawX();
-			        float y = event.getRawY();
-			        // moved up, or recording started
-			        if (y < mSearchButtonCont.getTop()+ mSearchButton.getTop()- margin
-			        		||  isRecording()) {
-			        	toggleSideButtons(false);
-						hoveringUndo = false;
-						hoveringReset = false;
-			        	break;
-			        }
-			        
-			        int searchRight = mSearchButtonCont.getLeft() + mSearchButton.getRight();
-			        int searchLeft = mSearchButtonCont.getLeft() + mSearchButton.getLeft();
-			        
-					if (mSideButtonsVisible == false && isRecording() == false) {
-						// show side buttons if long-press of beginning drag
-						if (event.getEventTime() - event.getDownTime() > 500) {  
-							mSearchButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-						}
-						if ((event.getEventTime() - event.getDownTime() > 500) ||
-								x > searchRight + margin || 
-								x < searchLeft - margin ) {
-							toggleSideButtons(true);
+                return handleSearchButtonMotionEvent(event, false);
+			}
+		});
+		
+	}
+
+    boolean hoveringReset = false;
+    boolean hoveringUndo = false;
+
+    private boolean handleSearchButtonMotionEvent(MotionEvent event, boolean isFake) {
+        DLog.i(TAG, ">>>> Event "+isFake+" search button  " + event.getAction()+ "   at x="+event.getRawX());
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                toggleSideButtons(false);
+                if (event.getEventTime() - event.getDownTime() <= 500) {
+                    float x = event.getRawX() - mSearchButtonCont.getLeft();
+                    float y = event.getRawY() - mSearchButtonCont.getTop();
+                    if (y > mSearchButton.getTop()- touchMargin &&
+                            x < mSearchButton.getRight() + touchMargin && x > mSearchButton.getLeft() - touchMargin ) {
+                        // mSearchButtonCont.performClick(); for some reason this doesn't work when the searchButton is embedded inside FrameLayout
+                        if (!isFake) {
+                            mEvaChatScreen.buttonClickHandler(mSearchButton);
+                        }
+                    }
+                }
+                if (hoveringUndo) {
+                    mUndoButton.performClick();
+                    mUndoButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                }
+                if (hoveringReset) {
+                    mResetButton.performClick();
+                    mResetButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                }
+                hoveringUndo = hoveringReset = false;
+                break;
+
+            case MotionEvent.ACTION_DOWN:
+                hoveringUndo = false;
+                hoveringReset = false;
+                mSideButtonsVisible = false;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                float x = event.getRawX();
+                float y = event.getRawY();
+                // moved up, or recording started
+                if (y < mSearchButtonCont.getTop()+ mSearchButton.getTop()- touchMargin
+                        ||  isRecording()) {
+                    toggleSideButtons(false);
+                    hoveringUndo = false;
+                    hoveringReset = false;
+                    break;
+                }
+
+                int searchRight = mSearchButtonCont.getLeft() + mSearchButton.getRight();
+                int searchLeft = mSearchButtonCont.getLeft() + mSearchButton.getLeft();
+
+                if (mSideButtonsVisible == false && isRecording() == false) {
+                    // show side buttons if long-press of beginning drag
+                    if (event.getEventTime() - event.getDownTime() > 500) {
+                        mSearchButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+                    }
+                    if ((event.getEventTime() - event.getDownTime() > 500) ||
+                            x > searchRight + touchMargin ||
+                            x < searchLeft - touchMargin ) {
+                        toggleSideButtons(true);
 //							// show drag shadow - if honeycomb+
 //							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 //								if (mSearchButtonShadow == null) {
@@ -359,66 +432,63 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 //								}
 //								mSearchButton.startDrag(ClipData.newPlainText("Nada",  "Nothing"), (View.DragShadowBuilder)mSearchButtonShadow, null, 0);
 //							}
-						}
-					}
-					if (mSideButtonsVisible) {
-						int searchCenter = (searchRight+searchLeft)/2;
-						float delta = x - searchCenter;
+                    }
+                }
+                if (mSideButtonsVisible) {
+                    int searchCenter = (searchRight+searchLeft)/2;
+                    float delta = x - searchCenter;
 
-                        if (x > searchCenter+margin) {
-                            FrameLayout resetButtonCont = (FrameLayout) mResetButton.getParent();
-                            int resetButtonCenter = (resetButtonCont.getRight()+ resetButtonCont.getLeft())/2;
+                    if (x > searchCenter+touchMargin) {
+                        FrameLayout resetButtonCont = (FrameLayout) mResetButton.getParent();
+                        int resetButtonCenter = (resetButtonCont.getRight()+ resetButtonCont.getLeft())/2;
 
-							delta = Math.min(delta, resetButtonCenter - searchCenter);
-							// linearly scale button up based on distance
-							float fraction =  Math.min(1f, (x - searchCenter - margin) / Math.max(1f, (resetButtonCenter - searchCenter - margin)));
-							
-							// TODO: use com.nineoldandroids.view.ViewHelper for older devices
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-								float scale = INITIAL_SCALE_SIDE_BUTTON + (1f-INITIAL_SCALE_SIDE_BUTTON)*fraction;
-								mResetButton.clearAnimation();
-								mResetButton.setScaleX(scale);
-								mResetButton.setScaleY(scale);
-								if (mUndoButton.getAnimation() == null || mUndoButton.getAnimation().hasEnded()) {
-									mUndoButton.setScaleX(INITIAL_SCALE_SIDE_BUTTON);
-									mUndoButton.setScaleY(INITIAL_SCALE_SIDE_BUTTON);
-								}
-							}
-							hoveringReset = fraction > 0.7;
-						}
-						else if (x < searchCenter-margin) {
-                            FrameLayout undoButtonCont = (FrameLayout) mUndoButton.getParent();
-                            int undoCenter = (undoButtonCont.getRight()+undoButtonCont.getLeft())/2;
-							delta = Math.max(delta, undoCenter - searchCenter);
-							// linearly scale button up based on distance
-							float fraction =  Math.min(1f, (searchCenter - margin- x ) / Math.max(1f, (searchCenter - undoCenter - margin)));
-							
-							if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-								float scale = INITIAL_SCALE_SIDE_BUTTON + (1f-INITIAL_SCALE_SIDE_BUTTON)*fraction;
-								mUndoButton.clearAnimation();
-								mUndoButton.setScaleX(scale);
-								mUndoButton.setScaleY(scale);
-								if (mResetButton.getAnimation() == null || mResetButton.getAnimation().hasEnded()) {
-									mResetButton.setScaleX(INITIAL_SCALE_SIDE_BUTTON);
-									mResetButton.setScaleY(INITIAL_SCALE_SIDE_BUTTON);
-								}
-							}
-							hoveringUndo = fraction > 0.7;
-						}
+                        delta = Math.min(delta, resetButtonCenter - searchCenter);
+                        // linearly scale button up based on distance
+                        float fraction =  Math.min(1f, (x - searchCenter - touchMargin) / Math.max(1f, (resetButtonCenter - searchCenter - touchMargin)));
 
-						setTranslationX(mSearchButtonCont, delta);
-						
-					}
-					break;
-				}
-				
-				return true;
-			}
-		});
-		
-	}
-	
-	public boolean isRecording() {
+                        // TODO: use com.nineoldandroids.view.ViewHelper for older devices
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            float scale = INITIAL_SCALE_SIDE_BUTTON + (1f-INITIAL_SCALE_SIDE_BUTTON)*fraction;
+                            mResetButton.clearAnimation();
+                            mResetButton.setScaleX(scale);
+                            mResetButton.setScaleY(scale);
+                            if (mUndoButton.getAnimation() == null || mUndoButton.getAnimation().hasEnded()) {
+                                mUndoButton.setScaleX(INITIAL_SCALE_SIDE_BUTTON);
+                                mUndoButton.setScaleY(INITIAL_SCALE_SIDE_BUTTON);
+                            }
+                        }
+                        hoveringReset = fraction > 0.7;
+                    }
+                    else if (x < searchCenter-touchMargin) {
+                        FrameLayout undoButtonCont = (FrameLayout) mUndoButton.getParent();
+                        int undoCenter = (undoButtonCont.getRight()+undoButtonCont.getLeft())/2;
+                        delta = Math.max(delta, undoCenter - searchCenter);
+                        // linearly scale button up based on distance
+                        float fraction =  Math.min(1f, (searchCenter - touchMargin- x ) / Math.max(1f, (searchCenter - undoCenter - touchMargin)));
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            float scale = INITIAL_SCALE_SIDE_BUTTON + (1f-INITIAL_SCALE_SIDE_BUTTON)*fraction;
+                            mUndoButton.clearAnimation();
+                            mUndoButton.setScaleX(scale);
+                            mUndoButton.setScaleY(scale);
+                            if (mResetButton.getAnimation() == null || mResetButton.getAnimation().hasEnded()) {
+                                mResetButton.setScaleX(INITIAL_SCALE_SIDE_BUTTON);
+                                mResetButton.setScaleY(INITIAL_SCALE_SIDE_BUTTON);
+                            }
+                        }
+                        hoveringUndo = fraction > 0.7;
+                    }
+
+                    setTranslationX(mSearchButtonCont, delta);
+
+                }
+                break;
+        }
+
+        return true;
+    }
+
+    public boolean isRecording() {
 		if (mUpdateLevel != null && mUpdateLevel.get() != null) {
 			SearchHandler  handler = (SearchHandler)mUpdateLevel.get();
 			if (handler != null && handler.isRecording()) {
