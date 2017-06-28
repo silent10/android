@@ -171,7 +171,8 @@ public class EvaSpeechRecogComponent {
 		}
 	}
 
-	public void startRecognizer(SpeechRecognitionResultListener listener, Object cookie, boolean editLastUtterance)  {
+	public void startRecognizer(SpeechRecognitionResultListener listener, Object cookie,
+                                boolean editLastUtterance, String rid)  {
 		DLog.d(TAG, "<<< Starting Speech Recognicition");
 		this.cookie = cookie;
 		// start thread
@@ -185,7 +186,7 @@ public class EvaSpeechRecogComponent {
 		}
 
 		// start a thread - from queue to http connection
-		mVoiceClient = new EvaVoiceClient(mContext, mEva, queue, editLastUtterance);
+		mVoiceClient = new EvaVoiceClient(mContext, mEva, queue, editLastUtterance, rid);
 		dictationTask = new EvaHttpThread(mVoiceClient, listener);
 		dictationTask.execute((Object[])null);
 	}

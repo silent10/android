@@ -15,6 +15,7 @@
     <string name="pref_header_credentials">Credentials</string>
     <string name="pref_credentials_site_code">Site Code</string>
     <string name="pref_credentials_api_key">API Key</string>
+    <string name="pref_vproxy_url">VProxy Host</string>
 
     <!-- override Eva string -->
     <string name="evature_zero_count">Sorry! No matching results found!\nDrag the microphone button to the left to undo.</string>
@@ -25,6 +26,8 @@
     <string name="scope">Scope</string>
     <string name="hotel">Hotel</string>
     <string name="flight">Flight</string>
-    <string name="car">car</string>
+    <string name="car">Car Rental</string>
     <string name="cruise">Cruise</string>
+    <string name="explore">Explore</string>
+    <string name="send_feedback">Send Feedback</string>
 </resources>

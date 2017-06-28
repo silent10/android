@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "497494502696",
+    "firebase_url": "https://evasdk-e5832.firebaseio.com",
+    "project_id": "evasdk-e5832",
+    "storage_bucket": "evasdk-e5832.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497494502696:android:fb1382c970d7c309",
+        "android_client_info": {
+          "package_name": "com.evature.exampleapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497494502696-77qrhff5js55ic2gtp96snee590rj1op.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.evature.exampleapp",
+            "certificate_hash": "38a8f8db6debd186453977d2bb09bee3c0fc20b4"
+          }
+        },
+        {
+          "client_id": "497494502696-8rjso8r2kna3isolpnk853gj0bio3tfd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChzJrywOy5-unRrdRHtvEY4ZzalP0Uy-E"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497494502696-8rjso8r2kna3isolpnk853gj0bio3tfd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

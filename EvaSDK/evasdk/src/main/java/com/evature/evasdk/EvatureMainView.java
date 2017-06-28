@@ -65,6 +65,8 @@ import com.evature.evasdk.user_interface.ProgressWheel;
 import com.evature.evasdk.util.DLog;
 import com.evature.evasdk.util.VolumeUtil;
 
+import static com.evature.evasdk.appinterface.EvaAppSetup.gcmToken;
+
 
 /****
  *  User interface parts of the Evature chat screen 
@@ -881,14 +883,16 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 	}
 
 	
-	public void startSpeechRecognition(final EvaSpeechRecogComponent.SpeechRecognitionResultListener listener, final EvaSpeechRecogComponent speechSearch, Object cookie, boolean editLastUtterance) {
+	public void startSpeechRecognition(final EvaSpeechRecogComponent.SpeechRecognitionResultListener listener,
+                                       final EvaSpeechRecogComponent speechSearch, Object cookie,
+                                       boolean editLastUtterance, String rid) {
 		//showStatus("Listening...");
 		
 		mUpdateLevel = new WeakReference<Handler>(new SearchHandler(speechSearch, this));
 		try {
 			Handler handler = mUpdateLevel.get();
 			if (handler != null) {
-				speechSearch.startRecognizer(listener, cookie, editLastUtterance);
+				speechSearch.startRecognizer(listener, cookie, editLastUtterance, rid);
 				handler.sendEmptyMessage(0);
 			}
 			else {

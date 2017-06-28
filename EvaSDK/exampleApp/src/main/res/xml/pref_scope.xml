@@ -28,5 +28,6 @@
     <SwitchPreference
         android:defaultValue="false"
         android:key="scope_explore"
-        android:title="explore"/>
+        android:title="@string/explore"
+        android:icon="@drawable/ic_menu_compass"/>
 </PreferenceScreen>

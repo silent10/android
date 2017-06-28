@@ -82,6 +82,7 @@ public class EvaComponent implements
 
         public boolean semanticHighlightingTimes = true;
         public boolean semanticHighlightingLocations = true;
+        public boolean semanticHighlightingHotelAttributes = true;
 
         public boolean autoOpenMicrophone = false;
 
@@ -715,6 +716,7 @@ public class EvaComponent implements
 
     public boolean getSemanticHighlightTimes() {return mConfig.semanticHighlightingTimes; }
     public boolean getSemanticHighlightLocations() { return mConfig.semanticHighlightingLocations;}
+    public boolean getSemanticHighlightHotelAttributes() { return mConfig.semanticHighlightingHotelAttributes;}
 
     public boolean semanticHighlightingEnabled() {
         return getSemanticHighlightTimes() || getSemanticHighlightLocations();

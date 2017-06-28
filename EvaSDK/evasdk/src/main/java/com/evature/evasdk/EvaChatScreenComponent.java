@@ -3,8 +3,10 @@ package com.evature.evasdk;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.media.AudioManager;
@@ -16,6 +18,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -24,7 +28,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -67,6 +70,10 @@ import com.evature.evasdk.util.DLog;
 import com.evature.evasdk.util.StringUtils;
 import com.evature.evasdk.util.VolumeUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -84,6 +91,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static com.evature.evasdk.evaapis.crossplatform.RequestAttributes.SortEnum.location;
+import static com.evature.evasdk.util.StringUtils.randomString;
+
 
 public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUtil.VolumeListener {
 
@@ -91,12 +101,19 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	private static final String TAG = "EvaChatScreenComponent";
 
     public static final String INTENT_EVA_CONTEXT = "evature_context";
+    public static final String TOKEN_REFRESHED_EVENT = "GCM_TOKEN_REFRESHED";
+    public final static String MESSAGE_RECEIVED_EVENT = "GCM_MSG_EVENT";
+
+
+
     private final boolean resetSessionOnLoad;
 
     private static class StoreResultData {
 		ChatItem storeResultInItem;
 		boolean editLastUtterance;
 		Spannable preEditChat;
+        String rid;
+        int interimTransctionIndex;
 	}
 	
 	private static class DeleteChatItemsData {
@@ -151,6 +168,93 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         return activity;
     }
     private final Executor executor = Executors.newCachedThreadPool();
+
+
+    public BroadcastReceiver gcmTokenReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null ) {
+                String token = intent.getStringExtra("token");
+                EvaAppSetup.gcmToken = token;
+            }
+        }
+    };
+
+    public BroadcastReceiver gcmMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null ) {
+                String jStreamingResult = intent.getStringExtra("streaming_result");
+                if (jStreamingResult == null) {
+                    Log.e(TAG, "streaming result is null");
+                    return;
+                }
+                JSONArray streamingResult;
+                try {
+                    streamingResult = new JSONArray(jStreamingResult);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed parsing streaming result", e);
+                    return;
+                }
+                String rid = intent.getStringExtra("rid");
+                int index = intent.getIntExtra("index", -1);
+                boolean isFinal = intent.getBooleanExtra("is_final", false);
+                StringBuilder sb = new StringBuilder(streamingResult.length());
+                try {
+                    for (int i=0; i<streamingResult.length(); i++) {
+                        sb.append(streamingResult.getJSONObject(i).getString("transcript"));
+                    }
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed parsing streaming result", e);
+                    return;
+                }
+                String text = sb.toString();
+                if (rid == null) {
+                    Log.w(TAG, "rid="+rid +"  and text="+text);
+                    return;
+                }
+                if (VOICE_COOKIE != null && rid.equals(VOICE_COOKIE.rid)) {
+                    // this transcription is related to ongoing recording
+                    if (index <= VOICE_COOKIE.interimTransctionIndex) {
+                        Log.w(TAG, "index="+index+ " but existing index="+VOICE_COOKIE.interimTransctionIndex+"  -- ignoring");
+                        return;
+                    }
+                    VOICE_COOKIE.interimTransctionIndex = index;
+
+                    SpannableString stabilityHighlightedText = new SpannableString(text);
+                    if (!isFinal) {
+                        try {
+                            int col = ContextCompat.getColor(activity, R.color.evature_text_muted);
+                            int pos = 0;
+                            for (int i = 0; i < streamingResult.length(); i++) {
+                                JSONObject transcriptObj = streamingResult.getJSONObject(i);
+                                String transcript = transcriptObj.getString("transcript");
+                                double stability = transcriptObj.getDouble("stability");
+                                int pos2 = pos + transcript.length();
+                                if (stability < 0.5) {
+                                    stabilityHighlightedText.setSpan(new ForegroundColorSpan(col), pos, pos2, 0);
+                                }
+                                pos = pos2;
+                            }
+                        } catch (JSONException e) {
+                            Log.e(TAG, "Failed parsing streaming result", e);
+                            return;
+                        }
+                    }
+
+                    if (VOICE_COOKIE.storeResultInItem != null) {
+                        VOICE_COOKIE.storeResultInItem.setChat(stabilityHighlightedText);
+                        mView.notifyDataChanged();
+                    }
+                    else {
+                        ChatItem chatItem = new ChatItem(stabilityHighlightedText);
+                        VOICE_COOKIE.storeResultInItem = chatItem;
+                        mView.addChatItem(chatItem);
+                    }
+                }
+            }
+        }
+    };
 
 
     public EvaChatScreenComponent(Activity hostActivity,
@@ -212,7 +316,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
         config.semanticHighlightingTimes = EvaAppSetup.semanticHighlightingTimes;
         config.semanticHighlightingLocations = EvaAppSetup.semanticHighlightingLocations;
+        config.semanticHighlightingHotelAttributes = EvaAppSetup.semanticHighlightingHotelAttributes;
         config.autoOpenMicrophone = EvaAppSetup.autoOpenMicrophone;
+
+        if (EvaAppSetup.vproxyHost != null) {
+            config.vproxyHost = EvaAppSetup.vproxyHost;
+        }
 
 		eva = new EvaComponent(activity, this, config);
 		eva.onCreate(savedInstanceState);
@@ -287,7 +396,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
             int pos = greeting.length();
             String seeExamples = resources.getString(R.string.evature_tap_for_examples);
             SpannableString sgreet = new SpannableString(greeting + new SpannedString(seeExamples));
-            int col = resources.getColor(R.color.evature_chat_secondary_text);
+            int col = ContextCompat.getColor(activity, R.color.evature_chat_secondary_text);
             sgreet.setSpan(new ForegroundColorSpan(col), pos, pos+seeExamples.length(), 0);
             sgreet.setSpan( new StyleSpan(Typeface.ITALIC), pos, pos+seeExamples.length(), 0);
             ChatItem chat = new ChatItem(sgreet,null, ChatItem.ChatType.EvaWelcome);
@@ -1008,8 +1117,12 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 //EvatureMainView.animateButton(imgButton, "alpha", 400, 1.0f, 0.0f);
                 imgButton.setVisibility(View.GONE);
             }
-
         }
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this.activity);
+        localBroadcastManager.registerReceiver(gcmTokenReceiver, new IntentFilter(TOKEN_REFRESHED_EVENT));
+        localBroadcastManager.registerReceiver(gcmMessageReceiver, new IntentFilter(MESSAGE_RECEIVED_EVENT));
+
 
 //        activity.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 		isPaused = false;
@@ -1065,6 +1178,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                 imgButton.setVisibility(View.VISIBLE);
             }
         }
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this.activity);
+        localBroadcastManager.unregisterReceiver(gcmTokenReceiver);
+        localBroadcastManager.unregisterReceiver(gcmMessageReceiver);
+
 
         eva.onPause();
 		eva.cancelSearch();
@@ -1195,8 +1313,11 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 	// the same callback)
 	private void voiceRecognitionSearch(ChatItem chatItem, final boolean editLastUtterance) {
 
+        final String rid = randomString(32);
 		VOICE_COOKIE.storeResultInItem = chatItem;
 		VOICE_COOKIE.editLastUtterance = editLastUtterance;
+        VOICE_COOKIE.rid = rid;
+        VOICE_COOKIE.interimTransctionIndex = -1;
 		
 		executor.execute(new Runnable() {
 			
@@ -1229,7 +1350,8 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     public void run() {
                         DLog.i(TAG, "Starting recognizer");
                         eva.stopSpeak();
-                        mView.startSpeechRecognition(mSpeechSearchListener, speechSearch, VOICE_COOKIE, editLastUtterance);
+                        mView.startSpeechRecognition(mSpeechSearchListener, speechSearch, VOICE_COOKIE,
+                                editLastUtterance, rid);
                         addEmptyFragment();
                     }
                 });
@@ -1442,7 +1564,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 			if (eva.semanticHighlightingEnabled() && reply.parsedText != null) {
 				try {
 					if (eva.getSemanticHighlightTimes() && reply.parsedText.times != null) {
-						int col = activity.getResources().getColor(R.color.evature_times_markup);
+						int col = ContextCompat.getColor(activity, R.color.evature_times_markup);
 						
 						for (ParsedText.TimesMarkup time : reply.parsedText.times) {
 							chat.setSpan( new ForegroundColorSpan(col), time.position, time.position+time.text.length(), 0);
@@ -1450,12 +1572,20 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					}
 					
 					if (eva.getSemanticHighlightLocations() && reply.parsedText.locations != null) {
-						int col = activity.getResources().getColor(R.color.evature_locations_markup);
-						
+						int col = ContextCompat.getColor(activity, R.color.evature_locations_markup);
+
 						for (ParsedText.LocationMarkup location: reply.parsedText.locations) {
 							chat.setSpan( new ForegroundColorSpan(col), location.position, location.position+location.text.length(), 0);
 						}
 					}
+
+                    if (eva.getSemanticHighlightHotelAttributes() && reply.parsedText.hotelAttributes != null) {
+                        int col = ContextCompat.getColor(activity, R.color.evature_hotel_attr_markup);
+
+                        for (ParsedText.HotelAttributesMarkup hotelAttr: reply.parsedText.hotelAttributes) {
+                            chat.setSpan( new ForegroundColorSpan(col), hotelAttr.position, hotelAttr.position+hotelAttr.text.length(), 0);
+                        }
+                    }
 				}
 				catch (IndexOutOfBoundsException e) {
 					DLog.e(TAG, "Index out of bounds setting spans of chat ["+chat+"]", e);
@@ -1477,6 +1607,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					mView.addChatItem(new ChatItem(chat));
 				}
 			}
+			VOICE_COOKIE.rid = null;
 		}
 
 		if (cookie == TEXT_TYPED_COOKIE) {
@@ -1778,6 +1909,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 				int index = mView.getChatListModel().indexOf(data.storeResultInItem);
 				mView.dismissItems(index+1, mView.getChatListModel().size(), ChatAdapter.DismissStep.ANIMATE_RESTORE);
 			}
+			data.rid = null;
 		}
 	}
 

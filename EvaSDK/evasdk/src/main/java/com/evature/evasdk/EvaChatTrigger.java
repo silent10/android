@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.content.PermissionChecker;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,8 +27,14 @@ import com.evature.evasdk.evaapis.EvaComponent;
 import com.evature.evasdk.evaapis.EvaSpeak;
 import com.evature.evasdk.util.DLog;
 
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+
+import static android.R.id.message;
+import static com.evature.evasdk.EvaChatScreenComponent.MESSAGE_RECEIVED_EVENT;
+import static com.evature.evasdk.EvaChatScreenComponent.TOKEN_REFRESHED_EVENT;
 
 /**
  * Created by iftah on 5/26/15.
@@ -40,6 +47,7 @@ public class EvaChatTrigger {
     public static ArrayList<WeakReference<ImageButton>> evaButtons = new ArrayList<WeakReference<ImageButton>>();
 
     private static float MARGIN_BOTTOM = 24;  // margin in DIP
+
 
     public static void addDefaultButton(FragmentActivity activity) {
         addDefaultButton(activity, null);
@@ -239,5 +247,21 @@ public class EvaChatTrigger {
             intent.putExtra(EvaChatScreenComponent.INTENT_EVA_CONTEXT, evaContext.toString());
         }
         activity.startActivity(intent);
+    }
+
+
+    public static void notifyPartialTranscription(Context context, String streaming_result, int index, String rid, boolean isFinal) {
+        Intent intent = new Intent(MESSAGE_RECEIVED_EVENT);
+        intent.putExtra("streaming_result", streaming_result);
+        intent.putExtra("index", index);
+        intent.putExtra("rid", rid);
+        intent.putExtra("is_final", isFinal);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    }
+
+    public static void notifyGcmTokenRefreshed(Context context, String token) {
+        Intent intent = new Intent(TOKEN_REFRESHED_EVENT);
+        intent.putExtra("token", token);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 }

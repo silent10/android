@@ -1,11 +1,10 @@
-
 apply plugin: 'com.android.library'
 
 
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.0'
 
     sourceSets {
         main {
@@ -22,7 +21,7 @@ android {
     // auto-increment version each build
     def versionPropsFile = file('version.properties')
     def Properties versionProps = new Properties()
-    if(versionPropsFile.exists())
+    if (versionPropsFile.exists())
         versionProps.load(new FileInputStream(versionPropsFile))
 
     def code = versionProps['VERSION_CODE']
@@ -31,14 +30,22 @@ android {
     else
         code = code.toInteger()
 
+    code += 1
     def name = versionProps['VERSION_NAME']
     if (name == null)
-        name = "2.0."+code
+        name = "2.1"
+    else
+        name = name.substring(0, name.lastIndexOf("."))
+    name += '.' + code
+
+    versionProps['VERSION_CODE'] = code.toString()
+    versionProps['VERSION_NAME'] = name.toString()
+    versionProps.store(versionPropsFile.newWriter(), null)
 
     defaultConfig {
         versionCode code
         versionName name
-        minSdkVersion 8
+        minSdkVersion 14
         targetSdkVersion 23
     }
 }
@@ -47,7 +54,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'jniLibs', include: ['*.jar', '*.so'])
-    compile "com.android.support:support-v4:23+"
+    compile 'com.android.support:support-v4:25.3.1'
 }
 
 // http://tools.android.com/tech-docs/new-build-system/tips#TOC-Improving-Build-Server-performance.
@@ -61,5 +68,6 @@ subprojects {
         }
     }
 }
+
 
 

@@ -60,7 +60,7 @@ abstract public class EvaBaseActivity extends Activity implements EvaSearchReply
 	//       also visual feedback is recommended
 	public void searchWithVoice(Object cookie, boolean editLastUtterance)
 	{
-		speechRecognition.startRecognizer(this, cookie, editLastUtterance);
+		speechRecognition.startRecognizer(this, cookie, editLastUtterance, null);
 	}
 	
 	// override to modify GUI - eg, enable microphone button

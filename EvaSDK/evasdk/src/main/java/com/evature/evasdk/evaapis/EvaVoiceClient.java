@@ -37,7 +37,9 @@ import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 
+import com.evature.evasdk.appinterface.EvaAppSetup;
 import com.evature.evasdk.util.DLog;
+
 
 
 /****
@@ -48,16 +50,15 @@ import com.evature.evasdk.util.DLog;
 public class EvaVoiceClient {
 
 	private static final int CONNECT_TIMEOUT = 5000;
-	private static final int READ_TIMEOUT = 6000;
+	private static final int READ_TIMEOUT = 15000;
 
 	private static final String TAG = "EvaVoiceClient";
+    private final String rid;
 
-	private String LANGUAGE = "ENUS";
+    private String LANGUAGE = "ENUS";
 	private String CODEC = "audio/x-flac;rate=16000";//"audio/x-speex;rate=16000";	//MP3
 	private String RESULTS_FORMAT = "text/plain";
 
-
-	private static short PORT = (short) 443;
 
 	private String mEvaResponse;
 
@@ -88,13 +89,17 @@ public class EvaVoiceClient {
 	/****
 	 * 
 	 * @param context - android context
+     *
+     * @param rid = utterance unique id (ie. random string)
 	 */
 	public EvaVoiceClient(Context context, final EvaComponent eva,
-			final LinkedBlockingQueue<byte[]> queue, final boolean editLastUtterance) {
+			final LinkedBlockingQueue<byte[]> queue, final boolean editLastUtterance, 
+                          final String rid) {
 		mEva = eva;
 		mContext = context;
 		mSpeechBufferQueue = queue;	
-		this.editLastUtterance = editLastUtterance; 
+		this.editLastUtterance = editLastUtterance;
+        this.rid = rid;
 	}
 
 //	private static HttpClient getHttpClient() throws NoSuchAlgorithmException, KeyManagementException
@@ -151,7 +156,9 @@ public class EvaVoiceClient {
             Locale currentLocale = Locale.getDefault();
             evatureUrl += "&locale="+ currentLocale.getCountry();
         }
-
+        if (rid != null && EvaAppSetup.arnToken != null) {
+            evatureUrl += "&interim_results=1&endpoint_arn="+ EvaAppSetup.arnToken+"&rid="+rid;
+        }
 
         if (mEva.getDeviceId() != null) {
             evatureUrl += "&uid="+mEva.getDeviceId();

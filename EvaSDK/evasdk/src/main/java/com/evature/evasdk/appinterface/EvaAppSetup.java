@@ -28,6 +28,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -41,6 +43,7 @@ public class EvaAppSetup {
     // optional parameters:
     public static boolean semanticHighlightingTimes = true;
     public static boolean semanticHighlightingLocations = true;
+    public static boolean semanticHighlightingHotelAttributes = true;
     public static boolean autoOpenMicrophone = false;  // true for hands free usage
     public static boolean locationTracking = true;     // true to enable Eva tracking location - used for understanding "home" location
     public static boolean tapToEditChat = false;
@@ -50,6 +53,9 @@ public class EvaAppSetup {
     public static String deviceId;   // if you have a unique identifier for the user/device (leave null and Eva will generate an internal ID)
     public static String appVersion; // recommended - will be passed to Eva for debugging and tracking
 
+    public static String gcmToken;   // GCM token is fetched by the application
+    public static String arnToken;   // GCM token is converted to ARN token by the Eva backend when verifying credentials
+
     public static String scopeStr = null;
 
     public static HashMap<String, String> extraParams = new HashMap<String,String>();
@@ -57,6 +63,8 @@ public class EvaAppSetup {
     public static int timeoutWaitingForResult = 4000;     // time (ms) waiting for async callback result before giving up
     public static int timeoutWaitingForCount = 4000;      // time (ms) waiting for async count before giving up
     public static int delaySpeakWhenWaitingForCount = 1200; // speak will be delayed slightly to give chance for async count to modify the default text (eg. if zero results or just one result)
+
+    public static String vproxyHost;
 
     public static boolean showCountResultsIcon = false;
 
@@ -113,12 +121,25 @@ public class EvaAppSetup {
             @TargetApi(Build.VERSION_CODES.GINGERBREAD)
             @Override
             public void run() {
-
+                String host = vproxyHost;
+                if (host == null) {
+                    host = "https://vproxy.evaws.com";
+                }
                 // make a request to Eva to verify the apiKey/siteCode are valid
-                String evatureUrl = "https://vproxy.evaws.com/v1.0?site_code="+siteCode+
-                                    "&api_key="+apiKey+
-                                    "&sdk_version="+EvaComponent.SDK_VERSION+
-                                    "&verifyCredentials&input_text=";
+                String evatureUrl = host+"/v1.0?site_code="+siteCode+
+                        "&api_key="+apiKey+
+                        "&sdk_version="+ EvaComponent.SDK_VERSION+
+                        "&verifyCredentials&input_text=";
+
+                if (gcmToken != null) {
+                    try {
+                        String encodedGcmToken = URLEncoder.encode(gcmToken, "utf-8");
+                        evatureUrl += "&device_id=" + encodedGcmToken;
+                    } catch (UnsupportedEncodingException e) {
+                        Log.w(TAG, "Failed encoding gcmToken " + gcmToken);
+                    }
+                }
+
                 try {
                     String result = DownloadUrl.get(evatureUrl);
                     JSONObject jobj = new JSONObject(result);
@@ -132,6 +153,10 @@ public class EvaAppSetup {
                         initHandler.initResult(EvaInitResult.InitResultEnum.Error, "Site-Code / API-Key invalid - please check you have passed the correct credentials to initEva method, as provided by Evature.", null);
                         return;
                     }
+                    arnToken = jobj.optString("endpoint_arn", null);
+                    if (arnToken != null) {
+                        arnToken = URLEncoder.encode(arnToken, "utf-8");
+                    }
                 } catch (IOException e) {
                     initHandler.initResult(EvaInitResult.InitResultEnum.Warning, "IOException in request to Evature: "+e.getMessage()+" - check your internet connectivity", e);
                     return;
@@ -140,6 +165,12 @@ public class EvaAppSetup {
                     initHandler.initResult(EvaInitResult.InitResultEnum.Warning, "JSON Exception parsing response from Evature: "+e.getMessage(), e);
                     return;
                 }
+
+                // SDK version checking is cool - but can save some time starting up
+                // when restoring version check remove instead the line below
+                initHandler.initResult(EvaInitResult.InitResultEnum.OK, null, null);
+                /*
+
 
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.GINGERBREAD) {
                     initHandler.initResult(EvaInitResult.InitResultEnum.Warning, "Warning: SDK version not checked due to old Android SDK", null);
@@ -186,6 +217,7 @@ public class EvaAppSetup {
                     initHandler.initResult(EvaInitResult.InitResultEnum.Warning, "IOException in request to check SDK version: "+e.getMessage()+" - check your internet connectivity", e);
                     return;
                 }
+                */
             }
         });
 

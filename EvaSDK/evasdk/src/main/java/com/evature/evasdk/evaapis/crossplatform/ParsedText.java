@@ -10,6 +10,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.evature.evasdk.evaapis.crossplatform.RequestAttributes.SortEnum.location;
+
 
 public class ParsedText implements Serializable {
 
@@ -24,9 +26,16 @@ public class ParsedText implements Serializable {
 		public String text;
 		public int position;
 	}
+
+	static public class HotelAttributesMarkup {
+        public String text;
+        public String type; // eg. departure, arrival
+        public int position;
+    }
 	
 	public ArrayList<TimesMarkup> times;
 	public ArrayList<LocationMarkup> locations;
+    public ArrayList<HotelAttributesMarkup> hotelAttributes;
 	
 	public ParsedText(JSONObject jsonObject, List<String> parseErrors) {
 		if (jsonObject.has("Times")) {
@@ -66,8 +75,30 @@ public class ParsedText implements Serializable {
 				DLog.e("ParsedText", "Error parsing JSON",e);
 				parseErrors.add("Failed to parse Locations in ParsedText");
 			}
-
 		}
+
+		if (jsonObject.has("Hotel Attributes")) {
+            try {
+                hotelAttributes = new ArrayList<HotelAttributesMarkup>();
+                JSONArray jHotelAttrs = jsonObject.getJSONArray("Hotel Attributes");
+                for (int index = 0; index < jHotelAttrs.length(); index++) {
+                    JSONObject jHotelAttr = jHotelAttrs.getJSONObject(index);
+                    HotelAttributesMarkup hotelAttr = new HotelAttributesMarkup();
+                    hotelAttr.text = jHotelAttr.optString("Text", "");
+                    hotelAttr.position = jHotelAttr.optInt("Position", -1);
+                    hotelAttr.type = jHotelAttr.optString("Type", null);
+                    if (hotelAttr.position != -1 && !"".equals(hotelAttr.text)) {
+                        // don't highlight "hotel" accommodation type
+                        if (!"Accommodation Type".equals(hotelAttr.type) || !"Hotel".equals(jHotelAttr.optString("Value"))) {
+                            hotelAttributes.add(hotelAttr);
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                DLog.e("ParsedText", "Error parsing JSON",e);
+                parseErrors.add("Failed to parse Locations in ParsedText");
+            }
+        }
 	}
 
 }

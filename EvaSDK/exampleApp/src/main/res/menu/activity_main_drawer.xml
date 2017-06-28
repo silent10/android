@@ -8,28 +8,33 @@
                 android:icon="@drawable/ic_menu_hotel"
                 android:checkable="true"
                 android:checked="true"
-                android:title="Hotel"/>
+                android:title="@string/hotel"/>
             <item
                 android:id="@+id/nav_flight"
                 android:icon="@drawable/ic_menu_flight"
                 android:checkable="true"
-                android:title="Flight"/>
+                android:title="@string/flight"/>
             <item
                 android:id="@+id/nav_car"
                 android:icon="@drawable/ic_menu_car"
                 android:checkable="true"
-                android:title="Cars"/>
+                android:title="@string/car"/>
             <item
                 android:id="@+id/nav_cruise"
                 android:icon="@drawable/ic_menu_cruise"
                 android:checkable="true"
-                android:title="Cruise"/>
+                android:title="@string/cruise"/>
+            <item
+                android:id="@+id/nav_explore"
+                android:icon="@drawable/ic_menu_compass"
+                android:checkable="true"
+                android:title="@string/explore"/>
         </menu>
     </item>
 
     <item
         android:id="@+id/nav_send"
         android:icon="@drawable/ic_menu_send"
-        android:title="Send Feedback"/>
+        android:title="@string/send_feedback"/>
 
 </menu>
