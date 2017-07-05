@@ -91,7 +91,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static com.evature.evasdk.evaapis.crossplatform.RequestAttributes.SortEnum.location;
 import static com.evature.evasdk.util.StringUtils.randomString;
 
 
@@ -1332,6 +1331,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 					return;
 				}
 				eva.stopSpeak();// stop the speech if there is one going
+                speechSearch.fakeAudioStreaming(mSpeechSearchListener, editLastUtterance, rid); // optimization - start the streaming as soon as possible
                 if (toneGenerator != null) {
                     toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 25);
                     try {
@@ -1350,8 +1350,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     public void run() {
                         DLog.i(TAG, "Starting recognizer");
                         eva.stopSpeak();
-                        mView.startSpeechRecognition(mSpeechSearchListener, speechSearch, VOICE_COOKIE,
-                                editLastUtterance, rid);
+                        mView.startSpeechRecognition(speechSearch, VOICE_COOKIE);
                         addEmptyFragment();
                     }
                 });
@@ -1544,16 +1543,16 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 		SpannableString chat = null;
 		boolean hasWarnings = false;
-		if (reply.processedText != null) {
+		if (reply.transcribedText != null) {
 			// reply of voice -  add a "Me" chat item for the input text
-			chat = new SpannableString(reply.processedText);
+			chat = new SpannableString(reply.transcribedText);
 			if (reply.evaWarnings.size() > 0) {
 				for (EvaWarning warning: reply.evaWarnings) {
 					if (warning.position == -1) {
 						continue;
 					}
 					hasWarnings = true;
-					if (warning.text.equals(reply.processedText)) {
+					if (warning.text.equals(reply.transcribedText)) {
 						// for some odd reason the error span doesn't show when its the entire string, so until a fix is available skip it
 						break;
 					}

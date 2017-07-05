@@ -882,17 +882,16 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 		}
 	}
 
+
 	
-	public void startSpeechRecognition(final EvaSpeechRecogComponent.SpeechRecognitionResultListener listener,
-                                       final EvaSpeechRecogComponent speechSearch, Object cookie,
-                                       boolean editLastUtterance, String rid) {
+	public void startSpeechRecognition(final EvaSpeechRecogComponent speechSearch, Object cookie) {
 		//showStatus("Listening...");
 		
 		mUpdateLevel = new WeakReference<Handler>(new SearchHandler(speechSearch, this));
 		try {
 			Handler handler = mUpdateLevel.get();
 			if (handler != null) {
-				speechSearch.startRecognizer(listener, cookie, editLastUtterance, rid);
+				speechSearch.startRecognizer(cookie);
 				handler.sendEmptyMessage(0);
 			}
 			else {

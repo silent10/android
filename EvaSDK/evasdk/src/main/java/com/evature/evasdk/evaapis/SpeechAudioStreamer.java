@@ -6,6 +6,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.evature.evasdk.util.DLog;
 
@@ -39,6 +40,7 @@ public class SpeechAudioStreamer {
 	private byte[] mBuffer = null;
 //	private int[] mBufferShorts = null;
 	private boolean mIsRecording = false;
+    private boolean mIsFakeingAudio = false;
 
 	// VAD Parameters,  default values
 	private int mMovingAverageWindow = 5;		// volume level is average of last X chunks
@@ -73,7 +75,7 @@ public class SpeechAudioStreamer {
 		mSampleRate = sampleRate;
 		totalTimeRecording = 0;
 		
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 //		mDebugSavePCM = prefs.getBoolean("eva_save_pcm", false);
 //		mDebugSavePCM = false;
 		
@@ -251,7 +253,7 @@ public class SpeechAudioStreamer {
 			}
 		}
 		
-		int SAMPLES_PER_VOLUME = 50 * 16;  // 50ms at 16000 samples per second
+		int SAMPLES_PER_VOLUME = 50 * mSampleRate / 1000;  // 50ms at 16000 samples per second
 
 		// Analyze Sound.
 		float currentVolume = -1f;
@@ -290,8 +292,8 @@ public class SpeechAudioStreamer {
 	class Producer implements Runnable {
 		private static final long MAX_TIME_WAIT_ITERATIONS = 300; // wait maximum 3 seconds
 		private static final int MAX_ERROR_ITERATIONS = 5;
-		DataOutputStream dos = null;
-		FileOutputStream fos = null;
+		//DataOutputStream dos = null;
+		//FileOutputStream fos = null;
 		FLACStreamEncoder encoder;
 		final LinkedBlockingQueue<byte[]>  queue;
 
@@ -302,7 +304,7 @@ public class SpeechAudioStreamer {
 		
 		private void encode(byte[] chunk, int readSize) throws IOException {
 			// long startTime = System.nanoTime();
-			
+			//Log.v(TAG, "Encode "+readSize+" bytes");
 			ByteBuffer bf = ByteBuffer.allocateDirect(readSize);
 			bf.put(chunk, 0, readSize);
 			
@@ -313,8 +315,7 @@ public class SpeechAudioStreamer {
 		}
 
 		public void run() {
-			long t0 = System.nanoTime();
-			
+            long timeIncludingFake = System.nanoTime();
 			accumulator = 0.0f;
 			samplesAccumulated = 0;
 			
@@ -335,84 +336,100 @@ public class SpeechAudioStreamer {
 			
 
 			try {
-				try {
-					android.os.Process
-							.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-				} catch (Exception e) {
-					DLog.e(TAG, "<<< Set rec thread priority failed: " + e.getMessage());
-				}
-				
+                try {
+                    android.os.Process
+                            .setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+                } catch (Exception e) {
+                    DLog.e(TAG, "<<< Set rec thread priority failed: " + e.getMessage());
+                }
 
-				for (int i = 0; i < mMovingAverageBuffer.length; i++) {
-					mMovingAverageBuffer[i] = 0.0f;
-				}
-				for (int i=0; i<mSoundLevelBuffer.length; i++) {
-					mSoundLevelBuffer[i] = 0;
-				}
-				
-				mRecorder.startRecording();
 
-				int iterations = 0;
-				int errorIterations = 0;
-				
-				while (mIsRecording) {
-					int readSize = mRecorder.read(mBuffer, 0, mBuffer.length);
+                for (int i = 0; i < mMovingAverageBuffer.length; i++) {
+                    mMovingAverageBuffer[i] = 0.0f;
+                }
+                for (int i = 0; i < mSoundLevelBuffer.length; i++) {
+                    mSoundLevelBuffer[i] = 0;
+                }
+                for (int i=0; i<mBuffer.length; i++) {
+                    mBuffer[i] = 0;
+                }
 
-					iterations++;
-					if (readSize < 0) {
-						DLog.w(TAG, "<<< Error reading from recorder "+readSize);
-						Thread.sleep(10);
-						errorIterations++;
-						if (errorIterations > MAX_ERROR_ITERATIONS) {
-							DLog.e(TAG, "<<< Errors - quiting");
-							break;
-						}
-					}
-					else if (readSize == 0) {
-						try {
-							DLog.i(TAG, "<<< Waiting for microphone to produce data");
-							Thread.sleep(10);
-							if (iterations > MAX_TIME_WAIT_ITERATIONS) {
-								DLog.e(TAG, "<<< Waited too long for microphone to produce data - quiting");
-								break;
-							}
-						} catch (InterruptedException e) {
-							DLog.e(TAG, "<<< Interruprted Producer stream", e);
-						}
-					} else {
-						
-						checkForSilence(readSize, t0);
-						
-						if (mIsRecording) {
-							try {
-								encode(mBuffer, readSize);
-							} catch (IOException e) {
-								DLog.e(TAG, "<<< IO error while sending to encoder");
-							}
-							
-//							if (mDebugSavePCM) {
-//								dos.write(mBuffer, 0, readSize);
-//							}
-//							Thread.sleep(10);
-						}
-					}
-				}
-				encoder.flush();
+                int readSize = 10*mSampleRate* 2 / 1000 ; // 10ms, 16000 samples per second, 2 bytes per sample
+                while (mIsFakeingAudio) {
+                    encode(mBuffer, readSize);
+                    Thread.sleep(10);
+                }
 
-				/*if (mDebugSavePCM) {
-					dos.flush();
-					dos.close();
+                if (!mIsRecording) {
+                    DLog.i(TAG, "<<< Finished producer thread - canceled before recording started");
+                    return;
+                }
+                mRecorder.startRecording();
 
-					String fileBase = Environment.getExternalStorageDirectory().getPath() + "/sample";
-					
-					byte bytes[] = FileUtils.readFileToByteArray(new File( fileBase + ".smp"));
+                int iterations = 0;
+                int errorIterations = 0;
 
-					WriteWavFile(new File(fileBase + ".wav"), 16000, bytes);
-				}*/
-				
-//				queue.put(new byte[0]);
+                long t0 = System.nanoTime();
 
-				DLog.i(TAG, "<<< Finished producer thread - iterations="+iterations+ "  time="+((System.nanoTime() - t0) / 1000000)+"ms");
+                while (mIsRecording) {
+                    readSize = mRecorder.read(mBuffer, 0, mBuffer.length);
+
+                    iterations++;
+                    if (readSize < 0) {
+                        DLog.w(TAG, "<<< Error reading from recorder " + readSize);
+                        Thread.sleep(10);
+                        errorIterations++;
+                        if (errorIterations > MAX_ERROR_ITERATIONS) {
+                            DLog.e(TAG, "<<< Errors - quiting");
+                            break;
+                        }
+                    } else if (readSize == 0) {
+                        try {
+                            DLog.i(TAG, "<<< Waiting for microphone to produce data");
+                            if (iterations > MAX_TIME_WAIT_ITERATIONS) {
+                                DLog.e(TAG, "<<< Waited too long for microphone to produce data - quiting");
+                                break;
+                            }
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            DLog.e(TAG, "<<< Interruprted Producer stream", e);
+                        }
+                    } else {
+
+                        checkForSilence(readSize, t0);
+
+                        if (mIsRecording) {
+                            try {
+                                encode(mBuffer, readSize);
+                            } catch (IOException e) {
+                                DLog.e(TAG, "<<< IO error while sending to encoder");
+                            }
+
+                            //							if (mDebugSavePCM) {
+                            //								dos.write(mBuffer, 0, readSize);
+                            //							}
+                            //							Thread.sleep(10);
+                        }
+                    }
+                }
+                encoder.flush();
+
+                    /*if (mDebugSavePCM) {
+                        dos.flush();
+                        dos.close();
+
+                        String fileBase = Environment.getExternalStorageDirectory().getPath() + "/sample";
+
+                        byte bytes[] = FileUtils.readFileToByteArray(new File( fileBase + ".smp"));
+
+                        WriteWavFile(new File(fileBase + ".wav"), 16000, bytes);
+                    }*/
+
+                //				queue.put(new byte[0]);
+
+                long timeRecording = ((System.nanoTime() - t0) / 1000000);
+                long timeRecordingWithFake = ((System.nanoTime() - timeIncludingFake) / 1000000);
+                DLog.i(TAG, "<<< Finished producer thread - iterations=" + iterations + "  time real recording=" + timeRecording + "ms, time with fake="+timeRecordingWithFake);
 
 			} catch (Exception ex) {
 				DLog.e(TAG, "<<< Exception in microphone producer", ex);
@@ -420,6 +437,7 @@ public class SpeechAudioStreamer {
 				byte[] endOfRecording = new byte[0];
 				queue.add(endOfRecording);
 				mIsRecording = false;
+                mIsFakeingAudio = false;
 
 				DLog.d(TAG, "<<< Releasing Recorder");
 				if (mRecorder != null) {
@@ -431,7 +449,7 @@ public class SpeechAudioStreamer {
 					encoder.release();
 					encoder = null;
 				}
-				totalTimeRecording = (System.nanoTime() - t0) / 1000000;
+				totalTimeRecording = (System.nanoTime() - timeIncludingFake) / 1000000;
 				DLog.d(TAG, "<<< All done.");
 			}
 		}
@@ -439,39 +457,51 @@ public class SpeechAudioStreamer {
 	}
 
 
-	public boolean startStreaming(final LinkedBlockingQueue<byte[]> queue) {
-		if (mIsRecording) {
-			DLog.w(TAG, "<<< Already recording - not starting 2nd time");
-			return false;
-		}
+    public void fakeAudioStreaming(final LinkedBlockingQueue<byte[]> queue) {
+        if (mIsRecording) {
+            DLog.w(TAG, "<<< Already recording - not starting 2nd time");
+            return;
+        }
+        DLog.d(TAG, "<<< Starting streaming fake silence");
+        mBufferIndex = 0;
+
+        this.mEncoder = new FLACStreamEncoder();
+        //mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16, false, 256);
+
+        mEncoder.setWriteCallback(new FLACStreamEncoder.WriteCallback() {
+
+            public void onWrite(byte[] buffer, int length, int samples, int frame) {
+                byte[] bufferCopy = new byte[length];
+                System.arraycopy(buffer, 0, bufferCopy, 0, length);
+                queue.add(bufferCopy);
+            }
+        });
+
+        mIsRecording = true;
+        mIsFakeingAudio = true;
+
+        mEncoder.initWithCallback( mSampleRate, CHANNELS, 16, false, 256);
+        DLog.i(TAG, "<<< Encoder initialized " + mEncoder.toString());
+        Producer p = new Producer(mEncoder, queue);
+
+        new Thread(p).start();
+
+        DLog.i(TAG, "<<< Audio Fake Streamer started!");
+    }
+
+
+	public boolean startStreaming() {
 		DLog.d(TAG, "<<< Starting streaming");
 		mBufferIndex = 0;
-
 		boolean success = initRecorder();
 		if (!success) {
 			DLog.e(TAG, "<<< Failed initializing recorder - not recording");
 			return false;
 		}
-		
-
-		this.mEncoder = new FLACStreamEncoder();
-		//mEncoder.init(fifoPath, mSampleRate, CHANNELS, 16, false, 256);
-
-		mEncoder.setWriteCallback(new FLACStreamEncoder.WriteCallback() {
-			
-			public void onWrite(byte[] buffer, int length, int samples, int frame) {
-				byte[] bufferCopy = new byte[length];
-				System.arraycopy(buffer, 0, bufferCopy, 0, length);
-				queue.add(bufferCopy);
-			}
-		});
 
 		mIsRecording = true;
-		mEncoder.initWithCallback( mSampleRate, CHANNELS, 16, false, 256);
-		DLog.i(TAG, "<<< Encoder initialized " + mEncoder.toString());
-		Producer p = new Producer(mEncoder, queue);
-		
-		new Thread(p).start();
+        mIsFakeingAudio = false;
+
 		//new Thread(c).start();
 		DLog.i(TAG, "<<< Audio Streamer started!");
 		return true;

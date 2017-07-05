@@ -33,6 +33,15 @@ LOCAL_SRC_FILES := \
 	flac/src/libFLAC/window.c \
 	flac/src/libFLAC/bitwriter.c
 
+#	webrtc/modules/audio_processing/vad/gmm.cc \
+#	webrtc/modules/audio_processing/vad/pitch_based_vad.cc \
+#	webrtc/modules/audio_processing/vad/pitch_internal.cc \
+#	webrtc/modules/audio_processing/vad/pole_zero_filter.cc \
+#	webrtc/modules/audio_processing/vad/standalone_vad.cc \
+#	webrtc/modules/audio_processing/vad/vad_audio_proc.cc \
+#	webrtc/modules/audio_processing/vad/vad_circular_buffer.cc \
+#	webrtc/modules/audio_processing/vad/voice_activity_detector.cc
+
 include $(BUILD_STATIC_LIBRARY)
 
 # Lastly build the JNI wrapper and link both other libs against it
@@ -48,3 +57,7 @@ LOCAL_LDLIBS := -llog
 LOCAL_STATIC_LIBRARIES := audio-flac
 
 include $(BUILD_SHARED_LIBRARY)
+
+
+
+

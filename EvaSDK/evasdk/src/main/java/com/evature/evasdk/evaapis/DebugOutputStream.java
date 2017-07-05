@@ -61,7 +61,7 @@ class DebugOutputStream extends OutputStream {
 	 }
 
     public void write(byte[] buffer) throws IOException {
-    	DLog.i(TAG, "<<< write buffer");
+    	DLog.i(TAG, "<<< write buffer "+buffer.length + " bytes");
     	wrapped.write(buffer);
     	if (mDebugSave) {
 			try {

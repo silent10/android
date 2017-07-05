@@ -1,8 +1,6 @@
 package com.evature.evasdk.evaapis.crossplatform;
 
 import com.evature.evasdk.evaapis.crossplatform.flow.Flow;
-import com.evature.evasdk.evaapis.crossplatform.flow.FlowElement;
-import com.evature.evasdk.evaapis.crossplatform.flow.StatementElement;
 import com.evature.evasdk.util.DLog;
 
 import org.json.JSONArray;
@@ -28,7 +26,7 @@ public class EvaApiReply implements Serializable {
 	public String sayIt;
 	public String sessionId;
 	public String transactionId;
-	public String processedText;
+	public String transcribedText;
 	public String originalInputText;
 	public EvaChat chat;
 	public EvaDialog dialog;
@@ -100,8 +98,8 @@ public class EvaApiReply implements Serializable {
 					transactionId = jFullReply.getString("transaction_key");
 				}
 				JSONObject jApiReply = jFullReply.getJSONObject("api_reply");
-				if (jApiReply.has("ProcessedText")) {
-					processedText = jApiReply.getString("ProcessedText");
+				if (jApiReply.has("TranscribedText")) {
+					transcribedText = jApiReply.getString("TranscribedText");
 				}
 				if (jApiReply.has("original_input_text")) {
 					originalInputText = jApiReply.getString("original_input_text");

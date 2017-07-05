@@ -325,7 +325,7 @@ public class EvaVoiceClient {
 //		resEntity.consumeContent();
 		
 		timeSpentReadingResponse = (System.nanoTime() - t0) / 1000000;
-		DLog.i(TAG, "<<< Got Response");//: \n"+mEvaResponse);
+		DLog.i(TAG, "<<< Got Response in "+timeSpentReadingResponse);//: \n"+mEvaResponse);
 
 	}
 	
@@ -342,11 +342,12 @@ public class EvaVoiceClient {
 			DLog.i(TAG,"<<< Sending post request to URL: "+url);
 			long t0 = System.nanoTime();
 			mConnection = getConnection(url);
-			DLog.d(TAG, "<<< Connection opened in "+((System.nanoTime() - t0)/1000)+"ms");
+			DLog.d(TAG, "<<< Connection opened in "+((System.nanoTime() - t0)/1000000)+"ms");
 			t0 = System.nanoTime();
 			setAudioContent(mConnection);
 			// wait until write is complete
 			while(true) {
+                //long time = System.nanoTime();
 				byte[] buffer = mSpeechBufferQueue.poll(MAX_WAIT_FOR_BUFFER, TimeUnit.SECONDS);
 				if (buffer == null) {
 					DLog.w(TAG, "Waited for "+MAX_WAIT_FOR_BUFFER+" seconds for data from encoder");
@@ -354,17 +355,21 @@ public class EvaVoiceClient {
 				}
 				if (buffer.length == 0) {
 					// end of encoded stream
+                    DLog.v(TAG, "<< end of upload");
 					break;
 				}
 				if (mInTransaction) { // if not canceled already
+                    //DLog.v(TAG, "<< got buffer to upload of size "+buffer.length+ " bytes, waited "+((System.nanoTime() - time)/1000000)+"ms");
+                    //time = System.nanoTime();
 					mUploadStream.write(buffer);
+                    mUploadStream.flush();
+                    //DLog.v(TAG, "<< flushed in  "+((System.nanoTime() - time)/1000000)+"ms");
 				}
 			}
 			
 			long t1 = System.nanoTime();
 			timeSpentUploading = (t1 - t0) / 1000000;
 			if (mInTransaction) {
-				t0 = System.nanoTime();
 				processResponse(mConnection);
 			}
 		}

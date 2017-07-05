@@ -58,10 +58,11 @@ abstract public class EvaBaseActivity extends Activity implements EvaSearchReply
 	
 	// note: you should play a "beep" before calling this function to notify users a recording is starting
 	//       also visual feedback is recommended
-	public void searchWithVoice(Object cookie, boolean editLastUtterance)
+	/*public void searchWithVoice(Object cookie, boolean editLastUtterance)
 	{
-		speechRecognition.startRecognizer(this, cookie, editLastUtterance, null);
-	}
+	    speechRecognition.fake(this, cookie, editLastUtterance)
+		speechRecognition.startRecognizer( null);
+	}*/
 	
 	// override to modify GUI - eg, enable microphone button
 	public void speechResultOK(String evaJson, Bundle debugData, Object cookie ) {

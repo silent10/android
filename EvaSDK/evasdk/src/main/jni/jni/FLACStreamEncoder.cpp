@@ -15,7 +15,6 @@
 #include "FLAC/metadata.h"
 #include "FLAC/stream_encoder.h"
 
-#include "util.h"
 
 #include <jni.h>
 
@@ -341,7 +340,7 @@ public:
 	/**
 	 * Flushes internal buffers to disk.
 	 **/
-	int flush() {
+	void flush() {
 		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "flush() called.");
 		flush_to_fifo();
 
@@ -384,8 +383,8 @@ public:
 		// got, push it onto the write FIFO and create a new buffer.
 		if (m_write_buffer
 				&& m_write_buffer_offset + bufsize32 > m_write_buffer_size) {
-			__android_log_print(ANDROID_LOG_DEBUG, LTAG,
-					"JNI buffer is full, pushing to FIFO");
+			//__android_log_print(ANDROID_LOG_DEBUG, LTAG,
+			//		"JNI buffer is full, pushing to FIFO - buffer contains %d", m_write_buffer_offset);
 			flush_to_fifo();
 
 			// Signal writer to wake up.
@@ -437,7 +436,7 @@ public:
 //					__android_log_print(ANDROID_LOG_VERBOSE, LTAG,
 //							"<<< Writer encoding size %d",
 //							current->m_buffer_fill_size);
-					//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Encoding current entry %p, buffer %p, size %d",
+					//__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Encoding current entry %p, buffer %p, size %d",
 					//    current, current->m_buffer, current->m_buffer_fill_size);
 
 					// Encode!
@@ -536,6 +535,7 @@ private:
 	inline int copyBuffer(char * buffer, int bufsize, int bufsize32) {
 		FLAC__int32 * buf = m_write_buffer + m_write_buffer_offset;
 
+		//__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "Adding %d to JNI buffer", bufsize32);
 		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writing at %p[%d] = %p", m_write_buffer, m_write_buffer_offset, buf);
 		if (8 == m_bits_per_sample) {
 			copyBuffer<int8_t>(buf, buffer, bufsize);
@@ -689,7 +689,7 @@ FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder 
 		const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data) {
 
 	FLACStreamEncoder* encoderCPP = (FLACStreamEncoder*)client_data;
-	//__android_log_print(ANDROID_LOG_INFO, LTAG, ">>>> Write Callback: %d bytes, %d samples, frame %d",  bytes, samples, current_frame);
+	//__android_log_print(ANDROID_LOG_VERBOSE, LTAG, ">>>> Write Callback: %d bytes, %d samples, frame %d",  bytes, samples, current_frame);
 
 	// Get JNI Env
 	JNIEnv* env;
@@ -698,7 +698,7 @@ FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder 
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
 	}
 
-//	__android_log_print(ANDROID_LOG_INFO, LTAG, ">>>> Write Callback: got the Java method, activating in %p", encoderCPP->m_obj);
+	//__android_log_print(ANDROID_LOG_INFO, LTAG, ">>>> Write Callback: got the Java method, activating in %p", encoderCPP->m_obj);
 
 	jbyteArray arr = env->NewByteArray(bytes);
 	env->SetByteArrayRegion(arr, 0, bytes, (jbyte*) buffer);

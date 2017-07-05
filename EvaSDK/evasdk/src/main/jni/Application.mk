@@ -5,6 +5,8 @@ APP_MODULES = audio-flac audio-native
 APP_OPTIM = release
 APP_PLATFORM = android-19  # mkfifo isn't backwards compatible in 21+
 
+APP_STL   := stlport_static
+
 AUDIO_NATIVE_FLAGS = \
 	-Ijni/config \
 	-Ijni/ogg/include \
@@ -14,3 +16,9 @@ AUDIO_NATIVE_FLAGS = \
 
 APP_CFLAGS += $(AUDIO_NATIVE_FLAGS)
 APP_CXXFLAGS += $(AUDIO_NATIVE_FLAGS)
+
+APP_CXXFLAGS += \
+	-std=c++11 \
+	-isystem \
+	-stdlib=libc++
+

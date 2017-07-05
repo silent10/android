@@ -18,7 +18,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class EvaSpeechRecogComponent {
 	public static final int SAMPLE_RATE = 16000;
-	public static final int CHANNELS = 1;
 	public static final String TAG = "EvaSpeechComponent";
 	
 	public static final String RESULT_TIME_ACTIVITY_CREATE = "TIME_CREATE";
@@ -27,9 +26,7 @@ public class EvaSpeechRecogComponent {
 	public static final String RESULT_TIME_RESPONSE = "TIME_RESPONSE";
 	public static final String RESULT_TIME_EXECUTE = "TIME_EXECUTE";
 	
-	public static final String RESULT_EVA_REPLY = "EVA_REPLY";
-	public static final String RESULT_EVA_ERR_MESSAGE = "EVA_ERR_MESSAGE";
-	
+
 	protected SpeechAudioStreamer mSpeechAudioStreamer;
 	private EvaHttpThread dictationTask=null;
 	EvaVoiceClient mVoiceClient = null;
@@ -137,7 +134,7 @@ public class EvaSpeechRecogComponent {
 			mVoiceClient.cancelTransfer();
 
 			if (isCancelled() == false) {
-				mVoiceClient.startVoiceRequest();
+				mVoiceClient.startVoiceRequest(); // do the upload streaming
 			}
 			else {
 				DLog.w(TAG, "Request was canceled");
@@ -171,24 +168,40 @@ public class EvaSpeechRecogComponent {
 		}
 	}
 
-	public void startRecognizer(SpeechRecognitionResultListener listener, Object cookie,
-                                boolean editLastUtterance, String rid)  {
-		DLog.d(TAG, "<<< Starting Speech Recognicition");
+
+    /*****
+     * For optimization
+     * @param listener
+     * @param editLastUtterance
+     * @param rid
+     */
+	public void fakeAudioStreaming(SpeechRecognitionResultListener listener, boolean editLastUtterance, String rid) {
+        DLog.d(TAG, "<<< Starting Speech Recognition");
+        // start thread
+        LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
+
+        mVoiceClient = new EvaVoiceClient(mContext, mEva, queue, editLastUtterance, rid);
+
+        // start a thread - from queue to http connection
+        mVoiceClient = new EvaVoiceClient(mContext, mEva, queue, editLastUtterance, rid);
+        dictationTask = new EvaHttpThread(mVoiceClient, listener);
+        dictationTask.execute((Object[])null);
+
+        mSpeechAudioStreamer.fakeAudioStreaming(queue);
+    }
+
+	public void startRecognizer(Object cookie)  {
+		DLog.d(TAG, "<<< Starting Speech Recognition");
 		this.cookie = cookie;
-		// start thread
-		LinkedBlockingQueue<byte[]> queue = new LinkedBlockingQueue<byte[]>();
-	
+
 		// start a thread - reading from microphone to encoder to queue
-		boolean success = mSpeechAudioStreamer.startStreaming(queue);
+		boolean success = mSpeechAudioStreamer.startStreaming();
 		if (!success) {
 			DLog.e(TAG, "Failed getting audio content");
+            cancel();
 			return;
 		}
 
-		// start a thread - from queue to http connection
-		mVoiceClient = new EvaVoiceClient(mContext, mEva, queue, editLastUtterance, rid);
-		dictationTask = new EvaHttpThread(mVoiceClient, listener);
-		dictationTask.execute((Object[])null);
 	}
 	
 	public void onDestroy() {

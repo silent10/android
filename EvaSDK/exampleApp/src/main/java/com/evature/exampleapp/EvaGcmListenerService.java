@@ -15,14 +15,13 @@ public class EvaGcmListenerService extends GcmListenerService {
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        Log.d(TAG, "From: " + from);
 
         String rid = data.getString("rid");
         try {
             int index = Integer.parseInt(data.getString("index"));
             String streamingResult = data.getString("streaming_result");
             boolean isFinal = Boolean.parseBoolean(data.getString("is_final", "false"));
-            Log.d(TAG, "streaming_result: " + streamingResult +"  index: "+index+ " is_final: "+isFinal);
+            Log.v(TAG, "streaming_result: " + streamingResult +"  index: "+index+ " is_final: "+isFinal+" from: "+from);
             EvaChatTrigger.notifyPartialTranscription(this, streamingResult, index, rid, isFinal);
         }
         catch(NumberFormatException e) {
