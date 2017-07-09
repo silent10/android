@@ -16,6 +16,7 @@ android {
         //main.java.srcDirs += 'src/main/generated-sources'
     }
 
+
     resourcePrefix 'evature_'
 
     // auto-increment version each build

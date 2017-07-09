@@ -22,7 +22,7 @@ this class listens to the microphone in a different thread, its output is an enc
 The class uses VAD algorithm to detect silence and stop the recording.
 The actual encoding is done in the class FLACStreamEncoder - which is actually a bridge to the C++ Flac library.
 
-2. FLACStreamEncoder - see above - encodes a stream of PCM audio into FLAC audio.
+2. FLACStreamEncoder - see above - encodes a stream of PCM audio into FLAC audio (in its own thread).
 
 3. EvaVoiceClient - this class is responsible to upload a stream using chunked HTTP POST.
 4. EvaTextClient - responsible for sending Eva requests via text (eg. when undo'ing or editing last utterance).

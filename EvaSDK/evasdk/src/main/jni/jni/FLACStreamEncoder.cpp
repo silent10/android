@@ -1,105 +1,28 @@
 
 
-// Define __STDINT_LIMITS to get INT8_MAX and INT16_MAX.
-#define __STDINT_LIMITS 1
-#include <stdint.h>
-#include <assert.h>
-#include <string.h>
 #include <alloca.h>
-#include <limits.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/stat.h>  /* Iftah:  for mkfifo */
+#include <jni.h>
+#include <android/log.h>
 
 
 #include "FLAC/metadata.h"
 #include "FLAC/stream_encoder.h"
+#include "jni/jni_utils.h"
+#include "jni/FLACStreamEncoder.h"
 
-
-#include <jni.h>
-
-#include <android/log.h>
-
-/*****************************************************************************
- * Very simple traits for int8_t/int16_t
- **/
-template <typename intT>
-struct type_traits
-{
-};
-
-
-template <>
-struct type_traits<int8_t>
-{
-  enum {
-    MAX = INT8_MAX,
-  };
-};
-
-
-template <>
-struct type_traits<int16_t>
-{
-  enum {
-    MAX = INT16_MAX,
-  };
-};
 
 namespace {
 
 
 
 
-/**
- * Convert a jstring to a UTF-8 char pointer. Ownership of the pointer goes
- * to the caller.
- **/
-char * convert_jstring_path(JNIEnv * env, jstring input)
-{
-  char buf[PATH_MAX];
-
-  jboolean copy = false;
-  char const * str = env->GetStringUTFChars(input, &copy);
-  if (NULL == str) {
-    // OutOfMemoryError has already been thrown here.
-    return NULL;
-  }
-
-  char * ret = strdup(str);
-  env->ReleaseStringUTFChars(input, str);
-  return ret;
-}
-
-
-/**
- * Throws the given exception/message
- **/
-void throwByName(JNIEnv * env, const char * name, const char * msg)
-{
-  jclass cls = env->FindClass(name);
-
-  // If cls is NULL, an exception has already been thrown
-  if (NULL != cls) {
-    env->ThrowNew(cls, msg);
-    // Ignore return value of ThrowNew... all we could reasonably do is try and
-    // throw another exception, after all.
-  }
-
-  env->DeleteLocalRef(cls);
-}
-
 
 /*****************************************************************************
  * Constants
  **/
-static char const * const FLACStreamEncoder_classname =
-		"com/evature/evasdk/evaapis/FLACStreamEncoder";
-static char const * const FLACStreamEncoder_mObject = "mObject";
-static char const * const FLACStreamEncoder_writeCallback = "writeCallback";
-
-static char const * const IllegalArgumentException_classname =
-		"java.lang.IllegalArgumentException";
 
 static char const * const LTAG = "FLACStreamEncoder/native";
 
@@ -107,24 +30,27 @@ static int COMPRESSION_LEVEL = 5;
 
 
 
-// Iftah:
-static JavaVM *java_vm;
-static jclass streamer_jcls;
-static jfieldID streamer_mObj;
-static jmethodID streamer_writeMethod;
 
-// Iftah:
-/***********
- * encoder	The encoder instance calling the callback.
- * buffer	An array of encoded data of length bytes.
- * bytes	The byte length of buffer.
- * samples	The number of samples encoded by buffer. 0 has a special meaning; see above.
- * current_frame	The number of the current frame being encoded.
- * client_data	The callee's client data set through FLAC__stream_encoder_init_*().
- */
+
 extern "C" {
-	FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder *encoder,
+
+	/***********
+	 * encoder	The encoder instance calling the callback.
+	 * buffer	An array of encoded data of length bytes.
+	 * bytes	The byte length of buffer.
+	 * samples	The number of samples encoded by buffer. 0 has a special meaning; see above.
+	 * current_frame	The number of the current frame being encoded.
+	 * client_data	The callee's client data set through FLAC__stream_encoder_init_*().
+	 */
+ 	FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder *encoder,
 		const FLAC__byte buffer[], size_t bytes, unsigned samples, unsigned current_frame, void *client_data);
+
+
+
+	JavaVM * get_java_vm();
+	jmethodID get_streamer_writeMethod();
+
+
 }
 
 
@@ -151,517 +77,333 @@ extern "C" {
  *    c) the writer thread is woken.
  **/
 
-class FLACStreamEncoder {
-public:
-	// Write FIFO
-	struct write_fifo_t {
-		write_fifo_t(FLAC__int32 * buf, int fillsize) :
-				m_next(NULL), m_buffer(buf) // Taking ownership here.
-						, m_buffer_fill_size(fillsize) {
-		}
 
-		~write_fifo_t() {
-			// We have ownership!
-			delete[] m_buffer;
-			delete m_next;
-		}
+/**
+ * Takes ownership of the outfile.
+ * Iftah: pass NULL outfile in order to use the write_callback instead
+ **/
+FLACStreamEncoder::FLACStreamEncoder(char * outfile, int sample_rate, int channels,
+		int bits_per_sample, bool verify, int frame_size, jobject obj) :
+    m_outfile(outfile), m_sample_rate(sample_rate),
+    m_channels(channels), m_bits_per_sample(bits_per_sample),
+    m_encoder(NULL), m_max_amplitude(0), m_average_sum(0),
+    m_average_count(0), m_write_buffer(NULL), m_write_buffer_size(0),
+    m_write_buffer_offset(0), m_fifo(NULL), m_kill_writer(false)
+    , m_verify(verify), m_frame_size(frame_size), m_obj(obj) {    }
 
-		write_fifo_t * last() volatile {
-			volatile write_fifo_t * last = this;
-			while (last->m_next) {
-				last = last->m_next;
-			}
-			return (write_fifo_t *) last;
-		}
+/**
+ * There are no exceptions here, so we need to "construct" outside the ctor.
+ * Returns NULL on success, else an error message
+ **/
+char const * const FLACStreamEncoder::init() {
 
-		write_fifo_t * m_next;
-		FLAC__int32 * m_buffer;
-		int m_buffer_fill_size;
-	};
-
-	// Thread trampoline arguments
-	struct trampoline {
-		typedef void * (FLACStreamEncoder::*func_t)(void * args);
-
-		FLACStreamEncoder * m_encoder;
-		func_t m_func;
-		void * m_args;
-
-		trampoline(FLACStreamEncoder * encoder, func_t func, void * args) :
-				m_encoder(encoder), m_func(func), m_args(args) {
-		}
-	};
-
-	/**
-	 * Takes ownership of the outfile.
-	 * Iftah: pass NULL outfile in order to use the write_callback instead
-	 **/
-	FLACStreamEncoder(char * outfile, int sample_rate, int channels,
-			int bits_per_sample, bool verify, int frame_size, jobject obj) :
-			m_outfile(outfile), m_sample_rate(sample_rate),
-			m_channels(channels), m_bits_per_sample(bits_per_sample),
-			m_encoder(NULL), m_max_amplitude(0), m_average_sum(0),
-			m_average_count(0), m_write_buffer(NULL), m_write_buffer_size(0),
-			m_write_buffer_offset(0), m_fifo(NULL), m_kill_writer(false)
-			, m_verify(verify), m_frame_size(frame_size), m_obj(obj) {
+	// Try to create the encoder instance
+	m_encoder = FLAC__stream_encoder_new();
+	if (!m_encoder) {
+		return "Could not create FLAC__StreamEncoder!";
 	}
 
-	/**
-	 * There are no exceptions here, so we need to "construct" outside the ctor.
-	 * Returns NULL on success, else an error message
-	 **/
-	char const * const init() {
-
-		// Try to create the encoder instance
-		m_encoder = FLAC__stream_encoder_new();
-		if (!m_encoder) {
-			return "Could not create FLAC__StreamEncoder!";
-		}
-
-		// Try to initialize the encoder.
-		FLAC__bool ok = true;
-		ok &= FLAC__stream_encoder_set_sample_rate(m_encoder,
-				1.0f * m_sample_rate);
-		ok &= FLAC__stream_encoder_set_channels(m_encoder, m_channels);
-		ok &= FLAC__stream_encoder_set_bits_per_sample(m_encoder,
-				m_bits_per_sample);
-		ok &= FLAC__stream_encoder_set_verify(m_encoder, m_verify);
-		ok &= FLAC__stream_encoder_set_compression_level(m_encoder,
-				COMPRESSION_LEVEL);
-		ok &= FLAC__stream_encoder_set_blocksize(m_encoder, m_frame_size); // Iftah: attempt to write smaller chunks in higher frequency
-		if (!ok) {
-			return "Could not set up FLAC__StreamEncoder with the given parameters!";
-		}
-
-
-		// Try initializing the file stream.
-		FLAC__StreamEncoderInitStatus init_status;
-
-		__android_log_print(ANDROID_LOG_DEBUG, LTAG, "initializing encoder, m_obj=%p", m_obj);
-
-		if (m_outfile != NULL) {
-			init_status =
-					FLAC__stream_encoder_init_file(m_encoder, m_outfile, NULL, NULL);
-		}
-		else {
-			init_status = FLAC__stream_encoder_init_stream(
-					m_encoder,
-					encoder_WriteCallback,
-					NULL,
-					NULL,
-					NULL,
-					this
-
-			);
-		}
-
-		if (FLAC__STREAM_ENCODER_INIT_STATUS_OK != init_status) {
-			__android_log_print(ANDROID_LOG_ERROR, LTAG, "Could not initialize FLAC__StreamEncoder!");
-		}
-		else {
-			__android_log_print(ANDROID_LOG_DEBUG, LTAG, "initialized encoder");
-		}
-
-
-		// Allocate write buffer. Based on observations noted down in issue #106, we'll
-		// choose this to be 32k in size. Actual allocation happens lazily.
-		//m_write_buffer_size = 32768;
-		// Iftah: attempt to write smaller chunks in higher frequency
-		m_write_buffer_size = m_frame_size*2;
-
-		// The write FIFO gets created lazily. But we'll initialize the mutex for it
-		// here.
-		int err = pthread_mutex_init(&m_fifo_mutex, NULL);
-		if (err) {
-			return "Could not initialize FIFO mutex!";
-		}
-
-		// Similarly, create the condition variable for the writer thread.
-		err = pthread_cond_init(&m_writer_condition, NULL);
-		if (err) {
-			return "Could not initialize writer thread condition!";
-		}
-
-		// Start thread!
-		err = pthread_create(&m_writer, NULL,
-				&FLACStreamEncoder::trampoline_func,
-				new trampoline(this, &FLACStreamEncoder::writer_thread, NULL));
-		if (err) {
-			return "Could not start writer thread!";
-		}
-
-
-
-		return NULL;
+	// Try to initialize the encoder.
+	FLAC__bool ok = true;
+	ok &= FLAC__stream_encoder_set_sample_rate(m_encoder,
+			1.0f * m_sample_rate);
+	ok &= FLAC__stream_encoder_set_channels(m_encoder, m_channels);
+	ok &= FLAC__stream_encoder_set_bits_per_sample(m_encoder,
+			m_bits_per_sample);
+	ok &= FLAC__stream_encoder_set_verify(m_encoder, m_verify);
+	ok &= FLAC__stream_encoder_set_compression_level(m_encoder,
+			COMPRESSION_LEVEL);
+	ok &= FLAC__stream_encoder_set_blocksize(m_encoder, m_frame_size); // Iftah: attempt to write smaller chunks in higher frequency
+	if (!ok) {
+		return "Could not set up FLAC__StreamEncoder with the given parameters!";
 	}
 
-	/**
-	 * Destroys encoder instance, releases outfile
-	 **/
-	~FLACStreamEncoder() {
-		// Flush thread.
+
+	// Try initializing the file stream.
+	FLAC__StreamEncoderInitStatus init_status;
+
+	__android_log_print(ANDROID_LOG_DEBUG, LTAG, "initializing encoder, m_obj=%p", m_obj);
+
+	if (m_outfile != NULL) {
+		init_status =
+				FLAC__stream_encoder_init_file(m_encoder, m_outfile, NULL, NULL);
+	}
+	else {
+		init_status = FLAC__stream_encoder_init_stream(
+				m_encoder,
+				encoder_WriteCallback,
+				NULL,
+				NULL,
+				NULL,
+				this
+
+		);
+	}
+
+	if (FLAC__STREAM_ENCODER_INIT_STATUS_OK != init_status) {
+		__android_log_print(ANDROID_LOG_ERROR, LTAG, "Could not initialize FLAC__StreamEncoder!");
+	}
+	else {
+		__android_log_print(ANDROID_LOG_DEBUG, LTAG, "initialized encoder");
+	}
+
+
+	// Allocate write buffer. Based on observations noted down in issue #106, we'll
+	// choose this to be 32k in size. Actual allocation happens lazily.
+	//m_write_buffer_size = 32768;
+	// Iftah: attempt to write smaller chunks in higher frequency
+	m_write_buffer_size = m_frame_size*2;
+
+	// The write FIFO gets created lazily. But we'll initialize the mutex for it
+	// here.
+	int err = pthread_mutex_init(&m_fifo_mutex, NULL);
+	if (err) {
+		return "Could not initialize FIFO mutex!";
+	}
+
+	// Similarly, create the condition variable for the writer thread.
+	err = pthread_cond_init(&m_writer_condition, NULL);
+	if (err) {
+		return "Could not initialize writer thread condition!";
+	}
+
+	// Start thread!
+	err = pthread_create(&m_writer, NULL,
+			&FLACStreamEncoder::trampoline_func,
+			new trampoline(this, &FLACStreamEncoder::writer_thread, NULL));
+	if (err) {
+		return "Could not start writer thread!";
+	}
+
+
+
+	return NULL;
+}
+
+/**
+ * Destroys encoder instance, releases outfile
+ **/
+FLACStreamEncoder::~FLACStreamEncoder() {
+	// Flush thread.
+	flush_to_fifo();
+
+	pthread_mutex_lock(&m_fifo_mutex);
+	m_kill_writer = true;
+	pthread_mutex_unlock(&m_fifo_mutex);
+
+	pthread_cond_broadcast(&m_writer_condition);
+
+	// Clean up thread related stuff.
+	void * retval = NULL;
+	pthread_join(m_writer, &retval);
+	pthread_cond_destroy(&m_writer_condition);
+	pthread_mutex_destroy(&m_fifo_mutex);
+
+	// Clean up FLAC stuff
+	if (m_encoder) {
+		FLAC__stream_encoder_finish(m_encoder);
+		FLAC__stream_encoder_delete(m_encoder);
+		m_encoder = NULL;
+	}
+
+	if (m_outfile) {
+		free(m_outfile);
+		m_outfile = NULL;
+	}
+
+	if (m_obj) {
+		JNIEnv* env;
+		JavaVM *java_vm = get_java_vm();
+		if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+			__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
+		}
+		else {
+			env->DeleteGlobalRef(m_obj);
+		}
+	}
+}
+
+/**
+ * Flushes internal buffers to disk.
+ **/
+void FLACStreamEncoder::flush() {
+	//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "flush() called.");
+	flush_to_fifo();
+
+	// Signal writer to wake up.
+	pthread_cond_signal(&m_writer_condition);
+}
+
+/**
+ * Writes bufsize elements from buffer to the stream. Returns the number of
+ * bytes actually written.
+ **/
+int FLACStreamEncoder::write(char * buffer, int bufsize) {
+	//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Asked to write buffer of size %d", bufsize);
+
+	// We have 8 or 16 bit pcm in the buffer, but FLAC expects 32 bit samples,
+	// where some of the 32 bits are unused.
+	int bufsize32 = bufsize / (m_bits_per_sample / 8);
+	//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Required size: %d", bufsize32);
+
+	// Protect from overly large buffers on the JNI side.
+	if (bufsize32 > m_write_buffer_size) {
+		// The only way we can handle this sanely without fragmenting buffers and
+		// so forth is to use a separate code path here. In this, we'll flush the
+		// current write buffer to the FIFO, and immediately append a new
+		// FIFO entry that's as large as bufsize32.
 		flush_to_fifo();
 
-		pthread_mutex_lock(&m_fifo_mutex);
-		m_kill_writer = true;
-		pthread_mutex_unlock(&m_fifo_mutex);
+		m_write_buffer = new FLAC__int32[bufsize32];
+		m_write_buffer_offset = 0;
 
-		pthread_cond_broadcast(&m_writer_condition);
+		int ret = copyBuffer(buffer, bufsize, bufsize32);
+		flush_to_fifo();
 
-		// Clean up thread related stuff.
-		void * retval = NULL;
-		pthread_join(m_writer, &retval);
-		pthread_cond_destroy(&m_writer_condition);
-		pthread_mutex_destroy(&m_fifo_mutex);
-
-		// Clean up FLAC stuff
-		if (m_encoder) {
-			FLAC__stream_encoder_finish(m_encoder);
-			FLAC__stream_encoder_delete(m_encoder);
-			m_encoder = NULL;
-		}
-
-		if (m_outfile) {
-			free(m_outfile);
-			m_outfile = NULL;
-		}
-
-		if (m_obj) {
-			JNIEnv* env;
-			if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
-				__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
-			}
-			else {
-				env->DeleteGlobalRef(m_obj);
-			}
-		}
+		// Signal writer to wake up.
+		pthread_cond_signal(&m_writer_condition);
+		return ret;
 	}
 
-	/**
-	 * Flushes internal buffers to disk.
-	 **/
-	void flush() {
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "flush() called.");
+	// If the current write buffer cannot hold the amount of data we've
+	// got, push it onto the write FIFO and create a new buffer.
+	if (m_write_buffer
+			&& m_write_buffer_offset + bufsize32 > m_write_buffer_size) {
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG,
+		//		"JNI buffer is full, pushing to FIFO - buffer contains %d", m_write_buffer_offset);
 		flush_to_fifo();
 
 		// Signal writer to wake up.
 		pthread_cond_signal(&m_writer_condition);
 	}
 
-	/**
-	 * Writes bufsize elements from buffer to the stream. Returns the number of
-	 * bytes actually written.
-	 **/
-	int write(char * buffer, int bufsize) {
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Asked to write buffer of size %d", bufsize);
-
-		// We have 8 or 16 bit pcm in the buffer, but FLAC expects 32 bit samples,
-		// where some of the 32 bits are unused.
-		int bufsize32 = bufsize / (m_bits_per_sample / 8);
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Required size: %d", bufsize32);
-
-		// Protect from overly large buffers on the JNI side.
-		if (bufsize32 > m_write_buffer_size) {
-			// The only way we can handle this sanely without fragmenting buffers and
-			// so forth is to use a separate code path here. In this, we'll flush the
-			// current write buffer to the FIFO, and immediately append a new
-			// FIFO entry that's as large as bufsize32.
-			flush_to_fifo();
-
-			m_write_buffer = new FLAC__int32[bufsize32];
-			m_write_buffer_offset = 0;
-
-			int ret = copyBuffer(buffer, bufsize, bufsize32);
-			flush_to_fifo();
-
-			// Signal writer to wake up.
-			pthread_cond_signal(&m_writer_condition);
-			return ret;
-		}
-
-		// If the current write buffer cannot hold the amount of data we've
-		// got, push it onto the write FIFO and create a new buffer.
-		if (m_write_buffer
-				&& m_write_buffer_offset + bufsize32 > m_write_buffer_size) {
-			//__android_log_print(ANDROID_LOG_DEBUG, LTAG,
-			//		"JNI buffer is full, pushing to FIFO - buffer contains %d", m_write_buffer_offset);
-			flush_to_fifo();
-
-			// Signal writer to wake up.
-			pthread_cond_signal(&m_writer_condition);
-		}
-
-		// If we need to create a new buffer, do so now.
-		if (!m_write_buffer) {
-			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Need new buffer.");
-			m_write_buffer = new FLAC__int32[m_write_buffer_size];
-			m_write_buffer_offset = 0;
-		}
-
-		// At this point we know that there's a write buffer, and we know that
-		// there's enough space in it to write the data we've received.
-		int ret = copyBuffer(buffer, bufsize, bufsize32);
-		return ret;
+	// If we need to create a new buffer, do so now.
+	if (!m_write_buffer) {
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Need new buffer.");
+		m_write_buffer = new FLAC__int32[m_write_buffer_size];
+		m_write_buffer_offset = 0;
 	}
 
-	/**
-	 * Writer thread function.
-	 **/
-	void * writer_thread(void * args) {
+	// At this point we know that there's a write buffer, and we know that
+	// there's enough space in it to write the data we've received.
+	int ret = copyBuffer(buffer, bufsize, bufsize32);
+	return ret;
+}
+
+/**
+ * Writer thread function.
+ **/
+void * FLACStreamEncoder::writer_thread(void * args) {
 
 //		__android_log_print(ANDROID_LOG_INFO, LTAG, "<<< Attaching thread");
-		JNIEnv* env;
-		java_vm->AttachCurrentThread(&env, NULL);
+	JNIEnv* env;
+	JavaVM *java_vm = get_java_vm();
+	java_vm->AttachCurrentThread(&env, NULL);
 
-		// Loop while m_kill_writer is false.
-		pthread_mutex_lock(&m_fifo_mutex);
-		do {
-			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Going to sleep...");
-			pthread_cond_wait(&m_writer_condition, &m_fifo_mutex);
-			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Wakeup: should I die after this? %s", (m_kill_writer ? "yes" : "no"));
+	// Loop while m_kill_writer is false.
+	pthread_mutex_lock(&m_fifo_mutex);
+	do {
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Going to sleep...");
+		pthread_cond_wait(&m_writer_condition, &m_fifo_mutex);
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Wakeup: should I die after this? %s", (m_kill_writer ? "yes" : "no"));
 
-			// Grab ownership over the current FIFO, and release the lock again.
-			write_fifo_t * fifo = (write_fifo_t *) m_fifo;
-			while (fifo) {
-				m_fifo = NULL;
-				pthread_mutex_unlock(&m_fifo_mutex);
+		// Grab ownership over the current FIFO, and release the lock again.
+		write_fifo_t * fifo = (write_fifo_t *) m_fifo;
+		while (fifo) {
+			m_fifo = NULL;
+			pthread_mutex_unlock(&m_fifo_mutex);
 
-				// Now we can take all the time we want to iterate over the FIFO's
-				// contents. We just need to make sure to grab the lock again before
-				// going into the next iteration of this loop.
-				int retry = 0;
+			// Now we can take all the time we want to iterate over the FIFO's
+			// contents. We just need to make sure to grab the lock again before
+			// going into the next iteration of this loop.
+			int retry = 0;
 
-				write_fifo_t * current = fifo;
-				while (current) {
+			write_fifo_t * current = fifo;
+			while (current) {
 //					__android_log_print(ANDROID_LOG_VERBOSE, LTAG,
 //							"<<< Writer encoding size %d",
 //							current->m_buffer_fill_size);
-					//__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Encoding current entry %p, buffer %p, size %d",
-					//    current, current->m_buffer, current->m_buffer_fill_size);
+				//__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Encoding current entry %p, buffer %p, size %d",
+				//    current, current->m_buffer, current->m_buffer_fill_size);
 
-					// Encode!
-					FLAC__bool ok = FLAC__stream_encoder_process_interleaved(
-							m_encoder, current->m_buffer,
-							current->m_buffer_fill_size);
-					if (ok) {
-						retry = 0;
+				// Encode!
+				FLAC__bool ok = FLAC__stream_encoder_process_interleaved(
+						m_encoder, current->m_buffer,
+						current->m_buffer_fill_size);
+				if (ok) {
+					retry = 0;
+				} else {
+					// We don't really know how much was written, we have to assume it was
+					// nothing.
+					if (++retry > 3) {
+						__android_log_print(ANDROID_LOG_ERROR, LTAG,
+								"Giving up on writing current FIFO!");
+						break;
 					} else {
-						// We don't really know how much was written, we have to assume it was
-						// nothing.
-						if (++retry > 3) {
-							__android_log_print(ANDROID_LOG_ERROR, LTAG,
-									"Giving up on writing current FIFO!");
-							break;
-						} else {
-							// Sleep a little before retrying.
-							__android_log_print(ANDROID_LOG_ERROR, LTAG,
-									"Writing FIFO entry %p failed; retrying...", current->m_buffer);
-							usleep(5000); // 5msec
-						}
-						continue;
+						// Sleep a little before retrying.
+						__android_log_print(ANDROID_LOG_ERROR, LTAG,
+								"Writing FIFO entry %p failed; retrying...", current->m_buffer);
+						usleep(5000); // 5msec
 					}
-
-					current = current->m_next;
+					continue;
 				}
 
-				// Once we've written everything, delete the fifo and grab the lock again.
-				delete fifo;
-				pthread_mutex_lock(&m_fifo_mutex);
-				fifo = (write_fifo_t *) m_fifo;
+				current = current->m_next;
 			}
 
-			//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "End of wakeup, or should I die? %s", (m_kill_writer ? "yes" : "no"));
-		} while (!m_kill_writer);
+			// Once we've written everything, delete the fifo and grab the lock again.
+			delete fifo;
+			pthread_mutex_lock(&m_fifo_mutex);
+			fifo = (write_fifo_t *) m_fifo;
+		}
 
-		pthread_mutex_unlock(&m_fifo_mutex);
+		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "End of wakeup, or should I die? %s", (m_kill_writer ? "yes" : "no"));
+	} while (!m_kill_writer);
+
+	pthread_mutex_unlock(&m_fifo_mutex);
 
 //		__android_log_print(ANDROID_LOG_INFO, LTAG, "<<< Detaching thread");
-		java_vm->DetachCurrentThread();
+	java_vm->DetachCurrentThread();
 
 //		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer sleeping");
 
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writer thread dies.");
-		for (long i = 0; i < 50; i++) {
-			usleep(5000);
-		}
+	//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writer thread dies.");
+	for (long i = 0; i < 50; i++) {
+		usleep(5000);
+	}
 //		__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "<<< Writer slept");
 //    __android_log_print(ANDROID_LOG_DEBUG, LTAG, "slept.");
-		return NULL;
-	}
+	return NULL;
+}
 
-	float getMaxAmplitude() {
-		float result = m_max_amplitude;
-		m_max_amplitude = 0;
-		return result;
-	}
+float FLACStreamEncoder::getMaxAmplitude() {
+	float result = m_max_amplitude;
+	m_max_amplitude = 0;
+	return result;
+}
 
-	float getAverageAmplitude() {
-		float result = m_average_sum / m_average_count;
-		m_average_sum = 0;
-		m_average_count = 0;
-		return result;
-	}
+float FLACStreamEncoder::getAverageAmplitude() {
+	float result = m_average_sum / m_average_count;
+	m_average_sum = 0;
+	m_average_count = 0;
+	return result;
+}
 
-private:
-	/**
-	 * Append current write buffer to FIFO, and clear it.
-	 **/
-	inline void flush_to_fifo() {
-		if (!m_write_buffer) {
-			return;
-		}
 
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Flushing to FIFO.");
 
-		write_fifo_t * next = new write_fifo_t(m_write_buffer,
-				m_write_buffer_offset);
-		m_write_buffer = NULL;
-
-		pthread_mutex_lock(&m_fifo_mutex);
-		if (m_fifo) {
-			write_fifo_t * last = m_fifo->last();
-			last->m_next = next;
-		} else {
-			m_fifo = next;
-		}
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "FIFO: %p, new entry: %p", m_fifo, next);
-		pthread_mutex_unlock(&m_fifo_mutex);
-	}
-
-	/**
-	 * Wrapper around templatized copyBuffer that writes to the current write
-	 * buffer at the current offset.
-	 **/
-	inline int copyBuffer(char * buffer, int bufsize, int bufsize32) {
-		FLAC__int32 * buf = m_write_buffer + m_write_buffer_offset;
-
-		//__android_log_print(ANDROID_LOG_VERBOSE, LTAG, "Adding %d to JNI buffer", bufsize32);
-		//__android_log_print(ANDROID_LOG_DEBUG, LTAG, "Writing at %p[%d] = %p", m_write_buffer, m_write_buffer_offset, buf);
-		if (8 == m_bits_per_sample) {
-			copyBuffer<int8_t>(buf, buffer, bufsize);
-			m_write_buffer_offset += bufsize32;
-		} else if (16 == m_bits_per_sample) {
-			copyBuffer<int16_t>(buf, buffer, bufsize);
-			m_write_buffer_offset += bufsize32;
-		} else {
-			// XXX should never happen, just exit.
-			return 0;
-		}
-
-		return bufsize;
-	}
-
-	/**
-	 * Copies inbuf to outpuf, assuming that inbuf is really a buffer of
-	 * sized_sampleT.
-	 * As a side effect, m_max_amplitude, m_average_sum and m_average_count are
-	 * modified.
-	 **/
-	template<typename sized_sampleT>
-	void copyBuffer(FLAC__int32 * outbuf, char * inbuf, int inbufsize) {
-		sized_sampleT * inbuf_sized = reinterpret_cast<sized_sampleT *>(inbuf);
-		for (int i = 0; i < inbufsize / sizeof(sized_sampleT); ++i) {
-			sized_sampleT cur = inbuf_sized[i];
-
-			// Convert sized sample to int32
-			outbuf[i] = cur;
-
-			// Convert to float on a range from 0..1
-			if (cur < 0) {
-				// Need to lose precision here, the positive value range is lower than
-				// the negative value range in a signed integer.
-				cur = -(cur + 1);
-			}
-			float amp = static_cast<float>(cur)
-					/ type_traits<sized_sampleT>::MAX;
-
-			// Store max amplitude
-			if (amp > m_max_amplitude) {
-				m_max_amplitude = amp;
-			}
-
-			// Sum average.
-			if (!(i % m_channels)) {
-				m_average_sum += amp;
-				++m_average_count;
-			}
-		}
-	}
 
 	// Thread trampoline
-	static void * trampoline_func(void * args) {
-		trampoline * tramp = static_cast<trampoline *>(args);
-		FLACStreamEncoder * encoder = tramp->m_encoder;
-		trampoline::func_t func = tramp->m_func;
+void * FLACStreamEncoder::trampoline_func(void * args) {
+	trampoline * tramp = static_cast<trampoline *>(args);
+	FLACStreamEncoder * encoder = tramp->m_encoder;
+	trampoline::func_t func = tramp->m_func;
 
-		void * result = (encoder->*func)(tramp->m_args);
+	void * result = (encoder->*func)(tramp->m_args);
 
-		// Ownership tor tramp is passed to us, so we'll delete it here.
-		delete tramp;
-		return result;
-	}
-
-	// Configuration values passed to ctor
-	char * m_outfile;
-	int m_sample_rate;
-	int m_channels;
-	int m_bits_per_sample;
-
-	// FLAC encoder instance
-	FLAC__StreamEncoder * m_encoder;
-
-	// Max amplitude measured
-	float m_max_amplitude;
-	float m_average_sum;
-	int m_average_count;
-
-	// JNI thread's buffer.
-	FLAC__int32 * m_write_buffer;
-	int m_write_buffer_size;
-	int m_write_buffer_offset;
-
-	bool m_verify;
-	int m_frame_size;
-
-
-	// Write FIFO
-	volatile write_fifo_t * m_fifo;
-	pthread_mutex_t m_fifo_mutex;
-
-	// Writer thread
-	pthread_t m_writer;
-	pthread_cond_t m_writer_condition;
-	volatile bool m_kill_writer;
-
-	public:
-	jobject m_obj; // pointer to the java object
-};
-
-/*****************************************************************************
- * Helper functions
- **/
-
-/**
- * Retrieve FLACStreamEncoder instance from the passed jobject.
- **/
-static FLACStreamEncoder * get_encoder(JNIEnv * env, jobject obj) {
-
-	jlong encoder_value = env->GetLongField(obj, streamer_mObj);
-
-	return reinterpret_cast<FLACStreamEncoder *>(encoder_value);
+	// Ownership tor tramp is passed to us, so we'll delete it here.
+	delete tramp;
+	return result;
 }
-
-/**
- * Store FLACStreamEncoder instance in the passed jobject.
- **/
-static void set_encoder(JNIEnv * env, jobject obj,
-		FLACStreamEncoder * encoder) {
-
-	jlong encoder_value = reinterpret_cast<jlong>(encoder);
-
-	env->SetLongField(obj, streamer_mObj, encoder_value);
-}
-
 
 
 } // anonymous namespace
@@ -674,6 +416,20 @@ static void set_encoder(JNIEnv * env, jobject obj,
 char * fifo_filename = 0;
 
 extern "C" {
+
+/*****************************************************************************
+ * Helper functions
+ **/
+
+/**
+ * Retrieve FLACStreamEncoder instance from the passed jobject.
+ **/
+FLACStreamEncoder * get_encoder(JNIEnv * env, jobject obj);
+
+/**
+ * Store FLACStreamEncoder instance in the passed jobject.
+ **/
+void set_encoder(JNIEnv * env, jobject obj, FLACStreamEncoder * encoder);
 
 
 // Iftah:
@@ -693,6 +449,7 @@ FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder 
 
 	// Get JNI Env
 	JNIEnv* env;
+	JavaVM *java_vm = get_java_vm();
 	if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
 		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
 		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
@@ -703,6 +460,7 @@ FLAC__StreamEncoderWriteStatus  encoder_WriteCallback(const FLAC__StreamEncoder 
 	jbyteArray arr = env->NewByteArray(bytes);
 	env->SetByteArrayRegion(arr, 0, bytes, (jbyte*) buffer);
 
+    jmethodID streamer_writeMethod = get_streamer_writeMethod();
 	env->CallVoidMethod(encoderCPP->m_obj, streamer_writeMethod, arr, bytes, samples, current_frame);
 	if (env->ExceptionCheck()) {
 		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>>> Write Callback: exception after calling method");
@@ -740,7 +498,7 @@ JNIEXPORT
 void Java_com_evature_evasdk_evaapis_FLACStreamEncoder_init(JNIEnv * env, jobject obj,
 		jstring outfile, jint sample_rate, jint channels,
 		jint bits_per_sample, jboolean verify, jint frame_size) {
-	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
+	static_assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *), "jlong smaller than pointer");
 
 	FLACStreamEncoder * encoder = new FLACStreamEncoder(
 			convert_jstring_path(env, outfile), sample_rate, channels,
@@ -772,7 +530,7 @@ JNIEXPORT
 void Java_com_evature_evasdk_evaapis_FLACStreamEncoder_initWithCallback(JNIEnv * env, jobject obj,
 		jint sample_rate, jint channels,
 		jint bits_per_sample, jboolean verify, jint frame_size) {
-	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
+	static_assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *), "jlong smaller than pointer");
 
 	FLACStreamEncoder * encoder = new FLACStreamEncoder(
 			NULL, sample_rate, channels,
@@ -865,44 +623,5 @@ JNIEXPORT jfloat Java_com_evature_evasdk_evaapis_FLACStreamEncoder_getAverageAmp
 	return encoder->getAverageAmplitude();
 }
 
-
-jint JNI_OnLoad(JavaVM *vm, void *reserved)
-{
-//	__android_log_print(ANDROID_LOG_INFO, LTAG, ">>> JNI_OnLoad");
-    java_vm = vm;
-
-
-	// Do the JNI dance for getting the mObject field, and write callback method
-    JNIEnv* env;
-	if (java_vm->GetEnv( (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
-		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>> GetEnv failed.");
-		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
-	}
-
-	jclass cls = env->FindClass(FLACStreamEncoder_classname);
-	if (env->ExceptionCheck()) {
-		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>>  failed to get class");
-		env->ExceptionDescribe();
-	    return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
-	}
-
-	streamer_jcls = cls;
-
-	assert(sizeof(jlong) >= sizeof(FLACStreamEncoder *));
-	jfieldID object_field = env->GetFieldID(streamer_jcls, FLACStreamEncoder_mObject, "J");
-	streamer_mObj = object_field;
-
-    jmethodID mid = env->GetMethodID(cls, FLACStreamEncoder_writeCallback, "([BIII)V");  // buffer, length, samples, frame
-    if (env->ExceptionCheck()) {
-		__android_log_print(ANDROID_LOG_ERROR, LTAG, ">>>> Write Callback: failed to get method");
-		env->ExceptionDescribe();
-		return FLAC__STREAM_ENCODER_WRITE_STATUS_FATAL_ERROR;
-	}
-	assert(mid != 0);
-	streamer_writeMethod = mid;
-
-
-    return JNI_VERSION_1_6;
-}
 
 } // extern "C"

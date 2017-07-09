@@ -10,8 +10,8 @@ import java.nio.ByteBuffer;
  * 1) Function names: eg. Java_com_evature_evaapis_FLACStreamEncoder_init
  * 2) Class name const:  eg. FLACStreamEncoder_classname 
  * 3) And rebuild NDK:
- * ~/devel/android-ndk-r8e/ndk-build  from project folder above the `jni` folder
- * 4) move the resulting *.so files to jniLibs folder
+ * ~/devel/android-ndk-???/ndk-build  from project folder above the `jni` folder
+ * 4) move the resulting *.so files (in `libs` folder) to `jniLibs` folder
  */
 
 public class FLACStreamEncoder
