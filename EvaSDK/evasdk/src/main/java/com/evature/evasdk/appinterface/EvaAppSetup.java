@@ -45,6 +45,7 @@ public class EvaAppSetup {
     public static boolean semanticHighlightingLocations = true;
     public static boolean semanticHighlightingHotelAttributes = true;
     public static boolean autoOpenMicrophone = false;  // true for hands free usage
+    public static boolean autoOpenMicrophoneOnQuestion = false; // true for hands free usage
     public static boolean locationTracking = true;     // true to enable Eva tracking location - used for understanding "home" location
     public static boolean tapToEditChat = false;
     public static boolean startEvaAsActivity = false;  // false to open as fragment, true to open as activity

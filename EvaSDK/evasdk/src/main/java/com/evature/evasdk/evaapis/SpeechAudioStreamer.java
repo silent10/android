@@ -12,7 +12,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 //import org.apache.commons.io.FileUtils;
@@ -41,25 +40,29 @@ public class SpeechAudioStreamer {
 	// VAD Parameters,  default values
 	private long mPreVadRecordingTime = 150; 	// time from start of recording where no VAD is considered
 	private long mNoisePeriod = 200;   			// minimum continuous noisy time to be considered "Noise"
-	private long mSilencePeriod = 700; 			// minimum continuous silent time to be considered "Silence"
+	private long mSilencePeriod = 500; 			// minimum continuous silent time to be considered "Silence"
 
-    private int aggressiveness = 3; // 0..3 A more aggressive (higher mode) VAD is more restrictive in reporting speech
-    private final int VAD_BUFFER_SAMPLES = 10*16; // 10ms of buffer at 16 samples per 1ms.  Buffer can be 10ms, 20ms, 30ms
+    private final int AGGRESSIVNESS = 3; // 0..3 A more aggressive (higher mode) VAD is more restrictive in reporting speech
+    private final int VAD_BUFFER_SAMPLES = 10*SAMPLE_RATE/1000; // X ms of buffer at 16 samples per 1ms.  WebRTC VAD requires Buffer to be one of 10ms, 20ms, 30ms
 
 	
 	public static final int SAMPLE_RATE = 16000;
 	public static final int CHANNELS = 1;
 
-	private int mSampleRate;
-
 	int mBufferIndex = 0;  // cyclic buffers index (cell used is:  index modulo buffer size)
-	float mSoundLevelBuffer[] = new float[26]; // this is passed to the visualization of the sound-level
+	float mSoundLevelBuffer[] = new float[26]; // this is passed to the visualization of the sound-level - 26 amplitude points for wavy line (the horizontal density of the waves)
+    final int  VISUALIZATION_TIMESTAMP = 30; // add volume point every (roughly) X ms (the speed the waves move)
+
     short[] mVADbuffer = new short[VAD_BUFFER_SAMPLES];
-    int VADbufferSize = 0;  // as the buffer gets filled this is increased
+    int mVADbufferSize = 0;  // as the buffer gets filled this is increased
 
 	long mStartLastSilence = -1;
 	long mStartLastNoise = -1;
-	private float mPeakSoundLevel;
+    long mLastVisualizationTime = 0;
+    float mAccumulator = 0;
+    int mAccumulatedSamples = 0;
+
+    private float mPeakSoundLevel;
 	private float mMinSoundLevel;
 	
 	public boolean wasNoise;
@@ -68,10 +71,9 @@ public class SpeechAudioStreamer {
 
 
 
-	public SpeechAudioStreamer(Context context, int sampleRate) {
+	public SpeechAudioStreamer() {
 //		fifoPath = context.getApplicationInfo().dataDir + "/flac_stream_fifo";
 
-		mSampleRate = sampleRate;
 		totalTimeRecording = 0;
 		
 //		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -89,7 +91,7 @@ public class SpeechAudioStreamer {
 		mEncoderBuffer = new byte[mRecorderBufferSize];
 
         vadWebRTC = new VADWebRTC();
-        vadWebRTC.init(aggressiveness);
+        vadWebRTC.init(AGGRESSIVNESS);
 		DLog.i(TAG, "<<< Initialized buffer to "+mRecorderBufferSize);
     }
 
@@ -135,44 +137,52 @@ public class SpeechAudioStreamer {
 		return (int)mMinSoundLevel;
 	}
 	
-	public void addVolumeSample(float volumeSample) {
+	public void addVolumeSampleForVisulazation(float volumeSample) {
 
 		mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ] =  volumeSample; // movingAverage;
 		//Log.d(TAG, "@@@ added "+mSoundLevelBuffer[mBufferIndex % mSoundLevelBuffer.length ]+"  to buffer, index now at "+mBufferIndex);
 		mBufferIndex++;
 	}
 
-	private Boolean handleVolumeSample(short[] audioBuffer, float currentVolume, long startOfRecording) {
+	long sampleTimestamp = -1;
+
+    /****
+     *
+     * @param audioBuffer
+     * @param startOfRecording
+     *
+     * @return      False   if enough consecutive noise to start waiting for silence
+     *              True    if enough consecutive silence to stop the recording
+     *              null    otherwise
+     */
+	private Boolean checkForSilence(short[] audioBuffer, long startOfRecording) {
 
 		// reduce Peak and increase minSound - to allow temporary peak/min to disappear over time
 //		float dist = mPeakSoundLevel - mMinSoundLevel;
 //		float factor = dist * 0.01f;
 //		mPeakSoundLevel -= factor;
 //		mMinSoundLevel += factor;
-		
-		long timeRecording = (System.nanoTime() - startOfRecording) / 1000000;
-		if (timeRecording < getPreVadRecordingTime()) {
-			// too soon to consider VAD
-			return null;
-		}
-//		
-		if (currentVolume > mPeakSoundLevel) {
-			mPeakSoundLevel = currentVolume;
-		}
-		if (currentVolume < mMinSoundLevel) {
-			mMinSoundLevel = currentVolume;
-		}
-		
-		addVolumeSample(currentVolume); // addVolumeSample(movingAverage);  
-		
-		// identifying speech start by sudden volume up in the last sample relative to the previous MOVING_AVERAGE_BUFFER_SIZE samples
+
+        long now = System.currentTimeMillis();
+        sampleTimestamp += audioBuffer.length / 16; // 16ms per sample
+
+
+        long timeRecording = now - startOfRecording;
+        if (timeRecording < getPreVadRecordingTime()) {
+            // too soon to consider VAD
+            DLog.v(TAG, "Too soon to consider VAD");
+            return null;
+        }
+
+
+        // identifying speech start by sudden volume up in the last sample relative to the previous MOVING_AVERAGE_BUFFER_SIZE samples
 //		if (mBufferIndex > MOVING_AVERAGE_BUFFER_SIZE && currentVolume > (2.0/MOVING_AVERAGE_BUFFER_SIZE) * movingAverage) {
 //			// this last sample was half of the twice its part of last accumulation buffer
 //			// this was a noise sample
 //			return false;
 //		}
 
-		int result = vadWebRTC.voiceActivity(audioBuffer, VAD_BUFFER_SAMPLES, mSampleRate);
+		int result = vadWebRTC.voiceActivity(audioBuffer, VAD_BUFFER_SAMPLES, SAMPLE_RATE);
         boolean silence = result == 0;
         boolean noise = result == 1;
 
@@ -184,15 +194,18 @@ public class SpeechAudioStreamer {
 			
 			// found start of silence ?
 			if (mStartLastSilence == -1) {
-				mStartLastSilence = System.currentTimeMillis();
+				mStartLastSilence = now;
+                //DLog.v(TAG, "VAD decided silence - - waiting.");
 				return null;
 			}
 			
 			// long time of silence ?
-			if ((System.currentTimeMillis() - mStartLastSilence) > getSilencePeriod()) {
-				return true;
+			if ((now - mStartLastSilence) > getSilencePeriod()) {
+                //DLog.v(TAG, "VAD decided silence - - enough time!");
+                return true;
 			}
 			// not enough silent time passed
+            //DLog.v(TAG, "VAD decided silence - - waiting...");
 			return null;
 		} 
 
@@ -205,58 +218,82 @@ public class SpeechAudioStreamer {
 			
 			// start of noise?
 			if (mStartLastNoise == -1) {
-				mStartLastNoise = System.currentTimeMillis();
+				mStartLastNoise = now;
+                //DLog.v(TAG, "VAD decided SPEECH - - waiting.");
 				return null;
 			}
 			
 			// long time noise?
-			if ((System.currentTimeMillis() - mStartLastNoise) > getNoisePeriod()) {
+			if ((now - mStartLastNoise) > getNoisePeriod()) {
+                //DLog.v(TAG, "VAD decided SPEECH - - enough time!");
 				return false;
 			}
 			// not enough noisy time passed
+            //DLog.v(TAG, "VAD decided SPEECH - - waiting...");
 			return null;
 		}
-		
+
+        //DLog.v(TAG, "VAD undecided?!");
 		// this is not a noise chunk
 		mStartLastNoise = -1;
 		return null;
 	}
 
-    float accumulator = 0;
 
 	// called roughly every 50ms with 1600 bytes (depends on device)
 	/***
+     * Handle visulazation, check for silence
 	 * @param numberOfReadBytes
 	 * @param startOfRecording
-	 * @return  true when detected silence, false when detected noise, null when undetermined
 	 */
-	private void checkForSilence(int numberOfReadBytes, long startOfRecording) {
+	private void handleAudioBuffer(int numberOfReadBytes, long startOfRecording) {
 
 		if (numberOfReadBytes == 0)
 			return;
 		
 		//Log.d(TAG, "Read "+numberOfReadBytes);
 		
-		if (mEncoderBuffer.length != numberOfReadBytes) {
+		if (mEncoderBuffer.length != numberOfReadBytes) { // sanity
 			DLog.w(TAG, "<<< unexpected numread="+numberOfReadBytes+" but buffer has "+ mEncoderBuffer.length);
 			if (mEncoderBuffer.length < numberOfReadBytes) {
 				numberOfReadBytes = mEncoderBuffer.length;
 			}
 		}
-		
+
+
 		// Analyze Sound.
 		for (int i = 0; i < numberOfReadBytes; i += 2) {
 			short sample = (short) ((mEncoderBuffer[i]) | mEncoderBuffer[i + 1] << 8);
-            mVADbuffer[VADbufferSize] = sample;
-            VADbufferSize++;
-            accumulator += sample * sample;
-            if (VADbufferSize == mVADbuffer.length) {
-                VADbufferSize = 0;
-                float currentVolume = accumulator / mVADbuffer.length;
-                accumulator = 0.0f;
+            mVADbuffer[mVADbufferSize] = sample;
+            mVADbufferSize++;
+            mAccumulator += sample * sample;
+            mAccumulatedSamples++;
+            if (mAccumulatedSamples % (SAMPLE_RATE/1000) == 0) {
+                sampleTimestamp++;  // every 16 samples is 1ms
+            }
 
-                Boolean hadSilence = handleVolumeSample(mVADbuffer, currentVolume, startOfRecording);
+            // handle visulization if enough time passed since last visualization
+            if ((sampleTimestamp - mLastVisualizationTime) >= VISUALIZATION_TIMESTAMP) {
+                float currentVolume = mAccumulator / mAccumulatedSamples;
+                mAccumulator = 0.0f;
+                mAccumulatedSamples = 0;
 
+                mLastVisualizationTime = sampleTimestamp;
+                addVolumeSampleForVisulazation(currentVolume);
+
+                if (currentVolume > mPeakSoundLevel) {
+                    mPeakSoundLevel = currentVolume;
+                }
+                if (currentVolume < mMinSoundLevel) {
+                    mMinSoundLevel = currentVolume;
+                }
+
+            }
+
+            if (mVADbufferSize == mVADbuffer.length) {
+                mVADbufferSize = 0;
+
+                Boolean hadSilence = checkForSilence(mVADbuffer, startOfRecording);
 
 				if (!wasNoise && Boolean.FALSE == hadSilence) {
 					DLog.d(TAG, "<<< Found initial noise");
@@ -302,8 +339,9 @@ public class SpeechAudioStreamer {
 
 		public void run() {
             long timeIncludingFake = System.nanoTime();
-			accumulator = 0.0f;
-            VADbufferSize = 0;
+			mAccumulator = 0.0f;
+            mAccumulatedSamples = 0;
+            mVADbufferSize = 0;
 
 			DLog.d(TAG, "<<< Starting producer thread");
 
@@ -340,7 +378,7 @@ public class SpeechAudioStreamer {
                     mEncoderBuffer[i] = 0;
                 }
 
-                int readSize = 10*mSampleRate* 2 / 1000 ; // 10ms, 16000 samples per second, 2 bytes per sample
+                int readSize = 10* SAMPLE_RATE* 2 / 1000 ; // 10ms, 16000 samples per second, 2 bytes per sample
                 while (mIsFakeingAudio) {
                     // TODO: optimize - make same size and FLAC encoder inner buffers
                     encode(mEncoderBuffer, readSize);
@@ -356,7 +394,8 @@ public class SpeechAudioStreamer {
                 int iterations = 0;
                 int errorIterations = 0;
 
-                long t0 = System.nanoTime();
+                long t0 = System.nanoTime() / 1000000;
+                sampleTimestamp = t0;
 
                 while (mIsRecording) {
                     readSize = mRecorder.read(mEncoderBuffer, 0, mEncoderBuffer.length);
@@ -383,7 +422,7 @@ public class SpeechAudioStreamer {
                         }
                     } else {
 
-                        checkForSilence(readSize, t0);
+                        handleAudioBuffer(readSize, t0);
 
                         if (mIsRecording) {
                             try {
@@ -414,7 +453,7 @@ public class SpeechAudioStreamer {
 
                 //				queue.put(new byte[0]);
 
-                long timeRecording = ((System.nanoTime() - t0) / 1000000);
+                long timeRecording = (System.nanoTime()/1000000) - t0;
                 long timeRecordingWithFake = ((System.nanoTime() - timeIncludingFake) / 1000000);
                 DLog.i(TAG, "<<< Finished producer thread - iterations=" + iterations + "  time real recording=" + timeRecording + "ms, time with fake="+timeRecordingWithFake);
 
@@ -467,7 +506,7 @@ public class SpeechAudioStreamer {
         mIsRecording = true;
         mIsFakeingAudio = true;
 
-        mEncoder.initWithCallback( mSampleRate, CHANNELS, 16, false, 256);
+        mEncoder.initWithCallback( SAMPLE_RATE, CHANNELS, 16, false, 256);
         DLog.i(TAG, "<<< Encoder initialized " + mEncoder.toString());
         Producer p = new Producer(mEncoder, queue);
 
@@ -564,6 +603,7 @@ public class SpeechAudioStreamer {
 
 	public void stop() {
 		mIsRecording = false;
+        mIsFakeingAudio = false;
 	}
 	
 	public boolean getIsRecording() {

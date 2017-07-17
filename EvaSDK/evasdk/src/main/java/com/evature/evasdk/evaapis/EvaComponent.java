@@ -85,6 +85,7 @@ public class EvaComponent implements
         public boolean semanticHighlightingHotelAttributes = true;
 
         public boolean autoOpenMicrophone = false;
+        public boolean autoOpenMicrophoneOnQuestion = false;
 
 		public String vproxyHost;
 		public String webServiceHost;
@@ -747,6 +748,10 @@ public class EvaComponent implements
 
     public boolean getAutoOpenMicrophone() {
         return mConfig.autoOpenMicrophone;
+    }
+
+    public boolean getAutoOpenMicrophoneOnQuestion() {
+        return mConfig.autoOpenMicrophoneOnQuestion;
     }
 
 }

@@ -9,7 +9,7 @@
     <string name="evature_greeting_car">What car can can I find for you?</string>
     <string name="evature_greeting_cruise">What cruise can I find for you?</string>
     <string name="evature_greeting_flight">What flight can I find for you?</string>
-    <string name="evature_greeting_hotel">What hotel can I find for you?</string>
+    <string name="evature_greeting_hotel">How can I help you?</string>
     <string name="evature_greeting">Hello, how may I help you?</string>
     <string name="evature_start_new_session_speak">Starting a new search. How may I help you?</string>
     <string name="evature_examples_greetings">You can try me by tapping on the microphone and saying any of these examples:</string>
@@ -47,8 +47,8 @@
         <item>Hotel tonight</item>
         <item>5 Star hotels, sorted by price</item>
         <item>Hotel near the Eiffel Tower</item>
-        <item>Hotel with a pool</item>
-        <item>Hilton</item>
+        <item>Hotel with a swimming pool</item>
+        <item>Sheraton in London</item>
     </string-array>
 
     <string-array name="evature_examples_cars">

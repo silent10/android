@@ -54,6 +54,10 @@ public class VADWebRTC
   // Pointer to opaque data in C
   public long  mObject;
 
+// Sets the VAD operating mode. A more aggressive (higher mode) VAD is more
+// restrictive in reporting speech. Put in other words the probability of being
+// speech when the VAD returns 1 is increased with increasing mode. As a
+// consequence also the missed detection rate goes up.
 //    kVadNormal = 0,
 //    kVadLowBitrate = 1,
 //    kVadAggressive = 2,

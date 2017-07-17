@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -28,6 +29,8 @@ import com.evature.evasdk.EvatureMainView;
 import com.evature.evasdk.R;
 import com.evature.evasdk.appinterface.EvaAppSetup;
 import com.evature.evasdk.model.ChatItem;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 
 public class ChatAdapter extends ArrayAdapter<ChatItem> {
@@ -146,8 +149,20 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 				// recycled view - undo animation done by dismiss
 				row.setScaleY(1.0f);
+//                RowHolder holder = (RowHolder) row.getTag(R.id.evature_chat_row_holder);
+//                if (holder != null) {
+//                    Log.v(TAG, "reusing view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
+//                    View chatbubble = holder.chatbubble;
+//                    chatbubble.setTranslationX(0);
+//                    chatbubble.clearAnimation();
+//                    chatbubble.setScaleY(1.0f);
+//
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                        chatbubble.setTranslationZ(0f);
+//                        chatbubble.setTranslationY(0f);
+//                    }
+//                }
 			}
-//			Ln.d("reusing view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
 		}
 		
 		RowHolder holder = (RowHolder) row.getTag(R.id.evature_chat_row_holder);
@@ -299,11 +314,12 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 	public enum DismissStep {
 		ANIMATE_DISMISS,    // only animate the dismiss - do not actually delete the items
 		DO_DELETE, 		    // actually delete the items
-		ANIMATE_RESTORE		// ooops, delete has failed or was canceled or undone - animate restore the items (can't be done if already deleted)
+		ANIMATE_RESTORE,	// ooops, delete has failed or was canceled or undone - animate restore the items (can't be done if already deleted)
+        ANIMATE_DISMISS_THEN_DELETE,
 	}
 
 	@SuppressLint("NewApi")
-	public void dismissItems(ListView listview, int start, int end, DismissStep step) {
+	public void dismissItems(final ListView listview, int start, int end, DismissStep step) {
 		if (start >= mChatList.size()) {
 			return;
 		}
@@ -336,6 +352,38 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 					animation.setDuration(400);
 					animation.setFillAfter(true);
                     animation.setInterpolator(new AccelerateInterpolator());
+                    if (step == DismissStep.ANIMATE_DISMISS_THEN_DELETE) {
+                        step = DismissStep.ANIMATE_DISMISS; // only the first animation has the listener
+                        animation.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {}
+
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                Log.v(TAG, "animation ended, clearing "+itemsToDismiss.size()+" items");
+//                                for (ChatItem item: mChatList) {
+//                                    Log.v(TAG, "> before clear item: "+item.toString());
+//                                }
+//                                for (int i = 0; i < listview.getCount(); i++) {
+//                                    View view  = listview.getChildAt(i);
+//                                    Log.v(TAG, "> before clear view: "+((view.getTag() != null) ? view.getTag().toString() : "null"));
+//                                }
+
+                                itemsToDismiss.clear();
+//                                for (ChatItem item: mChatList) {
+//                                    Log.v(TAG, "< after clear item: "+item.toString());
+//                                }
+                                ChatAdapter.this.notifyDataSetChanged();
+//                                for (int i = 0; i < listview.getCount(); i++) {
+//                                    View view  = listview.getChildAt(i);
+//                                    Log.v(TAG, "< after clear view: "+((view.getTag() != null) ? view.getTag().toString() : "null"));
+//                                }
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) { }
+                        });
+                    }
 					view.clearAnimation();
 					view.startAnimation(animation);
 				}

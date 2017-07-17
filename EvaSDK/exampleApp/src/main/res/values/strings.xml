@@ -30,4 +30,7 @@
     <string name="cruise">Cruise</string>
     <string name="explore">Explore</string>
     <string name="send_feedback">Send Feedback</string>
+    <string name="open_mic_on_question">Open Mic on Question</string>
+    <string name="open_mic_on_start">Open Mic on Start</string>
+    <string name="auto_open_microphone">Auto Open Microphone</string>
 </resources>

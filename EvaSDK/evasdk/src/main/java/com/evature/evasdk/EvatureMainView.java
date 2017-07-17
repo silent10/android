@@ -19,9 +19,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -64,8 +62,6 @@ import com.evature.evasdk.user_interface.ChatAdapter;
 import com.evature.evasdk.user_interface.ProgressWheel;
 import com.evature.evasdk.util.DLog;
 import com.evature.evasdk.util.VolumeUtil;
-
-import static com.evature.evasdk.appinterface.EvaAppSetup.gcmToken;
 
 
 /****
@@ -864,7 +860,7 @@ public class EvatureMainView implements OnItemClickListener, EvaChatApi {
 			}
 			else {
 				// continue sending data to soundView - but fake it as a zero volume sound
-				speechAudioStreamer.addVolumeSample(speechAudioStreamer.getMinSoundLevel());
+				speechAudioStreamer.addVolumeSampleForVisulazation(speechAudioStreamer.getMinSoundLevel());
 				view.mSoundView.setSoundData(
 						speechAudioStreamer.getSoundLevelBuffer(), 
 						speechAudioStreamer.getBufferIndex()

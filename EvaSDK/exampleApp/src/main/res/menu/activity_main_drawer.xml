@@ -30,11 +30,28 @@
                 android:checkable="true"
                 android:title="@string/explore"/>
         </menu>
+
     </item>
 
-    <item
-        android:id="@+id/nav_send"
-        android:icon="@drawable/ic_menu_send"
-        android:title="@string/send_feedback"/>
+    <item android:title="Auto Open Microphone">
+        <menu  android:checkableBehavior="all">
+            <item
+                android:id="@+id/nav_auto_open_mic"
+                android:checkable="true"
+                android:title="@string/open_mic_on_start"
+                android:icon="@drawable/ic_menu_auto_mic"/>
+
+            <item
+                android:id="@+id/nav_auto_open_mic_on_question"
+                android:checkable="true"
+                android:title="@string/open_mic_on_question"
+                android:icon="@drawable/ic_menu_auto_mic_q"/>
+        </menu>
+    </item>
+
+    <!--<item-->
+        <!--android:id="@+id/nav_send"-->
+        <!--android:icon="@drawable/ic_menu_send"-->
+        <!--android:title="@string/send_feedback"/>-->
 
 </menu>

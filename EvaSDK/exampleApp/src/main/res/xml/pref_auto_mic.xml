@@ -1,0 +1,18 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_menu_auto_mic"
+        android:key="auto_open_mic"
+        android:title="@string/open_mic_on_start"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_menu_auto_mic_q"
+        android:key="auto_open_mic_on_q"
+        android:title="@string/open_mic_on_question"/>
+
+
+</PreferenceScreen>

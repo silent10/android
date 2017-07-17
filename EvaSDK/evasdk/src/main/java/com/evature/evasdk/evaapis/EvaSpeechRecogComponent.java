@@ -9,6 +9,8 @@ import com.evature.evasdk.util.DLog;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static com.evature.evasdk.evaapis.SpeechAudioStreamer.SAMPLE_RATE;
+
 
 /******
  * Thread with:
@@ -17,7 +19,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author iftah
  */
 public class EvaSpeechRecogComponent {
-	public static final int SAMPLE_RATE = 16000;
 	public static final String TAG = "EvaSpeechComponent";
 	
 	public static final String RESULT_TIME_ACTIVITY_CREATE = "TIME_CREATE";
@@ -39,7 +40,7 @@ public class EvaSpeechRecogComponent {
 	public EvaSpeechRecogComponent(Context context, EvaComponent eva) {
 		mEva = eva;
 		mContext = context;
-		mSpeechAudioStreamer = new SpeechAudioStreamer(mContext, SAMPLE_RATE);
+		mSpeechAudioStreamer = new SpeechAudioStreamer();
 	}
 	
 	public EvaSpeechRecogComponent(EvaComponent eva) {

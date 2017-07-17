@@ -23,6 +23,7 @@ public class QuestionElement extends FlowElement  implements Serializable {
 	public enum QuestionCategory {
 		Unknown,
 		Location_Ambiguity,
+        Time_Ambiguity,
 		Missing_Date,
 		Missing_Duration,
 		Missing_Location,

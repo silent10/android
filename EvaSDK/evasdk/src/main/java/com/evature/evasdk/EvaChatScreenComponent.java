@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Typeface;
+import android.location.Location;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Bundle;
@@ -242,14 +243,19 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                     }
 
                     if (VOICE_COOKIE.storeResultInItem != null) {
+                        Log.v(TAG, ">>> Placing in existing chat item: "+stabilityHighlightedText);
                         VOICE_COOKIE.storeResultInItem.setChat(stabilityHighlightedText);
                         mView.notifyDataChanged();
                     }
                     else {
                         ChatItem chatItem = new ChatItem(stabilityHighlightedText);
+                        Log.v(TAG, ">>> Placing in NEW chat item: "+stabilityHighlightedText);
                         VOICE_COOKIE.storeResultInItem = chatItem;
                         mView.addChatItem(chatItem);
                     }
+                }
+                else {
+                    Log.v(TAG, "Ignoring transcription because voice_cookie doesn't match");
                 }
             }
         }
@@ -317,6 +323,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
         config.semanticHighlightingLocations = EvaAppSetup.semanticHighlightingLocations;
         config.semanticHighlightingHotelAttributes = EvaAppSetup.semanticHighlightingHotelAttributes;
         config.autoOpenMicrophone = EvaAppSetup.autoOpenMicrophone;
+        config.autoOpenMicrophoneOnQuestion = EvaAppSetup.autoOpenMicrophoneOnQuestion;
 
         if (EvaAppSetup.vproxyHost != null) {
             config.vproxyHost = EvaAppSetup.vproxyHost;
@@ -649,7 +656,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
                                         public void run() {
                                             DLog.d(TAG, "Question asked");
                                             mView.flashSearchButton(3);
-                                            if (eva.getAutoOpenMicrophone()) {
+                                            if (eva.getAutoOpenMicrophoneOnQuestion()) {
                                                 voiceRecognitionSearch(null, false);
                                             }
                                         }
@@ -1419,6 +1426,38 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 		eva.searchWithText("", DELETE_UTTERANCE_COOKIE, true); // undo last utterance - edit it to an empty string
 	}
 
+	private void removeChatBubble(ChatItem chatItem) {
+        ArrayList<ChatItem> chatList= mView.getChatListModel();
+        if (chatList.size() > 0) {
+            int dismissFrom = -1;
+            // search for last user chat - dismiss from the point forward
+            for (int i=chatList.size()-1; i>=0; i--) {
+                if (chatList.get(i) == chatItem) {
+                    dismissFrom = i;
+                    break;
+                }
+            }
+
+            if (dismissFrom > 0) {
+                int dismissTo = chatList.size();
+                mView.dismissItems(dismissFrom, dismissTo, ChatAdapter.DismissStep.ANIMATE_DISMISS_THEN_DELETE);
+            }
+        }
+
+        // Hello hotel in <Location geoid="1234">Florida</Location> on <Time>Monday</Time>
+    }
+
+    private void cancelRecording() {
+        DLog.i(TAG, "Canceling recording");
+        speechSearch.cancel();
+        mView.deactivateSearchButton();
+        mView.hideSpeechWave();
+        if (VOICE_COOKIE.storeResultInItem != null) {
+            removeChatBubble(VOICE_COOKIE.storeResultInItem);
+            VOICE_COOKIE.storeResultInItem = null;
+            VOICE_COOKIE.rid = null;
+        }
+    }
 
     /***
      * returns true if handled internally
@@ -1429,10 +1468,7 @@ public class EvaChatScreenComponent implements EvaSearchReplyListener, VolumeUti
 
 	   // cancel recording if during recording
 	   if (speechSearch.isInSpeechRecognition()) {
-		   DLog.i(TAG, "Canceling recording");
-		   speechSearch.cancel();
-		   mView.deactivateSearchButton();
-		   mView.hideSpeechWave();
+		   cancelRecording();
 		   return true;
 	   }
 

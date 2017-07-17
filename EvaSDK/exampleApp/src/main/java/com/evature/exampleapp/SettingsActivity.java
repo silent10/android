@@ -138,7 +138,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || CredentialsPreferenceFragment.class.getName().equals(fragmentName)
-                || ScopePreferenceFragment.class.getName().equals(fragmentName);
+                || ScopePreferenceFragment.class.getName().equals(fragmentName)
+                || AutoMicPreferenceFragment.class.getName().equals(fragmentName);
     }
 
     /**
@@ -191,5 +192,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }*/
     }
+
+
+    /**
+     * This fragment is used when the activity is showing a two-pane settings UI.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class AutoMicPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_auto_mic);
+        }
+
+    }
+
 
 }
