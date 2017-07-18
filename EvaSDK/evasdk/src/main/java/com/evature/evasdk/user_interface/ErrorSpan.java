@@ -2,12 +2,12 @@ package com.evature.evasdk.user_interface;
 
 
 import android.content.res.Resources;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
-import android.graphics.Shader.TileMode;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.style.DynamicDrawableSpan;
 
@@ -20,9 +20,9 @@ import com.evature.evasdk.R;
  */
 public class ErrorSpan extends DynamicDrawableSpan {
 	
-	private int width;
-    int lineWidth;
-    int waveSize;
+	private float width;
+    float lineWidth;
+    float waveSize;
     int color;
 
 
@@ -35,8 +35,8 @@ public class ErrorSpan extends DynamicDrawableSpan {
         // Get the screen's density scale
         final float scale = resources.getDisplayMetrics().density;
         // Convert the dps to pixels, based on density scale
-        this.lineWidth = (int) (lineWidth * scale + 0.5f);
-        this.waveSize = (int) (waveSize * scale + 0.5f);
+        this.lineWidth = lineWidth * scale + 0.5f;
+        this.waveSize = waveSize * scale + 0.5f;
 
         this.color = color;
 	}
@@ -50,8 +50,8 @@ public class ErrorSpan extends DynamicDrawableSpan {
     public int getSize(Paint paint, CharSequence text,
                          int start, int end,
                          Paint.FontMetricsInt fm) {
-        width = (int) paint.measureText(text, start, end);
-	    return width;
+        width = paint.measureText(text, start, end);
+	    return (int)width;
 	}
                          
 
@@ -65,13 +65,26 @@ public class ErrorSpan extends DynamicDrawableSpan {
         p.setStrokeWidth(lineWidth);
         p.setAntiAlias(true);
         p.setStyle(Paint.Style.STROKE);
-        p.setStrokeJoin(Paint.Join.ROUND);
+        p.setStrokeCap(Paint.Cap.BUTT);
+        p.setStrokeJoin(Paint.Join.MITER);
+        p.setPathEffect(new CornerPathEffect(2*lineWidth) );   // set the path effect when they join.
 
-        int doubleWaveSize = waveSize * 2;
-        for (int i = (int)x; i < x + width; i += doubleWaveSize) {
-            canvas.drawLine(i, bottom, i + waveSize, bottom - waveSize, p);
-            canvas.drawLine(i + waveSize, bottom - waveSize, i + doubleWaveSize, bottom, p);
+        float doubleWaveSize = waveSize * 2;
+        Path path = new Path();
+        path.moveTo(x, bottom-waveSize);
+        for (float i = x; i < x + width; i += doubleWaveSize) {
+            path.rLineTo(waveSize, waveSize);
+            path.rLineTo(waveSize, -waveSize);
         }
+        canvas.save();
+        // clip the squigly line, add some pixels above and below to clipping to allow for round path join
+        canvas.clipRect(new Rect(
+                (int)x, // left
+                (int)(bottom-waveSize-2*lineWidth), // top
+                (int)(x+width+0.5f), // right
+                (int)(bottom+2*lineWidth+0.5)));  // bottom
+        canvas.drawPath(path, p);
+        canvas.restore();
 		canvas.drawText(text.subSequence(start, end).toString(), x, y, paint);
 	}
 }

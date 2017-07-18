@@ -115,7 +115,7 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 		ChatItem chatItem = getItem(position);
 		ChatItem.ChatType viewType = chatItem.getType(); // should be same logic as getItemViewType
 		View row = convertView;
-		if (row == null) {
+        if (row == null) {
 //			Ln.d("Creating view for row "+position+" type: "+viewType+"  chat: "+chatItem.getChat());
 			switch (viewType) {
 			case User:
@@ -368,11 +368,22 @@ public class ChatAdapter extends ArrayAdapter<ChatItem> {
 //                                    View view  = listview.getChildAt(i);
 //                                    Log.v(TAG, "> before clear view: "+((view.getTag() != null) ? view.getTag().toString() : "null"));
 //                                }
+                                for (ChatItem item: itemsToDismiss) {
+                                    Log.v(TAG, "< reseting view of item: "+item.toString());
+                                    View viewToReset = listview.findViewWithTag(item);
+                                    if (viewToReset.getAnimation() != null) {
+                                        viewToReset.getAnimation().setFillAfter(false);
+                                        viewToReset.clearAnimation();
+                                    }
+                                    //viewToReset.clearAnimation();
+                                    //viewToReset.setScaleY(1.0f);
+                                }
 
                                 itemsToDismiss.clear();
 //                                for (ChatItem item: mChatList) {
 //                                    Log.v(TAG, "< after clear item: "+item.toString());
 //                                }
+
                                 ChatAdapter.this.notifyDataSetChanged();
 //                                for (int i = 0; i < listview.getCount(); i++) {
 //                                    View view  = listview.getChildAt(i);
