@@ -309,12 +309,12 @@ For examples of count results see the implementation of the search interfaces in
 
 To add live transcriptions of the ongoing speech recognition first integrate your app with [Firebase Cloud Messaging (FCM)](https://firebase.google.com/docs/cloud-messaging/android/client) or Google Cloud Messaging (GCM).
 
-Follow the FCM or GCM documentation for information about how to setup lisenters for token refresh and incoming notification.
+Follow the FCM or GCM documentation for information about how to setup listeners for token refresh and incoming notification.
 
 Register a listener for a token refresh event, and there call `EvaChatTrigger.notifyGcmTokenRefreshed(context, token)`, which will allow the server to send the notifications.
 Register a listener for a notification and there extract the data values for "rid", "index", "streaming_result" and "is_final" and then call `EvaChatTrigger.notifyPartialTranscription(context, streamingResult, index, rid, isFinal);`
 
-For example, a notification lisetner code should be similar to:
+For example, an FCM notification listener code should be similar to:
 
 ``` java
 
