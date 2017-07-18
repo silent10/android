@@ -1,7 +1,7 @@
 
 # Eva Voice SDK - Android
 
-Version 2.0
+Version 2.1
 
 
 
@@ -10,16 +10,20 @@ Version 2.0
 
 
 - [Introduction](#introduction)
-- [Step 1: Setup the SDK in your IDE](#step-1-include-the-sdk-in-your-android-studio-project)
+- [Step 1: Include the SDK in your Android Studio Project](#step-1-include-the-sdk-in-your-android-studio-project)
 - [Step 2: Initialize and Configure Eva](#step-2-initialize-and-configure-eva)
 - [Step 3: Add the microphone button!](#step-3-add-the-microphone-button)
-  - [Mini Integration Test - Say Hi!](#mini-integration-test---say-hi)
   - [Context parameter](#context-parameter)
+  - [Mini Integration Test - Say Hi!](#mini-integration-test---say-hi)
 - [Step 4: Implement your applicative callbacks](#step-4-implement-your-applicative-callbacks)
   - [Applicative Search interfaces](#applicative-search-interfaces)
     - [Note:  null values of parameters](#note--null-values-of-parameters)
     - [The IsComplete argument](#the-iscomplete-argument)
+    - [EvaResult](#evaresult)
+      - [Customize Eva response text](#customize-eva-response-text)
+      - [Integration with search results count](#integration-with-search-results-count)
 - [Advanced Integration](#advanced-integration)
+  - [Live Speech Recognition Transcriptions](#live-speech-recognition-transcriptions)
   - [Look & Feel Customizations](#look-&-feel-customizations)
   - [Google Now Integration](#google-now-integration)
   - [Other App Setup settings](#other-app-setup-settings)
@@ -91,7 +95,7 @@ It should compile without an error.
 
 Do you have your Eva SITE_CODE and API_KEY?
 
-Register for free at [http://www.evature.com/registration/form](http://www.evature.com/registration/form) 
+Registertion for new users is currently closed, but you can contact info@evature.com for queries. 
 
 The minimal required setup is to call AppSetup.initEva with these three parameters:
 
@@ -300,6 +304,42 @@ While waiting for async count results, Eva will delay the default text for a dur
 For examples of count results see the implementation of the search interfaces in ExampleApp's MainActivity class.
 
 ## Advanced Integration
+
+### Live Speech Recognition Transcriptions
+
+To add live transcriptions of the ongoing speech recognition first integrate your app with [Firebase Cloud Messaging (FCM)](https://firebase.google.com/docs/cloud-messaging/android/client) or Google Cloud Messaging (GCM).
+
+Follow the FCM or GCM documentation for information about how to setup lisenters for token refresh and incoming notification.
+
+Register a listener for a token refresh event, and there call `EvaChatTrigger.notifyGcmTokenRefreshed(context, token)`, which will allow the server to send the notifications.
+Register a listener for a notification and there extract the data values for "rid", "index", "streaming_result" and "is_final" and then call `EvaChatTrigger.notifyPartialTranscription(context, streamingResult, index, rid, isFinal);`
+
+For example, a notification lisetner code should be similar to:
+
+``` java
+
+    @Override
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        String from = remoteMessage.getFrom();
+        Map<String,String> data = remoteMessage.getData();
+        String rid = data.get("rid");
+        try {
+            int index = Integer.parseInt(data.get("index"));
+            String streamingResult = data.get("streaming_result");
+            String isFinalStr = data.get("is_final");
+            boolean isFinal = false;
+            if (isFinalStr != null) {
+                isFinal = Boolean.parseBoolean(isFinalStr);
+            }
+            Log.v(TAG, "streaming_result: " + streamingResult +"  index: "+index+ " is_final: "+isFinal+" from: "+from);
+            EvaChatTrigger.notifyPartialTranscription(this, streamingResult, index, rid, isFinal);
+        }
+        catch(NumberFormatException e) {
+            Log.e(TAG, "Error parsing index '"+data.get("index")+"'", e);
+        }
+    }
+```
+
 
 ### Look & Feel Customizations
 
